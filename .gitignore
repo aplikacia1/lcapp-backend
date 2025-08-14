@@ -1,0 +1,4 @@
+# nezverejňovať citlivé a ťažké veci
+.env
+node_modules/
+uploads/
