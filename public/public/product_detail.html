@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detail produktu</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root{
+      --max-w: 820px;
+      --gap: 16px;
+      --header-h: 64px;
+      --lc-bg:#0c1f4b; --lc-surface:#fff; --lc-border:#e8e8e8;
+      --lc-surface-2:#eef6ff; --lc-border-2:#bcd6ff; --lc-text:#0c1f4b;
+      --lc-radius:12px; --lc-shadow:0 2px 10px rgba(0,0,0,.08);
+    }
+    html, body { margin:0; padding:0; background:#061c47; color:#fff; font-family:Arial, sans-serif; }
+
+    /* HLAVIČKA – rovnaká logika ako na ostatných stránkach */
+    .header { position:sticky; top:0; z-index:50; background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.12); }
+    .header-inner{
+      height:var(--header-h);
+      display:flex; align-items:center; justify-content:space-between;
+      max-width:var(--max-w); margin:0 auto; padding:0 var(--gap);
+    }
+    .logo-small{ height:32px }
+    .nav{ display:flex; gap:8px; align-items:center; }
+    .btn{
+      height:40px; display:inline-flex; align-items:center; gap:8px;
+      padding:0 14px; border-radius:12px; border:1px solid rgba(255,255,255,.3);
+      background:#fff; color:#0c1f4b; cursor:pointer;
+    }
+    .btn--danger{ background:#ff6b6b; color:#fff; border:none }
+
+    /* OBSAH */
+    .wrap{ max-width:var(--max-w); margin:16px auto; padding:0 var(--gap) 140px; }
+
+    .product-image{
+      width:100%; max-height:360px; object-fit:contain;
+      border-radius:12px; background:#0b1c45;
+      border:1px solid rgba(255,255,255,.12);
+    }
+    .title{ font-size:24px; font-weight:800; margin:12px 0 6px; color:#fff; }
+    .muted{ opacity:.85; }
+    .meta{ margin:6px 0 12px; font-size:14px; }
+    p{ line-height:1.5; }
+
+    /* sumár hodnotení */
+    .summary{ margin:10px 0 18px; }
+    .stars-line{ font-size:20px; letter-spacing:.5px; }
+
+    /* recenzie (vizuál zjednotený s kartami) */
+    .review{
+      background:#05163d; border:1px solid rgba(255,255,255,.12);
+      border-radius:12px; padding:10px 12px; margin:10px 0; box-shadow:var(--lc-shadow);
+    }
+    .review .head{ display:flex; justify-content:space-between; gap:12px; margin-bottom:4px }
+    .review .who{ font-weight:700; color:#fff; }
+    .review .when{ opacity:.75; font-size:12px; color:#fff; }
+
+    /* fixný dolný hodnotiaci panel – zjednotený vzhľad */
+    .rate-bar{
+      position:fixed; left:0; right:0; bottom:0; z-index:60;
+      background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
+      display:flex; justify-content:center; padding:8px 10px;
+    }
+    .rate-inner{
+      width:100%; max-width:var(--max-w); padding:0 var(--gap);
+      display:grid; grid-template-columns: auto 1fr auto; gap:8px; align-items:center;
+    }
+    .rate-stars span{ cursor:pointer; font-size:22px; margin-right:2px; }
+    .rate-text{
+      width:100%; height:40px; border-radius:12px; border:1px solid var(--lc-border-2);
+      padding:8px 10px; background:var(--lc-surface-2); color:var(--lc-text);
+    }
+    .rate-btn{
+      height:40px; padding:0 12px; border-radius:12px; border:1px solid var(--lc-border-2);
+      background:var(--lc-surface-2); color:var(--lc-text); cursor:pointer;
+    }
+    .rate-msg{ grid-column:1 / -1; font-size:12px; opacity:.85; margin-top:4px; color:#fff; }
+
+    /* MarSab® badge (ponechané, ak ho chceš mať aj tu nad rate barom) */
+    .brand-badge{
+      position: fixed; left: 16px; bottom: 76px; z-index: 70;
+      display:inline-flex; align-items:center; gap:8px;
+      background:#000; color:#fff; text-decoration:none;
+      border:2px solid #fff; border-radius:14px; padding:8px 10px;
+      box-shadow:0 8px 18px rgba(0,0,0,.25); opacity:.96;
+    }
+    .brand-badge img{ height:24px; width:auto; display:block; }
+    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
+    @media (max-width:480px){
+      .brand-badge{ left:12px; bottom:72px; padding:6px 8px; border-radius:12px; }
+      .brand-badge img{ height:20px; }
+      .brand-badge .wordmark{ font-size:12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HLAVIČKA (IDs pre JS ostávajú: #backBtn, #logoutBtn) -->
+  <header class="header">
+    <div class="header-inner">
+      <img src="logo_lc.jpg" class="logo-small" alt="Logo">
+      <div class="nav">
+        <button id="backBtn" class="btn">Späť</button>
+        <button id="logoutBtn" class="btn btn--danger">Odhlásiť sa</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- OBSAH (IDs 100% kompatibilné s product_detail.js) -->
+  <main class="wrap">
+    <img id="productImage" class="product-image" alt="Produkt"/>
+    <div id="productTitle" class="title">—</div>
+    <div id="productMeta" class="meta muted"></div>
+    <p id="productDescription"></p>
+
+    <div class="summary">
+      <div id="ratingAverage" class="stars-line">Zatiaľ bez hodnotení</div>
+      <div id="ratingCount" class="muted" style="font-size:13px"></div>
+    </div>
+
+    <section class="reviews" id="reviewsList"></section>
+  </main>
+
+  <!-- MarSab® badge (ak ho nechceš tu, zmaž celý blok <a class="brand-badge">…) -->
+  <a class="brand-badge" href="#" aria-label="MarSab®">
+    <img src="img/marsab_logo.png" alt="">
+    <span class="wordmark">MarSab®</span>
+  </a>
+
+  <!-- Fixný hodnotiaci panel (IDs ostávajú) -->
+  <div class="rate-bar">
+    <div class="rate-inner">
+      <div id="rateStars" class="rate-stars" aria-label="Zvoľte počet hviezdičiek">
+        <span data-star="1">★</span><span data-star="2">★</span><span data-star="3">★</span><span data-star="4">★</span><span data-star="5">★</span>
+      </div>
+      <input id="rateComment" class="rate-text" placeholder="Napíšte svoje hodnotenie (nepovinné)..." />
+      <button id="rateSubmit" class="rate-btn">Odoslať hodnotenie</button>
+      <div id="rateMsg" class="rate-msg"></div>
+    </div>
+  </div>
+
+  <script src="product_detail.js"></script>
+</body>
+</html>

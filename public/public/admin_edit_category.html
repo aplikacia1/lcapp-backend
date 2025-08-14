@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <title>Upraviť kategóriu</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    #product-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .product-card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      width: 220px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .product-card h4 {
+      margin: 10px 0 5px 0;
+    }
+
+    .product-card p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .product-card button {
+      margin-top: 10px;
+    }
+
+    #addProductBtn {
+      display: block;
+      margin: 30px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h2>Produkty v kategórii</h2>
+  <div id="product-list"></div>
+
+  <button id="addProductBtn">➕ Pridať nový produkt</button>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryId = urlParams.get("id");
+
+    document.getElementById("addProductBtn").onclick = () => {
+      window.location.href = "/admin_add_product.html";
+    };
+
+    fetch(`/api/products/${categoryId}`)
+      .then(res => res.json())
+      .then(products => {
+        const container = document.getElementById("product-list");
+
+        products.forEach(prod => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+
+          const img = document.createElement("img");
+          img.src = `/uploads/${prod.image}`;
+          img.alt = prod.name;
+
+          const title = document.createElement("h4");
+          title.textContent = prod.name;
+
+          const desc = document.createElement("p");
+          desc.textContent = prod.description;
+
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "🗑 Vymazať";
+          delBtn.onclick = () => {
+            if (confirm("Naozaj chcete vymazať tento produkt?")) {
+              fetch(`/api/product/${prod._id}`, { method: "DELETE" })
+                .then(() => location.reload());
+            }
+          };
+
+          card.appendChild(img);
+          card.appendChild(title);
+          card.appendChild(desc);
+          card.appendChild(delBtn);
+
+          container.appendChild(card);
+        });
+      });
+  </script>
+</body>
+</html>

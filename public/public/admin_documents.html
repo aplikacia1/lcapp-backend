@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Dokumenty</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- FORMULÁR: ostáva v karte -->
+  <div class="container center-content">
+    <div class="card">
+      <h2>Pridať novú kategóriu</h2>
+      <form id="category-form" enctype="multipart/form-data" method="POST" action="/api/categories">
+        <label for="name">Názov kategórie:</label>
+        <input type="text" id="name" name="name" required />
+
+        <label for="image">Obrázok kategórie (JPG/PNG):</label>
+        <input type="file" id="image" name="image" accept="image/png, image/jpeg" required />
+
+        <button type="submit">Pridať kategóriu</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABUĽKA: mimo karty, bez rámika -->
+  <div style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <h3 style="color: white;">Existujúce kategórie</h3>
+    <div id="category-list" style="margin-top: 20px;"></div>
+  </div>
+
+  <script src="admin_documents.js"></script>
+</body>
+</html>

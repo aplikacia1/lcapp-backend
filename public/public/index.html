@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LCAPP – Lištové centrum</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { background:#061c47; color:#fff; margin:0; font-family:Arial, sans-serif; }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 80px; }
+    .hero { display:flex; flex-direction:column; align-items:center; gap:20px; margin-top: 24px; }
+    .logo-lc { height: 180px; max-width: 92vw; width:auto; display:block; border-radius:12px; }
+    h1 { margin: 12px 0 8px; font-size: 28px; text-align:center; }
+    .card { background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,.12);
+            border-radius:16px; padding:16px; margin-top: 24px; }
+    .btn { display:block; width:100%; max-width:420px; margin:10px auto 0; height:44px;
+           border-radius:12px; border:1px solid rgba(255,255,255,.35); background:#fff; color:#0c1f4b; cursor:pointer; }
+    .btn--primary { background:#e9f2ff; }
+    .brand-badge{
+      position: fixed; left: 16px; bottom: 16px; z-index: 70;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #000; color:#fff; text-decoration:none;
+      border: 2px solid #fff; border-radius: 14px; padding: 8px 10px;
+      box-shadow:0 8px 18px rgba(0,0,0,.25); opacity:.96;
+    }
+    .brand-badge img{ height: 24px; width:auto; display:block; }
+    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
+    @media (max-width: 520px){
+      .logo-lc { height: 150px; }
+      h1 { font-size: 24px; }
+    }
+
+    /* Animácia vynorenia */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap fade-in">
+    <div class="hero">
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-lc" />
+      <h1>Vitajte v aplikácii LCAPP</h1>
+    </div>
+
+    <div class="card">
+      <h2>O aplikácii</h2>
+      <p>
+        Jednoduchý prístup ku katalógu produktov, čítanie a písanie recenzií, hodnotenie tovaru a Lištobook –
+        časová os s príspevkami majstrov.
+      </p>
+      <p>Pri registrácii stačí e-mail a heslo. Prezývku si nastavíte v účte.</p>
+
+      <button class="btn btn--primary" id="goRegister">Vytvoriť účet</button>
+      <button class="btn" id="goLogin">Prihlásiť sa</button>
+    </div>
+  </div>
+
+  <!-- MarSab® badge -->
+  <a class="brand-badge" href="#" aria-label="MarSab®">
+    <img src="img/marsab_logo.png" alt="">
+    <span class="wordmark">MarSab®</span>
+  </a>
+
+  <script>
+    document.getElementById('goRegister').addEventListener('click', ()=> location.href = 'register.html');
+    document.getElementById('goLogin').addEventListener('click', ()=> location.href = 'login.html');
+  </script>
+</body>
+</html>

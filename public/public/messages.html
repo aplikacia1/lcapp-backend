@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Súkromné správy</title>
+
+  <!-- globálny štýl -->
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- lokálne vylepšenia len pre Správy (bezpečné, nezasahujú inde) -->
+  <style>
+    :root{ --max-w:980px; --gap:16px; }
+
+    html, body { margin:0; padding:0; background:#0c1f4b; color:#fff; }
+
+    /* ===== HLAVIČKA – rovnaká ako na Lištobooku ===== */
+    .header-timeline{
+      position: sticky; top: 0; z-index: 60;
+      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.12);
+      height:72px; display:flex; align-items:center; justify-content:center;
+    }
+    .header-inner{
+      width:100%; max-width:var(--max-w); padding:0 var(--gap);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .logo-small{ height:32px; display:block; }
+    .user-info{ color:#fff; font-weight:600; }
+
+    /* ===== PAGE WRAP ===== */
+    .wrap{ max-width:var(--max-w); margin:16px auto; padding:0 var(--gap); }
+
+    .card{
+      background:#05163d; border:1px solid rgba(255,255,255,.12);
+      border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.06);
+    }
+    .card .head{ padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.08); font-weight:800; }
+    .card .body{ padding:12px; }
+
+    .row{ display:flex; align-items:center; gap:8px; }
+
+    /* ===== GRID ===== */
+    .grid{ display:grid; grid-template-columns: 280px 1fr; gap:12px; }
+    @media (max-width:900px){ .grid{ grid-template-columns: 1fr; } }
+
+    /* ===== KONVERZÁCIE (ľavý panel) ===== */
+    .conv-list{ max-height:60vh; overflow:auto; }
+    .conv-item{ padding:10px; border-bottom:1px solid rgba(255,255,255,.06); cursor:pointer; }
+    .conv-item:hover{ background:#081b44; }
+    .conv-item.active{ background:#0b2152; }
+    .conv-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .conv-name{ font-weight:800; color:#fff; }
+    .conv-last{ font-size:12px; opacity:.8; margin-top:2px; }
+    .badge{
+      min-width:18px; height:18px; border-radius:999px; background:#ffcc00; color:#111;
+      font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center; padding:0 6px;
+    }
+
+    /* ===== VLÁKNO (pravý panel) ===== */
+    .thread{ display:flex; flex-direction:column; gap:8px; min-height:40vh; }
+    .msg{ background:#fff; color:#111; border-radius:10px; padding:10px; }
+    .meta{ font-size:12px; opacity:.75; margin-bottom:4px; display:flex; justify-content:space-between; gap:8px; }
+
+    /* polia */
+    .input, .area{
+      width:100%; border-radius:10px; border:1px solid #bcd6ff; background:#eef6ff; color:#0c1f4b; padding:8px 10px;
+      box-sizing:border-box;
+    }
+    .input{ height:40px; }
+    .area{ min-height:100px; }
+    .new-card{ margin-bottom:12px; }
+  </style>
+</head>
+<body>
+
+  <!-- HLAVIČKA (zjednotená) -->
+  <div class="header-timeline">
+    <div class="header-inner">
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
+      <div class="user-info">Prihlásený ako: <span id="who">—</span></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="backBtn">Späť</button>
+        <button class="btn" id="timelineBtn">Časová os</button>
+        <button class="btn btn--danger" id="logoutBtn" style="display:none;">Odhlásiť sa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBSAH -->
+  <div class="wrap">
+    <!-- Nová správa -->
+    <div class="card new-card">
+      <div class="head">Nová správa</div>
+      <div class="body">
+        <div class="row" style="margin-bottom:8px;">
+          <input id="toName" class="input" placeholder="Komu (prezývka)…" />
+          <button id="sendBtn" class="btn btn--accent">Odoslať</button>
+        </div>
+        <textarea id="newText" class="area" placeholder="Napíšte správu… (max 2000 znakov)" maxlength="2000"></textarea>
+        <div id="hint" style="opacity:.85; font-size:13px; margin-top:6px;"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Konverzácie -->
+      <div class="card">
+        <div class="head">Konverzácie</div>
+        <div class="body conv-list" id="convList"></div>
+      </div>
+
+      <!-- Vlákno -->
+      <div class="card">
+        <div class="head" id="threadHead">Vyberte konverzáciu</div>
+        <div class="body">
+          <div id="thread" class="thread"></div>
+          <div id="replyBox" style="margin-top:10px; display:none;">
+            <textarea id="replyText" class="area" placeholder="Napíšte odpoveď… (max 2000 znakov)" maxlength="2000"></textarea>
+            <div style="margin-top:8px; display:flex; justify-content:flex-end;">
+              <button id="replySend" class="btn">Odoslať</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="messages.js"></script>
+</body>
+</html>

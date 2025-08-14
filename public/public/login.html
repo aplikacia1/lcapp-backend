@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prihlásenie</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .auth-wrap{max-width:420px;margin:40px auto;padding:16px}
+    .logo {display:block;margin:24px auto 8px;height:120px;object-fit:contain}
+    h1{margin:12px 0 18px}
+    form{display:flex;flex-direction:column;gap:12px}
+    input,button{height:42px;border-radius:10px;border:1px solid #bcd6ff;padding:0 12px}
+    button{background:#fff;color:#0c1f4b;border:1px solid rgba(255,255,255,.3);cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .link-row{margin-top:4px;font-size:.95rem}
+    .brand-badge{
+      position: fixed; left: 16px; bottom: 16px; z-index: 70;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #000; color:#fff; text-decoration:none;
+      border: 2px solid #fff; border-radius: 14px; padding: 8px 10px; opacity:.96;
+    }
+    .brand-badge img{ height:24px; width:auto; display:block; }
+
+    /* Animácia vynorenia */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap fade-in">
+    <img src="logo_lc.jpg" alt="Lištové centrum" class="logo"/>
+    <h1>Prihlásenie</h1>
+
+    <form id="loginForm" novalidate>
+      <input id="email" type="email" placeholder="E-mail" autocomplete="username" required />
+      <input id="password" type="password" placeholder="Heslo" autocomplete="current-password" required />
+      <button id="loginBtn" type="submit">Prihlásiť sa</button>
+      <div class="link-row">Nemáte účet? <a href="register.html">Zaregistrovať</a></div>
+    </form>
+  </div>
+
+  <a class="brand-badge" href="#" aria-label="MarSab®">
+    <img src="img/marsab_logo.png" alt=""> <span>MarSab®</span>
+  </a>
+
+  <script src="login.js" defer></script>
+</body>
+</html>

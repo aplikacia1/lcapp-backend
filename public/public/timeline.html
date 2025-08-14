@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lištobook – Časová os</title>
+  <link rel="stylesheet" href="style.css"/>
+
+  <meta name="description" content="Lištobook – komunita majstrov v oblasti líšt, recenzie, fotky, komentáre, skúsenosti.">
+  <meta name="keywords" content="lištové centrum, lišty, montáž líšt, recenzie, skúsenosti, komunita, časová os">
+  <meta name="author" content="Lištové centrum">
+
+  <style>
+    :root{
+      --max-w: 820px;
+      --gap: 16px;
+      --header-h: 72px;
+      --ui-bg: #eef6ff;
+      --ui-border: #bcd6ff;
+      --ui-text: #0c1f4b;
+      --ui-focus: #6aa8ff;
+      --ui-bg-hover: #e3f0ff;
+    }
+    html,body{margin:0;padding:0}
+    body{background:#0c1f4b;}
+
+    /* HEADER */
+    .header-timeline{
+      position: sticky; top: 0; z-index: 60;
+      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.12);
+      height:var(--header-h); display:flex; align-items:center; justify-content:center;
+    }
+    .header-inner{
+      width:100%; max-width:var(--max-w); padding:0 var(--gap);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .logo-small{height:32px}
+    .user-info{color:#fff; font-weight:600}
+    .btn{
+      height:40px; display:inline-flex; align-items:center; gap:8px;
+      padding:0 14px; border-radius:12px; border:1px solid rgba(255,255,255,.3);
+      background:#fff; color:#0c1f4b; cursor:pointer;
+    }
+    .btn--danger{ background:#ff6b6b; color:#fff; border:none }
+    .btn--accent{ background:#ffe37a; border:1px solid #ffd34d; color:#493a00 }
+    .btn--accent:hover{ filter:brightness(0.97); }
+
+    /* LAYOUT */
+    .main-content{
+      width:100%; max-width:var(--max-w); margin:24px auto; padding:0 var(--gap);
+      padding-bottom:120px; /* composer's height fallback */
+    }
+
+    /* RIGHT PANEL: Users (PC only) */
+    .presence-panel{
+      position:fixed; right:24px; top:calc(var(--header-h) + 16px);
+      width:260px; max-height:calc(100vh - var(--header-h) - 120px);
+      overflow:auto; background:#fff; border:1px solid #e8e8e8; border-radius:12px;
+      box-shadow:0 2px 10px rgba(0,0,0,.06); padding:10px; z-index:50;
+    }
+    .presence-title{ font-weight:700; color:#0c1f4b; margin-bottom:6px }
+    .presence-list{ list-style:none; padding:0; margin:0 }
+    .presence-item{ display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px dotted #eee }
+    .presence-item:last-child{ border-bottom:none }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background:#bbb; box-shadow:0 0 0 2px #fff inset, 0 0 0 1px #ddd;
+    }
+    .dot.online{ background:#22c55e }
+    .presence-name{ color:#111; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    @media (max-width:1200px){
+      .presence-panel{ display:none; }
+    }
+
+    /* FEED */
+    .post{ background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px }
+    .post strong{ color:#0c1f4b }
+    .post p{ color:#111; }
+    .post-image{ max-width:100%; height:auto; border-radius:10px; margin-top:8px }
+    .post-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .comments{ margin-top:8px }
+    .comments ul{ list-style:none; padding-left:0; margin:0 0 8px 0 }
+    .comments li{ padding:4px 0; border-bottom:1px dotted #eee; color:#111; display:flex; justify-content:space-between; gap:8px; }
+    .comment-text{ flex:1; min-width:0; }
+    .comment-actions{ flex:0 0 auto; }
+    .link-btn{ background:transparent; border:none; color:#0c1f4b; cursor:pointer; padding:4px 8px; border-radius:8px; }
+    .link-btn:hover{ background:rgba(12,31,75,.08); }
+
+    /* komentárový formulár */
+    .commentForm{ display:flex; align-items:center; gap:8px; width:100%; }
+    .commentForm input[type="text"]{
+      flex:1 1 auto; min-width:160px; height:40px; padding:8px 12px;
+      background:var(--ui-bg); color:#111 !important;
+      border:1px solid var(--ui-border); border-radius:10px; box-sizing:border-box;
+      appearance:none !important; -webkit-appearance:none !important;
+    }
+    .commentForm input[type="text"]::placeholder{ color:#51607f }
+    .commentForm input[type="text"]:focus{
+      outline:none; border-color:var(--ui-focus); box-shadow:0 0 0 3px rgba(106,168,255,.25);
+    }
+    .commentForm button{
+      padding:10px 14px; border:1px solid var(--ui-border); border-radius:10px;
+      background:var(--ui-bg); color:var(--ui-text); cursor:pointer;
+    }
+    .commentForm button:hover{ background:var(--ui-bg-hover); }
+
+    /* composer dole */
+    .composer-bar{
+      position:fixed; left:0; right:0; bottom:0; z-index:9999;
+      background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
+      display:flex; justify-content:center; padding:10px 12px;
+    }
+    .composer-wrap{ width:100%; max-width:var(--max-w); padding:0 var(--gap); }
+    .composer{ background:#fff; border:1px solid #eee; border-radius:14px; padding:10px; }
+    .composer-row{ display:grid; grid-template-columns: 1fr auto auto; gap:8px; align-items:center; }
+
+    .input-group{
+      display:flex; align-items:center; gap:8px; width:100%;
+      background:var(--ui-bg); border:1px solid var(--ui-border); border-radius:12px;
+      padding:6px 8px; box-sizing:border-box;
+    }
+    #timelineForm .composer-input{
+      flex:1 1 auto; min-width:0; height:28px; padding:0 8px; border:none; outline:none;
+      background:transparent; color:#111 !important; caret-color:#111 !important; font-weight:500;
+      appearance:none !important; -webkit-appearance:none !important;
+    }
+    #composerCount{ margin-left:6px; font-size:12px; color:#667; white-space:nowrap; }
+
+    .button{
+      height:40px; display:inline-flex; align-items:center; justify-content:center;
+      padding:0 12px; border:1px solid var(--ui-border); border-radius:12px;
+      background:var(--ui-bg); color:var(--ui-text); cursor:pointer; white-space:nowrap;
+    }
+    .button:hover{ background:var(--ui-bg-hover); }
+    .button--icon{ width:48px; padding:0; font-size:18px; }
+    .composer-meta{ display:none !important; }
+
+    @media (max-width:640px){
+      .button{ padding:0 10px; }
+      .button--icon{ width:44px; font-size:17px; }
+      #composerCount{ font-size:11px; }
+    }
+
+    /* MarSab® – badge (posunutý nad composer) */
+    .brand-badge{
+      position: fixed; left: 16px; bottom: 120px; z-index: 70; /* nad composerom */
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #000; color:#fff; text-decoration:none;
+      border: 2px solid #fff; border-radius: 14px; padding: 8px 10px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity:.96;
+    }
+    .brand-badge img{ height: 24px; width:auto; display:block; }
+    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
+
+    @media (max-width:480px){
+      .brand-badge{ left:12px; bottom: 140px; padding:6px 8px; border-radius:12px; }
+      .brand-badge img{ height:20px; }
+      .brand-badge .wordmark{ font-size:12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HLAVIČKA -->
+  <div class="header-timeline">
+    <div class="header-inner">
+      <img src="logo_lc.jpg" alt="Logo" class="logo-small">
+      <div class="user-info" id="loggedUser">Prihlásený ako: </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" onclick="backToCatalog()">Späť</button>
+        <button class="btn btn--accent" onclick="openMessages()">
+          Správy
+          <span id="msgBadge"
+                style="display:none; margin-left:6px; min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center;"></span>
+        </button>
+        <button class="btn btn--danger" onclick="logout()" style="display:none;">Odhlásiť sa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOČNÝ PANEL – ONLINE UŽÍVATELIA (PC) -->
+  <aside id="presencePanel" class="presence-panel">
+    <div class="presence-title">Používatelia</div>
+    <ul id="presenceList" class="presence-list"></ul>
+  </aside>
+
+  <!-- OBSAH -->
+  <div class="main-content">
+    <div class="post-feed" id="postFeed"></div>
+  </div>
+
+  <!-- COMPOSER DOLE -->
+  <div class="composer-bar" id="composerBar">
+    <div class="composer-wrap">
+      <form id="timelineForm" class="composer" autocomplete="off" enctype="multipart/form-data">
+        <div class="composer-row">
+          <div class="input-group">
+            <input id="postContent" class="composer-input" type="text" placeholder="Napíš niečo..." maxlength="300" />
+            <span id="composerCount">0 / 300</span>
+            <input id="postImage" type="file" accept="image/*" hidden />
+          </div>
+          <button type="button" id="postImageBtn" class="button button--icon" aria-label="Pridať obrázok">📎</button>
+          <button id="postSubmit" class="button" type="submit" disabled>Odoslať</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MarSab® badge -->
+  <a class="brand-badge" href="#" aria-label="MarSab®">
+    <img src="img/marsab_logo.png" alt="">
+    <span class="wordmark">MarSab®</span>
+  </a>
+
+  <script src="timeline.js"></script>
+</body>
+</html>

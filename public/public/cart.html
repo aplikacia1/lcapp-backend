@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Košík</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    const loggedInUser = sessionStorage.getItem("loggedInUser");
+    if (!loggedInUser) window.location.href = "index.html";
+  </script>
+</head>
+<body>
+  <div class="container welcome">
+    <img src="logo_lc.jpg" alt="Logo" class="logo" />
+    <h1>Váš košík</h1>
+    <div id="userGreeting">Načítavam...</div>
+
+    <div class="main-content" id="ordersContainer"></div>
+
+    <div class="nav-buttons">
+      <button onclick="window.location.href='dashboard.html'">Účet</button>
+      <button onclick="window.location.href='catalog.html'">Katalóg</button>
+      <button onclick="window.location.href='cart.html'">Košík</button>
+    </div>
+
+    <p class="footer">Baner na reklamu • MarSab®</p>
+  </div>
+
+  <script>
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (user) {
+      document.getElementById("userGreeting").textContent = `Prihlásený: ${user.name || user.email}`;
+    }
+  </script>
+  <script src="cart.js"></script>
+</body>
+</html>

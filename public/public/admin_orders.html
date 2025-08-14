@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Súkromné správy</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root { --gap:16px; --max-w:1200px; }
+    body{ background:#0d1a4f; color:#fff; font-family:Arial, sans-serif; margin:0; }
+    .container{ max-width: var(--max-w); margin: 24px auto; padding: 0 var(--gap); }
+    h1{ text-align:center; margin: 10px 0 20px; }
+
+    .layout{ display:grid; grid-template-columns: 320px 1fr; gap:16px; }
+    @media (max-width: 900px){ .layout{ grid-template-columns: 1fr; } }
+
+    .panel{ background:#ffffff10; border:1px solid #ffffff22; border-radius:12px; padding:12px; }
+
+    /* zoznam konverzácií */
+    .thread-list{ list-style:none; margin:0; padding:0; max-height:70vh; overflow:auto; }
+    .thread-item{ padding:10px; border-bottom:1px solid #ffffff1f; cursor:pointer; }
+    .thread-item:hover{ background:#ffffff0f; }
+    .thread-item.active{ background:#17306b; }
+    .thread-name{ font-weight:700; }
+    .thread-sub{ opacity:.8; font-size:12px; }
+
+    /* thread */
+    .msgs{ max-height:60vh; overflow:auto; }
+    .msg{ background:#fff; color:#111; border-radius:10px; padding:8px 10px; margin:8px 0; }
+    .msg .meta{ font-size:12px; opacity:.75; margin-bottom:4px; }
+    .msg.me{ background:#eaf2ff; }
+
+    /* odpoveď */
+    .reply{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:start; margin-top:12px; }
+    .reply textarea{ width:100%; min-height:90px; border:none; border-radius:10px; padding:10px; resize:vertical; background:#eef6ff; color:#0c1f4b; }
+    .reply button{ height:40px; padding:0 14px; border-radius:10px; border:1px solid #bcd6ff; background:#eef6ff; color:#0c1f4b; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📨 Súkromné správy (Lištové centrum)</h1>
+    <div id="warn" style="text-align:center; margin-bottom:12px; opacity:.85;"></div>
+
+    <div class="layout">
+      <aside class="panel">
+        <h3 style="margin:6px 0 10px">Konverzácie</h3>
+        <ul id="threadList" class="thread-list"></ul>
+      </aside>
+
+      <section class="panel">
+        <div id="threadHeader" style="font-weight:700; margin-bottom:6px;"></div>
+        <div id="msgs" class="msgs"></div>
+
+        <div class="reply" id="replyBox" style="display:none;">
+          <textarea id="replyText" placeholder="Napíšte odpoveď… (max 2000 znakov)" maxlength="2000"></textarea>
+          <button id="sendBtn">Odoslať</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="admin_orders.js"></script>
+</body>
+</html>

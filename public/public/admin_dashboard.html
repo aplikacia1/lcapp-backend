@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Admin rozhranie</h1>
+    <p>Vitajte v administrátorskom paneli aplikácie LCAPP.</p>
+
+    <div class="admin-buttons">
+      <button onclick="location.href='admin_registrations.html'">✅ Registrácie</button>
+      <button onclick="location.href='admin_documents.html'">📂 Dokumenty</button>
+      <button onclick="location.href='admin_orders.html'">📦 Objednávky</button>
+      <button onclick="location.href='admin_banner.html'">🖼️ Banner</button>
+      <button onclick="location.href='admin_change_password.html'">🔐 Zmena hesla</button>
+
+      <!-- NOVÉ: Lištobook v admin móde -->
+      <button id="adminTimelineBtn">🧵 Lištobook (admin mód)</button>
+
+      <button id="adminLogoutBtn">🚪 Odhlásiť sa</button>
+    </div>
+  </div>
+
+  <script src="admin_dashboard.js"></script>
+</body>
+</html>

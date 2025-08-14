@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <title>Pridať produkt</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0d1a4f;
+      color: white;
+      font-family: sans-serif;
+    }
+
+    .full-container {
+      width: 100%;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+
+    .form-section, .table-section {
+      background-color: #10236b;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: 2px solid white;
+      background-color: transparent;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: white;
+      color: #0d1a4f;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #ffffff10;
+      color: white;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+
+    img {
+      max-height: 60px;
+    }
+
+    .action-btn {
+      margin-right: 10px;
+      padding: 6px 12px;
+      background-color: white;
+      color: #0d1a4f;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      background-color: #ccc;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="full-container">
+    <div class="form-section">
+      <h2>🛒 Pridať nový produkt</h2>
+      <form id="productForm" enctype="multipart/form-data">
+        <label for="categorySelect">Kategória:</label>
+        <select id="categorySelect" name="categoryId" required></select>
+
+        <label for="name">Názov:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="code">Kód:</label>
+        <input type="text" id="code" name="code" required>
+
+        <label for="price">Cena:</label>
+        <input type="number" id="price" name="price" step="0.01" required>
+
+        <label for="unit">Jednotka (napr. ks, m2):</label>
+        <input type="text" id="unit" name="unit">
+
+        <label for="description">Popis:</label>
+        <textarea id="description" name="description" rows="4"></textarea>
+
+        <label for="image">Obrázok:</label>
+        <input type="file" id="image" name="image" accept="image/png, image/jpeg">
+
+        <button type="submit">Pridať produkt</button>
+      </form>
+
+      <p id="message"></p>
+    </div>
+
+    <div class="table-section">
+      <h3>📦 Produkty v tejto kategórii</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Názov</th>
+            <th>Kód</th>
+            <th>Kategória</th>
+            <th>Cena</th>
+            <th>Akcie</th>
+          </tr>
+        </thead>
+        <tbody id="productList">
+          <!-- Tu sa načítajú produkty -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="admin_add_product.js"></script>
+</body>
+</html>

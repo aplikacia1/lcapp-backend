@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin • Banner</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .wrap {max-width: 980px; margin: 40px auto; padding: 16px;}
+    h1 {text-align:center; margin-bottom: 24px;}
+    .card {background:#0c1f4b; border:1px solid rgba(255,255,255,.15); border-radius:16px; padding:16px; margin-bottom:16px;}
+    .row {display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    .row-3 {display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px}
+    label {font-size:14px; opacity:.8}
+    input[type="text"], textarea, input[type="file"] {width:100%; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#fff;}
+    textarea {min-height: 110px;}
+    .btn {height:40px; padding:0 16px; border-radius:12px; border:1px solid rgba(255,255,255,.3); background:#fff; color:#0c1f4b; cursor:pointer;}
+    .btn--danger {background:#ff6b6b; color:#fff; border:none;}
+    .grid {display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:16px;}
+    .banner-tile {background:#0c1f4b; border:1px solid rgba(255,255,255,.15); border-radius:16px; overflow:hidden;}
+    .banner-tile img {width:100%; aspect-ratio: 16/5; object-fit: cover; display:block;}
+    .tile-body {padding:12px}
+    .muted {opacity:.7; font-size:12px}
+    .switch {display:flex; gap:8px; align-items:center;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Reklamné bannery</h1>
+
+    <div class="card">
+      <h3>Pridať banner</h3>
+      <form id="createForm">
+        <div class="row">
+          <div>
+            <label>Názov</label>
+            <input type="text" name="title" placeholder="Krátky názov"/>
+          </div>
+          <div class="switch">
+            <input type="checkbox" id="isActive" name="isActive" checked />
+            <label for="isActive">Aktívny</label>
+          </div>
+        </div>
+        <div>
+          <label>Popis (zobrazí sa len v detaile)</label>
+          <textarea name="description" placeholder="Voliteľne..."></textarea>
+        </div>
+        <div>
+          <label>Obrázok (odporúčané min. 1280×400, pomer ~16:5)</label>
+          <input type="file" name="image" accept="image/*" required />
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn" type="submit">Uložiť</button>
+          <a class="btn btn--danger" href="admin_dashboard.html">Späť</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Zoznam bannerov</h3>
+      <div id="list" class="grid"></div>
+    </div>
+  </div>
+
+  <script src="admin_banner.js"></script>
+</body>
+</html>

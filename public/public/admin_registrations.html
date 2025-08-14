@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registrácie</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #001b4d;
+      color: white;
+    }
+
+    .top-bar {
+      padding: 20px;
+      background-color: #002866;
+      text-align: center;
+    }
+
+    .counts {
+      margin-top: 10px;
+      font-size: 1.1em;
+    }
+
+    .search-box {
+      margin: 10px auto 0;
+      text-align: center;
+    }
+
+    .search-input {
+      padding: 8px;
+      border-radius: 5px;
+      border: none;
+      width: 300px;
+      font-size: 1em;
+    }
+
+    #userList {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .user-box {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #003580;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .user-box p {
+      margin: 5px 0;
+      flex: 1 1 200px;
+    }
+
+    .note-input {
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+      width: 200px;
+    }
+
+    .user-box label {
+      margin-right: 20px;
+    }
+
+    .user-box button {
+      background-color: #ff4c4c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .user-box button:hover {
+      background-color: #ff0000;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .back-button {
+      background-color: #004080;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background-color: #0066cc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <h1>Zoznam registrovaných zákazníkov</h1>
+    <div class="counts">
+      <p id="userCount"></p>
+      <p id="onlineCount"></p>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 Vyhľadaj používateľa...">
+    </div>
+  </div>
+
+  <div id="userList"></div>
+
+  <div class="footer">
+    <button class="back-button" onclick="window.location.href='admin_dashboard.html'">⬅️ Späť</button>
+  </div>
+
+  <script src="admin_registrations.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banner</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .wrap {max-width: 1080px; margin: 24px auto; padding: 12px;}
+    .imgbox {background:#0c1f4b; border:1px solid rgba(255,255,255,.15); border-radius:16px; padding:12px;}
+    .imgbox img{width:100%; height:auto; display:block;}
+    .meta {margin-top:12px; opacity:.85}
+    .topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+    .btn{height:40px; padding:0 14px; border-radius:12px; border:1px solid rgba(255,255,255,.3); background:#fff; color:#0c1f4b; cursor:pointer;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h2 id="bTitle">Banner</h2>
+      <button class="btn" onclick="history.back()">Späť</button>
+    </div>
+    <div class="imgbox">
+      <img id="bImg" alt="Banner">
+    </div>
+    <div class="meta" id="bDesc"></div>
+  </div>
+
+  <script src="banner_view.js"></script>
+</body>
+</html>
