@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 
 console.log('BOOT FILE:', __filename);
@@ -90,9 +91,13 @@ try {
 const publicDir = path.join(__dirname, 'backend', 'public');
 app.use(express.static(publicDir));
 
-/* Root na index.html */
+/* Root na index.html s fallbackom, ak chýba súbor */
 app.get('/', (_req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+  const indexPath = path.join(publicDir, 'index.html');
+  if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
+  res
+    .status(200)
+    .send('<h1>Backend OK</h1><p>Chýba <code>backend/public/index.html</code>.</p>');
 });
 
 /* --- Štart servera --- */
