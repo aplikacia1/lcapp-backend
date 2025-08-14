@@ -49,6 +49,11 @@ try {
 const publicDir = path.join(__dirname, 'public');
 app.use(express.static(publicDir));
 
+/* --- ZÁKLADNÝ TEST ROUTY (nič s DB) --- */
+/* Toto je náš minikrok 1: ak po nasadení otvoríš /health/db a uvidíš "Test OK",
+   znamená to, že backend routy fungujú (potom spravíme krok 2 s kontrolou Mongo). */
+app.get('/health/db', (_req, res) => res.send('Test OK'));
+
 /* Root na index.html (voliteľne môžeš zmeniť na dashboard.html) */
 app.get('/', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
