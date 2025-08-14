@@ -14,11 +14,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* --- Rýchle diagnostické routy --- */
+/* --- Diagnostika --- */
 app.get('/__whoami', (_req, res) => {
   res.json({ file: __filename, dir: __dirname, ts: new Date().toISOString() });
 });
-app.get('/health/db', (_req, res) => res.send('Test OK'));
 
 /* --- MongoDB --- */
 const MONGO_URI = process.env.MONGO_URI;
@@ -32,6 +31,40 @@ mongoose.connect(MONGO_URI)
     console.error('❌ MongoDB error:', err?.message || err);
     process.exit(1);
   });
+
+/* --- Health check s pingom a počtami --- */
+app.get('/health/db', async (_req, res) => {
+  try {
+    if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+      return res.status(500).json({ status: 'fail', error: 'DB not connected' });
+    }
+    const admin = mongoose.connection.db.admin();
+    await admin.ping();
+
+    const sampleCounts = {};
+    const tryCount = async (name) => {
+      try { sampleCounts[name] = await mongoose.connection.db.collection(name).countDocuments(); }
+      catch { /* kolekcia nemusí existovať */ }
+    };
+    await Promise.all([
+      tryCount('users'),
+      tryCount('products'),
+      tryCount('categories'),
+      tryCount('timelineposts'),
+      tryCount('ratings'),
+      tryCount('orders')
+    ]);
+
+    res.json({
+      status: 'ok',
+      host: mongoose.connection.host,
+      db: mongoose.connection.name,
+      sampleCounts
+    });
+  } catch (e) {
+    res.status(500).json({ status: 'fail', error: e.message });
+  }
+});
 
 /* --- Statické súbory (bežíme z koreňa) --- */
 app.use('/uploads', express.static(path.join(__dirname, 'backend', 'uploads')));
@@ -50,7 +83,7 @@ try {
   app.use('/api/admin/timeline', require('./backend/routes/timelineAdminRoutes'));
   app.use('/api/messages', require('./backend/routes/messageRoutes'));
 } catch (e) {
-  console.warn('⚠️ Skontroluj názvy/umiestnenie súborov v backend/routes. Ak niektorý neexistuje, vyhoď alebo oprav import.');
+  console.warn('⚠️ Skontroluj názvy súborov v backend/routes. Ak niektorý neexistuje, odstráň import.');
 }
 
 /* --- FRONTEND: backend/public --- */
