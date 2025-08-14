@@ -1,4 +1,4 @@
-// backend/index.js
+// index.js  (KOREŇ PROJEKTU)
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -25,37 +25,35 @@ mongoose.connect(MONGO_URI)
     process.exit(1);
   });
 
-/* --- Uploads (ponechávame) --- */
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+/* --- Statické adresáre (cesty upravené, lebo bežíme z KOREŇA) --- */
+app.use('/uploads', express.static(path.join(__dirname, 'backend', 'uploads')));
 
-/* --- API routy (ponechaj/odstráň podľa toho, čo reálne máš v backend/routes) --- */
+/* --- API routy (smerujú do backend/routes) --- */
 try {
-  app.use('/api/admin', require('./routes/adminRoutes'));
-  app.use('/api/users', require('./routes/userRoutes'));
-  app.use('/api/categories', require('./routes/categoryRoutes')); // ak nemáš categoryRoutes.js, vyhoď tento riadok
-  app.use('/api/products', require('./routes/productRoutes'));
-  app.use('/api/orders', require('./routes/orderRoutes'));
-  app.use('/api/timeline', require('./routes/timelineRoutes'));
-  app.use('/api/ratings', require('./routes/ratingRoutes'));
-  app.use('/api/presence', require('./routes/presenceRoutes'));
-  app.use('/api/banners', require('./routes/bannerRoutes'));
-  app.use('/api/admin/timeline', require('./routes/timelineAdminRoutes'));
-  app.use('/api/messages', require('./routes/messageRoutes'));
+  app.use('/api/admin', require('./backend/routes/adminRoutes'));
+  app.use('/api/users', require('./backend/routes/userRoutes'));
+  app.use('/api/categories', require('./backend/routes/categoryRoutes')); // ak nemáš, vyhoď tento riadok
+  app.use('/api/products', require('./backend/routes/productRoutes'));
+  app.use('/api/orders', require('./backend/routes/orderRoutes'));
+  app.use('/api/timeline', require('./backend/routes/timelineRoutes'));
+  app.use('/api/ratings', require('./backend/routes/ratingRoutes'));
+  app.use('/api/presence', require('./backend/routes/presenceRoutes'));
+  app.use('/api/banners', require('./backend/routes/bannerRoutes'));
+  app.use('/api/admin/timeline', require('./backend/routes/timelineAdminRoutes'));
+  app.use('/api/messages', require('./backend/routes/messageRoutes'));
 } catch (e) {
   console.warn('⚠️ Skontroluj názvy/umiestnenie súborov v backend/routes. Ak niektorý neexistuje, vyhoď alebo oprav import.');
 }
 
 /* --- FRONTEND: statické súbory z backend/public --- */
-const publicDir = path.join(__dirname, 'public');
+const publicDir = path.join(__dirname, 'backend', 'public');
 app.use(express.static(publicDir));
 
-/* --- ZÁKLADNÝ TEST ROUTY (nič s DB) --- */
-/* Toto je náš minikrok 1: ak po nasadení otvoríš /health/db a uvidíš "Test OK",
-   znamená to, že backend routy fungujú (potom spravíme krok 2 s kontrolou Mongo). */
+/* --- Testovacia route na kontrolu nasadenia --- */
 app.get('/health/db', (_req, res) => res.send('Test OK'));
 
-/* Root na index.html (voliteľne môžeš zmeniť na dashboard.html) */
-app.get('/', (req, res) => {
+/* Root na index.html */
+app.get('/', (_req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 
