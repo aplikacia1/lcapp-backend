@@ -23,11 +23,10 @@ app.get('/debug/db', (_req, res) => {
   res.json({ state: c.readyState, db: c.name || null, host: c.host || null });
 });
 
-/* --- Statické súbory --- */
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-const publicDir = path.join(__dirname, 'public'); // servujeme backend/public
-app.use(express.static(publicDir));
-app.get('/', (_req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+/* --- Statické súbory (HTML/CSS/JS + UPLOADS) --- */
+app.use(express.static(path.join(__dirname, 'public')));                 // / -> backend/public
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));    // /uploads -> backend/uploads
+app.get('/', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 /* --- Helper na mount rout --- */
 function mountRoute(url, modPath) {
