@@ -3,7 +3,6 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const fs = require('fs');
 const cors = require('cors');
 
 console.log('BOOT FILE:', __filename);
@@ -21,7 +20,7 @@ app.get('/__whoami', (_req, res) => {
 });
 
 /* --- MongoDB --- */
-const MONGO_URI = process.env.MONGO_URI; // odporúčam aby končilo .../test?...
+const MONGO_URI = process.env.MONGO_URI; // ideálne nech končí .../test?...
 if (!MONGO_URI) {
   console.error('❌ Chýba MONGO_URI v environment variables');
   process.exit(1);
@@ -34,43 +33,23 @@ mongoose
     process.exit(1);
   });
 
-/* --- Health check (ping + počty) --- */
+/* --- Health check (JSON) --- */
 app.get('/health/db', async (_req, res) => {
   try {
     if (!mongoose.connection || mongoose.connection.readyState !== 1) {
       return res.status(500).json({ status: 'fail', error: 'DB not connected' });
     }
-    const admin = mongoose.connection.db.admin();
-    await admin.ping();
-
-    const sampleCounts = {};
-    const tryCount = async (name) => {
-      try { sampleCounts[name] = await mongoose.connection.db.collection(name).countDocuments(); }
-      catch {}
-    };
-    await Promise.all([
-      tryCount('users'),
-      tryCount('products'),
-      tryCount('categories'),
-      tryCount('timelineposts'),
-      tryCount('ratings'),
-      tryCount('orders'),
-    ]);
-
-    res.json({ status: 'ok', host: mongoose.connection.host, db: mongoose.connection.name, sampleCounts });
+    await mongoose.connection.db.admin().ping();
+    res.json({ status: 'ok', db: mongoose.connection.name, host: mongoose.connection.host });
   } catch (e) {
     res.status(500).json({ status: 'fail', error: e.message });
   }
 });
 
-/* --- KTORÝ FRONTEND SLOŽKA EXISTUJE? --- */
-const frontFromFrontend = path.join(__dirname, 'frontend', 'public');
-const frontFromBackend  = path.join(__dirname, 'backend', 'public');
-const publicDir = fs.existsSync(frontFromFrontend) ? frontFromFrontend : frontFromBackend;
-console.log('Serving static from:', publicDir);
-app.use(express.static(publicDir));
+/* --- Uploads statika --- */
+app.use('/uploads', express.static(path.join(__dirname, 'backend', 'uploads')));
 
-/* --- API routy: montujeme každú zvlášť (aby jedna chybná nezastavila ostatné) --- */
+/* --- API routy – montujeme bezpečne --- */
 const mounted = {};
 function tryMount(filePath, mountPath) {
   try {
@@ -83,9 +62,8 @@ function tryMount(filePath, mountPath) {
   }
 }
 
-// cesty pre súbory v backend/routes/...
 tryMount('./backend/routes/userRoutes', '/api/users');
-tryMount('./backend/routes/documentRoutes', '/api/categories'); // tvoj „documentRoutes“ bol na /api/categories
+tryMount('./backend/routes/documentRoutes', '/api/categories'); // tvoje pôvodné mapovanie
 tryMount('./backend/routes/adminRoutes', '/api/admin');
 tryMount('./backend/routes/productRoutes', '/api/products');
 tryMount('./backend/routes/orderRoutes', '/api/orders');
@@ -96,7 +74,7 @@ tryMount('./backend/routes/bannerRoutes', '/api/banners');
 tryMount('./backend/routes/timelineAdminRoutes', '/api/admin/timeline');
 tryMount('./backend/routes/messageRoutes', '/api/messages');
 
-/* --- Fallback pre /api/products, ak sa route nenamountovala --- */
+/* --- Fallback pre /api/products, ak route nesedel --- */
 if (!mounted['/api/products']) {
   app.get('/api/products', async (_req, res) => {
     try {
@@ -109,11 +87,9 @@ if (!mounted['/api/products']) {
   console.log('ℹ️ using fallback /api/products (no productRoutes mounted)');
 }
 
-/* Root – ak index.html chýba, nepadne to */
+/* --- Root: bez frontendu, len informácia --- */
 app.get('/', (_req, res) => {
-  const indexPath = path.join(publicDir, 'index.html');
-  if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
-  res.status(200).send('<h1>Backend OK</h1><p>Chýba <code>frontend/public/index.html</code> alebo <code>backend/public/index.html</code>.</p>');
+  res.status(200).send('<h1>API OK</h1><p>Frontend sa zatiaľ nenasadzuje z tohto servera.</p>');
 });
 
 /* --- Štart servera --- */
