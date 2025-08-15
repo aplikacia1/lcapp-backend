@@ -2,6 +2,7 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upraviť kategóriu</title>
   <link rel="stylesheet" href="style.css">
   <style>
@@ -62,7 +63,6 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
   </style>
 </head>
 <body>
@@ -72,6 +72,8 @@
 
   <button id="addProductBtn">➕ Pridať nový produkt</button>
 
+  <!-- ✳️ config musí byť načítaný skôr -->
+  <script src="/js/config.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const categoryId = urlParams.get("id");
@@ -80,7 +82,8 @@
       window.location.href = "/admin_add_product.html";
     };
 
-    fetch(`/api/products/${categoryId}`)
+    // načítanie produktov danej kategórie
+    fetch(`${API_BASE}/api/products/${categoryId}`)
       .then(res => res.json())
       .then(products => {
         const container = document.getElementById("product-list");
@@ -90,20 +93,20 @@
           card.className = "product-card";
 
           const img = document.createElement("img");
-          img.src = `/uploads/${prod.image}`;
+          img.src = `${API_BASE}/uploads/${prod.image}`;
           img.alt = prod.name;
 
           const title = document.createElement("h4");
           title.textContent = prod.name;
 
           const desc = document.createElement("p");
-          desc.textContent = prod.description;
+          desc.textContent = prod.description || '';
 
           const delBtn = document.createElement("button");
           delBtn.textContent = "🗑 Vymazať";
           delBtn.onclick = () => {
             if (confirm("Naozaj chcete vymazať tento produkt?")) {
-              fetch(`/api/product/${prod._id}`, { method: "DELETE" })
+              fetch(`${API_BASE}/api/product/${prod._id}`, { method: "DELETE" })
                 .then(() => location.reload());
             }
           };
