@@ -1,11 +1,10 @@
-// index.js (KOREŇ REPA)
+// index.js — JEDINÁ spúšťacia appka
 require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
-
-console.log('BOOT FILE:', __filename);
 
 const app = express();
 
@@ -14,49 +13,58 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* --- Diagnostika --- */
-app.get('/__whoami', (_req, res) =>
-  res.json({ file: __filename, dir: __dirname, ts: new Date().toISOString() })
-);
-app.get('/health/db', (_req, res) => res.send('Test OK'));
+/* --- Rýchle diagnostiky --- */
+app.get('/__whoami', (_req, res) => {
+  res.json({ subor: __filename, dir: __dirname, ts: new Date().toISOString() });
+});
+app.get('/health/db', (_req, res) => res.send('Test je v poriadku'));
 
 /* --- MongoDB --- */
-const MONGO_URI = process.env.MONGO_URI;
+const { MONGO_URI } = process.env;
 if (!MONGO_URI) {
   console.error('❌ Chýba MONGO_URI v environment variables');
   process.exit(1);
 }
 mongoose
   .connect(MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch((err) => {
-    console.error('❌ MongoDB error:', err?.message || err);
+  .then(() => console.log('🟢 MongoDB connected'))
+  .catch(err => {
+    console.error('🔴 MongoDB error:', err?.message || err);
     process.exit(1);
   });
 
 /* --- Statické súbory --- */
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // ak priečinok nebude, nič sa nedeje
+// nahrávky (ak používaš)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// frontend ide z ./public
 const publicDir = path.join(__dirname, 'public');
 app.use(express.static(publicDir));
 
-/* --- API routy: teraz z ./routes, nie z ./backend/routes --- */
-try {
-  app.use('/api/admin', require('./routes/adminRoutes'));
-  app.use('/api/users', require('./routes/userRoutes'));
-  app.use('/api/categories', require('./routes/categoryRoutes'));   // ak súbor nemáš, dočasne zakomentuj
-  app.use('/api/products', require('./routes/productRoutes'));       // ak sa súbor volá inak (napr. products.js), uprav import
-  app.use('/api/orders', require('./routes/orderRoutes'));
-  app.use('/api/timeline', require('./routes/timelineRoutes'));
-  app.use('/api/ratings', require('./routes/ratingRoutes'));
-  app.use('/api/presence', require('./routes/presenceRoutes'));
-  app.use('/api/banners', require('./routes/bannerRoutes'));
-  app.use('/api/admin/timeline', require('./routes/timelineAdminRoutes'));
-  app.use('/api/messages', require('./routes/messageRoutes'));
-} catch (e) {
-  console.warn('⚠️ Skontroluj názvy súborov v ./routes. Ak niektorý neexistuje, premenuj import alebo ho dočasne vypni.');
+/* --- Helper na mount routes s logom --- */
+function mountRoute(url, filePath) {
+  try {
+    const router = require(filePath);
+    app.use(url, router);
+    console.log(`✅ route ${url} -> ${filePath}`);
+  } catch (e) {
+    console.warn(`⚠️  preskakujem ${url}: ${filePath} (nenájdené?) – ${e.message}`);
+  }
 }
 
-/* --- Root -> index.html z public --- */
+/* --- API routes (POZOR: správne ./routes/...) --- */
+mountRoute('/api/admin',           './routes/adminRoutes');
+mountRoute('/api/users',           './routes/userRoutes');
+mountRoute('/api/categories',      './routes/categoryRoutes');
+mountRoute('/api/products',        './routes/productRoutes');
+mountRoute('/api/orders',          './routes/orderRoutes');
+mountRoute('/api/timeline',        './routes/timelineRoutes');
+mountRoute('/api/ratings',         './routes/ratingRoutes');
+mountRoute('/api/presence',        './routes/presenceRoutes');
+mountRoute('/api/banners',         './routes/bannerRoutes');
+mountRoute('/api/admin/timeline',  './routes/timelineAdminRoutes');
+mountRoute('/api/messages',        './routes/messageRoutes');
+
+/* --- Root: pošli index.html z ./public --- */
 app.get('/', (_req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
 });
