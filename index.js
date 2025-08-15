@@ -1,4 +1,4 @@
-// index.js  (KOREŇ PROJEKTU)
+// index.js (KOREŇ PROJEKTU)
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -21,7 +21,7 @@ app.get('/__whoami', (_req, res) => {
 });
 
 /* --- MongoDB --- */
-const MONGO_URI = process.env.MONGO_URI; // odporúčam: ...mongodb.net/test?... (tam máš dáta)
+const MONGO_URI = process.env.MONGO_URI; // odporúčam aby končilo .../test?...
 if (!MONGO_URI) {
   console.error('❌ Chýba MONGO_URI v environment variables');
   process.exit(1);
@@ -46,7 +46,7 @@ app.get('/health/db', async (_req, res) => {
     const sampleCounts = {};
     const tryCount = async (name) => {
       try { sampleCounts[name] = await mongoose.connection.db.collection(name).countDocuments(); }
-      catch { /* kolekcia môže chýbať */ }
+      catch {}
     };
     await Promise.all([
       tryCount('users'),
@@ -63,21 +63,14 @@ app.get('/health/db', async (_req, res) => {
   }
 });
 
-/* --- Rýchla sonda bez modelu (pomôže pri overení) --- */
-app.get('/__probe/products', async (_req, res) => {
-  try {
-    const docs = await mongoose.connection.db.collection('products').find({}).limit(5).toArray();
-    res.json({ count: docs.length, docs });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-/* --- Statické súbory (bežíme z koreňa) --- */
-const publicDir = path.join(__dirname, 'backend', 'public');
+/* --- KTORÝ FRONTEND SLOŽKA EXISTUJE? --- */
+const frontFromFrontend = path.join(__dirname, 'frontend', 'public');
+const frontFromBackend  = path.join(__dirname, 'backend', 'public');
+const publicDir = fs.existsSync(frontFromFrontend) ? frontFromFrontend : frontFromBackend;
+console.log('Serving static from:', publicDir);
 app.use(express.static(publicDir));
 
-/* --- API routy: montujeme každú zvlášť + fallback, ak niektorá chýba --- */
+/* --- API routy: montujeme každú zvlášť (aby jedna chybná nezastavila ostatné) --- */
 const mounted = {};
 function tryMount(filePath, mountPath) {
   try {
@@ -90,10 +83,11 @@ function tryMount(filePath, mountPath) {
   }
 }
 
-tryMount('./backend/routes/adminRoutes', '/api/admin');
+// cesty pre súbory v backend/routes/...
 tryMount('./backend/routes/userRoutes', '/api/users');
-tryMount('./backend/routes/categoryRoutes', '/api/categories');
-tryMount('./backend/routes/productRoutes', '/api/products'); // ak je rozbité, nižšie máme fallback
+tryMount('./backend/routes/documentRoutes', '/api/categories'); // tvoj „documentRoutes“ bol na /api/categories
+tryMount('./backend/routes/adminRoutes', '/api/admin');
+tryMount('./backend/routes/productRoutes', '/api/products');
 tryMount('./backend/routes/orderRoutes', '/api/orders');
 tryMount('./backend/routes/timelineRoutes', '/api/timeline');
 tryMount('./backend/routes/ratingRoutes', '/api/ratings');
@@ -115,15 +109,15 @@ if (!mounted['/api/products']) {
   console.log('ℹ️ using fallback /api/products (no productRoutes mounted)');
 }
 
-/* Root na index.html s bezpečným fallbackom */
+/* Root – ak index.html chýba, nepadne to */
 app.get('/', (_req, res) => {
   const indexPath = path.join(publicDir, 'index.html');
   if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
-  res.status(200).send('<h1>Backend OK</h1><p>Chýba <code>backend/public/index.html</code>.</p>');
+  res.status(200).send('<h1>Backend OK</h1><p>Chýba <code>frontend/public/index.html</code> alebo <code>backend/public/index.html</code>.</p>');
 });
 
 /* --- Štart servera --- */
-const PORT = process.env.PORT || 5000; // Render si interný port nastaví sám
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server beží na porte ${PORT}`);
 });
