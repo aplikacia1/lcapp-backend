@@ -26,14 +26,15 @@ if (!MONGO_URI) {
   console.error('❌ Chýba MONGO_URI v environment variables');
   process.exit(1);
 }
-mongoose.connect(MONGO_URI)
+mongoose
+  .connect(MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => {
+  .catch((err) => {
     console.error('❌ MongoDB error:', err?.message || err);
     process.exit(1);
   });
 
-/* --- Health check s pingom a počtami --- */
+/* --- Health check (ping + počty) --- */
 app.get('/health/db', async (_req, res) => {
   try {
     if (!mongoose.connection || mongoose.connection.readyState !== 1) {
@@ -44,8 +45,9 @@ app.get('/health/db', async (_req, res) => {
 
     const sampleCounts = {};
     const tryCount = async (name) => {
-      try { sampleCounts[name] = await mongoose.connection.db.collection(name).countDocuments(); }
-      catch { /* kolekcia nemusí existovať */ }
+      try {
+        sampleCounts[name] = await mongoose.connection.db.collection(name).countDocuments();
+      } catch {}
     };
     await Promise.all([
       tryCount('users'),
@@ -53,45 +55,62 @@ app.get('/health/db', async (_req, res) => {
       tryCount('categories'),
       tryCount('timelineposts'),
       tryCount('ratings'),
-      tryCount('orders')
+      tryCount('orders'),
     ]);
 
     res.json({
       status: 'ok',
       host: mongoose.connection.host,
       db: mongoose.connection.name,
-      sampleCounts
+      sampleCounts,
     });
   } catch (e) {
     res.status(500).json({ status: 'fail', error: e.message });
   }
 });
 
+/* --- Rýchla sonda bez modelu (pomôže pri overení) --- */
+app.get('/__probe/products', async (_req, res) => {
+  try {
+    const docs = await mongoose.connection.db
+      .collection('products')
+      .find({})
+      .limit(5)
+      .toArray();
+    res.json({ count: docs.length, docs });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* --- Statické súbory (bežíme z koreňa) --- */
-app.use('/uploads', express.static(path.join(__dirname, 'backend', 'uploads')));
-
-/* --- API routy (súbory sú v backend/routes) --- */
-try {
-  app.use('/api/admin', require('./backend/routes/adminRoutes'));
-  app.use('/api/users', require('./backend/routes/userRoutes'));
-  app.use('/api/categories', require('./backend/routes/categoryRoutes')); // ak nemáš, odstráň
-  app.use('/api/products', require('./backend/routes/productRoutes'));
-  app.use('/api/orders', require('./backend/routes/orderRoutes'));
-  app.use('/api/timeline', require('./backend/routes/timelineRoutes'));
-  app.use('/api/ratings', require('./backend/routes/ratingRoutes'));
-  app.use('/api/presence', require('./backend/routes/presenceRoutes'));
-  app.use('/api/banners', require('./backend/routes/bannerRoutes'));
-  app.use('/api/admin/timeline', require('./backend/routes/timelineAdminRoutes'));
-  app.use('/api/messages', require('./backend/routes/messageRoutes'));
-} catch (e) {
-  console.warn('⚠️ Skontroluj názvy súborov v backend/routes. Ak niektorý neexistuje, odstráň import.');
-}
-
-/* --- FRONTEND: backend/public --- */
 const publicDir = path.join(__dirname, 'backend', 'public');
 app.use(express.static(publicDir));
 
-/* Root na index.html s fallbackom, ak chýba súbor */
+/* --- API routy: každú montujeme zvlášť (aby jedna chybná nezastavila ostatné) --- */
+function tryMount(filePath, mountPath) {
+  try {
+    const router = require(filePath);
+    app.use(mountPath, router);
+    console.log(`✅ mounted ${mountPath} from ${filePath}`);
+  } catch (e) {
+    console.warn(`⚠️ skipping ${mountPath} (${filePath}) → ${e.message}`);
+  }
+}
+
+tryMount('./backend/routes/adminRoutes', '/api/admin');
+tryMount('./backend/routes/userRoutes', '/api/users');
+tryMount('./backend/routes/categoryRoutes', '/api/categories');
+tryMount('./backend/routes/productRoutes', '/api/products');
+tryMount('./backend/routes/orderRoutes', '/api/orders');
+tryMount('./backend/routes/timelineRoutes', '/api/timeline');
+tryMount('./backend/routes/ratingRoutes', '/api/ratings');
+tryMount('./backend/routes/presenceRoutes', '/api/presence');
+tryMount('./backend/routes/bannerRoutes', '/api/banners');
+tryMount('./backend/routes/timelineAdminRoutes', '/api/admin/timeline');
+tryMount('./backend/routes/messageRoutes', '/api/messages');
+
+/* Root na index.html s bezpečným fallbackom */
 app.get('/', (_req, res) => {
   const indexPath = path.join(publicDir, 'index.html');
   if (fs.existsSync(indexPath)) return res.sendFile(indexPath);
