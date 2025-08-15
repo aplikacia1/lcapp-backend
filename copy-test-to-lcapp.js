@@ -1,12 +1,16 @@
-// scripts/copy-test-to-lcapp.js
-// npm i mongodb
+// copy-test-to-lcapp.js
+// npm i mongodb dotenv
+require('dotenv').config();
 const { MongoClient } = require('mongodb');
 
-const URI = process.env.MONGO_ATLAS_URI; // bez názvu DB (…mongodb.net)
+// vezme MONGO_ATLAS_URI alebo (ak chýba) MONGO_URI
+// POZOR: tu má byť URI bez /db (len ...mongodb.net/?...)
+const URI = process.env.MONGO_ATLAS_URI || process.env.MONGO_URI;
+
 const SRC_DB  = 'test';
 const DEST_DB = 'lcapp';
 
-// zoznam kolekcií, ktoré chceš preniesť
+// kolekcie, ktoré chceme preniesť
 const collections = [
   'admins',
   'banners',
@@ -23,10 +27,12 @@ const collections = [
 
 (async () => {
   if (!URI) {
-    console.error('❌ Setni MONGO_ATLAS_URI (bez /db) v env!');
+    console.error('❌ Chýba MONGO_ATLAS_URI alebo MONGO_URI (bez /db) v .env!');
     process.exit(1);
   }
+
   const client = new MongoClient(URI, { ignoreUndefined: true });
+
   try {
     await client.connect();
     const src  = client.db(SRC_DB);
@@ -43,12 +49,14 @@ const collections = [
       try { await dCol.drop(); } catch (_) {}
 
       if (docs.length) {
-        await dCol.insertMany(docs, { ordered: false }); // zachová pôvodné _id
+        // zachová pôvodné _id
+        await dCol.insertMany(docs, { ordered: false });
       }
     }
+
     console.log('✅ Hotovo: skopírované do DB', DEST_DB);
   } catch (e) {
-    console.error('❌ Chyba pri kopírovaní:', e);
+    console.error('❌ Chyba pri kopírovaní:', e?.message || e);
   } finally {
     await client.close();
   }
