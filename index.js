@@ -1,68 +1,85 @@
-// index.js (KOREŇ PROJEKTU) — rev: no-frontend-v1
+// index.js (KOREŇ PROJEKTU)
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 
 console.log('BOOT FILE:', __filename);
 
 const app = express();
+
+/* --- Middleware --- */
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/* --- Rýchle diagnostické cesty --- */
 app.get('/__whoami', (_req, res) => {
-  res.json({ rev: 'no-frontend-v1', file: __filename, dir: __dirname, ts: new Date().toISOString() });
+  res.json({ file: __filename, dir: __dirname, ts: new Date().toISOString() });
 });
+app.get('/health/db', (_req, res) => res.send('Test OK'));
 
+/* --- MongoDB --- */
 const MONGO_URI = process.env.MONGO_URI;
-if (!MONGO_URI) { console.error('❌ Chýba MONGO_URI'); process.exit(1); }
-mongoose.connect(MONGO_URI)
+if (!MONGO_URI) {
+  console.error('❌ Chýba MONGO_URI v environment variables');
+  process.exit(1);
+}
+mongoose
+  .connect(MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => { console.error('❌ MongoDB error:', err?.message || err); process.exit(1); });
+  .catch(err => {
+    console.error('❌ MongoDB error:', err?.message || err);
+    process.exit(1);
+  });
 
-app.get('/health/db', async (_req, res) => {
-  try {
-    if (mongoose.connection.readyState !== 1) return res.status(500).json({ status:'fail', error:'DB not connected' });
-    await mongoose.connection.db.admin().ping();
-    res.json({ status:'ok', db: mongoose.connection.name, host: mongoose.connection.host });
-  } catch(e){ res.status(500).json({ status:'fail', error: e.message }); }
-});
-
+/* --- Uploads (ponechané) --- */
 app.use('/uploads', express.static(path.join(__dirname, 'backend', 'uploads')));
 
-// bezpečné mountovanie rout
-const mounted = {};
-function mount(file, mountPath){
-  try { app.use(mountPath, require(file)); mounted[mountPath]=true; console.log(`✅ mounted ${mountPath}`); }
-  catch(e){ console.warn(`⚠️ skipping ${mountPath} → ${e.message}`); }
+/* --- Bezpečné montovanie API rout --- */
+function mountRoute(url, relPath) {
+  try {
+    app.use(url, require(relPath));
+    console.log(`✔ mounted ${url} -> ${relPath}`);
+  } catch (e) {
+    console.warn(`⚠️ route ${url} not mounted (missing file?): ${relPath}`, e?.message || e);
+  }
 }
-mount('./backend/routes/userRoutes', '/api/users');
-mount('./backend/routes/documentRoutes', '/api/categories'); // tvoje pôvodné mapovanie
-mount('./backend/routes/adminRoutes', '/api/admin');
-mount('./backend/routes/productRoutes', '/api/products');
-mount('./backend/routes/orderRoutes', '/api/orders');
-mount('./backend/routes/timelineRoutes', '/api/timeline');
-mount('./backend/routes/ratingRoutes', '/api/ratings');
-mount('./backend/routes/presenceRoutes', '/api/presence');
-mount('./backend/routes/bannerRoutes', '/api/banners');
-mount('./backend/routes/timelineAdminRoutes', '/api/admin/timeline');
-mount('./backend/routes/messageRoutes', '/api/messages');
+mountRoute('/api/admin', './backend/routes/adminRoutes');
+mountRoute('/api/users', './backend/routes/userRoutes');
+mountRoute('/api/categories', './backend/routes/categoryRoutes');
+mountRoute('/api/products', './backend/routes/productRoutes');
+mountRoute('/api/orders', './backend/routes/orderRoutes');
+mountRoute('/api/timeline', './backend/routes/timelineRoutes');
+mountRoute('/api/ratings', './backend/routes/ratingRoutes');
+mountRoute('/api/presence', './backend/routes/presenceRoutes');
+mountRoute('/api/banners', './backend/routes/bannerRoutes');
+mountRoute('/api/admin/timeline', './backend/routes/timelineAdminRoutes');
+mountRoute('/api/messages', './backend/routes/messageRoutes');
 
-// fallback pre /api/products, ak sa route nenamountovala
-if (!mounted['/api/products']) {
-  app.get('/api/products', async (_req, res) => {
-    try {
-      const items = await mongoose.connection.db.collection('products').find({}).limit(50).toArray();
-      res.json(items);
-    } catch(e){ res.status(500).json({ error: e.message }); }
+/* rýchly ping, aby sme vedeli že endpoint žije */
+app.get('/api/products/ping', (_req, res) => res.json({ ok: true }));
+
+/* --- FRONTEND: slúž iba ak skutočne existuje backend/public/index.html --- */
+const publicDir = path.join(__dirname, 'backend', 'public');
+const indexHtml = path.join(publicDir, 'index.html');
+
+if (fs.existsSync(indexHtml)) {
+  app.use(express.static(publicDir));
+  app.get('/', (_req, res) => res.sendFile(indexHtml));
+  console.log('🗂 serving static from', publicDir);
+} else {
+  // API-only root – žiadny ENOENT
+  app.get('/', (_req, res) => {
+    res.status(200).send('<h1>API OK</h1><p>Frontend sa tu zatiaľ neservuje.</p>');
   });
-  console.log('ℹ️ using fallback /api/products');
+  console.log('ℹ️ static frontend not found, keeping API-only root');
 }
 
-// žiadny frontend z tohto servera
-app.get('/', (_req, res) => res.status(200).send('<h1>API OK</h1><p>Frontend sa z tohto servera neservuje.</p>'));
-
+/* --- Štart servera --- */
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server beží na porte ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server beží na porte ${PORT}`);
+});
