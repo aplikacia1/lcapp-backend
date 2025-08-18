@@ -1,129 +1,115 @@
-// ===== helpers =====
-function getParams() {
-  const p = new URLSearchParams(window.location.search);
-  return {
-    categoryId: p.get('categoryId') || '',
-    email: p.get('email') || ''
+// public/js/products.js
+(() => {
+  const q = new URLSearchParams(location.search);
+  const categoryId =
+    q.get('categoryId') || q.get('cat') || q.get('id') || '';
+  const categoryName = q.get('categoryName') || q.get('name') || '';
+
+  const API = window.API_BASE || '';
+  const grid = document.getElementById('productGrid');
+  const empty = document.getElementById('emptyState');
+  const search = document.getElementById('searchInput');
+  const title = document.getElementById('catTitle');
+
+  if (categoryName) title.textContent = `Produkty – ${categoryName}`;
+
+  const normalize = (s) =>
+    (s || '')
+      .toString()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase();
+
+  const imgSrc = (image) => {
+    if (!image) return 'img/placeholder.png';
+    if (/^https?:\/\//i.test(image)) return image;
+    const clean = image.replace(/^uploads[\\/]/i, '');
+    return `/uploads/${clean}`;
   };
-}
-function $(s, r = document) { return r.querySelector(s); }
 
-const { categoryId, email } = getParams();
-let _products = [];
+  let ALL = [];
 
-// Jednotný formátovač na EUR
-const EUR = new Intl.NumberFormat('sk-SK', {
-  style: 'currency',
-  currency: 'EUR',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2
-});
+  const fetchJSON = async (url) => {
+    const r = await fetch(url, { credentials: 'include' });
+    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+    return r.json();
+  };
 
-document.addEventListener('DOMContentLoaded', init);
+  const loadProducts = async () => {
+    const tries = [];
+    if (categoryId) {
+      tries.push(`${API}/api/products?category=${encodeURIComponent(categoryId)}`);
+      tries.push(`${API}/api/products?categoryId=${encodeURIComponent(categoryId)}`);
+    }
+    tries.push(`${API}/api/products`);
 
-async function init() {
-  bindHeader();
-  await showUser();
-  await loadProducts();
-  $('#searchInput')?.addEventListener('input', onSearch);
-}
+    let data = [];
+    let ok = false;
+    for (const url of tries) {
+      try {
+        data = await fetchJSON(url);
+        ok = true;
+        break;
+      } catch (_) {}
+    }
+    if (!ok) throw new Error('Nepodarilo sa načítať produkty.');
 
-function nav(page) {
-  const url = email ? `${page}?email=${encodeURIComponent(email)}` : page;
-  window.location.href = url;
-}
+    if (categoryId) {
+      const idStr = String(categoryId);
+      data = data.filter((p) => String(p.categoryId || p.category || '') === idStr);
+    }
 
-function bindHeader() {
-  // opravene – doplnené tlačidlo Katalóg
-  $('#catalogBtn')?.addEventListener('click', () => nav('catalog.html'));
+    ALL = Array.isArray(data) ? data : [];
+    render(ALL);
+  };
 
-  $('#accountBtn')?.addEventListener('click', () => nav('dashboard.html'));
-  $('#timelineBtn')?.addEventListener('click', () => nav('timeline.html'));
-  $('#logoutBtn')?.addEventListener('click', () => {
-    window.location.href = 'index.html';
-  });
-}
-
-async function showUser() {
-  if (!email) return;
-  try {
-    const res = await fetch(`/api/users/${encodeURIComponent(email)}`);
-    if (!res.ok) return;
-    const u = await res.json();
-    $('#userGreeting').textContent =
-      `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
-  } catch {}
-}
-
-async function loadProducts() {
-  const grid = $('#productGrid');
-  const empty = $('#emptyState');
-  grid.innerHTML = '';
-  empty.style.display = 'none';
-
-  if (!categoryId) {
-    empty.style.display = 'block';
-    empty.textContent = 'Chýba categoryId v URL.';
-    return;
-  }
-
-  try {
-    const res = await fetch(`/api/products/byCategory/${encodeURIComponent(categoryId)}`);
-    if (!res.ok) throw new Error('Načítanie produktov zlyhalo');
-    _products = await res.json();
-    if (!_products.length) {
-      empty.style.display = 'block';
+  const render = (items) => {
+    grid.innerHTML = '';
+    if (!items.length) {
+      empty.style.display = '';
       return;
     }
-    render(_products);
-  } catch (e) {
-    empty.style.display = 'block';
-    empty.textContent = 'Chyba pri načítaní produktov.';
-    console.error(e);
-  }
-}
+    empty.style.display = 'none';
 
-function render(list) {
-  const grid = $('#productGrid');
-  grid.innerHTML = list.map(p => {
-    const img = p?.image ? `/uploads/${p.image}` : 'placeholder_cat.png';
-    const title = p?.name || 'Bez názvu';
-
-    // ✅ Cena: 12,34 € / m2 (alebo / ks)
-    let price = '';
-    if (p?.price !== null && p?.price !== undefined && isFinite(Number(p.price))) {
-      price = `${EUR.format(Number(p.price))}${p?.unit ? ` / ${p.unit}` : ''}`;
-    }
-
-    // ⭐ Priemer na 1 desatinné miesto, ak je
-    const avg = (typeof p?.averageRating === 'number') ? p.averageRating : null;
-    const ratingStr = (avg != null ? `★ ${avg.toFixed(1)}` : '—') +
-                      (p?.ratingCount ? ` (${p.ratingCount})` : '');
-
-    return `
-      <article class="card" data-id="${p._id}" title="${title}">
-        <img class="card-img" src="${img}" alt="${title}" onerror="this.src='placeholder_cat.png'">
+    const frag = document.createDocumentFragment();
+    for (const p of items) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img class="card-img" alt="" loading="lazy">
         <div class="card-body">
-          <h3 class="card-title">${title}</h3>
-          <div class="price">${price}</div>
-          <div class="rating">${ratingStr}</div>
+          <div class="card-title" title="${p.name || ''}">${p.name || 'Bez názvu'}</div>
+          <div class="price">${p.price ? p.price + ' €' : ''} ${p.unit || ''}</div>
+          ${p.code ? `<div class="rating">Kód: ${p.code}</div>` : ''}
         </div>
-      </article>
-    `;
-  }).join('');
+      `;
+      card.querySelector('img').src = imgSrc(p.image);
+      // Preklik do detailu prípadne:
+      // card.addEventListener('click', () => location.href = `product_detail.html?id=${p._id}`);
+      frag.appendChild(card);
+    }
+    grid.appendChild(frag);
+  };
 
-  grid.querySelectorAll('.card').forEach(el => {
-    el.addEventListener('click', () => {
-      const id = el.getAttribute('data-id');
-      const url = `product_detail.html?id=${encodeURIComponent(id)}&categoryId=${encodeURIComponent(categoryId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`;
-      window.location.href = url;
+  const doSearch = () => {
+    const term = normalize(search.value);
+    if (!term) {
+      render(ALL);
+      return;
+    }
+    const filtered = ALL.filter((p) => {
+      const hay = `${normalize(p.name)} ${normalize(p.code)} ${normalize(p.description)}`;
+      return hay.includes(term);
     });
-  });
-}
+    render(filtered);
+  };
 
-function onSearch() {
-  const q = $('#searchInput').value.trim().toLowerCase();
-  if (!q) { render(_products); return; }
-  const filtered = _products.filter(p => (p?.name || '').toLowerCase().includes(q));
-  render(filtered);
-}
+  search.addEventListener('input', doSearch);
+
+  loadProducts().catch((e) => {
+    console.error(e);
+    grid.innerHTML = '';
+    empty.textContent = 'Nepodarilo sa načítať produkty.';
+    empty.style.display = '';
+  });
+})();
