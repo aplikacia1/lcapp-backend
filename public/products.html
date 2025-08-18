@@ -1,54 +1,49 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Produkty v kategórii</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
   <style>
-    body{background:#0c1f4b;color:#fff;margin:0}
-    .header{display:flex;align-items:center;gap:12px;justify-content:center;height:72px;border-bottom:1px solid rgba(255,255,255,.12)}
-    .header-inner{width:100%;max-width:980px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
-    .logo-small{height:32px}
-    .nav{display:flex;gap:8px}
-    .btn{height:40px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:#fff;color:#0c1f4b;cursor:pointer}
-    .btn--danger{background:#ff6b6b;color:#fff;border:none}
-    .main{max-width:980px;margin:16px auto;padding:0 16px}
-    h1{margin:8px 0 12px}
-    .search{background:#eef6ff;border:1px solid #bcd6ff;border-radius:12px;padding:10px 12px;color:#0c1f4b;width:100%}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:16px}
-    .card{background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;color:#0c1f4b;cursor:pointer;display:flex;flex-direction:column}
-    .card-img{width:100%;height:150px;object-fit:cover;background:#0b1c45}
-    .card-body{padding:10px 12px}
-    .card-title{font-weight:700;margin:0 0 4px}
-    .price{font-size:14px;color:#274}
-    .rating{font-size:14px;color:#333}
-    .empty{opacity:.8;margin-top:24px}
+    /* jemné minimum – zvyšok si berie z tvojho style.css */
+    .page-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 16px 80px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:16px; }
+    .btn { border:1px solid #fff; background:transparent; color:#fff; border-radius:10px; padding:8px 12px; cursor:pointer }
+    .btn:hover { background:#fff; color:#0d1a4f }
+    #searchInput { width:320px; max-width:100%; height:36px; border-radius:10px; border:1px solid rgba(255,255,255,.35); background:#0e255f; color:#fff; padding:0 10px; }
+    #emptyState { margin-top:20px; opacity:.9 }
+    /* karty – mená z tvojho katalógu, nech sadnú na existujúci CSS */
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:16px; }
+    .card { background:#071a48; border:1px solid rgba(255,255,255,.12); border-radius:14px; overflow:hidden; cursor:pointer }
+    .card-img { width:100%; height:170px; object-fit:cover; background:#06143a; display:block }
+    .card-body { padding:10px 12px; }
+    .card-title { font-weight:700; color:#fff; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+    .price { color:#cfe3ff; font-weight:700; }
+    .rating { font-size:12px; opacity:.85; margin-top:2px }
   </style>
 </head>
-<body>
-  <header class="header">
-    <div class="header-inner">
-      <img src="logo_lc.jpg" class="logo-small" alt="Logo"/>
-      <div id="userGreeting">Prihlásený:</div>
-      <div class="nav">
-        <button onclick="location.href='catalog.html'" class="btn">Späť do katalógu</button>
-        <button onclick="location.href='timeline.html'" class="btn">Lištobook</button>
-        <button onclick="location.href='login.html'" class="btn btn--danger">Odhlásiť sa</button>
+<body style="background:#061c47; color:#fff;">
+
+  <div class="page-wrap">
+    <div class="topbar">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn" id="backBtn" onclick="history.back()">Späť do katalógu</button>
+        <a class="btn" href="timeline.html">Lištobook</a>
+        <a class="btn" href="index.html">Odhlásiť sa</a>
       </div>
+
+      <input id="searchInput" type="search" placeholder="Hľadať podľa názvu alebo kódu…" />
     </div>
-  </header>
 
-  <main class="main">
-    <h1 id="catTitle">Produkty</h1>
-    <input id="searchInput" class="search" placeholder="🔎 Hľadať podľa názvu alebo kódu…"/>
+    <h1 id="catTitle" style="margin:0 0 12px;">Produkty</h1>
+
+    <div id="emptyState" style="display:none;">Žiadne produkty.</div>
     <div id="productGrid" class="grid"></div>
-    <div id="emptyState" class="empty" style="display:none">Žiadne produkty.</div>
-  </main>
+  </div>
 
-  <!-- konfigurácia API -->
-  <script src="js/config.js"></script>
-  <!-- logika stránok produktov -->
-  <script src="js/products.js"></script>
+  <!-- Dôležité: config a skript stránky (verziovanie kvôli cache) -->
+  <script src="/js/config.js?v=4"></script>
+  <script src="products.js?v=4"></script>
 </body>
 </html>
