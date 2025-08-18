@@ -6,25 +6,30 @@
   <title>Registrácia</title>
   <link rel="stylesheet" href="style.css"/>
   <style>
+    /* Stránka-špecifické: vypni akékoľvek veľké pozadia */
+    body { background-color:#0c1f4b; background-image:none !important; }
+
     .auth-wrap{max-width:420px;margin:40px auto;padding:16px}
     .logo {display:block;margin:24px auto 8px;height:120px;object-fit:contain}
     h1{margin:12px 0 18px}
     form{display:flex;flex-direction:column;gap:12px}
-
-    .field{display:flex;flex-direction:column;gap:6px}
-    .hint{font-size:.9rem; opacity:.85}
-    .err{font-size:.9rem; color:#ffd1d1; background:rgba(255,82,82,.12);
-         border:1px solid rgba(255,82,82,.35); padding:8px 10px; border-radius:8px; display:none}
-
     input,button{height:42px;border-radius:10px;border:1px solid #bcd6ff;padding:0 12px}
-    input{background:#fff}
-    button{background:#fff;color:#0c1f4b;border:1px solid rgba(12,31,75,.25);cursor:pointer}
+    button{background:#fff;color:#0c1f4b;border:1px solid rgba(255,255,255,.3);cursor:pointer}
     button:disabled{opacity:.6;cursor:not-allowed}
     .link-row{margin-top:4px;font-size:.95rem}
 
-    /* Animácia vynorenia (zhodná s index/login) */
-    .fade-in{opacity:0;transform:translateY(20px);animation:fadeInUp .6s ease forwards}
-    @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+    /* Malý odznak MarSab vľavo dole */
+    .brand-badge{
+      position: fixed; left: 16px; bottom: 16px; z-index: 70;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #000; color:#fff; text-decoration:none;
+      border: 2px solid #fff; border-radius: 14px; padding: 8px 10px; opacity:.96;
+    }
+    .brand-badge img{ height:24px; width:auto; display:block; }
+
+    /* Jemná animácia vynorenia */
+    .fade-in { opacity:0; transform:translateY(20px); animation: fadeInUp .6s ease forwards; }
+    @keyframes fadeInUp { to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
 <body>
@@ -33,29 +38,18 @@
     <h1>Registrácia</h1>
 
     <form id="registerForm" novalidate>
-      <div class="field">
-        <input id="email" type="email" placeholder="E-mail" autocomplete="username" required />
-        <div id="emailErr" class="err"></div>
-      </div>
-
-      <div class="field">
-        <input id="password" type="password" placeholder="Heslo" autocomplete="new-password" required />
-        <div class="hint">Min. 6 znakov. Uchovávame iba hash hesla.</div>
-        <div id="passErr" class="err"></div>
-      </div>
-
+      <input id="email" type="email" placeholder="E-mail" autocomplete="username" required />
+      <input id="password" type="password" placeholder="Heslo" autocomplete="new-password" minlength="6" required />
       <button id="registerBtn" type="submit">Registrovať</button>
-      <div class="hint" style="margin-top:6px">
-        Pri registrácii súhlasíte so spracovaním e-mailu pre účely prihlásenia do aplikácie.
-        Občas vám môžeme poslať novinky z Lištového centra. Odhlásiť sa môžete kedykoľvek.
-      </div>
-
+      <p style="font-size:.86rem;line-height:1.25;color:#cfe2ffb0;margin:6px 0 0">
+        Pri registrácii súhlasíte so spracovaním e-mailu pre účely prihlásenia do aplikácie. Občas vám môžeme poslať novinky z Lištového centra. Odhlásiť sa môžete kedykoľvek.
+      </p>
       <div class="link-row">Už máte účet? <a href="login.html">Prihlásiť sa</a></div>
     </form>
   </div>
 
   <a class="brand-badge" href="#" aria-label="MarSab®">
-    <img src="img/marsab_logo.png" alt=""> <span>MarSab®</span>
+    <img src="img/marsab_logo.png" alt=""><span>MarSab®</span>
   </a>
 
   <script src="register.js" defer></script>
