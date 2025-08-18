@@ -1,131 +1,160 @@
-// ===== admin_add_product.js (DROP-IN) =======================================
+// public/admin_add_product.js
+(() => {
+  const API = window.API_BASE || "";
+  const $ = (id) => document.getElementById(id);
 
-// 🔍 Získať ID kategórie z URL
-function getCategoryIdFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("categoryId") || params.get("id");
-}
-const categoryId = getCategoryIdFromURL();
-let editingProductId = null;
+  const form = $("productForm");
+  const sel  = $("categorySelect");
+  const msg  = $("message");
+  const tbody= $("productList");
 
-/* ===== Pomôcky na formátovanie ceny (€ / jednotka) ===== */
-const eurFmt = new Intl.NumberFormat('sk-SK', {
-  style: 'currency',
-  currency: 'EUR',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2
-});
-function formatPriceEUR(price, unit) {
-  const n = Number(price);
-  // ak je to NaN/undefined, zobraz aspoň pomlčku
-  if (!isFinite(n)) return '-';
-  return `${eurFmt.format(n)}${unit ? ` / ${unit}` : ''}`;
-}
+  let editingProductId = null;
 
-// ⬇️ Načítanie kategórií do výberu
-document.addEventListener("DOMContentLoaded", () => {
-  fetch("/api/categories")
-    .then(res => res.json())
-    .then(data => {
-      const select = document.getElementById("categorySelect");
-      data.forEach(c => {
-        const o = document.createElement("option");
-        o.value = c._id; o.textContent = c.name;
-        if (c._id === categoryId) o.selected = true;
-        select.appendChild(o);
-      });
-      loadProducts();
-    })
-    .catch(err => console.error("❌ Načítanie kategórií:", err));
-});
+  // --- pomocné ---
+  const eurFmt = new Intl.NumberFormat('sk-SK', {
+    style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+  const fmtPrice = (price, unit) => {
+    const n = Number(price);
+    if (!isFinite(n)) return "-";
+    return `${eurFmt.format(n)}${unit ? ` / ${unit}` : ""}`;
+  };
+  const cleanUploadPath = (s="") => s.replace(/^\/?uploads[\\/]/i, "");
 
-// ✅ Pridanie / úprava
-document.getElementById("productForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const fd = new FormData(form);
-  fd.set("categoryId", document.getElementById("categorySelect").value);
+  const getCategoryIdFromURL = () => {
+    const p = new URLSearchParams(location.search);
+    return p.get("categoryId") || p.get("id") || "";
+  };
 
-  const url = editingProductId ? `/api/products/${editingProductId}` : "/api/products";
-  const method = editingProductId ? "PUT" : "POST";
-
-  try {
-    const res = await fetch(url, { method, body: fd });
-    const json = await res.json().catch(()=>({}));
-    const msg = document.getElementById("message");
-    if (res.ok) {
-      msg.textContent = editingProductId ? "✅ Produkt upravený." : "✅ Produkt pridaný.";
-      msg.style.color = "lightgreen";
-      form.reset(); editingProductId = null;
-      loadProducts();
-    } else {
-      msg.textContent = "❌ " + (json?.message || "Nepodarilo sa uložiť produkt.");
-      msg.style.color = "orange";
-    }
-  } catch (err) {
-    console.error("❌ Odosielanie:", err);
-    const msg = document.getElementById("message");
-    msg.textContent = "❌ Chyba pri odosielaní.";
-    msg.style.color = "red";
+  async function j(url, opts) {
+    const r = await fetch(url, opts);
+    if (!r.ok) throw new Error(await r.text().catch(()=>"Chyba"));
+    return r.json();
   }
-});
 
-// 📦 Načítať produkty v kategórii
-async function loadProducts() {
-  const container = document.getElementById("productList");
-  container.innerHTML = "";
-  try {
-    const res = await fetch(`/api/products/byCategory/${categoryId}`);
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      container.textContent = "Žiadne produkty v tejto kategórii.";
+  // --- načítaj kategórie do <select> ---
+  async function loadCategories() {
+    const cats = await j(`${API}/api/categories`);
+    sel.innerHTML = "";
+    const fromURL = getCategoryIdFromURL();
+
+    for (const c of cats) {
+      const o = document.createElement("option");
+      o.value = c._id;
+      o.textContent = c.name;
+      if (fromURL && c._id === fromURL) o.selected = true;
+      sel.appendChild(o);
+    }
+  }
+
+  // --- načítaj produkty pre vybranú kategóriu (správny endpoint) ---
+  async function loadProducts() {
+    const catId = sel.value || getCategoryIdFromURL();
+    tbody.innerHTML = "";
+    if (!catId) {
+      tbody.innerHTML = `<tr><td colspan="5">Vyberte kategóriu.</td></tr>`;
       return;
     }
-    data.forEach((p) => {
-      const row = document.createElement("tr");
-      const img = p.image ? `<img src="/uploads/${p.image}" alt="obrázok" height="40">` : "";
-      row.innerHTML = `
-        <td>${img}<br>${p.name}</td>
+    const payload = await j(`${API}/api/products?categoryId=${encodeURIComponent(catId)}`);
+    const items = Array.isArray(payload) ? payload : (payload.items || []);
+    renderRows(items);
+  }
+
+  function renderRows(items) {
+    tbody.innerHTML = "";
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="5">Žiadne produkty v tejto kategórii.</td></tr>`;
+      return;
+    }
+    for (const p of items) {
+      const img = p.image ? `<img src="/uploads/${cleanUploadPath(p.image)}" alt="obrázok" height="40">` : "";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${img}<br>${p.name || ""}</td>
         <td>${p.code || "-"}</td>
         <td>${p.categoryName || ""}</td>
-        <td>${formatPriceEUR(p.price, p.unit)}</td>
+        <td>${fmtPrice(p.price, p.unit)}</td>
         <td>
-          <button class="action-btn" onclick="editProduct('${p._id}')">Upraviť</button>
-          <button class="action-btn" onclick="deleteProduct('${p._id}')">Vymazať</button>
-        </td>`;
-      container.appendChild(row);
-    });
-  } catch (err) {
-    console.error("❌ Načítanie produktov:", err);
-    container.textContent = "❌ Chyba pri načítaní produktov.";
+          <button class="action-btn" data-edit="${p._id}">Upraviť</button>
+          <button class="action-btn" data-del="${p._id}">Vymazať</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
   }
-}
 
-// 🗑️ Vymazanie
-async function deleteProduct(id) {
-  if (!confirm("Naozaj vymazať produkt?")) return;
-  try {
-    const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
-    if (res.ok) loadProducts(); else alert("❌ Chyba pri mazaní.");
-  } catch (e) { console.error(e); }
-}
+  // --- kliky v tabuľke (edit/delete) ---
+  tbody.addEventListener("click", async (e) => {
+    const id = e.target?.dataset?.del || e.target?.dataset?.edit;
+    if (!id) return;
 
-// ✏️ Úprava
-async function editProduct(id) {
-  try {
-    const res = await fetch(`/api/products/${id}`);
-    const p = await res.json();
-    document.getElementById("name").value = p.name || "";
-    document.getElementById("code").value = p.code || "";
-    document.getElementById("price").value = p.price ?? "";
-    document.getElementById("unit").value = p.unit || "";
-    document.getElementById("description").value = p.description || "";
-    document.getElementById("categorySelect").value = p.categoryId;
-    editingProductId = id;
-    const msg = document.getElementById("message");
-    msg.textContent = "✏️ Úprava produktu – uložte zmeny.";
-    msg.style.color = "orange";
-  } catch (e) {
-    console.error("❌ Načítanie produktu:", e);
-  }
-}
+    if (e.target?.dataset?.del) {
+      if (!confirm("Naozaj vymazať produkt?")) return;
+      try {
+        await j(`${API}/api/products/${id}`, { method: "DELETE" });
+        await loadProducts();
+      } catch (err) {
+        alert("❌ Chyba pri mazaní: " + err.message);
+      }
+      return;
+    }
+
+    // edit
+    try {
+      const p = await j(`${API}/api/products/${id}`);
+      $("name").value = p.name || "";
+      $("code").value = p.code || "";
+      $("price").value = p.price ?? "";
+      $("unit").value = p.unit || "";
+      $("description").value = p.description || "";
+      sel.value = p.categoryId || sel.value;
+      editingProductId = id;
+      msg.textContent = "✏️ Úprava produktu – uložte zmeny.";
+      msg.style.color = "orange";
+    } catch (err) {
+      console.error("❌ Načítanie produktu:", err);
+    }
+  });
+
+  // --- submit (create/update) cez FormData => uloží sa aj obrázok ---
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.textContent = "Ukladám...";
+    msg.style.color = "";
+
+    try {
+      const fd = new FormData(form);
+      fd.set("categoryId", sel.value);
+
+      const url = editingProductId ? `${API}/api/products/${editingProductId}` : `${API}/api/products`;
+      const method = editingProductId ? "PUT" : "POST";
+
+      const r = await fetch(url, { method, body: fd });
+      if (!r.ok) throw new Error(await r.text().catch(()=> "Nepodarilo sa uložiť produkt"));
+
+      msg.textContent = editingProductId ? "✅ Produkt upravený." : "✅ Produkt pridaný.";
+      msg.style.color = "lightgreen";
+      form.reset();
+      editingProductId = null;
+      await loadProducts();
+    } catch (err) {
+      console.error(err);
+      msg.textContent = "❌ " + err.message;
+      msg.style.color = "red";
+    }
+  });
+
+  // --- zmena kategórie ---
+  sel.addEventListener("change", loadProducts);
+
+  // boot
+  (async () => {
+    try {
+      await loadCategories();
+      await loadProducts();
+    } catch (e) {
+      console.error(e);
+      msg.textContent = "❌ Chyba pri načítaní kategórií/produktov.";
+    }
+  })();
+})();
