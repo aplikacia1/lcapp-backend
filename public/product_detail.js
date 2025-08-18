@@ -1,3 +1,4 @@
+// public/product_detail.js
 // === helpers ===
 function getParams() {
   const p = new URLSearchParams(location.search);
@@ -9,7 +10,9 @@ function getParams() {
 }
 function $(s, r=document){ return r.querySelector(s); }
 function escapeHTML(s=''){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+const cleanUploadPath = (s="") => String(s).replace(/^\/?uploads[\\/]/i, "");
 
+const API = window.API_BASE || '';
 const { id: productId, categoryId, email } = getParams();
 let selectedStars = 5;
 
@@ -22,8 +25,12 @@ function goBack(){
 
 // === LOAD: produkt (title, meta, description, image) ===
 async function loadProduct(){
+  if (!productId) {
+    alert('Chýba ID produktu.');
+    return;
+  }
   try{
-    const res = await fetch(`/api/products/${productId}`);
+    const res = await fetch(`${API}/api/products/${productId}`);
     if(!res.ok) throw new Error('Produkt sa nenašiel');
     const p = await res.json();
 
@@ -31,7 +38,7 @@ async function loadProduct(){
     const titleEl = $('#productTitle');
     if (titleEl) titleEl.textContent = p.name || 'Produkt';
 
-    // meta: cena + jednotka + kód (ak je)  ✅ formát € / jednotka
+    // meta: cena + jednotka + kód
     const metaEl = $('#productMeta');
     if (metaEl) {
       const eurFmt = new Intl.NumberFormat('sk-SK', {
@@ -55,10 +62,10 @@ async function loadProduct(){
     // obrázok
     const imgEl = $('#productImage');
     if (imgEl) {
-      const img = p.image ? `/uploads/${p.image}` : 'placeholder_cat.png';
-      imgEl.src = img;
+      const src = p.image ? `/uploads/${cleanUploadPath(p.image)}` : '/img/placeholder.png';
+      imgEl.src = src;
       imgEl.alt = p.name || 'Produkt';
-      imgEl.onerror = () => { imgEl.src = 'placeholder_cat.png'; };
+      imgEl.onerror = () => { imgEl.src = '/img/placeholder.png'; };
     }
   }catch(e){
     console.warn('[product]', e.message);
@@ -68,7 +75,7 @@ async function loadProduct(){
 // === LOAD: zhrnutie hodnotení (priemer + počet) ===
 async function loadSummary(){
   try{
-    const res = await fetch(`/api/ratings/summary/${productId}`);
+    const res = await fetch(`${API}/api/ratings/summary/${productId}`);
     if(!res.ok) throw new Error('summary 404');
     const s = await res.json();
 
@@ -101,7 +108,7 @@ async function loadSummary(){
 // === LOAD: zoznam recenzií ===
 async function loadReviews(){
   try{
-    const res = await fetch(`/api/ratings/list/${productId}`);
+    const res = await fetch(`${API}/api/ratings/list/${productId}`);
     if(!res.ok) throw new Error('list 404');
     const list = await res.json();
 
@@ -160,7 +167,7 @@ async function sendRating(){
 
   try{
     lock(true);
-    const res = await fetch('/api/ratings', {
+    const res = await fetch(`${API}/api/ratings`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ productId, email, stars: selectedStars, comment })
@@ -180,7 +187,6 @@ async function sendRating(){
       return;
     }
 
-    // úspech
     if ($('#rateComment')) $('#rateComment').value = '';
     msg && (msg.textContent = 'Hodnotenie bolo uložené. Ďakujeme!');
     await loadSummary();
@@ -196,8 +202,8 @@ async function sendRating(){
 document.addEventListener('DOMContentLoaded', async ()=>{
   if(!productId){ alert('Chýba ID produktu.'); return; }
 
-  $('#backBtn')    && $('#backBtn').addEventListener('click', (e)=>{ e.preventDefault(); goBack(); });
-  $('#logoutBtn')  && $('#logoutBtn').addEventListener('click', ()=> location.href='index.html');
+  $('#backBtn')   && $('#backBtn').addEventListener('click', (e)=>{ e.preventDefault(); goBack(); });
+  $('#logoutBtn') && $('#logoutBtn').addEventListener('click', ()=> location.href='index.html');
 
   bindStars();
 

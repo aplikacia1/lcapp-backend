@@ -1,7 +1,7 @@
-// public/js/products.js
+// public/products.js
 (() => {
   const q = new URLSearchParams(location.search);
-  const categoryId = q.get("categoryId") || q.get("cat") || q.get("id") || "";
+  const categoryId   = q.get("categoryId") || q.get("cat") || q.get("id") || "";
   const categoryName = q.get("categoryName") || q.get("name") || "";
 
   const API   = window.API_BASE || "";
@@ -22,8 +22,7 @@
   const imgSrc = (image) => {
     if (!image) return "/img/placeholder.png";
     if (/^https?:\/\//i.test(image)) return image;
-    // odstráň prípadné leading `/uploads/` alebo `uploads/`
-    const clean = image.replace(/^\/?uploads[\\/]/i, "");
+    const clean = String(image).replace(/^\/?uploads[\\/]/i, "");
     return `/uploads/${clean}`;
   };
 
@@ -38,9 +37,8 @@
   const loadProducts = async () => {
     const tries = [];
     if (categoryId) {
-      // backend podporuje categoryId, pre istotu skúsime aj category
       tries.push(`${API}/api/products?categoryId=${encodeURIComponent(categoryId)}`);
-      tries.push(`${API}/api/products?category=${encodeURIComponent(categoryId)}`);
+      tries.push(`${API}/api/products?category=${encodeURIComponent(categoryId)}`); // fallback alias
     }
     tries.push(`${API}/api/products`);
 
@@ -54,9 +52,7 @@
     }
     if (!ok) throw new Error("Nepodarilo sa načítať produkty.");
 
-    // podpora: pole alebo objekt s .items
     let data = Array.isArray(payload) ? payload : (payload.items || []);
-    // fallback filtrovanie podľa categoryId (ak by server neaplikoval filter)
     if (categoryId) {
       const idStr = String(categoryId);
       data = data.filter(p => String(p.categoryId || p.category || "") === idStr);
@@ -71,7 +67,7 @@
     grid.innerHTML = "";
     if (!items.length) {
       if (empty) {
-        empty.textContent ||= "Žiadne produkty.";
+        empty.textContent = "Žiadne produkty.";
         empty.style.display = "";
       }
       return;
@@ -91,6 +87,15 @@
         </div>
       `;
       card.querySelector("img").src = imgSrc(p.image);
+
+      // 🔗 preklik do detailu
+      card.addEventListener("click", () => {
+        const cid = p.categoryId || p.category || "";
+        const params = new URLSearchParams({ id: p._id });
+        if (cid) params.set("categoryId", cid);
+        location.href = `product_detail.html?${params.toString()}`;
+      });
+
       frag.appendChild(card);
     }
     grid.appendChild(frag);
