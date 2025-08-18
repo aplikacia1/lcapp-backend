@@ -1,154 +1,207 @@
-// routes/productRoutes.js
+// backend/routes/productRoutes.js
 const express = require("express");
-const multer = require("multer");
+const router = express.Router();
 const path = require("path");
-
+const fs = require("fs");
+const multer = require("multer");
 const Product = require("../models/product");
 const Category = require("../models/category");
-const Rating = require("../models/rating");
 
-const router = express.Router();
-
-/* ---------------------------- Upload obrázkov ---------------------------- */
+// ---------- Multer: ukladanie do backend/uploads ----------
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // => /server/uploads
-    cb(null, path.join(__dirname, "../uploads"));
+  destination: (_req, _file, cb) => {
+    cb(null, path.join(__dirname, "..", "uploads"));
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
+  filename: (_req, file, cb) => {
+    const safe = file.originalname.replace(/\s+/g, "_");
+    cb(null, `${Date.now()}-${safe}`);
   },
 });
 const upload = multer({ storage });
 
-/* ------------------------------ PRIDAŤ PRODUKT ------------------------------ */
-router.post("/", upload.single("image"), async (req, res) => {
+// Pomocník: bezpečné zmazanie starého súboru
+function deleteFileSafe(filename) {
+  if (!filename) return;
+  const full = path.join(__dirname, "..", "uploads", filename);
+  fs.stat(full, (err, st) => {
+    if (!err && st.isFile()) {
+      fs.unlink(full, () => {});
+    }
+  });
+}
+
+// ---------- GET /api/products ----------
+// podpora ?categoryId=... & q=... & page=1 & limit=50 & sort=createdAt:-1
+router.get("/", async (req, res) => {
   try {
-    let { categoryId, name, code, price, unit, description } = req.body;
-    if (Array.isArray(categoryId)) categoryId = categoryId[0];
+    const { categoryId, q, page = 1, limit = 100, sort } = req.query;
 
-    const image = req.file ? req.file.filename : "";
+    const where = {};
+    if (categoryId) where.categoryId = categoryId;
 
-    const parsedPrice = parseFloat(price);
-    if (isNaN(parsedPrice)) {
-      return res.status(400).json({ message: "Cena musí byť číslo." });
+    if (q && q.trim()) {
+      const rx = new RegExp(q.trim(), "i");
+      where.$or = [{ name: rx }, { code: rx }];
     }
 
-    const newProduct = new Product({
-      categoryId,
-      name,
-      code,
-      price: parsedPrice,
-      unit,
-      description,
-      image,
-    });
+    // sorting
+    let sortObj = { createdAt: -1 };
+    if (sort) {
+      // napr. "price:1" alebo "createdAt:-1"
+      const [field, dir] = String(sort).split(":");
+      if (field) sortObj = { [field]: Number(dir) === 1 ? 1 : -1 };
+    }
 
-    await newProduct.save();
-    res.status(201).json({ message: "✅ Produkt pridaný." });
-  } catch (error) {
-    console.error("❌ Chyba pri ukladaní produktu:", error);
-    res.status(500).json({ message: "Nepodarilo sa pridať produkt." });
+    const pg = Math.max(1, Number(page) || 1);
+    const lim = Math.min(500, Math.max(1, Number(limit) || 100));
+
+    const [items, total] = await Promise.all([
+      Product.find(where).sort(sortObj).skip((pg - 1) * lim).limit(lim).lean(),
+      Product.countDocuments(where),
+    ]);
+
+    res.json({ items, total, page: pg, limit: lim });
+  } catch (e) {
+    console.error("GET /products error:", e);
+    res.status(500).json({ message: "Chyba pri načítaní produktov" });
   }
 });
 
-/* ------- PRODUKTY PODĽA KATEGÓRIE (vrátane počtu a priemeru hodnotení) ------ */
-router.get("/byCategory/:id", async (req, res) => {
+// ---------- GET /api/products/category/:categoryId ----------
+router.get("/category/:categoryId", async (req, res) => {
   try {
-    const products = await Product.find({ categoryId: req.params.id });
-    const category = await Category.findById(req.params.id);
-    const categoryName = category ? category.name : "";
-
-    const enrichedProducts = await Promise.all(
-      products.map(async (product) => {
-        // efektívnejšie: z ratingov berieme iba "stars"
-        const ratings = await Rating.find(
-          { productId: product._id },
-          { stars: 1 }
-        );
-
-        const ratingCount = ratings.length;
-        const averageRating = ratingCount
-          ? Number(
-              (
-                ratings.reduce((sum, r) => sum + r.stars, 0) / ratingCount
-              ).toFixed(1)
-            )
-          : 0; // ak ešte nikto nehodnotil, pošleme 0
-
-        return {
-          ...product.toObject(),
-          categoryName,
-          ratingCount,
-          averageRating,
-        };
-      })
-    );
-
-    res.json(enrichedProducts);
-  } catch (error) {
-    console.error("❌ Chyba pri načítaní produktov:", error);
-    res.status(500).json({ message: "Nepodarilo sa načítať produkty." });
+    const items = await Product.find({ categoryId: req.params.categoryId })
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json(items);
+  } catch (e) {
+    res.status(500).json({ message: "Chyba pri načítaní kategórie" });
   }
 });
 
-/* ----------------------------- DETAIL PRODUKTU ---------------------------- */
+// ---------- GET /api/products/:id ----------
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Produkt sa nenašiel." });
-    res.json(product);
-  } catch (error) {
-    console.error("❌ Chyba pri načítaní produktu:", error);
-    res.status(500).json({ message: "Nepodarilo sa načítať produkt." });
+    const item = await Product.findById(req.params.id).lean();
+    if (!item) return res.status(404).json({ message: "Produkt nenájdený" });
+    res.json(item);
+  } catch (e) {
+    res.status(500).json({ message: "Chyba servera" });
   }
 });
 
-/* ------------------------------ UPRAVIŤ PRODUKT ------------------------------ */
+// ---------- POST /api/products ----------
+// multipart/form-data: name, code, price, unit, categoryId, description, image(file)
+router.post("/", upload.single("image"), async (req, res) => {
+  try {
+    const { name, code, price, unit, categoryId, description } = req.body;
+
+    if (!name || !categoryId) {
+      return res.status(400).json({ message: "Chýba názov alebo kategória" });
+    }
+
+    const cat = await Category.findById(categoryId);
+    if (!cat) return res.status(400).json({ message: "Neplatná kategória" });
+
+    const image = req.file ? req.file.filename : null;
+
+    const doc = await Product.create({
+      name,
+      code: code || "",
+      price: price ? Number(price) : 0,
+      unit: unit || "",
+      categoryId,
+      description: description || "",
+      image, // uložený názov súboru v /uploads
+    });
+
+    res.status(201).json(doc);
+  } catch (e) {
+    console.error("POST /products error:", e);
+    res.status(500).json({ message: "Chyba pri vytvorení produktu" });
+  }
+});
+
+// ---------- PUT /api/products/:id ----------
+// multipart/form-data (voliteľne nová image)
 router.put("/:id", upload.single("image"), async (req, res) => {
   try {
-    let { categoryId, name, code, price, unit, description } = req.body;
-    if (Array.isArray(categoryId)) categoryId = categoryId[0];
+    const { name, code, price, unit, categoryId, description } = req.body;
 
-    const parsedPrice = parseFloat(price);
-    if (isNaN(parsedPrice)) {
-      return res.status(400).json({ message: "Cena musí byť číslo." });
-    }
+    const item = await Product.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Produkt nenájdený" });
 
-    const updateData = {
-      categoryId,
-      name,
-      code,
-      price: parsedPrice,
-      unit,
-      description,
-    };
-
+    // ak prišla nová fotka, zmažeme starú
     if (req.file) {
-      updateData.image = req.file.filename;
+      deleteFileSafe(item.image);
+      item.image = req.file.filename;
     }
 
-    const updated = await Product.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    );
+    if (typeof name !== "undefined") item.name = name;
+    if (typeof code !== "undefined") item.code = code;
+    if (typeof price !== "undefined") item.price = Number(price) || 0;
+    if (typeof unit !== "undefined") item.unit = unit;
+    if (typeof description !== "undefined") item.description = description;
 
-    res.json({ message: "✅ Produkt upravený.", updated });
-  } catch (error) {
-    console.error("❌ Chyba pri úprave produktu:", error);
-    res.status(500).json({ message: "Nepodarilo sa upraviť produkt." });
+    if (typeof categoryId !== "undefined") {
+      const cat = await Category.findById(categoryId);
+      if (!cat) return res.status(400).json({ message: "Neplatná kategória" });
+      item.categoryId = categoryId;
+    }
+
+    await item.save();
+    res.json(item);
+  } catch (e) {
+    console.error("PUT /products/:id error:", e);
+    res.status(500).json({ message: "Chyba pri úprave produktu" });
   }
 });
 
-/* ------------------------------ VYMAZAŤ PRODUKT ----------------------------- */
+// ---------- DELETE /api/products/:id ----------
 router.delete("/:id", async (req, res) => {
   try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Produkt vymazaný." });
-  } catch (error) {
-    console.error("❌ Chyba pri mazaní produktu:", error);
-    res.status(500).json({ message: "Nepodarilo sa vymazať produkt." });
+    const item = await Product.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: "Produkt nenájdený" });
+
+    deleteFileSafe(item.image);
+    await item.deleteOne();
+
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("DELETE /products/:id error:", e);
+    res.status(500).json({ message: "Chyba pri mazaní produktu" });
+  }
+});
+
+// ---------- GET /api/products/stats/count-by-category ----------
+router.get("/stats/count-by-category/all", async (_req, res) => {
+  try {
+    const rows = await Product.aggregate([
+      { $group: { _id: "$categoryId", count: { $sum: 1 } } },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "_id",
+          foreignField: "_id",
+          as: "cat",
+        },
+      },
+      { $unwind: { path: "$cat", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 0,
+          categoryId: "$_id",
+          categoryName: "$cat.name",
+          count: 1,
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    res.json(rows);
+  } catch (e) {
+    console.error("stats/count-by-category error:", e);
+    res.status(500).json({ message: "Chyba pri štatistike" });
   }
 });
 
