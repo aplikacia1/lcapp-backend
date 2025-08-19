@@ -7,15 +7,30 @@
   <link rel="stylesheet" href="style.css"/>
 
   <style>
-    /* Hlavička */
-    .header { display:flex; align-items:center; justify-content:center; gap:12px; }
-    .header .right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+    :root{
+      --hdr-h: 96px; /* reálna výška sa dopočíta v JS nižšie */
+    }
+
+    /* === PEVNÁ HLAVIČKA === */
+    .header{
+      position: fixed; inset: 0 0 auto 0; z-index: 100;
+      display:flex; align-items:center; justify-content:center; gap:12px;
+      padding:8px 12px;
+      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
+    }
+    .header .right{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+    .logo-small{ height:48px; object-fit:contain; display:block; }
+    #userGreeting{ color:#cfe2ff; font-size:.95rem; }
+
     .btn{
       height:40px; display:inline-flex; align-items:center; gap:8px;
       padding:0 14px; border-radius:12px; border:1px solid rgba(255,255,255,.3);
       background:#fff; color:#0c1f4b; cursor:pointer;
     }
     .btn--danger{ background:#ff6b6b; color:#fff; border:none }
+
+    /* Rezerva pod pevnú hlavičku */
+    body{ padding-top: var(--hdr-h); }
 
     /* Hlava katalógu + vyhľadávanie */
     .catalog-head{
@@ -78,7 +93,7 @@
 </head>
 <body>
 
-  <!-- HLAVIČKA -->
+  <!-- HLAVIČKA (pevná) -->
   <div class="header">
     <img src="logo_lc.jpg" alt="Logo" class="logo-small"/>
     <div id="userGreeting">Prihlásený:</div>
@@ -89,7 +104,7 @@
     </div>
   </div>
 
-  <!-- SLOT pre banner (bude FIXED dole; slot môže byť hocikde v tele) -->
+  <!-- SLOT pre banner (bude FIXED dole) -->
   <div id="bannerSlot" aria-live="polite"></div>
 
   <!-- HLAVIČKA KATALÓGU + HĽADANIE -->
@@ -112,6 +127,20 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
+  <!-- Po načítaní nastav presnú výšku hlavičky do --hdr-h (rezerva pre body) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const hdr = document.querySelector('.header');
+      function setHdrH(){
+        if(!hdr) return;
+        const h = hdr.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--hdr-h', h + 'px');
+      }
+      setHdrH();
+      window.addEventListener('resize', setHdrH);
+    });
+  </script>
+
   <!-- iba tento jeden riadok navyše -->
   <script src="/js/config.js"></script>
 
@@ -122,8 +151,6 @@
   <script src="banners.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', ()=>{
-      // banner bude stále viditeľný naspodku; pushContent pridá spodný padding,
-      // premenná --banner-h sa použije aj na posun badge
       mountBannerRotator('bannerSlot', {
         fixed: true,
         position: 'bottom',

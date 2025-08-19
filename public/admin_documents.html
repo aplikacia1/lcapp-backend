@@ -5,11 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin – Dokumenty</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* čitateľná tabuľka na tmavom pozadí */
+    .table{ width:100%; border-collapse:collapse; }
+    .table th, .table td{
+      padding:10px 12px; text-align:center;
+      border-bottom:1px solid rgba(255,255,255,.25); color:#fff;
+    }
+    .table th{
+      color:#cfe2ff; font-weight:700;
+      border-bottom:1px solid rgba(255,255,255,.35);
+    }
+    .table img{ max-width:150px; height:auto; border-radius:8px; display:block; margin:0 auto; }
+    .table button{
+      height:34px; padding:0 12px; border-radius:10px; cursor:pointer;
+      background:#fff; color:#0c1f4b; border:1px solid rgba(255,255,255,.35);
+    }
+    .table .danger{ background:#ff6b6b; color:#fff; border:none; }
+  </style>
 </head>
 <body>
   <!-- FORMULÁR: ostáva v karte -->
   <div class="container center-content">
-    <div class="card">
+    <div class="card" style="max-width:680px">
       <h2>Pridať novú kategóriu</h2>
       <form id="category-form" enctype="multipart/form-data" method="POST" action="/api/categories">
         <label for="name">Názov kategórie:</label>

@@ -2,101 +2,99 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchCategories();
 });
 
-function fetchCategories() {
-  fetch("/api/categories")
-    .then(res => {
-      if (!res.ok) throw new Error(`Chyba pri načítaní kategórií: ${res.status}`);
-      return res.json();
-    })
-    .then(categories => {
-      const container = document.getElementById("category-list");
-      container.innerHTML = ""; // Vyčistiť
+function el(tag, attrs = {}, children = []) {
+  const n = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (k === "class") n.className = v;
+    else if (k === "style") Object.assign(n.style, v);
+    else if (k.startsWith("on") && typeof v === "function") n[k] = v;
+    else n.setAttribute(k, v);
+  });
+  (Array.isArray(children) ? children : [children]).forEach(c => {
+    if (c == null) return;
+    n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  });
+  return n;
+}
 
-      if (categories.length === 0) {
-        container.textContent = "Žiadne kategórie nenájdené.";
-        return;
-      }
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
 
-      const table = document.createElement("table");
-      table.style.width = "100%";
-      table.style.borderCollapse = "collapse";
-      table.innerHTML = `
-        <thead>
-          <tr>
-            <th>Názov</th>
-            <th>Obrázok</th>
-            <th>Počet tovarov</th>
-            <th>Upraviť</th>
-            <th>Vymazať</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      `;
+async function fetchCategories() {
+  const container = document.getElementById("category-list");
+  container.innerHTML = "Načítavam…";
 
-      const tbody = table.querySelector("tbody");
+  try {
+    const categories = await fetchJSON("/api/categories");
 
-      categories.forEach(cat => {
-        fetch(`/api/categories/items/${cat._id}`)
-          .then(res => res.json())
-          .then(items => {
-            const row = document.createElement("tr");
-            row.style.borderBottom = "1px solid #ccc";
-            row.style.textAlign = "center";
-            row.style.color = "white";
+    if (!categories?.length) {
+      container.textContent = "Žiadne kategórie nenájdené.";
+      return;
+    }
 
-            const nameCell = document.createElement("td");
-            nameCell.textContent = cat.name;
+    const table = el("table", { class: "table" }, [
+      el("thead", {}, el("tr", {}, [
+        el("th", {}, "Názov"),
+        el("th", {}, "Obrázok"),
+        el("th", {}, "Počet tovarov"),
+        el("th", {}, "Upraviť"),
+        el("th", {}, "Vymazať"),
+      ])),
+      el("tbody")
+    ]);
 
-            const imageCell = document.createElement("td");
-            const img = document.createElement("img");
-            img.src = `/uploads/${cat.image}`;
-            img.alt = cat.name;
-            img.style.width = "150px";
-            img.style.cursor = "pointer";
-            img.onclick = () => window.open(`/uploads/${cat.image}`, "_blank");
-            imageCell.appendChild(img);
+    const tbody = table.querySelector("tbody");
 
-            const countCell = document.createElement("td");
-            countCell.textContent = items.length;
+    // Najprv vykreslíme riadky (aj s "…"), potom dopočítame počty produktov
+    categories.forEach(cat => {
+      const imgSrc = cat?.image ? `/uploads/${cat.image}` : "placeholder_cat.png";
 
-            const editCell = document.createElement("td");
-            const editBtn = document.createElement("button");
-            editBtn.textContent = "Upraviť";
-            editBtn.onclick = () => {
-              window.location.href = `/admin_add_product.html?id=${cat._id}`;
-            };
-            editCell.appendChild(editBtn);
+      const nameCell  = el("td", {}, cat?.name || "Bez názvu");
+      const imageCell = el("td", {}, el("img", {
+        src: imgSrc, alt: cat?.name || "Kategória",
+        onerror: () => { imageCell.querySelector("img").src = "placeholder_cat.png"; }
+      }));
+      const countCell = el("td", {}, "…");
 
-            const deleteCell = document.createElement("td");
-            const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "Vymazať";
-            deleteBtn.onclick = () => {
-              if (confirm("Naozaj chcete vymazať túto kategóriu?")) {
-                fetch(`/api/categories/${cat._id}`, { method: "DELETE" })
-                  .then(res => {
-                    if (!res.ok) throw new Error("Chyba pri mazaní kategórie");
-                    fetchCategories();
-                  })
-                  .catch(err => alert(err.message));
-              }
-            };
-            deleteCell.appendChild(deleteBtn);
+      const editBtn = el("button", { onclick: () => {
+        window.location.href = `/admin_add_product.html?id=${cat._id}`;
+      }}, "Upraviť");
 
-            row.appendChild(nameCell);
-            row.appendChild(imageCell);
-            row.appendChild(countCell);
-            row.appendChild(editCell);
-            row.appendChild(deleteCell);
+      const delBtn = el("button", {
+        class: "danger",
+        onclick: async () => {
+          if (!confirm("Naozaj chcete vymazať túto kategóriu?")) return;
+          try {
+            const res = await fetch(`/api/categories/${cat._id}`, { method: "DELETE" });
+            if (!res.ok) throw new Error("Chyba pri mazaní kategórie");
+            fetchCategories(); // refresh
+          } catch (e) {
+            alert(e.message || "Chyba pri mazaní.");
+          }
+        }
+      }, "Vymazať");
 
-            tbody.appendChild(row);
-          });
-      });
+      const row = el("tr", {}, [
+        nameCell, imageCell, countCell, el("td", {}, editBtn), el("td", {}, delBtn)
+      ]);
+      tbody.appendChild(row);
 
-      container.appendChild(table);
-    })
-    .catch(err => {
-      const container = document.getElementById("category-list");
-      container.innerHTML = `<p style="color: red;">${err.message}</p>`;
-      console.error(err);
+      // ⚠️ Počet produktov – podľa bežnej logiky aplikácie
+      // (na products.html sa filtruje podľa categoryId)
+      fetch(`/api/products?categoryId=${encodeURIComponent(cat._id)}`)
+        .then(r => r.ok ? r.json() : Promise.reject(new Error("Chyba")))
+        .then(items => { countCell.textContent = Array.isArray(items) ? items.length : 0; })
+        .catch(() => { countCell.textContent = "0"; });
     });
+
+    container.innerHTML = "";
+    container.appendChild(table);
+
+  } catch (err) {
+    container.innerHTML = `<p style="color: #ffaaaa;">Chyba pri načítaní kategórií: ${err.message}</p>`;
+    console.error(err);
+  }
 }
