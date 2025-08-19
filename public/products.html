@@ -2,48 +2,101 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Produkty v kategórii</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
   <style>
-    /* jemné minimum – zvyšok si berie z tvojho style.css */
-    .page-wrap { max-width: 1000px; margin: 0 auto; padding: 24px 16px 80px; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:16px; }
-    .btn { border:1px solid #fff; background:transparent; color:#fff; border-radius:10px; padding:8px 12px; cursor:pointer }
-    .btn:hover { background:#fff; color:#0d1a4f }
-    #searchInput { width:320px; max-width:100%; height:36px; border-radius:10px; border:1px solid rgba(255,255,255,.35); background:#0e255f; color:#fff; padding:0 10px; }
-    #emptyState { margin-top:20px; opacity:.9 }
-    /* karty – mená z tvojho katalógu, nech sadnú na existujúci CSS */
-    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:16px; }
-    .card { background:#071a48; border:1px solid rgba(255,255,255,.12); border-radius:14px; overflow:hidden; cursor:pointer }
-    .card-img { width:100%; height:170px; object-fit:cover; background:#06143a; display:block }
-    .card-body { padding:10px 12px; }
-    .card-title { font-weight:700; color:#fff; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-    .price { color:#cfe3ff; font-weight:700; }
-    .rating { font-size:12px; opacity:.85; margin-top:2px }
+    :root{ --max-w: 980px; --gap: 16px; --header-h: 72px; }
+    body{ background:#0c1f4b; color:#fff; margin:0 }
+
+    /* HLAVIČKA – rovnaká ako na ostatných stránkach */
+    .header{
+      position:sticky; top:0; z-index:40;
+      display:flex; align-items:center; justify-content:center;
+      height:var(--header-h); border-bottom:1px solid rgba(255,255,255,.12);
+      background:#0c1f4b;
+    }
+    .header-inner{
+      width:100%; max-width:var(--max-w); padding:0 var(--gap);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .logo-small{ height:32px }
+    .nav{ display:flex; gap:8px; align-items:center; }
+    .btn{
+      height:40px; padding:0 14px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.3);
+      background:#fff; color:#0c1f4b; cursor:pointer;
+    }
+    .btn--danger{ background:#ff6b6b; color:#fff; border:none }
+
+    /* OBSAH */
+    .main{ max-width:var(--max-w); margin:16px auto; padding:0 var(--gap) 32px; }
+    .toolbar{ display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+    .search{
+      background:#eef6ff; border:1px solid #bcd6ff; border-radius:12px;
+      padding:10px 12px; color:#0c1f4b; width:100%;
+    }
+
+    .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+    .card{ background:#fff; border:1px solid #eee; border-radius:12px; overflow:hidden; color:#0c1f4b; cursor:pointer; display:flex; flex-direction:column; box-shadow:0 4px 12px rgba(0,0,0,.12) }
+    .card-img{ width:100%; height:150px; object-fit:cover; background:#f5f7fb }
+    .card-body{ padding:10px 12px }
+    .card-title{ font-weight:700; margin:0 0 4px; color:#0c1f4b }
+    .price{ font-size:14px; color:#0a5 }
+    .rating{ font-size:14px; color:#223 }
+    .empty{ opacity:.85; margin-top:24px }
+
+    /* MarSab® badge */
+    .brand-badge{
+      position: fixed; left: 16px; bottom: 16px; z-index: 70;
+      display:inline-flex; align-items:center; gap:8px;
+      background:#000; color:#fff; text-decoration:none;
+      border:2px solid #fff; border-radius:14px; padding:8px 10px;
+      box-shadow:0 8px 18px rgba(0,0,0,.25); opacity:.96;
+    }
+    .brand-badge img{ height:24px; width:auto; display:block; }
+    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
+    @media (max-width:480px){
+      .brand-badge{ left:12px; bottom:12px; padding:6px 8px; border-radius:12px;}
+      .brand-badge img{ height:20px; }
+      .brand-badge .wordmark{ font-size:12px; }
+    }
   </style>
 </head>
-<body style="background:#061c47; color:#fff;">
+<body>
 
-  <div class="page-wrap">
-    <div class="topbar">
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn" id="backBtn" onclick="history.back()">Späť do katalógu</button>
-        <a class="btn" href="timeline.html">Lištobook</a>
-        <a class="btn" href="index.html">Odhlásiť sa</a>
+  <!-- HLAVIČKA -->
+  <header class="header">
+    <div class="header-inner">
+      <img src="logo_lc.jpg" class="logo-small" alt="Logo">
+      <div id="userGreeting">Prihlásený:</div>
+      <div class="nav">
+        <button id="catalogBtn" class="btn">Katalóg</button>
+        <button id="timelineBtn" class="btn">Lištobook</button>
+        <button id="accountBtn"  class="btn">Účet</button>
+        <button id="logoutBtn"  class="btn btn--danger">Odhlásiť sa</button>
       </div>
+    </div>
+  </header>
 
-      <input id="searchInput" type="search" placeholder="Hľadať podľa názvu alebo kódu…" />
+  <!-- OBSAH -->
+  <main class="main">
+    <div class="toolbar">
+      <button id="backToCatalogBtn" class="btn">Späť do katalógu</button>
+      <input id="searchInput" class="search" placeholder="🔎 Hľadať podľa názvu alebo kódu…">
     </div>
 
-    <h1 id="catTitle" style="margin:0 0 12px;">Produkty</h1>
-
-    <div id="emptyState" style="display:none;">Žiadne produkty.</div>
     <div id="productGrid" class="grid"></div>
-  </div>
+    <div id="emptyState" class="empty" style="display:none">Žiadne produkty.</div>
+  </main>
 
-  <!-- Dôležité: config a skript stránky (verziovanie kvôli cache) -->
-  <script src="/js/config.js?v=4"></script>
-  <script src="products.js?v=4"></script>
+  <!-- MarSab® badge -->
+  <a class="brand-badge" href="#" aria-label="MarSab®">
+    <img src="img/marsab_logo.png" alt="">
+    <span class="wordmark">MarSab®</span>
+  </a>
+
+  <script src="/js/config.js"></script>
+  <script src="products.js"></script>
 </body>
 </html>
