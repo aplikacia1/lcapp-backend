@@ -1,17 +1,14 @@
 // ===== helpers =====
 function getParams() {
   const p = new URLSearchParams(window.location.search);
-  return {
-    categoryId: p.get('categoryId') || '',
-    email: p.get('email') || ''
-  };
+  return { categoryId: p.get('categoryId') || '', email: p.get('email') || '' };
 }
 function $(s, r = document) { return r.querySelector(s); }
 
 const { categoryId, email } = getParams();
-let _products = [];
+let ALL = [];
 
-const EUR = new Intl.NumberFormat('sk-SK', { style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2 });
+const EUR = new Intl.NumberFormat('sk-SK', { style:'currency', currency:'EUR', minimumFractionDigits:2 });
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -23,65 +20,30 @@ async function init() {
 }
 
 function nav(page) {
-  const url = email ? `${page}?email=${encodeURIComponent(email)}` : page;
-  window.location.href = url;
+  window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page;
 }
 function bindHeader() {
   $('#catalogBtn')?.addEventListener('click', () => nav('catalog.html'));
   $('#accountBtn')?.addEventListener('click', () => nav('dashboard.html'));
   $('#timelineBtn')?.addEventListener('click', () => nav('timeline.html'));
-  $('#logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
+  $('#logoutBtn')?.addEventListener('click', () => location.href = 'index.html');
 }
 async function showUser() {
   if (!email) return;
   try {
-    const res = await fetch(`/api/users/${encodeURIComponent(email)}`);
-    if (!res.ok) return;
-    const u = await res.json();
-    $('#userGreeting').textContent =
-      `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
+    const r = await fetch(`/api/users/${encodeURIComponent(email)}`);
+    if (!r.ok) return;
+    const u = await r.json();
+    $('#userGreeting').textContent = `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
   } catch {}
 }
 
-async function loadProducts() {
-  const grid = $('#productGrid');
-  const empty = $('#emptyState');
-  grid.innerHTML = '';
-  empty.style.display = 'none';
+/* ---------- robust fetch + filter ---------- */
 
-  if (!categoryId) {
-    empty.style.display = 'block';
-    empty.textContent = 'Chýba categoryId v URL.';
-    return;
-  }
-
-  try {
-    // 1) náš fungujúci endpoint
-    let list = await tryFetchArray(`/api/categories/items/${encodeURIComponent(categoryId)}`);
-
-    // 2) ak by bol prázdny, fallback – stiahni všetko a prefiltruj na FE
-    if (!list || list.length === 0) {
-      const all = await tryFetchArray(`/api/products`);
-      list = filterByCategory(all, categoryId);
-    }
-
-    _products = list || [];
-    if (!_products.length) {
-      empty.style.display = 'block';
-      empty.textContent = 'Žiadne produkty.';
-      return;
-    }
-    render(_products);
-  } catch (e) {
-    console.error(e);
-    empty.style.display = 'block';
-    empty.textContent = 'Chyba pri načítaní produktov.';
-  }
-}
-
+// skúsi postupne viac route-ov
 async function tryFetchArray(url) {
   try {
-    const r = await fetch(url, { credentials:'include' });
+    const r = await fetch(url, { credentials: 'include' });
     if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
     const data = await r.json();
     if (Array.isArray(data)) return data;
@@ -94,64 +56,129 @@ async function tryFetchArray(url) {
   }
 }
 
-// prefiltruj podľa categoryId (string / ObjectId / { _id } / { $oid })
+// z dokumentu vytiahne categoryId bez ohľadu na tvar
+function extractCategoryId(p) {
+  if (!p || typeof p !== 'object') return '';
+  // preferované polia
+  if (typeof p.categoryId === 'string') return p.categoryId;
+  if (typeof p.category === 'string') return p.category;
+
+  // objekt s _id / $oid / id
+  const v = p.categoryId || p.category;
+  if (v && typeof v === 'object') {
+    if (v._id)  return String(v._id);
+    if (v.$oid) return String(v.$oid);
+    if (v.id)   return String(v.id);
+  }
+
+  // posledný pokus – prehľadaj všetky kľúče, ktoré obsahujú "category"
+  for (const k of Object.keys(p)) {
+    if (!/category/i.test(k)) continue;
+    const val = p[k];
+    if (typeof val === 'string') return val;
+    if (val && typeof val === 'object') {
+      if (val._id)  return String(val._id);
+      if (val.$oid) return String(val.$oid);
+      if (val.id)   return String(val.id);
+    }
+  }
+  return '';
+}
+
 function filterByCategory(list, catId) {
   const id = String(catId);
-  return list.filter(p => {
-    const v = p?.categoryId;
-    if (!v) return false;
-    if (typeof v === 'string') return v === id;
-    if (typeof v === 'object') {
-      if (v._id)  return String(v._id)  === id;
-      if (v.$oid) return String(v.$oid) === id;
-    }
-    return false;
-  });
+  return list.filter(p => extractCategoryId(p) === id);
+}
+
+/* ---------- hlavné načítanie ---------- */
+
+async function loadProducts() {
+  const grid  = $('#productGrid');
+  const empty = $('#emptyState');
+  grid.innerHTML = ''; empty.style.display = 'none';
+
+  if (!categoryId) {
+    empty.style.display = 'block';
+    empty.textContent = 'Chýba categoryId v URL.';
+    return;
+  }
+
+  // 1) skúšame známe endpointy
+  const endpoints = [
+    `/api/categories/items/${encodeURIComponent(categoryId)}`,
+    `/api/products/byCategory/${encodeURIComponent(categoryId)}`,
+    `/api/products?category=${encodeURIComponent(categoryId)}`,
+    `/api/products?categoryId=${encodeURIComponent(categoryId)}`
+  ];
+
+  let items = [];
+  for (const url of endpoints) {
+    items = await tryFetchArray(url);
+    if (items && items.length) break;
+  }
+
+  // 2) fallback: všetky produkty + filter
+  if (!items || !items.length) {
+    const all = await tryFetchArray(`/api/products`);
+    items = filterByCategory(all, categoryId);
+  }
+
+  ALL = items || [];
+  if (!ALL.length) {
+    empty.style.display = 'block';
+    empty.textContent = 'Žiadne produkty.';
+    return;
+  }
+  render(ALL);
+}
+
+/* ---------- render + vyhľadávanie ---------- */
+
+function imgPath(image) {
+  if (!image) return 'placeholder_cat.png';
+  if (/^https?:\/\//i.test(image)) return image;
+  return `/uploads/${String(image).replace(/^\/?uploads[\\/]/i,'')}`;
+}
+function ratingText(p) {
+  const avg = (typeof p?.averageRating === 'number') ? p.averageRating
+            : (typeof p?.ratingAvg === 'number')      ? p.ratingAvg
+            : (typeof p?.rating === 'number')         ? p.rating
+            : null;
+  const count = p?.ratingCount ?? p?.reviewsCount ?? 0;
+  return (avg != null ? `★ ${avg.toFixed(1)}` : '—') + (count ? ` (${count})` : '');
+}
+function priceText(p) {
+  const n = Number(p?.price);
+  if (!isFinite(n)) return '';
+  return `${EUR.format(n)}${p?.unit ? ` / ${p.unit}` : ''}`;
 }
 
 function render(list) {
   const grid = $('#productGrid');
-  grid.innerHTML = list.map(p => {
-    const img = p?.image ? `/uploads/${String(p.image).replace(/^\/?uploads[\\/]/i,'')}` : 'placeholder_cat.png';
-    const title = p?.name || 'Bez názvu';
+  grid.innerHTML = list.map(p => `
+    <article class="card" data-id="${p._id}" title="${p?.name || 'Bez názvu'}">
+      <img class="card-img" src="${imgPath(p.image)}" alt="${p?.name || 'Produkt'}" onerror="this.src='placeholder_cat.png'">
+      <div class="card-body">
+        <h3 class="card-title">${p?.name || 'Bez názvu'}</h3>
+        <div class="price">${priceText(p)}</div>
+        <div class="rating">${ratingText(p)}</div>
+      </div>
+    </article>
+  `).join('');
 
-    let price = '';
-    if (p?.price !== null && p?.price !== undefined && isFinite(Number(p.price))) {
-      price = `${EUR.format(Number(p.price))}${p?.unit ? ` / ${p.unit}` : ''}`;
-    }
-
-    const avg = (typeof p?.averageRating === 'number') ? p.averageRating
-              : (typeof p?.ratingAvg === 'number')      ? p.ratingAvg
-              : (typeof p?.rating === 'number')         ? p.rating
-              : null;
-    const count = p?.ratingCount ?? p?.reviewsCount ?? 0;
-    const ratingStr = (avg != null ? `★ ${avg.toFixed(1)}` : '—') + (count ? ` (${count})` : '');
-
-    return `
-      <article class="card" data-id="${p._id}" title="${title}">
-        <img class="card-img" src="${img}" alt="${title}" onerror="this.src='placeholder_cat.png'">
-        <div class="card-body">
-          <h3 class="card-title">${title}</h3>
-          <div class="price">${price}</div>
-          <div class="rating">${ratingStr}</div>
-        </div>
-      </article>
-    `;
-  }).join('');
-
-  grid.querySelectorAll('.card').forEach(el => {
-    el.addEventListener('click', () => {
+  grid.querySelectorAll('.card').forEach(el=>{
+    el.addEventListener('click', ()=>{
       const id = el.getAttribute('data-id');
       const url = `product_detail.html?id=${encodeURIComponent(id)}&categoryId=${encodeURIComponent(categoryId)}${email ? `&email=${encodeURIComponent(email)}` : ''}`;
-      window.location.href = url;
+      location.href = url;
     });
   });
 }
 
 function onSearch() {
-  const q = $('#searchInput').value.trim().toLowerCase();
-  if (!q) { render(_products); return; }
-  const filtered = _products.filter(p =>
+  const q = ($('#searchInput')?.value || '').trim().toLowerCase();
+  if (!q) { render(ALL); return; }
+  const filtered = ALL.filter(p =>
     `${p?.name || ''} ${p?.code || ''} ${p?.description || ''}`.toLowerCase().includes(q)
   );
   render(filtered);
