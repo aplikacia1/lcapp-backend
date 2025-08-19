@@ -7,78 +7,58 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     :root{
-      /* výška hlavičky sa dopočíta v JS – toto je len bezpečný fallback */
-      --hdr-h: 96px;
+      --hdr-h: 96px;         /* výšku po načítaní dopočíta JS */
       --pad-x: 12px;
-      --pill-minw: 116px;
+      --gap: 8px;
+      --visible: 3;          /* na mobile vidieť 3 tlačidlá */
     }
 
-    /* === PEVNÁ HLAVIČKA DASHBOARDU === */
+    /* === Jednoduchá pevná hlavička (konzistentná s login/register) === */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 100;
       background: #0c1f4b; border-bottom: 1px solid rgba(255,255,255,.15);
     }
     .app-header-inner{ max-width: 980px; margin: 0 auto; padding: 8px var(--pad-x); }
 
-    .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; }
-    .logo-small{ height:26px; object-fit:contain; display:none; } /* ak by si chcel logo, nastav display:block */
+    .logo-small{
+      display:block; height:48px; object-fit:contain; margin:2px auto 6px;
+    }
+    .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* Vodorovný pás s tlačidlami */
-    .nav-scroller{ position:relative; overflow:hidden; padding:0 var(--pad-x); }
+    /* Vodorovne posúvateľný rad tlačidiel – vidno 3, štvrté je „za okrajom“ */
+    .nav-scroller{ padding: 0 var(--pad-x); }
     .nav-track{
-      display:flex; gap:8px;
+      display:flex; gap: var(--gap);
       overflow-x:auto; overflow-y:hidden;
       -webkit-overflow-scrolling:touch;
       overscroll-behavior-x:contain;
+      scrollbar-width:none;
       scroll-snap-type:x mandatory;
-      scrollbar-width:none;          /* Firefox */
     }
-    .nav-track::-webkit-scrollbar{ display:none; } /* WebKit */
+    .nav-track::-webkit-scrollbar{ display:none; }
 
     .pill{
-      flex:0 0 auto;
-      min-width:var(--pill-minw);
-      height:38px;
-      padding:8px 14px;
-      border-radius:16px;
+      flex: 0 0 calc((100% - (var(--gap) * (var(--visible) - 1))) / var(--visible));
+      height:38px; padding:8px 14px; border-radius:16px;
       border:1px solid rgba(255,255,255,.35);
-      background:#fff; color:#0c1f4b;
-      cursor:pointer;
+      background:#fff; color:#0c1f4b; cursor:pointer;
       scroll-snap-align:start;
     }
     .pill-danger{ background:#000; color:#fff; border-color:#fff; }
 
-    /* Gradientové náznaky (ukážu sa len ak je čo posúvať) */
-    .fade-left, .fade-right{
-      position:absolute; top:0; bottom:0; width:28px; pointer-events:none;
-      display:none;
+    /* Desktop: všetky 4 vedľa seba, bez scrollu */
+    @media (min-width: 768px){
+      .nav-track{ overflow: visible; }
+      .pill{ flex: 0 0 auto; }
     }
-    .fade-left { left:0;  background:linear-gradient(to right,#0c1f4b,transparent); }
-    .fade-right{ right:0; background:linear-gradient(to left, #0c1f4b,transparent); }
 
-    /* Malé šípky (zobrazia sa len ak je čo posúvať) */
-    .chev{
-      position:absolute; top:50%; transform:translateY(-50%);
-      width:28px; height:28px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.45);
-      background:rgba(0,0,0,.35); color:#fff;
-      display:none; align-items:center; justify-content:center;
-      cursor:pointer; z-index:2;
-    }
-    .chev-left{  left:4px; }
-    .chev-right{ right:4px; }
-
-    /* Rezerva pre pevnú hlavičku (reálna výška sa nastaví v JS do --hdr-h) */
+    /* Rezerva pod pevnú hlavičku */
     body{ padding-top: var(--hdr-h); }
 
-    /* ===== ZVYŠOK PONECHÁVAME – tvoje pôvodné časti ===== */
-
-    /* Obsah – ponecháme rezervu, banners.js aj tak pridá vlastný padding */
+    /* ===== Zvyšok zostáva ako si mal ===== */
     .scrollable-body .main-content{
       padding-bottom: calc(var(--banner-h, 0px) + 24px);
     }
-
-    /* MarSab® badge – nad bannerom (banners.js nastaví --banner-h) */
     .brand-badge{
       position: fixed; left: 16px; bottom: calc(var(--banner-h, 0px) + 16px); z-index: 120;
       display: inline-flex; align-items: center; gap: 8px;
@@ -94,35 +74,26 @@
       .brand-badge .wordmark{ font-size:12px; }
     }
 
-    /* Jemný efekt vynorenia (ako na iných stránkach) */
     .fade-in { opacity:0; transform: translateY(20px); animation: fadeInUp .6s ease forwards; }
     @keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
-  <!-- === NOVÁ HLAVIČKA (FIXED) === -->
+  <!-- HLAVIČKA (logo + 3 viditeľné tlačidlá, 4. posunom) -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip">Prihlásený: <strong id="userLabel">…</strong></div>
 
-      <!-- Vodorovne posúvateľné tlačidlá -->
-      <div class="nav-scroller" id="navScroller" aria-label="Hlavné sekcie">
+      <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track" id="navTrack">
           <button class="pill" id="goCatalogBtn">Katalóg</button>
           <button class="pill" id="goTimelineBtn">Lištobook</button>
           <button class="pill" id="goGameBtn">Hra</button>
           <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
         </div>
-
-        <!-- vizuálne náznaky posúvania -->
-        <div class="fade-left" aria-hidden="true"></div>
-        <div class="fade-right" aria-hidden="true"></div>
-
-        <!-- malé šípky (ukážu sa iba ak je čo posúvať) -->
-        <button class="chev chev-left" id="chevLeft" aria-label="Posun doľava">‹</button>
-        <button class="chev chev-right" id="chevRight" aria-label="Posun doprava">›</button>
-      </div>
+      </nav>
     </div>
   </header>
 
@@ -167,7 +138,7 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- Navigácia (pôvodné – zachované) -->
+  <!-- Navigácia (nechávame tvoju pôvodnú logiku) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const email = new URLSearchParams(window.location.search).get("email");
@@ -179,62 +150,17 @@
     });
   </script>
 
-  <!-- Hlavička – správanie (scroll, šípky, gradienty, automatická výška) -->
+  <!-- Hlavička: len dopočet výšky (rezerva pod fixed header) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const header = document.querySelector('.app-header');
-      const track  = document.getElementById('navTrack');
-      const left   = document.getElementById('chevLeft');
-      const right  = document.getElementById('chevRight');
-      const fL     = document.querySelector('.fade-left');
-      const fR     = document.querySelector('.fade-right');
-
-      // dopočítaj reálnu výšku hlavičky a daj ju do --hdr-h (kvôli paddingu tela)
       const setHdrH = () => {
         if (!header) return;
         const h = header.getBoundingClientRect().height;
         document.documentElement.style.setProperty('--hdr-h', h + 'px');
       };
-
-      // je pretečené?
-      const hasOverflow = () => track && (track.scrollWidth > track.clientWidth + 2);
-
-      function updateAffordances(){
-        if (!track) return;
-        if (!hasOverflow()){
-          [left, right, fL, fR].forEach(el => el && (el.style.display = 'none'));
-          return;
-        }
-        const atStart = track.scrollLeft <= 1;
-        const atEnd   = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
-
-        if (left)  left.style.display  = atStart ? 'none' : 'flex';
-        if (right) right.style.display = atEnd   ? 'none' : 'flex';
-        if (fL)    fL.style.display    = atStart ? 'none' : 'block';
-        if (fR)    fR.style.display    = atEnd   ? 'none' : 'block';
-      }
-
-      function snapBy(delta){
-        track?.scrollBy({ left: delta, behavior: 'smooth' });
-      }
-
-      left?.addEventListener('click',  () => snapBy(- (track.clientWidth * 0.6)));
-      right?.addEventListener('click', () => snapBy(  (track.clientWidth * 0.6)));
-
-      track?.addEventListener('scroll', updateAffordances, { passive: true });
-      window.addEventListener('resize', () => { setHdrH(); updateAffordances(); });
-
-      // jemný "hint" – krátke posunutie tam a späť (bez session/local storage)
-      setTimeout(() => {
-        if (hasOverflow()){
-          track.scrollBy({ left: 24, behavior: 'smooth' });
-          setTimeout(() => track.scrollBy({ left: -24, behavior: 'smooth' }), 450);
-        }
-      }, 350);
-
-      // init
       setHdrH();
-      updateAffordances();
+      window.addEventListener('resize', setHdrH);
     });
   </script>
 
