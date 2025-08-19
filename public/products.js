@@ -1,4 +1,6 @@
-// ===== helpers =====
+// ===== products.js (robustné načítanie + isté filtrovanie podľa categoryId) =====
+
+// --- helpers ---
 function getParams() {
   const p = new URLSearchParams(window.location.search);
   return { categoryId: p.get('categoryId') || '', email: p.get('email') || '' };
@@ -8,7 +10,9 @@ function $(s, r = document) { return r.querySelector(s); }
 const { categoryId, email } = getParams();
 let ALL = [];
 
-const EUR = new Intl.NumberFormat('sk-SK', { style:'currency', currency:'EUR', minimumFractionDigits:2 });
+const EUR = new Intl.NumberFormat('sk-SK', {
+  style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2
+});
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -26,7 +30,7 @@ function bindHeader() {
   $('#catalogBtn')?.addEventListener('click', () => nav('catalog.html'));
   $('#accountBtn')?.addEventListener('click', () => nav('dashboard.html'));
   $('#timelineBtn')?.addEventListener('click', () => nav('timeline.html'));
-  $('#logoutBtn')?.addEventListener('click', () => location.href = 'index.html');
+  $('#logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
 }
 async function showUser() {
   if (!email) return;
@@ -34,13 +38,12 @@ async function showUser() {
     const r = await fetch(`/api/users/${encodeURIComponent(email)}`);
     if (!r.ok) return;
     const u = await r.json();
-    $('#userGreeting').textContent = `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
+    $('#userGreeting').textContent =
+      `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
   } catch {}
 }
 
-/* ---------- robust fetch + filter ---------- */
-
-// skúsi postupne viac route-ov
+// ---------- robust fetch + filter ----------
 async function tryFetchArray(url) {
   try {
     const r = await fetch(url, { credentials: 'include' });
@@ -56,22 +59,18 @@ async function tryFetchArray(url) {
   }
 }
 
-// z dokumentu vytiahne categoryId bez ohľadu na tvar
+// z produktu vytiahne categoryId bez ohľadu na tvar
 function extractCategoryId(p) {
   if (!p || typeof p !== 'object') return '';
-  // preferované polia
   if (typeof p.categoryId === 'string') return p.categoryId;
-  if (typeof p.category === 'string') return p.category;
+  if (typeof p.category   === 'string') return p.category;
 
-  // objekt s _id / $oid / id
   const v = p.categoryId || p.category;
   if (v && typeof v === 'object') {
     if (v._id)  return String(v._id);
     if (v.$oid) return String(v.$oid);
     if (v.id)   return String(v.id);
   }
-
-  // posledný pokus – prehľadaj všetky kľúče, ktoré obsahujú "category"
   for (const k of Object.keys(p)) {
     if (!/category/i.test(k)) continue;
     const val = p[k];
@@ -84,14 +83,12 @@ function extractCategoryId(p) {
   }
   return '';
 }
-
 function filterByCategory(list, catId) {
   const id = String(catId);
   return list.filter(p => extractCategoryId(p) === id);
 }
 
-/* ---------- hlavné načítanie ---------- */
-
+// ---------- hlavné načítanie ----------
 async function loadProducts() {
   const grid  = $('#productGrid');
   const empty = $('#emptyState');
@@ -103,7 +100,7 @@ async function loadProducts() {
     return;
   }
 
-  // 1) skúšame známe endpointy
+  // 1) známe endpointy (môžu vrátiť aj všetko → nižšie aj tak prefiltrované)
   const endpoints = [
     `/api/categories/items/${encodeURIComponent(categoryId)}`,
     `/api/products/byCategory/${encodeURIComponent(categoryId)}`,
@@ -113,11 +110,16 @@ async function loadProducts() {
 
   let items = [];
   for (const url of endpoints) {
-    items = await tryFetchArray(url);
-    if (items && items.length) break;
+    const got = await tryFetchArray(url);
+    if (got && got.length) { items = got; break; }
   }
 
-  // 2) fallback: všetky produkty + filter
+  // 🔎 VŽDY prefiltrovať na istotu
+  if (items && items.length) {
+    items = filterByCategory(items, categoryId);
+  }
+
+  // 2) fallback: všetky + filter
   if (!items || !items.length) {
     const all = await tryFetchArray(`/api/products`);
     items = filterByCategory(all, categoryId);
@@ -132,10 +134,9 @@ async function loadProducts() {
   render(ALL);
 }
 
-/* ---------- render + vyhľadávanie ---------- */
-
+// ---------- render + vyhľadávanie ----------
 function imgPath(image) {
-  if (!image) return 'placeholder_cat.png';
+  if (!image) return 'img/placeholder.png';
   if (/^https?:\/\//i.test(image)) return image;
   return `/uploads/${String(image).replace(/^\/?uploads[\\/]/i,'')}`;
 }
@@ -157,7 +158,7 @@ function render(list) {
   const grid = $('#productGrid');
   grid.innerHTML = list.map(p => `
     <article class="card" data-id="${p._id}" title="${p?.name || 'Bez názvu'}">
-      <img class="card-img" src="${imgPath(p.image)}" alt="${p?.name || 'Produkt'}" onerror="this.src='placeholder_cat.png'">
+      <img class="card-img" src="${imgPath(p.image)}" alt="${p?.name || 'Produkt'}" onerror="this.src='img/placeholder.png'">
       <div class="card-body">
         <h3 class="card-title">${p?.name || 'Bez názvu'}</h3>
         <div class="price">${priceText(p)}</div>

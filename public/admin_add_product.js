@@ -1,4 +1,4 @@
-// public/admin_add_product.js – robustný listing
+// ===== admin_add_product.js (robustný listing + filtrovanie podľa categoryId) =====
 
 function getCategoryIdFromURL() {
   const p = new URLSearchParams(location.search);
@@ -11,7 +11,7 @@ const EUR = new Intl.NumberFormat('sk-SK', { style:'currency', currency:'EUR', m
 const priceEUR = (price, unit) => isFinite(Number(price)) ? `${EUR.format(Number(price))}${unit?` / ${unit}`:''}` : '-';
 const clean = s => String(s||'').replace(/^\/?uploads[\\/]/i,'').replace(/^\/+/,'');
 
-// --- fetch helpers + filter (rovnaké ako v products.js) ---
+// --- fetch helpers + filter (rovnaké princípy ako v products.js) ---
 async function tryFetchArray(url){
   try{
     const r = await fetch(url);
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
 document.getElementById('categorySelect')?.addEventListener('change', loadProducts);
 
-// --- load products for category (viac route-ov + fallback) ---
+// --- load products pre kategóriu (vždy prefiltrované) ---
 async function loadProducts(){
   const tbody = document.getElementById('productList');
   tbody.innerHTML = '';
@@ -81,9 +81,15 @@ async function loadProducts(){
 
   let items = [];
   for (const url of endpoints) {
-    items = await tryFetchArray(url);
-    if (items && items.length) break;
+    const got = await tryFetchArray(url);
+    if (got && got.length) { items = got; break; }
   }
+
+  // 🔎 vždy prefiltruj
+  if (items && items.length) {
+    items = filterByCategory(items, categoryId);
+  }
+
   if (!items || !items.length) {
     const all = await tryFetchArray('/api/products');
     items = filterByCategory(all, categoryId);
