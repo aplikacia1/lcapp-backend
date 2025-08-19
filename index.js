@@ -51,6 +51,7 @@ mountRoute('/api/presence',        './routes/presenceRoutes');
 mountRoute('/api/banners',         './routes/bannerRoutes');
 mountRoute('/api/admin/timeline',  './routes/timelineAdminRoutes');
 mountRoute('/api/messages',        './routes/messageRoutes');
+mountRoute('/api/push',            './routes/pushRoutes');   // ⬅️ pridané
 
 /* --- Štart až po úspešnom Mongo pripojení --- */
 const PORT = process.env.PORT || 5000;

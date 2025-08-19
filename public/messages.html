@@ -5,125 +5,171 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Súkromné správy</title>
 
-  <!-- globálny štýl -->
   <link rel="stylesheet" href="style.css"/>
 
-  <!-- lokálne vylepšenia len pre Správy (bezpečné, nezasahujú inde) -->
   <style>
-    :root{ --max-w:980px; --gap:16px; }
+    :root{
+      --max-w: 1100px;
+      --gap: 16px;
+      --header-h: 68px;
+      --composer-h: 66px;
+      --bg: #0c1f4b;
+      --panel: #05163d;
+      --border: rgba(255,255,255,.12);
+      --soft: rgba(255,255,255,.06);
+      --text: #fff;
+      --ink: #0c1f4b;
+      --field-bg:#eef6ff;
+      --field-b:#bcd6ff;
+    }
+    html,body{margin:0;background:var(--bg);color:var(--text);height:100%}
+    *{box-sizing:border-box}
 
-    html, body { margin:0; padding:0; background:#0c1f4b; color:#fff; }
-
-    /* ===== HLAVIČKA – rovnaká ako na Lištobooku ===== */
-    .header-timeline{
-      position: sticky; top: 0; z-index: 60;
-      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.12);
-      height:72px; display:flex; align-items:center; justify-content:center;
+    /* Header (rovnaký vizuál ako inde) */
+    .header{
+      position:sticky;top:0;z-index:50;
+      height:var(--header-h);background:var(--bg);
+      border-bottom:1px solid var(--border);
+      display:flex;justify-content:center;align-items:center;
     }
     .header-inner{
-      width:100%; max-width:var(--max-w); padding:0 var(--gap);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      width:100%;max-width:var(--max-w);padding:0 var(--gap);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
     }
-    .logo-small{ height:32px; display:block; }
-    .user-info{ color:#fff; font-weight:600; }
+    .logo-small{height:32px}
+    .nav{display:flex;gap:8px;align-items:center}
 
-    /* ===== PAGE WRAP ===== */
-    .wrap{ max-width:var(--max-w); margin:16px auto; padding:0 var(--gap); }
+    /* Layout */
+    .wrap{
+      max-width:var(--max-w);
+      margin:10px auto 0;
+      padding:0 var(--gap);
+      padding-bottom: calc(var(--composer-h) + 20px); /* priestor pre composer */
+    }
+    .grid{
+      display:grid; gap:12px;
+      grid-template-columns: 320px 1fr;
+    }
+    @media (max-width: 960px){
+      .grid{ grid-template-columns: 1fr; }
+      body.mode-thread .list-panel{ display:none; }
+      body.mode-thread .thread-panel{ display:block; }
+    }
 
     .card{
-      background:#05163d; border:1px solid rgba(255,255,255,.12);
-      border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.06);
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      overflow:hidden;
     }
-    .card .head{ padding:10px 12px; border-bottom:1px solid rgba(255,255,255,.08); font-weight:800; }
+    .card .head{
+      padding:10px 12px;border-bottom:1px solid var(--soft);font-weight:800;
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+    }
     .card .body{ padding:12px; }
 
-    .row{ display:flex; align-items:center; gap:8px; }
-
-    /* ===== GRID ===== */
-    .grid{ display:grid; grid-template-columns: 280px 1fr; gap:12px; }
-    @media (max-width:900px){ .grid{ grid-template-columns: 1fr; } }
-
-    /* ===== KONVERZÁCIE (ľavý panel) ===== */
-    .conv-list{ max-height:60vh; overflow:auto; }
-    .conv-item{ padding:10px; border-bottom:1px solid rgba(255,255,255,.06); cursor:pointer; }
+    /* Zoznam konverzácií */
+    .conv-list{ max-height:68vh; overflow:auto; }
+    .conv-item{
+      padding:10px 12px;border-bottom:1px solid var(--soft);cursor:pointer;
+    }
     .conv-item:hover{ background:#081b44; }
     .conv-item.active{ background:#0b2152; }
-    .conv-top{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .conv-name{ font-weight:800; color:#fff; }
-    .conv-last{ font-size:12px; opacity:.8; margin-top:2px; }
+    .conv-name{ font-weight:700; }
+    .conv-name.unread{ font-weight:900; }
+    .conv-last{ font-size:12px; opacity:.8; margin-top:3px; }
     .badge{
-      min-width:18px; height:18px; border-radius:999px; background:#ffcc00; color:#111;
-      font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center; padding:0 6px;
+      min-width:18px;height:18px;border-radius:999px;background:#ffcc00;color:#111;
+      font-weight:800;font-size:12px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px;margin-left:6px;
     }
 
-    /* ===== VLÁKNO (pravý panel) ===== */
-    .thread{ display:flex; flex-direction:column; gap:8px; min-height:40vh; }
-    .msg{ background:#fff; color:#111; border-radius:10px; padding:10px; }
-    .meta{ font-size:12px; opacity:.75; margin-bottom:4px; display:flex; justify-content:space-between; gap:8px; }
+    /* Vlákno */
+    .thread{
+      display:flex;flex-direction:column;gap:8px;min-height:40vh;
+    }
+    .msg{ background:#fff;color:#111;border-radius:10px;padding:10px; }
+    .me{ background:#d7e8ff; align-self:flex-end; }
+    .meta{ font-size:12px; opacity:.75; margin-bottom:4px; }
 
-    /* polia */
-    .input, .area{
-      width:100%; border-radius:10px; border:1px solid #bcd6ff; background:#eef6ff; color:#0c1f4b; padding:8px 10px;
-      box-sizing:border-box;
+    /* Polia */
+    .input,.area{
+      width:100%;border-radius:10px;border:1px solid var(--field-b);
+      background:var(--field-bg);color:var(--ink);padding:8px 10px;
     }
     .input{ height:40px; }
-    .area{ min-height:100px; }
-    .new-card{ margin-bottom:12px; }
+    .area{
+      min-height:38px; max-height:120px; resize:vertical;
+      line-height:1.35;
+    }
+
+    /* Composer – fixný dole */
+    .composer{
+      position:fixed;left:0;right:0;bottom:0;z-index:55;
+      background:var(--panel);border-top:1px solid var(--border);
+      display:flex;justify-content:center;
+    }
+    .composer-inner{
+      width:100%;max-width:var(--max-w);padding:8px var(--gap);display:grid;gap:8px;
+      grid-template-columns: 1fr auto;
+      align-items:center;
+    }
+    .to-wrap{display:flex;gap:8px;}
+    .to-input{max-width:220px}
+    .send-btn{min-width:110px}
+
+    /* V thread móde skryť "Komu" */
+    body.mode-thread .to-input{ display:none; }
   </style>
 </head>
-<body>
-
-  <!-- HLAVIČKA (zjednotená) -->
-  <div class="header-timeline">
+<body class="mode-list">
+  <!-- HLAVIČKA -->
+  <div class="header">
     <div class="header-inner">
-      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
-      <div class="user-info">Prihlásený ako: <span id="who">—</span></div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn" id="backBtn">Späť</button>
-        <button class="btn" id="timelineBtn">Časová os</button>
-        <button class="btn btn--danger" id="logoutBtn" style="display:none;">Odhlásiť sa</button>
+      <img src="logo_lc.jpg" alt="Logo" class="logo-small">
+      <div id="userLabel">Prihlásený:</div>
+      <div class="nav">
+        <button class="btn" id="catalogBtn">Katalóg</button>
+        <button class="btn" id="timelineBtn">Lištobook</button>
+        <button class="btn btn--danger" id="logoutBtn">Odhlásiť sa</button>
       </div>
     </div>
   </div>
 
   <!-- OBSAH -->
   <div class="wrap">
-    <!-- Nová správa -->
-    <div class="card new-card">
-      <div class="head">Nová správa</div>
-      <div class="body">
-        <div class="row" style="margin-bottom:8px;">
-          <input id="toName" class="input" placeholder="Komu (prezývka)…" />
-          <button id="sendBtn" class="btn btn--accent">Odoslať</button>
-        </div>
-        <textarea id="newText" class="area" placeholder="Napíšte správu… (max 2000 znakov)" maxlength="2000"></textarea>
-        <div id="hint" style="opacity:.85; font-size:13px; margin-top:6px;"></div>
-      </div>
-    </div>
-
     <div class="grid">
-      <!-- Konverzácie -->
-      <div class="card">
+      <!-- PANEL: Zoznam -->
+      <section class="card list-panel">
         <div class="head">Konverzácie</div>
         <div class="body conv-list" id="convList"></div>
-      </div>
+      </section>
 
-      <!-- Vlákno -->
-      <div class="card">
-        <div class="head" id="threadHead">Vyberte konverzáciu</div>
-        <div class="body">
-          <div id="thread" class="thread"></div>
-          <div id="replyBox" style="margin-top:10px; display:none;">
-            <textarea id="replyText" class="area" placeholder="Napíšte odpoveď… (max 2000 znakov)" maxlength="2000"></textarea>
-            <div style="margin-top:8px; display:flex; justify-content:flex-end;">
-              <button id="replySend" class="btn">Odoslať</button>
-            </div>
+      <!-- PANEL: Vlákno -->
+      <section class="card thread-panel">
+        <div class="head">
+          <div id="threadTitle">Vyberte konverzáciu</div>
+          <div>
+            <button class="btn" id="backBtn" title="Späť na zoznam">Späť</button>
           </div>
         </div>
+        <div class="body">
+          <div id="thread" class="thread"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- FIXNÝ COMPOSER -->
+  <div class="composer">
+    <div class="composer-inner">
+      <div class="to-wrap">
+        <input id="toName" class="input to-input" placeholder="Komu (prezývka)…" />
+        <textarea id="composerText" class="area" placeholder="Napíšte správu… (Enter = odoslať, Shift+Enter = nový riadok)" maxlength="2000"></textarea>
       </div>
+      <button id="sendBtn" class="btn btn--accent send-btn">Odoslať</button>
     </div>
   </div>
 
   <script src="messages.js"></script>
+  <script src="/js/push.js"></script> <!-- ⬅️ doplnené -->
 </body>
 </html>
