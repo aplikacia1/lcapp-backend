@@ -6,45 +6,25 @@
   <title>Produkty v kategórii</title>
   <link rel="stylesheet" href="style.css"/>
   <style>
-    :root{ --max-w: 980px; --gap: 16px; --header-h: 72px; }
-    body{ background:#0c1f4b; color:#fff; margin:0 }
+    body{background:#0c1f4b;color:#fff;margin:0}
+    .header{display:flex;align-items:center;gap:12px;justify-content:center;height:72px;border-bottom:1px solid rgba(255,255,255,.12)}
+    .header-inner{width:100%;max-width:980px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+    .logo-small{height:32px}
+    .nav{display:flex;gap:8px}
+    .btn{height:40px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:#fff;color:#0c1f4b;cursor:pointer}
+    .btn--danger{background:#ff6b6b;color:#fff;border:none}
 
-    /* HLAVIČKA – rovnaká ako na ostatných stránkach */
-    .header{
-      position:sticky; top:0; z-index:40;
-      display:flex; align-items:center; justify-content:center;
-      height:var(--header-h); border-bottom:1px solid rgba(255,255,255,.12);
-      background:#0c1f4b;
-    }
-    .header-inner{
-      width:100%; max-width:var(--max-w); padding:0 var(--gap);
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .logo-small{ height:32px }
-    .nav{ display:flex; gap:8px; align-items:center; }
-    .btn{
-      height:40px; padding:0 14px; border-radius:12px;
-      border:1px solid rgba(255,255,255,.3);
-      background:#fff; color:#0c1f4b; cursor:pointer;
-    }
-    .btn--danger{ background:#ff6b6b; color:#fff; border:none }
+    .main{max-width:980px;margin:16px auto;padding:0 16px}
+    .search{background:#eef6ff;border:1px solid #bcd6ff;border-radius:12px;padding:10px 12px;color:#0c1f4b;width:100%}
 
-    /* OBSAH */
-    .main{ max-width:var(--max-w); margin:16px auto; padding:0 var(--gap) 32px; }
-    .toolbar{ display:flex; gap:8px; align-items:center; margin-bottom:12px; }
-    .search{
-      background:#eef6ff; border:1px solid #bcd6ff; border-radius:12px;
-      padding:10px 12px; color:#0c1f4b; width:100%;
-    }
-
-    .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
-    .card{ background:#fff; border:1px solid #eee; border-radius:12px; overflow:hidden; color:#0c1f4b; cursor:pointer; display:flex; flex-direction:column; box-shadow:0 4px 12px rgba(0,0,0,.12) }
-    .card-img{ width:100%; height:150px; object-fit:cover; background:#f5f7fb }
-    .card-body{ padding:10px 12px }
-    .card-title{ font-weight:700; margin:0 0 4px; color:#0c1f4b }
-    .price{ font-size:14px; color:#0a5 }
-    .rating{ font-size:14px; color:#223 }
-    .empty{ opacity:.85; margin-top:24px }
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:16px}
+    .card{background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;color:#0c1f4b;cursor:pointer;display:flex;flex-direction:column}
+    .card-img{width:100%;height:150px;object-fit:cover;background:#f5f7fb}
+    .card-body{padding:10px 12px}
+    .card-title{font-weight:700;margin:0 0 4px}
+    .price{font-size:14px;color:#274}
+    .rating{font-size:14px;color:#333}
+    .empty{opacity:.8;margin-top:24px}
 
     /* MarSab® badge */
     .brand-badge{
@@ -64,28 +44,21 @@
   </style>
 </head>
 <body>
-
-  <!-- HLAVIČKA -->
   <header class="header">
     <div class="header-inner">
       <img src="logo_lc.jpg" class="logo-small" alt="Logo">
       <div id="userGreeting">Prihlásený:</div>
       <div class="nav">
+        <button id="accountBtn" class="btn">Účet</button>
         <button id="catalogBtn" class="btn">Katalóg</button>
         <button id="timelineBtn" class="btn">Lištobook</button>
-        <button id="accountBtn"  class="btn">Účet</button>
-        <button id="logoutBtn"  class="btn btn--danger">Odhlásiť sa</button>
+        <button id="logoutBtn" class="btn btn--danger">Odhlásiť sa</button>
       </div>
     </div>
   </header>
 
-  <!-- OBSAH -->
   <main class="main">
-    <div class="toolbar">
-      <button id="backToCatalogBtn" class="btn">Späť do katalógu</button>
-      <input id="searchInput" class="search" placeholder="🔎 Hľadať podľa názvu alebo kódu…">
-    </div>
-
+    <input id="searchInput" class="search" placeholder="🔎 Hľadať produkt...">
     <div id="productGrid" class="grid"></div>
     <div id="emptyState" class="empty" style="display:none">Žiadne produkty.</div>
   </main>
@@ -96,7 +69,6 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <script src="/js/config.js"></script>
   <script src="products.js"></script>
 </body>
 </html>
