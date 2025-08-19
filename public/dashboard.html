@@ -7,25 +7,23 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     :root{
-      --hdr-h: 96px;         /* výšku po načítaní dopočíta JS */
+      --hdr-h: 96px;    /* reálnu výšku dopočíta JS */
       --pad-x: 12px;
       --gap: 8px;
-      --visible: 3;          /* na mobile vidieť 3 tlačidlá */
+      --visible: 3;     /* na mobile vidno 3 tlačidlá; 4. je posunom */
     }
 
-    /* === Jednoduchá pevná hlavička (konzistentná s login/register) === */
+    /* === Jednoduchá pevná hlavička === */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 100;
       background: #0c1f4b; border-bottom: 1px solid rgba(255,255,255,.15);
     }
     .app-header-inner{ max-width: 980px; margin: 0 auto; padding: 8px var(--pad-x); }
 
-    .logo-small{
-      display:block; height:48px; object-fit:contain; margin:2px auto 6px;
-    }
+    .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* Vodorovne posúvateľný rad tlačidiel – vidno 3, štvrté je „za okrajom“ */
+    /* Vodorovne posúvateľný rad tlačidiel – vidno 3, 4. je „za okrajom“ */
     .nav-scroller{ padding: 0 var(--pad-x); }
     .nav-track{
       display:flex; gap: var(--gap);
@@ -46,19 +44,21 @@
     }
     .pill-danger{ background:#000; color:#fff; border-color:#fff; }
 
-    /* Desktop: všetky 4 vedľa seba, bez scrollu */
+    /* Desktop: všetky 4 vedľa seba (bez scrollu) a prirodzená šírka */
     @media (min-width: 768px){
       .nav-track{ overflow: visible; }
-      .pill{ flex: 0 0 auto; }
+      .pill{ flex: 0 0 auto; width: auto !important; }
     }
 
     /* Rezerva pod pevnú hlavičku */
     body{ padding-top: var(--hdr-h); }
 
-    /* ===== Zvyšok zostáva ako si mal ===== */
+    /* ===== Zvyšok zostáva ako predtým ===== */
     .scrollable-body .main-content{
       padding-bottom: calc(var(--banner-h, 0px) + 24px);
     }
+
+    /* MarSab® badge – nad bannerom (banners.js nastaví --banner-h) */
     .brand-badge{
       position: fixed; left: 16px; bottom: calc(var(--banner-h, 0px) + 16px); z-index: 120;
       display: inline-flex; align-items: center; gap: 8px;
@@ -84,7 +84,7 @@
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
-      <div class="user-chip">Prihlásený: <strong id="userLabel">…</strong></div>
+      <div class="user-chip" id="userLabel">Prihlásený: …</div>
 
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track" id="navTrack">
@@ -138,7 +138,7 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- Navigácia (nechávame tvoju pôvodnú logiku) -->
+  <!-- Navigácia (tvoja pôvodná logika) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const email = new URLSearchParams(window.location.search).get("email");
@@ -150,7 +150,7 @@
     });
   </script>
 
-  <!-- Hlavička: len dopočet výšky (rezerva pod fixed header) -->
+  <!-- Hlavička: dopočet výšky (rezerva pod fixed header) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const header = document.querySelector('.app-header');
