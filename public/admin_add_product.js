@@ -1,6 +1,6 @@
 // public/admin_add_product.js
 (() => {
-  const API = window.API_BASE || "";
+  const API = (window.API_BASE || '').replace(/\/+$/, '');
   const $ = (id) => document.getElementById(id);
 
   const form  = $("productForm");
@@ -11,14 +11,10 @@
   let editingProductId = null;
   const catNameById = new Map();
 
-  // --- Pomocné ---
-  const eurFmt = new Intl.NumberFormat("sk-SK", {
-    style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2
-  });
+  const eurFmt = new Intl.NumberFormat("sk-SK", { style: "currency", currency: "EUR" });
   const fmtPrice = (price, unit) => {
     const n = Number(price);
-    if (!isFinite(n)) return "-";
-    return `${eurFmt.format(n)}${unit ? ` / ${unit}` : ""}`;
+    return isFinite(n) ? `${eurFmt.format(n)}${unit ? ` / ${unit}` : ""}` : "-";
   };
   const cleanUploadPath = (s = "") =>
     String(s).replace(/^\/?uploads[\\/]/i, "").replace(/^\/+/, "");
@@ -30,14 +26,11 @@
 
   async function j(url, opts) {
     const r = await fetch(url, opts);
-    if (!r.ok) {
-      const t = await r.text().catch(() => "");
-      throw new Error(t || `${r.status} ${r.statusText}`);
-    }
+    if (!r.ok) throw new Error((await r.text().catch(()=> "")) || `${r.status} ${r.statusText}`);
     return r.json();
   }
 
-  // --- Kategórie do <select> ---
+  // --- kategórie do selectu ---
   async function loadCategories() {
     const cats = await j(`${API}/api/categories`);
     sel.innerHTML = "";
@@ -54,7 +47,7 @@
     }
   }
 
-  // --- Načítanie produktov podľa kategórie (robustne) ---
+  // --- vyskúšaj viac endpointov pre produkty podľa kategórie ---
   async function loadProducts() {
     const catId = sel.value || getCategoryIdFromURL();
     tbody.innerHTML = "";
@@ -66,17 +59,25 @@
 
     const urls = [
       `${API}/api/products?categoryId=${encodeURIComponent(catId)}`,
-      `${API}/api/products?category=${encodeURIComponent(catId)}`
+      `${API}/api/products?category=${encodeURIComponent(catId)}`,
+      `${API}/api/categories/${encodeURIComponent(catId)}/products`,
+      `${API}/api/products/category/${encodeURIComponent(catId)}`,
+      `${API}/api/products/by-category/${encodeURIComponent(catId)}`,
+      `${API}/api/products/byCategory/${encodeURIComponent(catId)}`
     ];
 
     let items = [];
     for (const u of urls) {
       try {
         const payload = await j(u);
-        items = Array.isArray(payload) ? payload : (payload.items || []);
-        if (Array.isArray(items)) break;
-      } catch {
-        // skúšame ďalší variant
+        items = Array.isArray(payload) ? payload
+              : Array.isArray(payload?.items) ? payload.items
+              : Array.isArray(payload?.products) ? payload.products
+              : [];
+        console.log('[admin] products loaded from', u, 'count=', items.length);
+        break;
+      } catch (e) {
+        console.warn('[admin] try failed', u, e.message);
       }
     }
 
@@ -112,19 +113,15 @@
     }
   }
 
-  // --- Kliky v tabuľke (edit/delete) ---
+  // delete / edit
   tbody.addEventListener("click", async (e) => {
     const t = e.target;
     if (!(t instanceof HTMLElement)) return;
 
-    const delId  = t.dataset.del;
-    const editId = t.dataset.edit;
-
-    // Vymazanie
-    if (delId) {
+    if (t.dataset.del) {
       if (!confirm("Naozaj vymazať produkt?")) return;
       try {
-        await j(`${API}/api/products/${delId}`, { method: "DELETE" });
+        await j(`${API}/api/products/${t.dataset.del}`, { method: "DELETE" });
         await loadProducts();
       } catch (err) {
         alert("❌ Chyba pri mazaní: " + err.message);
@@ -132,10 +129,9 @@
       return;
     }
 
-    // Editácia – predvyplniť formulár
-    if (editId) {
+    if (t.dataset.edit) {
       try {
-        const p = await j(`${API}/api/products/${editId}`);
+        const p = await j(`${API}/api/products/${t.dataset.edit}`);
         $("name").value        = p.name || "";
         $("code").value        = p.code || "";
         $("price").value       = p.price ?? "";
@@ -143,7 +139,7 @@
         $("description").value = p.description || "";
         if (p.categoryId) sel.value = p.categoryId;
 
-        editingProductId = editId;
+        editingProductId = t.dataset.edit;
         msg.textContent = "✏️ Úprava produktu – uložte zmeny.";
         msg.style.color = "orange";
       } catch (err) {
@@ -154,7 +150,7 @@
     }
   });
 
-  // --- Submit (create/update) cez FormData – uloží sa aj obrázok ---
+  // create/update cez FormData
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     msg.textContent = "Ukladám…";
@@ -184,10 +180,8 @@
     }
   });
 
-  // --- Zmena kategórie -> prepnúť zoznam produktov ---
   sel.addEventListener("change", loadProducts);
 
-  // --- Štart ---
   (async () => {
     try {
       await loadCategories();
