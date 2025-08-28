@@ -12,6 +12,19 @@
   function escapeHTML(s=""){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   const cleanUploadPath = (s="") => String(s).replace(/^\/?uploads[\\/]/i,"").replace(/^\/+/,"");
 
+  // ✅ inline placeholder – žiadny súbor netreba, a zabránime nekonečnému onerror
+  const IMG_PLACEHOLDER =
+    'data:image/svg+xml;utf8,' +
+    encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450">
+         <rect width="100%" height="100%" fill="#0b1c45"/>
+         <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
+               font-family="Arial, sans-serif" font-size="22" fill="#ffffff" opacity="0.85">
+           Bez obrázka
+         </text>
+       </svg>`
+    );
+
   const API_BASE = (window.API_BASE || "").replace(/\/+$/,"");
   const { id: productId, categoryId, email } = getParams();
   let selectedStars = 5;
@@ -107,15 +120,22 @@
 
       const imgEl = $("#productImage");
       if(imgEl){
-        const src = p.image ? `/uploads/${cleanUploadPath(p.image)}` : "/img/placeholder.png";
-        imgEl.src = src; imgEl.alt = p.name || "Produkt";
-        imgEl.onerror = () => { imgEl.src = "/img/placeholder.png"; };
+        // primárny zdroj
+        const src = p.image ? `/uploads/${cleanUploadPath(p.image)}` : IMG_PLACEHOLDER;
+        imgEl.onerror = () => {              // ✅ jednorazový fallback, bez nekonečného loopu
+          imgEl.onerror = null;
+          imgEl.src = IMG_PLACEHOLDER;
+        };
+        imgEl.src = src;
+        imgEl.alt = p.name || "Produkt";
       }
     }catch(e){
       console.warn("[product]", e.message);
       $("#productTitle") && ($("#productTitle").textContent = "Produkt");
       $("#productMeta") && ($("#productMeta").textContent = "");
       $("#productDescription") && ($("#productDescription").textContent = "Produkt sa nenašiel.");
+      const imgEl = $("#productImage");
+      if(imgEl){ imgEl.onerror = null; imgEl.src = IMG_PLACEHOLDER; }
     }
   }
 

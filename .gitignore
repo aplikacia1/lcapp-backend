@@ -1,4 +1,15 @@
 # nezverejňovať citlivé a ťažké veci
 .env
+.env.*
+*.env
+
 node_modules/
+
+# runtime uploady (nechceme v gite)
 uploads/
+uploads/**/*
+
+# logy (pre istotu)
+npm-debug.log*
+yarn-debug.log*
+*.log
