@@ -4,7 +4,7 @@ const router = express.Router();
 
 const Rating  = require('../models/rating');
 const Product = require('../models/product');
-const User    = require('../models/user');
+const User    = require('../models/User'); // ⬅️ dôležité: veľké "U"
 
 /* ───────── helpers ───────── */
 async function getSummaryFor(productId) {
