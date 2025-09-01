@@ -12,6 +12,9 @@ let ADMIN = { email:'', name:'Lištové centrum' };
 let currentOtherEmail = null;
 let currentOtherLabel = null;
 
+// draft cache (aby sa nestratil text pri refreshoch)
+let draftCache = "";
+
 /* ---------- NAV / HEADER ---------- */
 function wireHeader(){
   $('#catalogBtn').onclick  = () => location.href = `catalog.html?email=${encodeURIComponent(userEmail)}`;
@@ -51,14 +54,12 @@ function setModeList(){
   currentOtherLabel = null;
   $('#threadTitle').textContent = 'Vyberte konverzáciu';
   $('#thread').innerHTML = '';
-  // v "list" móde musí byť viditeľné pole "Komu"
   $('#toName').value = '';
 }
 
 /* ---------- LIST: konverzácie ---------- */
 async function loadConversations(){
   const box = $('#convList');
-  box.innerHTML = 'Načítavam…';
   try{
     const res = await fetch(`/api/messages/conversations/${encodeURIComponent(userEmail)}`);
     const rows = res.ok ? await res.json() : [];
@@ -142,18 +143,14 @@ async function sendMessage(){
   const text = rawText.trim();
   if (!text) return;
 
-  // režim: nové vlákno vs. odpoveď
   let toName = null;
-
   if (currentOtherEmail){
-    // v thread móde posielame podľa labelu (prezývky) – back-end už mapuje
     toName = currentOtherLabel || currentOtherEmail;
   }else{
     toName = ($('#toName').value || '').trim();
     if (!toName){ alert('Doplňte komu (prezývku).'); return; }
   }
 
-  // odoslanie
   const r = await fetch('/api/messages/send', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -166,19 +163,16 @@ async function sendMessage(){
     return;
   }
 
-  // vyčisti field a refresh
   $('#composerText').value = '';
+  draftCache = "";
 
   if (currentOtherEmail){
     await openThread(currentOtherEmail, currentOtherLabel);
   }else{
-    // začali sme novú konverzáciu – prepnime sa do vlákna s adresátom
-    // skúsime zistiť jeho email z vyhľadávania
     const resolved = await resolveEmailByName(toName);
     if (resolved){
       await openThread(resolved, toName);
     }else{
-      // nevieme e-mail – aspoň obnovíme ľavý panel
       await loadConversations();
     }
   }
@@ -192,6 +186,10 @@ function wireComposerKeys(){
       e.preventDefault();
       sendMessage();
     }
+  });
+  // cache draft pri písaní
+  area.addEventListener('input', ()=>{
+    draftCache = area.value;
   });
 }
 
@@ -218,4 +216,21 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   await loadSelf();
   await loadAdmin();
   await loadConversations();
+
+  // ⏳ auto-refresh každých 6 sekúnd
+  setInterval(async ()=>{
+    await loadConversations();
+    if (currentOtherEmail){
+      const preserve = $('#composerText');
+      const saved = preserve.value; // zachovať rozpísaný text
+      await openThread(currentOtherEmail, currentOtherLabel);
+      preserve.value = saved;
+      draftCache = saved;
+    }
+  }, 6000);
+
+  // načítanie draftu po reloade (ak je)
+  if (draftCache){
+    $('#composerText').value = draftCache;
+  }
 });

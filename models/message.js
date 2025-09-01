@@ -11,10 +11,17 @@ const messageSchema = new mongoose.Schema(
 
     text:      { type: String, required: true },
 
-    // aby sme vedeli rozlíšiť systémové (auto) odpovede
-    isAuto:    { type: Boolean, default: false }
+    // odlíšenie systémových (auto) odpovedí
+    isAuto:    { type: Boolean, default: false },
+
+    // === dôležité – stav prečítania, aby sedel s trasami ===
+    isRead:    { type: Boolean, default: false, index: true },
+    readAt:    { type: Date }
   },
   { timestamps: true, collection: 'messages' }
 );
+
+// rýchle rátanie neprečítaných pre adresáta
+messageSchema.index({ toEmail: 1, isRead: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Message', messageSchema);

@@ -196,7 +196,8 @@
       <form id="timelineForm" class="composer" autocomplete="off" enctype="multipart/form-data">
         <div class="composer-row">
           <div class="input-group">
-            <input id="postContent" class="composer-input" type="text" placeholder="Napíš niečo..." maxlength="300" />
+            <!-- ✳️ pridané data-preserve, aby pri live aktualizácii nezmizol rozpísaný text -->
+            <input id="postContent" class="composer-input" type="text" placeholder="Napíš niečo..." maxlength="300" data-preserve />
             <span id="composerCount">0 / 300</span>
             <input id="postImage" type="file" accept="image/*" hidden />
           </div>
@@ -213,8 +214,11 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- ✳️ iba tento jeden riadok navyše -->
+  <!-- ✳️ iba tento jeden riadok navyše (už u teba bol) -->
   <script src="/js/config.js"></script>
+
+  <!-- ✳️ nový skript: badge neprečítaných + auto-aktualizácia -->
+  <script src="/js/unread-badge.js"></script>
 
   <script src="timeline.js"></script>
 </body>

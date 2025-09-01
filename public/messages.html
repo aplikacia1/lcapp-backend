@@ -6,119 +6,6 @@
   <title>Súkromné správy</title>
 
   <link rel="stylesheet" href="style.css"/>
-
-  <style>
-    :root{
-      --max-w: 1100px;
-      --gap: 16px;
-      --header-h: 68px;
-      --composer-h: 66px;
-      --bg: #0c1f4b;
-      --panel: #05163d;
-      --border: rgba(255,255,255,.12);
-      --soft: rgba(255,255,255,.06);
-      --text: #fff;
-      --ink: #0c1f4b;
-      --field-bg:#eef6ff;
-      --field-b:#bcd6ff;
-    }
-    html,body{margin:0;background:var(--bg);color:var(--text);height:100%}
-    *{box-sizing:border-box}
-
-    /* Header (rovnaký vizuál ako inde) */
-    .header{
-      position:sticky;top:0;z-index:50;
-      height:var(--header-h);background:var(--bg);
-      border-bottom:1px solid var(--border);
-      display:flex;justify-content:center;align-items:center;
-    }
-    .header-inner{
-      width:100%;max-width:var(--max-w);padding:0 var(--gap);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-    }
-    .logo-small{height:32px}
-    .nav{display:flex;gap:8px;align-items:center}
-
-    /* Layout */
-    .wrap{
-      max-width:var(--max-w);
-      margin:10px auto 0;
-      padding:0 var(--gap);
-      padding-bottom: calc(var(--composer-h) + 20px); /* priestor pre composer */
-    }
-    .grid{
-      display:grid; gap:12px;
-      grid-template-columns: 320px 1fr;
-    }
-    @media (max-width: 960px){
-      .grid{ grid-template-columns: 1fr; }
-      body.mode-thread .list-panel{ display:none; }
-      body.mode-thread .thread-panel{ display:block; }
-    }
-
-    .card{
-      background:var(--panel);border:1px solid var(--border);
-      border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);
-      overflow:hidden;
-    }
-    .card .head{
-      padding:10px 12px;border-bottom:1px solid var(--soft);font-weight:800;
-      display:flex;align-items:center;justify-content:space-between;gap:8px;
-    }
-    .card .body{ padding:12px; }
-
-    /* Zoznam konverzácií */
-    .conv-list{ max-height:68vh; overflow:auto; }
-    .conv-item{
-      padding:10px 12px;border-bottom:1px solid var(--soft);cursor:pointer;
-    }
-    .conv-item:hover{ background:#081b44; }
-    .conv-item.active{ background:#0b2152; }
-    .conv-name{ font-weight:700; }
-    .conv-name.unread{ font-weight:900; }
-    .conv-last{ font-size:12px; opacity:.8; margin-top:3px; }
-    .badge{
-      min-width:18px;height:18px;border-radius:999px;background:#ffcc00;color:#111;
-      font-weight:800;font-size:12px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px;margin-left:6px;
-    }
-
-    /* Vlákno */
-    .thread{
-      display:flex;flex-direction:column;gap:8px;min-height:40vh;
-    }
-    .msg{ background:#fff;color:#111;border-radius:10px;padding:10px; }
-    .me{ background:#d7e8ff; align-self:flex-end; }
-    .meta{ font-size:12px; opacity:.75; margin-bottom:4px; }
-
-    /* Polia */
-    .input,.area{
-      width:100%;border-radius:10px;border:1px solid var(--field-b);
-      background:var(--field-bg);color:var(--ink);padding:8px 10px;
-    }
-    .input{ height:40px; }
-    .area{
-      min-height:38px; max-height:120px; resize:vertical;
-      line-height:1.35;
-    }
-
-    /* Composer – fixný dole */
-    .composer{
-      position:fixed;left:0;right:0;bottom:0;z-index:55;
-      background:var(--panel);border-top:1px solid var(--border);
-      display:flex;justify-content:center;
-    }
-    .composer-inner{
-      width:100%;max-width:var(--max-w);padding:8px var(--gap);display:grid;gap:8px;
-      grid-template-columns: 1fr auto;
-      align-items:center;
-    }
-    .to-wrap{display:flex;gap:8px;}
-    .to-input{max-width:220px}
-    .send-btn{min-width:110px}
-
-    /* V thread móde skryť "Komu" */
-    body.mode-thread .to-input{ display:none; }
-  </style>
 </head>
 <body class="mode-list">
   <!-- HLAVIČKA -->
@@ -170,6 +57,6 @@
   </div>
 
   <script src="messages.js"></script>
-  <script src="/js/push.js"></script> <!-- ⬅️ doplnené -->
+  <script src="/js/push.js"></script>
 </body>
 </html>
