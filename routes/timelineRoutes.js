@@ -15,7 +15,23 @@ const storage = multer.diskStorage({
   filename: (_req, file, cb) =>
     cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}-${file.originalname}`)
 });
-const upload = multer({ storage });
+
+// 👉 pridané: limit a filter
+const upload = multer({
+  storage,
+  limits: { fileSize: 7 * 1024 * 1024 }, // max 7 MB
+  fileFilter: (_req, file, cb) => {
+    const okTypes = [
+      'image/jpeg', 'image/png', 'image/webp',
+      'image/gif', 'image/heic', 'image/heif'
+    ];
+    if (okTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Nepodporovaný typ súboru.'));
+    }
+  }
+});
 
 // ===== Vulgarizmy =====
 const bannedWords = ['idiot', 'debil', 'sprostý', 'hlúpy', 'nadávka', 'kokot', 'kkt', 'piča', 'hajzel'];
@@ -26,8 +42,8 @@ const containsBannedWords = (t = '') =>
 const unlinkIfExists = (relUrl) => {
   if (!relUrl) return;
   try {
-    // očakávame tvar "/uploads/<subor>"
-    const base = path.basename(relUrl); // bezpečne vytiahne len názov súboru
+    if (!relUrl.startsWith('/uploads/')) return; // ochrana
+    const base = path.basename(relUrl);
     const filePath = path.join(UPLOAD_DIR, base);
     fs.unlink(filePath, () => {});
   } catch {}
@@ -47,7 +63,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
       author: user.name,
       text: text || '',
       imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
-      createdAt: new Date() // istota – ak schéma nemá timestamps
+      createdAt: new Date()
     });
 
     await post.save();
@@ -58,7 +74,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
   }
 });
 
-// 📄 Získanie všetkých príspevkov (najnovšie hore)
+// 📄 Získanie všetkých príspevkov
 router.get('/', async (_req, res) => {
   try {
     const posts = await TimelinePost.find().sort({ createdAt: -1 });
@@ -69,7 +85,7 @@ router.get('/', async (_req, res) => {
   }
 });
 
-// 💬 Pridanie komentára (s časom)
+// 💬 Pridanie komentára
 router.post('/comment/:postId', async (req, res) => {
   try {
     const { email, text } = req.body;
@@ -85,7 +101,7 @@ router.post('/comment/:postId', async (req, res) => {
     post.comments.push({
       author: user.name,
       text: text.trim(),
-      createdAt: new Date() // 👈 čas komentára
+      createdAt: new Date()
     });
 
     await post.save();

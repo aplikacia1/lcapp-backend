@@ -16,6 +16,7 @@ const isAdmin = new URLSearchParams(window.location.search).get("admin") === "1"
 // Stav
 const userEmail = getEmailFromURL(); // len z URL, žiadny storage
 let userData = null;
+let tlTimer = null; // interval na auto-refresh timeline
 
 // ak email chýba, pošleme na index
 if (!userEmail) { window.location.href = "index.html"; }
@@ -98,26 +99,6 @@ async function loadUserInfo() {
   }
 }
 
-// Inicializácia
-document.addEventListener("DOMContentLoaded", async () => {
-  setComposerPadding();
-  setPresenceBottom();
-  window.addEventListener("resize", () => { setComposerPadding(); setPresenceBottom(); });
-
-  await loadUserInfo();
-  if (!isAdmin) initComposer();
-  loadPosts();
-
-  // Presence – heartbeat + refresh
-  startPresenceHeartbeat();
-  refreshPresence();
-  setInterval(refreshPresence, 10000);
-
-  // 🔔 badge neprečítaných – prvé načítanie + interval
-  await refreshUnreadBadge();
-  setInterval(refreshUnreadBadge, 20000);
-});
-
 // Nevhodné slová
 const bannedWords = ["idiot", "debil", "hovno", "kurva", "kkt", "kokot"];
 function containsBannedWords(text) {
@@ -196,9 +177,30 @@ function initComposer() {
   updateUI();
 }
 
-// Načítať príspevky
+// --- pomocníci: zachovanie rozpisovaných komentárov pri refreshoch ---
+function collectCommentDrafts(){
+  const drafts = {};
+  document.querySelectorAll('form.commentForm').forEach(f=>{
+    const postId = f.getAttribute('data-id');
+    const val = (f.comment?.value || '').trim();
+    if (postId && val) drafts[postId] = val;
+  });
+  return drafts;
+}
+function applyCommentDrafts(drafts = {}){
+  Object.entries(drafts).forEach(([postId, val])=>{
+    const form = document.querySelector(`form.commentForm[data-id="${postId}"]`);
+    if (form && form.comment) form.comment.value = val;
+  });
+}
+
+// Načítať príspevky (s komentármi)
 async function loadPosts() {
   const postFeed = $("#postFeed");
+  // zachovaj rozpisané komentáre a scroll
+  const drafts = collectCommentDrafts();
+  const scrollY = window.scrollY;
+
   try {
     const res = await fetch("/api/timeline");
     const posts = await res.json();
@@ -242,6 +244,10 @@ async function loadPosts() {
       `;
       postFeed.appendChild(postEl);
     });
+
+    // vráť rozpisané komentáre a scroll
+    applyCommentDrafts(drafts);
+    window.scrollTo(0, scrollY);
 
     setComposerPadding(); setPresenceBottom();
   } catch (err) {
@@ -350,3 +356,34 @@ function renderPresence(users){
 
 // Odhlásenie (globálna funkcia z HTML)
 window.logout = () => { window.location.href = "index.html"; };
+
+// Inicializácia
+document.addEventListener("DOMContentLoaded", async () => {
+  setComposerPadding();
+  setPresenceBottom();
+  window.addEventListener("resize", () => { setComposerPadding(); setPresenceBottom(); });
+
+  await loadUserInfo();
+  if (!isAdmin) initComposer();
+  await loadPosts();
+
+  // Auto-refresh timeline (príspevky + komentáre) každých 6 s
+  const startTL = () => { if (!tlTimer) tlTimer = setInterval(loadPosts, 6000); };
+  const stopTL  = () => { if (tlTimer) { clearInterval(tlTimer); tlTimer = null; } };
+  startTL();
+
+  // šetrenie: zastav na pozadí, spusti po návrate
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopTL();
+    else startTL();
+  });
+
+  // Presence – heartbeat + refresh
+  startPresenceHeartbeat();
+  refreshPresence();
+  setInterval(refreshPresence, 10000);
+
+  // 🔔 badge neprečítaných – prvé načítanie + interval
+  await refreshUnreadBadge();
+  setInterval(refreshUnreadBadge, 20000);
+});
