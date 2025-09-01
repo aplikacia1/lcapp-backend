@@ -1,14 +1,17 @@
 // frontend/public/timeline.js
 
-// Pomôcky
+// ───────────────────── Pomôcky ─────────────────────
 function getEmailFromURL() {
   const params = new URLSearchParams(window.location.search);
   return params.get("email") || "";
 }
 function $(sel, root = document) { return root.querySelector(sel); }
 function escapeHTML(str = "") {
-  return String(str || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  return String(str || "").replace(/[&<>"']/g, m => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+  ));
 }
+const scroller = document.scrollingElement || document.documentElement;
 
 // Admin mód cez ?admin=1
 const isAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
@@ -16,12 +19,14 @@ const isAdmin = new URLSearchParams(window.location.search).get("admin") === "1"
 // Stav
 const userEmail = getEmailFromURL(); // len z URL, žiadny storage
 let userData = null;
-let tlTimer = null; // interval na auto-refresh timeline
+let tlTimer = null;          // interval na auto-refresh timeline
+let userScrollActive = false; // krátke obdobie po scrollovaní vynecháme refresh
+let scrollIdleTO = null;
 
 // ak email chýba, pošleme na index
 if (!userEmail) { window.location.href = "index.html"; }
 
-// Dolný padding podľa výšky composeru
+// ───────────────── Dolný padding podľa výšky composeru ─────────────────
 function setComposerPadding() {
   const bar = $("#composerBar");
   const main = $(".main-content");
@@ -105,7 +110,7 @@ function containsBannedWords(text) {
   return bannedWords.some(word => String(text || '').toLowerCase().includes(word));
 }
 
-// Minimalistický composer (fixne dole)
+// ───────────────── Composer (fixne dole) ─────────────────
 function initComposer() {
   const form = $("#timelineForm");
   if (!form) return;
@@ -162,7 +167,7 @@ function initComposer() {
       const data = await res.json();
       if (res.ok) {
         textInput.value = ""; fileInput.value = ""; selectedFile = null;
-        updateUI(); loadPosts();
+        updateUI(); loadPosts({ preserveScroll: true });
       } else {
         alert(data.message || "Chyba pri ukladaní príspevku.");
       }
@@ -177,7 +182,7 @@ function initComposer() {
   updateUI();
 }
 
-// --- pomocníci: zachovanie rozpisovaných komentárov pri refreshoch ---
+// ── Zachovanie rozpisovaných komentárov pri refreshoch ──
 function collectCommentDrafts(){
   const drafts = {};
   document.querySelectorAll('form.commentForm').forEach(f=>{
@@ -194,12 +199,14 @@ function applyCommentDrafts(drafts = {}){
   });
 }
 
-// Načítať príspevky (s komentármi)
-async function loadPosts() {
+// ───────────────── Načítať príspevky (stabilný scroll) ─────────────────
+async function loadPosts(opts = {}) {
+  const preserveScroll = !!opts.preserveScroll;
   const postFeed = $("#postFeed");
-  // zachovaj rozpisané komentáre a scroll
+
+  // 1) Snapshot pozície + rozpísaných komentárov
   const drafts = collectCommentDrafts();
-  const scrollY = window.scrollY;
+  const prevScrollY = preserveScroll ? (scroller.scrollTop || 0) : 0;
 
   try {
     const res = await fetch("/api/timeline");
@@ -207,21 +214,23 @@ async function loadPosts() {
     postFeed.innerHTML = "";
 
     posts.forEach(post => {
-      const author = escapeHTML(post.author || "Neznámy");
-      const text = escapeHTML(post.text || "");
+      const author   = escapeHTML(post.author || "Neznámy");
+      const text     = escapeHTML(post.text || "");
       const comments = Array.isArray(post.comments) ? post.comments : [];
 
       const canDeletePost = isAdmin || (userData && userData.name && userData.name === post.author);
 
-      const postEl = document.createElement("div");
-      postEl.className = "post";
-      postEl.innerHTML = `
+      const el = document.createElement("div");
+      el.className = "post";
+      el.dataset.id = post._id;
+
+      el.innerHTML = `
         <div class="post-head">
           <strong>${author}</strong>
           ${canDeletePost ? `<button class="link-btn post-delete" data-id="${post._id}">Zmazať</button>` : ""}
         </div>
-        <p>${text}</p>
-        ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" alt="Obrázok príspevku">` : ""}
+        ${text ? `<p>${text}</p>` : ""}
+        ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" alt="Obrázok príspevku" loading="lazy">` : ""}
         <div class="comments">
           <ul>
             ${(comments || []).map(c => {
@@ -242,20 +251,29 @@ async function loadPosts() {
             </form>` : (isAdmin ? '' : `<p>Len prihlásení používatelia s prezývkou môžu komentovať.</p>`)}
         </div>
       `;
-      postFeed.appendChild(postEl);
+      postFeed.appendChild(el);
     });
 
-    // vráť rozpisané komentáre a scroll
-    applyCommentDrafts(drafts);
-    window.scrollTo(0, scrollY);
+    setComposerPadding(); 
+    setPresenceBottom();
 
-    setComposerPadding(); setPresenceBottom();
+    // 2) Obnov rozpísané komentáre
+    applyCommentDrafts(drafts);
+
+    // 3) Obnov scroll (po reflow) – dva rAF pre istotu
+    if (preserveScroll) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scroller.scrollTo({ top: prevScrollY, left: 0, behavior: "auto" });
+        });
+      });
+    }
   } catch (err) {
     console.error("Chyba pri načítaní príspevkov", err);
   }
 }
 
-// Komentovanie
+// ───────────────── Komentovanie ─────────────────
 document.addEventListener("submit", async (e) => {
   const form = e.target;
   if (form.classList && form.classList.contains("commentForm")) {
@@ -273,13 +291,13 @@ document.addEventListener("submit", async (e) => {
       });
       const data = await response.json();
 
-      if (response.ok) loadPosts();
+      if (response.ok) loadPosts({ preserveScroll: true });
       else alert(data.message || "Chyba pri ukladaní komentára.");
     } catch (err) { alert("Server neodpovedá."); }
   }
 });
 
-// Mazanie príspevku / komentára (admin má vlastné endpointy)
+// ─────────────── Mazanie príspevku / komentára ───────────────
 document.addEventListener("click", async (e) => {
   const postBtn = e.target.closest(".post-delete");
   if (postBtn) {
@@ -293,7 +311,8 @@ document.addEventListener("click", async (e) => {
         body: isAdmin ? undefined : JSON.stringify({ email: userEmail })
       });
       const data = await res.json().catch(()=>({}));
-      if (res.ok) loadPosts();
+// Ak sme v liste nižšie, po zmazaní môže výška nad nami klesnúť – nechajme restore
+      if (res.ok) loadPosts({ preserveScroll: true });
       else alert((data && data.message) || "Mazanie príspevku zlyhalo.");
     } catch { alert("Server neodpovedá."); }
   }
@@ -312,13 +331,13 @@ document.addEventListener("click", async (e) => {
         body: isAdmin ? undefined : JSON.stringify({ email: userEmail })
       });
       const data = await res.json().catch(()=>({}));
-      if (res.ok) loadPosts();
+      if (res.ok) loadPosts({ preserveScroll: true });
       else alert((data && data.message) || "Mazanie komentára zlyhalo.");
     } catch { alert("Server neodpovedá."); }
   }
 });
 
-// ======= ONLINE PRESENCE =======
+// ───────────────── Online presence ─────────────────
 async function startPresenceHeartbeat(){
   const ping = async () => {
     try{
@@ -331,7 +350,6 @@ async function startPresenceHeartbeat(){
   await ping();
   setInterval(ping, 30000);
 }
-
 async function refreshPresence(){
   try{
     const res = await fetch('/api/presence');
@@ -340,7 +358,6 @@ async function refreshPresence(){
     renderPresence(users);
   }catch(e){}
 }
-
 function renderPresence(users){
   const ul = $("#presenceList");
   if(!ul) return;
@@ -357,7 +374,20 @@ function renderPresence(users){
 // Odhlásenie (globálna funkcia z HTML)
 window.logout = () => { window.location.href = "index.html"; };
 
-// Inicializácia
+// Pomôcky pre auto-refresh: detekcia písania/scrollu
+function isTyping() {
+  const a = document.activeElement;
+  if (!a) return false;
+  const tag = (a.tagName || '').toLowerCase();
+  return (tag === 'input' || tag === 'textarea');
+}
+window.addEventListener('scroll', () => {
+  userScrollActive = true;
+  clearTimeout(scrollIdleTO);
+  scrollIdleTO = setTimeout(() => { userScrollActive = false; }, 400);
+}, { passive: true });
+
+// ───────────────── Inicializácia ─────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   setComposerPadding();
   setPresenceBottom();
@@ -367,8 +397,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!isAdmin) initComposer();
   await loadPosts();
 
-  // Auto-refresh timeline (príspevky + komentáre) každých 6 s
-  const startTL = () => { if (!tlTimer) tlTimer = setInterval(loadPosts, 6000); };
+  // Auto-refresh timeline každých 6 s – bez skoku a šetrne
+  const tick = () => {
+    // vynechaj, keď je karta skrytá, keď používateľ práve scrolluje alebo píše
+    if (document.hidden || userScrollActive || isTyping()) return;
+    loadPosts({ preserveScroll: true });
+  };
+  const startTL = () => { if (!tlTimer) tlTimer = setInterval(tick, 6000); };
   const stopTL  = () => { if (tlTimer) { clearInterval(tlTimer); tlTimer = null; } };
   startTL();
 
