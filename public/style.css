@@ -436,3 +436,19 @@ input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--lc-a
   body.mode-thread .list-panel { display:none; }
   body.mode-thread .thread-panel { display:block; }
 }
+
+/* === Dashboard header pills – jemné zjednotenie vzhľadu (globálne nezasahuje) === */
+.pill { font-weight: 700; letter-spacing: .2px; }
+.pill-danger { background: #ff4d4d !important; border-color: #ff4d4d !important; color: #fff !important; }
+.pill:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,.25); }
+.nav-track { -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+             mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%); }
+
+/* === Timeline – čitateľnosť príspevkov a komentárov =================== */
+.post, 
+.post * {
+  color: #111 !important;          /* všetok text v príspevku čierny */
+}
+.post strong {
+  color: #0c1f4b !important;       /* meno autora nechávame modré */
+}

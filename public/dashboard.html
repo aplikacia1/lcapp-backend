@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lištový dashboard</title>
   <link rel="stylesheet" href="style.css" />
+
   <style>
     :root{
       --hdr-h: 96px;    /* reálnu výšku dopočíta JS */
@@ -18,13 +19,16 @@
       position: fixed; inset: 0 0 auto 0; z-index: 100;
       background: #0c1f4b; border-bottom: 1px solid rgba(255,255,255,.15);
     }
-    .app-header-inner{ max-width: 980px; margin: 0 auto; padding: 8px var(--pad-x); }
+    .app-header-inner{
+      max-width: 980px; margin: 0 auto; padding: 8px var(--pad-x);
+      display:flex; flex-direction:column; align-items:center;
+    }
 
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* Vodorovne posúvateľný rad tlačidiel – vidno 3, 4. je „za okrajom“ */
-    .nav-scroller{ padding: 0 var(--pad-x); }
+    /* Vodorovne posúvateľný rad tlačidiel – mobil */
+    .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
       display:flex; gap: var(--gap);
       overflow-x:auto; overflow-y:hidden;
@@ -41,24 +45,27 @@
       border:1px solid rgba(255,255,255,.35);
       background:#fff; color:#0c1f4b; cursor:pointer;
       scroll-snap-align:start;
+      white-space:nowrap;
     }
     .pill-danger{ background:#000; color:#fff; border-color:#fff; }
 
-    /* Desktop: všetky 4 vedľa seba (bez scrollu) a prirodzená šírka */
+    /* Desktop: všetky 4 vedľa seba (bez scrollu) a centrované */
     @media (min-width: 768px){
-      .nav-track{ overflow: visible; }
+      .nav-track{ overflow: visible; justify-content:center; }
       .pill{ flex: 0 0 auto; width: auto !important; }
     }
 
     /* Rezerva pod pevnú hlavičku */
     body{ padding-top: var(--hdr-h); }
 
-    /* ===== Zvyšok zostáva ako predtým ===== */
+    /* Zvyšok (informácie + formuláre) nechávame pôvodne */
     .scrollable-body .main-content{
       padding-bottom: calc(var(--banner-h, 0px) + 24px);
+      max-width: 500px;
+      margin: 0 auto;
     }
 
-    /* MarSab® badge – nad bannerom (banners.js nastaví --banner-h) */
+    /* MarSab® badge – nad bannerom */
     .brand-badge{
       position: fixed; left: 16px; bottom: calc(var(--banner-h, 0px) + 16px); z-index: 120;
       display: inline-flex; align-items: center; gap: 8px;
@@ -80,7 +87,7 @@
 </head>
 <body>
 
-  <!-- HLAVIČKA (logo + 3 viditeľné tlačidlá, 4. posunom) -->
+  <!-- HLAVIČKA (logo + vycentrované tlačidlá) -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
@@ -97,7 +104,7 @@
     </div>
   </header>
 
-  <!-- SLOT pre banner (presne ako na katalógu) -->
+  <!-- SLOT pre banner -->
   <div id="bannerSlot" aria-live="polite"></div>
 
   <!-- OBSAH -->
@@ -170,7 +177,7 @@
   <!-- LOGIKA -->
   <script src="dashboard.js"></script>
 
-  <!-- Bannery (rovnako ako na katalógu) -->
+  <!-- Bannery -->
   <script src="banners.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', ()=>{

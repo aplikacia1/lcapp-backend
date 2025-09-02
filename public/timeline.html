@@ -14,69 +14,83 @@
     :root{
       --max-w: 820px;
       --gap: 16px;
-      --header-h: 72px;
+      --hdr-h: 96px;          /* reálna výška sa dopočíta v skripte nižšie */
       --ui-bg: #eef6ff;
       --ui-border: #bcd6ff;
       --ui-text: #0c1f4b;
       --ui-focus: #6aa8ff;
       --ui-bg-hover: #e3f0ff;
+      --pad-x: 12px;
+      --nav-gap: 8px;
+      --visible: 3;          /* mobil: vidno 3 tlačidlá, 4. posunom */
     }
     html,body{margin:0;padding:0}
-    body{background:#0c1f4b;}
+    body{background:#0c1f4b; color:#fff; padding-top:var(--hdr-h);}
 
-    /* HEADER */
-    .header-timeline{
-      position: sticky; top: 0; z-index: 60;
-      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.12);
-      height:var(--header-h); display:flex; align-items:center; justify-content:center;
+    /* === Jednotná pevná hlavička (ako dashboard/catalog/products) === */
+    .app-header{
+      position: fixed; inset: 0 0 auto 0; z-index: 100;
+      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
     }
-    .header-inner{
-      width:100%; max-width:var(--max-w); padding:0 var(--gap);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    .app-header-inner{
+      max-width: var(--max-w); margin: 0 auto; padding: 8px var(--pad-x);
+      display:flex; flex-direction:column; align-items:center;
     }
-    .logo-small{height:32px}
-    .user-info{color:#fff; font-weight:600}
-    .btn{
-      height:40px; display:inline-flex; align-items:center; gap:8px;
-      padding:0 14px; border-radius:12px; border:1px solid rgba(255,255,255,.3);
+    .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
+    .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
+
+    /* nav pills (mobil – posúvateľné) */
+    .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
+    .nav-track{
+      display:flex; gap: var(--nav-gap);
+      overflow-x:auto; overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior-x:contain;
+      scrollbar-width:none;
+      scroll-snap-type:x mandatory;
+    }
+    .nav-track::-webkit-scrollbar{ display:none; }
+
+    .pill{
+      flex: 0 0 calc((100% - (var(--nav-gap) * (var(--visible) - 1))) / var(--visible));
+      height:38px; padding:8px 14px; border-radius:16px;
+      border:1px solid rgba(255,255,255,.35);
       background:#fff; color:#0c1f4b; cursor:pointer;
+      scroll-snap-align:start; white-space:nowrap;
+      display:inline-flex; align-items:center; gap:8px;
     }
-    .btn--danger{ background:#ff6b6b; color:#fff; border:none }
-    .btn--accent{ background:#ffe37a; border:1px solid #ffd34d; color:#493a00 }
-    .btn--accent:hover{ filter:brightness(0.97); }
+    .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
+    @media (min-width: 768px){
+      .nav-track{ overflow: visible; justify-content:center; }
+      .pill{ flex: 0 0 auto; width: auto !important; }
+    }
 
-    /* LAYOUT */
+    /* ===== Layout hlavného obsahu ===== */
     .main-content{
       width:100%; max-width:var(--max-w); margin:24px auto; padding:0 var(--gap);
-      padding-bottom:120px; /* composer's height fallback */
+      padding-bottom:120px; /* composer reserve */
     }
 
-    /* RIGHT PANEL: Users (PC only) */
+    /* RIGHT PANEL – online užívatelia (PC) */
     .presence-panel{
-      position:fixed; right:24px; top:calc(var(--header-h) + 16px);
-      width:260px; max-height:calc(100vh - var(--header-h) - 120px);
+      position:fixed; right:24px; top:calc(var(--hdr-h) + 16px);
+      width:260px; max-height:calc(100vh - var(--hdr-h) - 120px);
       overflow:auto; background:#fff; border:1px solid #e8e8e8; border-radius:12px;
-      box-shadow:0 2px 10px rgba(0,0,0,.06); padding:10px; z-index:50;
+      box-shadow:0 2px 10px rgba(0,0,0,.06); padding:10px; z-index:50; color:#111;
     }
     .presence-title{ font-weight:700; color:#0c1f4b; margin-bottom:6px }
     .presence-list{ list-style:none; padding:0; margin:0 }
     .presence-item{ display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px dotted #eee }
     .presence-item:last-child{ border-bottom:none }
-    .dot{
-      width:10px; height:10px; border-radius:50%;
-      background:#bbb; box-shadow:0 0 0 2px #fff inset, 0 0 0 1px #ddd;
-    }
+    .dot{ width:10px; height:10px; border-radius:50%; background:#bbb; box-shadow:0 0 0 2px #fff inset, 0 0 0 1px #ddd; }
     .dot.online{ background:#22c55e }
-    .presence-name{ color:#111; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .presence-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-    @media (max-width:1200px){
-      .presence-panel{ display:none; }
-    }
+    @media (max-width:1200px){ .presence-panel{ display:none; } }
 
-    /* FEED */
-    .post{ background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px }
+    /* Feed / posts */
+    .post{ background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px; color:#111 }
     .post strong{ color:#0c1f4b }
-    .post p{ color:#111; }
     .post-image{ max-width:100%; height:auto; border-radius:10px; margin-top:8px }
     .post-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
     .comments{ margin-top:8px }
@@ -93,7 +107,6 @@
       flex:1 1 auto; min-width:160px; height:40px; padding:8px 12px;
       background:var(--ui-bg); color:#111 !important;
       border:1px solid var(--ui-border); border-radius:10px; box-sizing:border-box;
-      appearance:none !important; -webkit-appearance:none !important;
     }
     .commentForm input[type="text"]::placeholder{ color:#51607f }
     .commentForm input[type="text"]:focus{
@@ -105,9 +118,9 @@
     }
     .commentForm button:hover{ background:var(--ui-bg-hover); }
 
-    /* composer dole */
+    /* Composer dole */
     .composer-bar{
-      position:fixed; left:0; right:0; bottom:0; z-index:9999;
+      position:fixed; left:0; right:0; bottom:0; z-index:55;
       background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
       display:flex; justify-content:center; padding:10px 12px;
     }
@@ -123,7 +136,6 @@
     #timelineForm .composer-input{
       flex:1 1 auto; min-width:0; height:28px; padding:0 8px; border:none; outline:none;
       background:transparent; color:#111 !important; caret-color:#111 !important; font-weight:500;
-      appearance:none !important; -webkit-appearance:none !important;
     }
     #composerCount{ margin-left:6px; font-size:12px; color:#667; white-space:nowrap; }
 
@@ -142,9 +154,9 @@
       #composerCount{ font-size:11px; }
     }
 
-    /* MarSab® – badge (posunutý nad composer) */
+    /* MarSab® – badge (nad composerom) */
     .brand-badge{
-      position: fixed; left: 16px; bottom: 120px; z-index: 70; /* nad composerom */
+      position: fixed; left: 16px; bottom: 120px; z-index: 70;
       display: inline-flex; align-items: center; gap: 8px;
       background: #000; color:#fff; text-decoration:none;
       border: 2px solid #fff; border-radius: 14px; padding: 8px 10px;
@@ -152,7 +164,6 @@
     }
     .brand-badge img{ height: 24px; width:auto; display:block; }
     .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
-
     @media (max-width:480px){
       .brand-badge{ left:12px; bottom: 140px; padding:6px 8px; border-radius:12px; }
       .brand-badge img{ height:20px; }
@@ -162,22 +173,24 @@
 </head>
 <body>
 
-  <!-- HLAVIČKA -->
-  <div class="header-timeline">
-    <div class="header-inner">
-      <img src="logo_lc.jpg" alt="Logo" class="logo-small">
-      <div class="user-info" id="loggedUser">Prihlásený ako: </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn" onclick="backToCatalog()">Späť</button>
-        <button class="btn btn--accent" onclick="openMessages()">
-          Správy
-          <span id="msgBadge"
-                style="display:none; margin-left:6px; min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center;"></span>
-        </button>
-        <button class="btn btn--danger" onclick="logout()" style="display:none;">Odhlásiť sa</button>
-      </div>
+  <!-- HLAVIČKA (zjednotená) -->
+  <header class="app-header" role="banner">
+    <div class="app-header-inner">
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
+      <div class="user-chip" id="loggedUser">Prihlásený ako: </div>
+
+      <nav class="nav-scroller" aria-label="Hlavné sekcie">
+        <div class="nav-track">
+          <button class="pill" id="goBackBtn">Späť</button>
+          <button class="pill" id="openMessagesBtn">
+            Správy
+            <span id="msgBadge" style="display:none; min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center;"></span>
+          </button>
+          <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
+        </div>
+      </nav>
     </div>
-  </div>
+  </header>
 
   <!-- BOČNÝ PANEL – ONLINE UŽÍVATELIA (PC) -->
   <aside id="presencePanel" class="presence-panel">
@@ -196,7 +209,6 @@
       <form id="timelineForm" class="composer" autocomplete="off" enctype="multipart/form-data">
         <div class="composer-row">
           <div class="input-group">
-            <!-- ✳️ pridané data-preserve, aby pri live aktualizácii nezmizol rozpísaný text -->
             <input id="postContent" class="composer-input" type="text" placeholder="Napíš niečo..." maxlength="300" data-preserve />
             <span id="composerCount">0 / 300</span>
             <input id="postImage" type="file" accept="image/*" hidden />
@@ -214,12 +226,36 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- ✳️ iba tento jeden riadok navyše (už u teba bol) -->
+  <!-- iba tento jeden riadok navyše -->
   <script src="/js/config.js"></script>
 
-  <!-- ✳️ nový skript: badge neprečítaných + auto-aktualizácia -->
+  <!-- badge neprečítaných + auto-aktualizácia -->
   <script src="/js/unread-badge.js"></script>
 
+  <!-- Timeline logika (nezmenené) -->
   <script src="timeline.js"></script>
+
+  <!-- dopočet výšky hlavičky + navigácia s prenesením emailu -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      /* rezerva pod pevnú hlavičku */
+      const header = document.querySelector('.app-header');
+      const setHdrH = () => {
+        if (!header) return;
+        const h = header.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--hdr-h', h + 'px');
+      };
+      setHdrH();
+      window.addEventListener('resize', setHdrH);
+
+      /* navigácia s emailom */
+      const email = new URLSearchParams(window.location.search).get("email");
+      const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+
+      document.getElementById('goBackBtn')?.addEventListener('click', () => go('catalog.html'));
+      document.getElementById('openMessagesBtn')?.addEventListener('click', () => go('messages.html'));
+      document.getElementById('logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
+    });
+  </script>
 </body>
 </html>

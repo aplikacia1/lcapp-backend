@@ -5,26 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Produkty v kategórii</title>
   <link rel="stylesheet" href="style.css"/>
+
   <style>
-    body{background:#0c1f4b;color:#fff;margin:0}
-    .header{display:flex;align-items:center;gap:12px;justify-content:center;height:72px;border-bottom:1px solid rgba(255,255,255,.12)}
-    .header-inner{width:100%;max-width:980px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
-    .logo-small{height:32px}
-    .nav{display:flex;gap:8px}
-    .btn{height:40px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:#fff;color:#0c1f4b;cursor:pointer}
-    .btn--danger{background:#ff6b6b;color:#fff;border:none}
+    :root{
+      --hdr-h: 96px;  /* reálna výška sa dopočíta v skripte nižšie */
+      --pad-x: 12px;
+      --gap: 8px;
+      --visible: 3;   /* mobil: vidno 3 tlačidlá, 4. posunom */
+    }
 
-    .main{max-width:980px;margin:16px auto;padding:0 16px}
-    .search{background:#eef6ff;border:1px solid #bcd6ff;border-radius:12px;padding:10px 12px;color:#0c1f4b;width:100%}
+    body{ background:#0c1f4b; color:#fff; margin:0; }
 
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:16px}
-    .card{background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;color:#0c1f4b;cursor:pointer;display:flex;flex-direction:column}
-    .card-img{width:100%;height:150px;object-fit:cover;background:#f5f7fb}
-    .card-body{padding:10px 12px}
-    .card-title{font-weight:700;margin:0 0 4px}
-    .price{font-size:14px;color:#274}
-    .rating{font-size:14px;color:#333}
-    .empty{opacity:.8;margin-top:24px}
+    /* === Jednotná pevná hlavička (ako dashboard/catalog) === */
+    .app-header{
+      position: fixed; inset: 0 0 auto 0; z-index: 100;
+      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
+    }
+    .app-header-inner{
+      max-width: 1100px; margin: 0 auto; padding: 8px var(--pad-x);
+      display:flex; flex-direction:column; align-items:center;
+    }
+    .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
+    .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
+
+    /* Vodorovne posúvateľné tlačidlá (mobil) */
+    .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
+    .nav-track{
+      display:flex; gap: var(--gap);
+      overflow-x:auto; overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior-x:contain;
+      scrollbar-width:none;
+      scroll-snap-type:x mandatory;
+    }
+    .nav-track::-webkit-scrollbar{ display:none; }
+
+    .pill{
+      flex: 0 0 calc((100% - (var(--gap) * (var(--visible) - 1))) / var(--visible));
+      height:38px; padding:8px 14px; border-radius:16px;
+      border:1px solid rgba(255,255,255,.35);
+      background:#fff; color:#0c1f4b; cursor:pointer;
+      scroll-snap-align:start; white-space:nowrap;
+    }
+    .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
+
+    /* Desktop: bez scrollu, centrované */
+    @media (min-width: 768px){
+      .nav-track{ overflow: visible; justify-content:center; }
+      .pill{ flex: 0 0 auto; width: auto !important; }
+    }
+
+    /* Rezerva pod pevnú hlavičku */
+    body{ padding-top: var(--hdr-h); }
+
+    /* === Obsah produktov === */
+    .main{ max-width:1100px; margin:16px auto; padding:0 16px; }
+    .search{
+      background:#eef6ff; border:1px solid #bcd6ff; border-radius:12px;
+      padding:10px 12px; color:#0c1f4b; width:100%;
+    }
+
+    .grid{
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+      gap:16px; margin-top:16px
+    }
+    .card{
+      background:#fff; border:1px solid #eee; border-radius:12px; overflow:hidden;
+      color:#0c1f4b; cursor:pointer; display:flex; flex-direction:column;
+      box-shadow:0 8px 18px rgba(0,0,0,.12);
+      transition:transform .15s, box-shadow .15s;
+    }
+    .card:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.18); }
+    .card-img{ width:100%; height:150px; object-fit:cover; background:#f5f7fb }
+    .card-body{ padding:10px 12px }
+    .card-title{ font-weight:700; margin:0 0 4px }
+    .price{ font-size:14px; color:#274 }
+    .rating{ font-size:14px; color:#333 }
+    .empty{ opacity:.8; margin-top:24px }
 
     /* MarSab® badge */
     .brand-badge{
@@ -44,16 +101,21 @@
   </style>
 </head>
 <body>
-  <header class="header">
-    <div class="header-inner">
-      <img src="logo_lc.jpg" class="logo-small" alt="Logo">
-      <div id="userGreeting">Prihlásený:</div>
-      <div class="nav">
-        <button id="accountBtn" class="btn">Účet</button>
-        <button id="catalogBtn" class="btn">Katalóg</button>
-        <button id="timelineBtn" class="btn">Lištobook</button>
-        <button id="logoutBtn" class="btn btn--danger">Odhlásiť sa</button>
-      </div>
+
+  <!-- HLAVIČKA (rovnaká ako dashboard/catalog) -->
+  <header class="app-header" role="banner">
+    <div class="app-header-inner">
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
+      <div class="user-chip" id="userGreeting">Prihlásený:</div>
+
+      <nav class="nav-scroller" aria-label="Hlavné sekcie">
+        <div class="nav-track">
+          <button class="pill" id="accountBtn">Účet</button>
+          <button class="pill" id="catalogBtn">Katalóg</button>
+          <button class="pill" id="timelineBtn">Lištobook</button>
+          <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
+        </div>
+      </nav>
     </div>
   </header>
 
@@ -69,6 +131,36 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
+  <!-- dopočet výšky hlavičky (rezerva pre body) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const header = document.querySelector('.app-header');
+      const setHdrH = () => {
+        if (!header) return;
+        const h = header.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--hdr-h', h + 'px');
+      };
+      setHdrH();
+      window.addEventListener('resize', setHdrH);
+    });
+  </script>
+
+  <!-- iba tento jeden riadok navyše -->
+  <script src="/js/config.js"></script>
+
+  <!-- LOGIKA STRÁNKY (nezmenené) -->
   <script src="products.js"></script>
+
+  <!-- navigácia – prenes email v URL (rovnako ako na dashboarde/katalógu) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const email = new URLSearchParams(window.location.search).get("email");
+      const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+      document.getElementById("accountBtn")?.addEventListener("click", ()=> go("dashboard.html"));
+      document.getElementById("catalogBtn")?.addEventListener("click", ()=> go("catalog.html"));
+      document.getElementById("timelineBtn")?.addEventListener("click", ()=> go("timeline.html"));
+      document.getElementById("logoutBtn")?.addEventListener("click", () => { window.location.href = "index.html"; });
+    });
+  </script>
 </body>
 </html>

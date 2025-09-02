@@ -8,31 +8,55 @@
 
   <style>
     :root{
-      --hdr-h: 96px; /* reálna výška sa dopočíta v JS nižšie */
+      --hdr-h: 96px;  /* reálna výška sa dopočíta v skripte nižšie */
+      --pad-x: 12px;
+      --gap: 8px;
+      --visible: 3;   /* mobil: vidno 3 tlačidlá, 4. posunom */
     }
 
-    /* === PEVNÁ HLAVIČKA === */
-    .header{
+    /* === Jednotná pevná hlavička (ako na dashboarde) === */
+    .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 100;
-      display:flex; align-items:center; justify-content:center; gap:12px;
-      padding:8px 12px;
       background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
     }
-    .header .right{ margin-left:auto; display:flex; gap:8px; align-items:center; }
-    .logo-small{ height:48px; object-fit:contain; display:block; }
-    #userGreeting{ color:#cfe2ff; font-size:.95rem; }
-
-    .btn{
-      height:40px; display:inline-flex; align-items:center; gap:8px;
-      padding:0 14px; border-radius:12px; border:1px solid rgba(255,255,255,.3);
-      background:#fff; color:#0c1f4b; cursor:pointer;
+    .app-header-inner{
+      max-width: 1100px; margin: 0 auto; padding: 8px var(--pad-x);
+      display:flex; flex-direction:column; align-items:center;
     }
-    .btn--danger{ background:#ff6b6b; color:#fff; border:none }
+    .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
+    .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
+
+    /* Vodorovne posúvateľné tlačidlá (mobil) */
+    .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
+    .nav-track{
+      display:flex; gap: var(--gap);
+      overflow-x:auto; overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior-x:contain;
+      scrollbar-width:none;
+      scroll-snap-type:x mandatory;
+    }
+    .nav-track::-webkit-scrollbar{ display:none; }
+
+    .pill{
+      flex: 0 0 calc((100% - (var(--gap) * (var(--visible) - 1))) / var(--visible));
+      height:38px; padding:8px 14px; border-radius:16px;
+      border:1px solid rgba(255,255,255,.35);
+      background:#fff; color:#0c1f4b; cursor:pointer;
+      scroll-snap-align:start; white-space:nowrap;
+    }
+    .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
+
+    /* Desktop: bez scrollu, centrované */
+    @media (min-width: 768px){
+      .nav-track{ overflow: visible; justify-content:center; }
+      .pill{ flex: 0 0 auto; width: auto !important; }
+    }
 
     /* Rezerva pod pevnú hlavičku */
     body{ padding-top: var(--hdr-h); }
 
-    /* Hlava katalógu + vyhľadávanie */
+    /* Hlavička katalógu + vyhľadávanie */
     .catalog-head{
       max-width:1100px; margin:18px auto 8px; padding:0 16px;
       display:flex; align-items:center; gap:16px; justify-content:space-between;
@@ -44,11 +68,10 @@
       padding:0 12px; background:#eaf2ff;
     }
 
-    /* Grid kategórií (dlaždice – zvyšok rieši style.css) */
+    /* Grid kategórií (dlaždice) */
     .grid-wrap{ max-width:1100px; margin:0 auto; padding:12px 16px 32px; }
     .empty{ opacity:.8; padding:24px 8px; }
 
-    /* 🗂️ Dlaždice kategórií */
     .card-grid{
       display:grid;
       grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
@@ -67,14 +90,13 @@
     .price{ font-size:13px; opacity:.85; margin-top:4px; }
     .rating{ font-size:12px; opacity:.75; }
 
-    /* mobil – 2 stĺpce, nižší obrázok */
     @media (max-width:480px){
       .card-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
       .card-img{ height:110px; }
       .card-title{ font-size:14px; }
     }
 
-    /* MarSab® badge – posuň nad pevný banner */
+    /* MarSab® badge – nad pevným bannerom */
     .brand-badge{
       position: fixed; left: 16px; bottom: calc(var(--banner-h, 0px) + 16px); z-index: 120;
       display: inline-flex; align-items: center; gap: 8px;
@@ -93,18 +115,23 @@
 </head>
 <body>
 
-  <!-- HLAVIČKA (pevná) -->
-  <div class="header">
-    <img src="logo_lc.jpg" alt="Logo" class="logo-small"/>
-    <div id="userGreeting">Prihlásený:</div>
-    <div class="right">
-      <button class="btn" id="accountBtn">Účet</button>
-      <button class="btn" id="timelineBtn">Lištobook</button>
-      <button class="btn btn--danger" id="logoutBtn">Odhlásiť sa</button>
-    </div>
-  </div>
+  <!-- HLAVIČKA (rovnaká ako dashboard) -->
+  <header class="app-header" role="banner">
+    <div class="app-header-inner">
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
+      <div class="user-chip" id="userGreeting">Prihlásený:</div>
 
-  <!-- SLOT pre banner (bude FIXED dole) -->
+      <nav class="nav-scroller" aria-label="Hlavné sekcie">
+        <div class="nav-track">
+          <button class="pill" id="accountBtn">Účet</button>
+          <button class="pill" id="timelineBtn">Lištobook</button>
+          <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- SLOT pre banner (FIXED dole) -->
   <div id="bannerSlot" aria-live="polite"></div>
 
   <!-- HLAVIČKA KATALÓGU + HĽADANIE -->
@@ -127,15 +154,15 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- Po načítaní nastav presnú výšku hlavičky do --hdr-h (rezerva pre body) -->
+  <!-- dopočet výšky hlavičky (rezerva pre body) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const hdr = document.querySelector('.header');
-      function setHdrH(){
-        if(!hdr) return;
-        const h = hdr.getBoundingClientRect().height;
+      const header = document.querySelector('.app-header');
+      const setHdrH = () => {
+        if (!header) return;
+        const h = header.getBoundingClientRect().height;
         document.documentElement.style.setProperty('--hdr-h', h + 'px');
-      }
+      };
       setHdrH();
       window.addEventListener('resize', setHdrH);
     });
@@ -144,7 +171,7 @@
   <!-- iba tento jeden riadok navyše -->
   <script src="/js/config.js"></script>
 
-  <!-- LOGIKA STRÁNKY -->
+  <!-- LOGIKA STRÁNKY (nezmenené) -->
   <script src="catalog.js"></script>
 
   <!-- BANNERY: render + rotácia (FIXED dole) -->
@@ -159,6 +186,15 @@
         heightMobile: 120,
         interval: 30000
       });
+    });
+
+    // navigácia – zachová email v URL (rovnako ako na dashboarde)
+    document.addEventListener('DOMContentLoaded', () => {
+      const email = new URLSearchParams(window.location.search).get("email");
+      const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+      document.getElementById("accountBtn")?.addEventListener("click", ()=> go("dashboard.html"));
+      document.getElementById("timelineBtn")?.addEventListener("click", ()=> go("timeline.html"));
+      document.getElementById("logoutBtn")?.addEventListener("click", () => { window.location.href = "index.html"; });
     });
   </script>
 </body>
