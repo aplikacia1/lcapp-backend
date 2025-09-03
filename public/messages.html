@@ -2,18 +2,15 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Súkromné správy</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 
-  <!-- (voliteľné) shim – ak by starý messages.js pristupoval k neexistujúcim ID -->
+  <!-- SHIM pre starý messages.js (ponechané) -->
   <script>
     (function(){
       const __stubs = new Map();
-      const makeStub = (id) => {
-        if (__stubs.has(id)) return __stubs.get(id);
-        const el = document.createElement('button'); el.id = id; __stubs.set(id, el); return el;
-      };
+      const makeStub = (id) => { if (__stubs.has(id)) return __stubs.get(id); const el=document.createElement('button'); el.id=id; __stubs.set(id,el); return el; };
       const g = Document.prototype.getElementById, q = Document.prototype.querySelector;
       Document.prototype.getElementById = function(id){ const n=g.call(this,id); return n || (id?makeStub(id):n); };
       Document.prototype.querySelector = function(sel){ const n=q.call(this,sel); return n || (sel && sel[0]==='#' ? makeStub(sel.slice(1)) : null); };
@@ -23,172 +20,132 @@
 
   <style>
     :root{
-      --max-w: 1100px;
+      --max-w: 1120px;
       --gap: 16px;
-      --hdr-h: 96px;   /* reálna výška dopočítaná nižšie */
-      --pad-x: 12px;
+      --hdr-h: 96px;
       --nav-gap: 8px;
-      --visible: 3;
-
-      /* UI farby (svetlý vstup v tmavom prostredí) */
-      --ui-bg: #eef6ff;
-      --ui-border: #bcd6ff;
-      --ui-text: #0c1f4b;
-      --ui-bg-hover:#e3f0ff;
-
-      --composer-h: 86px;
+      --ui-bg: #eef6ff; --ui-border: #bcd6ff; --ui-text:#0c1f4b; --ui-hover:#e3f0ff;
+      --panel-border: rgba(255,255,255,.12);
+      --list-w: 340px;      /* šírka ľavého panelu na desktope */
+      --composer-h: 84px;   /* rezerva dolu */
     }
 
-    html, body { margin:0; padding:0; height:100%; }
-    body{ background:#0c1f4b; color:#fff; padding-top: var(--hdr-h); }
+    html,body{margin:0;padding:0;height:100%}
+    body{background:#0c1f4b; color:#fff; padding-top:var(--hdr-h); overflow:hidden;}
+    body.no-scroll{ overflow:hidden; }
 
-    /* === Jednotná pevná hlavička (ako dashboard) === */
-    .app-header{
-      position: fixed; inset: 0 0 auto 0; z-index: 100;
-      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
-    }
-    .app-header-inner{
-      max-width: var(--max-w); margin: 0 auto; padding: 8px var(--pad-x);
-      display:flex; flex-direction:column; align-items:center; position:relative;
-    }
-    .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
-    .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
+    /* ===== Header (zjednotený) ===== */
+    .app-header{ position:fixed; inset:0 0 auto 0; z-index:1000; background:#0c1f4b; border-bottom:1px solid var(--panel-border); }
+    .app-header-inner{ max-width:var(--max-w); margin:0 auto; padding:8px var(--gap); display:flex; flex-direction:column; align-items:center; position:relative; }
+    .logo-small{ height:48px; margin:2px auto 6px; display:block; }
+    .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
 
-    /* Hamburgre (mobil) */
-    .nav-toggle{ display:none; }
-    .burger{
-      position:absolute; left:12px; top:10px;
-      width:44px; height:44px; display:none; align-items:center; justify-content:center;
-      border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; cursor:pointer;
-      background:transparent; z-index:101;
-    }
+    /* hamburgre (len mobil) */
+    .nav-toggle{display:none}
+    .burger{ position:absolute; left:12px; top:10px; width:44px; height:44px; display:none; place-content:center; border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; background:transparent; }
     .burger svg{ width:22px; height:22px; }
-    @media (max-width: 767.98px){ .burger{ display:flex; } }
+    @media (max-width: 900px){ .burger{ display:grid; } }
 
-    /* Navigačné "pills" – desktop aj mobil (na mobile posúvateľné) */
-    .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
-    .nav-track{
-      display:flex; gap: var(--nav-gap);
-      overflow-x:auto; overflow-y:hidden;
-      -webkit-overflow-scrolling:touch;
-      overscroll-behavior-x:contain;
-      scrollbar-width:none;
-      scroll-snap-type:x mandatory;
-      justify-content:center;
-    }
-    .nav-track::-webkit-scrollbar{ display:none; }
-
-    .pill{
-      flex: 0 0 calc((100% - (var(--nav-gap) * (var(--visible) - 1))) / var(--visible));
-      height:38px; padding:8px 14px; border-radius:16px;
-      border:1px solid rgba(255,255,255,.35);
-      background:#fff; color:#0c1f4b; cursor:pointer;
-      scroll-snap-align:start; white-space:nowrap; font-weight:700; letter-spacing:.2px;
-      display:inline-flex; align-items:center; justify-content:center;
-    }
+    .nav-scroller{ padding:0 var(--gap); width:100%; }
+    .nav-track{ display:flex; gap:8px; justify-content:center; }
+    .pill{ height:38px; padding:8px 14px; border-radius:16px; border:1px solid rgba(255,255,255,.35); background:#fff; color:#0c1f4b; font-weight:700; letter-spacing:.2px; }
     .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
-    @media (min-width:768px){ .pill{ flex:0 0 auto; width:auto !important; } }
 
-    /* Off-canvas menu z nav-scrolleru (mobil) */
-    @media (max-width: 767.98px){
-      .nav-scroller{
-        position: fixed; top: 0; left: 0; height: 100vh;
-        width: min(80vw, 320px);
-        background: #0c1f4b;
-        padding: 88px 16px 16px;
-        box-shadow: 24px 0 36px rgba(0,0,0,.35);
-        transform: translateX(-100%);
-        transition: transform .25s ease;
-      }
-      .nav-track{ flex-direction: column; gap: 10px; overflow: hidden; scroll-snap-type: none; align-items: stretch; }
-      .pill{ width:100% !important; height:44px; border-radius:14px; font-size:1rem; }
-      .nav-toggle:checked ~ header .nav-scroller{ transform: translateX(0); }
-    }
-
-    /* Pracovný priestor: medzi headerom a composerom */
+    /* ===== Layout ===== */
     .wrap{
-      max-width:var(--max-w); margin:18px auto 0; padding:0 var(--gap);
-      min-height: calc(100vh - var(--hdr-h) - var(--composer-h) - 18px);
+      max-width:var(--max-w); margin:0 auto;
+      height: calc(100vh - var(--hdr-h));  /* presný pracovný priestor */
+      display:grid; grid-template-columns: var(--list-w) 1fr; gap:var(--gap);
+      padding:16px; box-sizing:border-box;
     }
-    .grid{ display:grid; gap:16px; grid-template-columns:1fr; }
-    @media (min-width:900px){ .grid{ grid-template-columns: 1fr 2fr; } }
+    @media (max-width: 900px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
 
-    .card{
-      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12);
-      border-radius:14px; overflow:hidden; display:flex; flex-direction:column; min-height:0;
-    }
-    .card .head{
-      padding:10px 12px; font-weight:700;
-      border-bottom:1px solid rgba(255,255,255,.12);
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .card .body{ padding:10px; flex:1 1 auto; overflow:auto; min-height:0; }
+    /* ľavý panel (zoznam konverzácií) */
+    .card{ background:rgba(255,255,255,.04); border:1px solid var(--panel-border); border-radius:14px; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+    .card .head{ padding:10px 12px; font-weight:700; border-bottom:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; }
+    .card .body{ flex:1 1 auto; overflow:auto; min-height:0; }
 
-    .conv-list .conv-item{
-      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-      border-radius:12px; padding:10px; margin-bottom:8px; cursor:pointer;
-    }
-    .conv-list .conv-item:hover{ background:rgba(255,255,255,.09); }
-    .conv-name{ font-weight:700; display:flex; align-items:center; gap:8px; }
-    .conv-name .badge{
-      background:#ffcc00; color:#111; border-radius:999px; padding:0 8px; font-weight:800; font-size:12px;
-      display:inline-flex; align-items:center; justify-content:center; height:20px; min-width:20px;
-    }
-    .conv-last{ opacity:.85; font-size:13px; margin-top:2px; }
+    .conv-list{ padding:8px; display:flex; flex-direction:column; gap:8px; }
+    .conv-item{ background:rgba(255,255,255,.06); border:1px solid var(--panel-border); border-radius:12px; padding:10px; cursor:pointer; }
+    .conv-item:hover{ background:rgba(255,255,255,.10); }
+    .conv-name{ font-weight:700; color:#fff; display:flex; align-items:center; gap:8px; }
+    .conv-name .badge{ min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center; }
+    .conv-last{ opacity:.85; font-size:13px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    .thread .msg{ background:#fff; color:#111; border-radius:12px; padding:10px 12px; margin:8px 0; }
-    .thread .msg.me{ background:#dff1ff; }
-    .thread .msg .meta{ font-size:12px; opacity:.75; display:flex; justify-content:space-between; margin-bottom:4px; }
+    /* pravý panel (vlákno) */
+    .thread-panel{ display:flex; flex-direction:column; min-height:0; }
+    .thread{ padding:10px; display:flex; flex-direction:column; gap:10px; color:#111; }
+    .thread-wrap{ flex:1 1 auto; overflow:auto; background:#fff; border-top:1px solid #eee; }
+    .msg{ background:#f5f7ff; border:1px solid #e6eaff; border-radius:12px; padding:10px; max-width:75%; }
+    .msg.me{ align-self:flex-end; background:#e8f4ff; }
+    .msg .meta{ font-size:12px; color:#445; display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; }
 
-    /* Spodný composer */
-    .composer-bar{
-      position:fixed; left:0; right:0; bottom:0; z-index:55;
-      background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
-      display:flex; justify-content:center; padding:10px 12px;
-    }
+    /* composer */
+    .composer-bar{ position:fixed; left:0; right:0; bottom:0; z-index:950; background:#0c1f4b; border-top:1px solid var(--panel-border); display:flex; justify-content:center; padding:10px 12px; }
     .composer-wrap{ width:100%; max-width:var(--max-w); padding:0 var(--gap); }
     .composer{ background:#fff; border:1px solid #eee; border-radius:14px; padding:10px; }
     .composer-row{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; }
-
     .input-group{ display:flex; align-items:center; gap:8px; width:100%; background:var(--ui-bg); border:1px solid var(--ui-border); border-radius:12px; padding:6px 8px; box-sizing:border-box; }
-    .composer-input{ height:28px; padding:0 8px; border:none; outline:none; background:transparent; color:#111 !important; }
-    #toName{ flex:0 0 220px; }
-    #composerText{ flex:1 1 auto; min-width:0; resize:none; caret-color:#111; font-weight:500; }
-    #composerCount{ margin-left:6px; font-size:12px; color:#667; white-space:nowrap; }
+    #toName{ flex:0 0 220px; max-width:220px; }
+    #composerText{ flex:1 1 auto; min-width:0; height:28px; border:none; background:transparent; outline:none; color:#111; font-weight:500; }
+    #composerCount{ font-size:12px; color:#667; white-space:nowrap; }
+    .button{ height:40px; padding:0 12px; border:1px solid var(--ui-border); border-radius:12px; background:var(--ui-bg); color:var(--ui-text); cursor:pointer; white-space:nowrap; }
+    .button:hover{ background:var(--ui-hover); }
 
-    .button{ height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0 12px; border:1px solid var(--ui-border); border-radius:12px; background:var(--ui-bg); color:#0c1f4b; cursor:pointer; white-space:nowrap; }
-    .button:hover{ background:var(--ui-bg-hover); }
+    /* mobil: zoznam konverzácií ako zásuvka */
+    .drawer{ display:none; } /* len hook pre JS */
+    @media (max-width:900px){
+      .list-panel{ position:fixed; top:0; left:0; height:100vh; width:min(88vw, 360px); z-index:1002;
+                   transform:translateX(-100%); transition:transform .25s ease; }
+      .nav-toggle:checked ~ .wrap .list-panel{ transform:translateX(0); }
+      .thread-panel{ height: calc(100vh - var(--hdr-h) - var(--composer-h)); }
+    }
 
+    /* rezervácia miesta pre composer, aby thread nebol pod ním */
+    .wrap{ padding-bottom: calc(var(--composer-h) + 16px); }
+
+    /* brand badge dole (neblokuje menu) */
+    .brand-badge{
+      position: fixed; left:16px; bottom: calc(var(--composer-h) + 24px); z-index:70;
+      display:inline-flex; align-items:center; gap:8px; background:#000; color:#fff; text-decoration:none;
+      border:2px solid #fff; border-radius:14px; padding:8px 10px; box-shadow:0 8px 18px rgba(0,0,0,.25); opacity:.96;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .nav-toggle:checked ~ .brand-badge{ opacity:.6; transform: translateY(6px); }
+    .brand-badge img{ height:24px; }
+    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
+    @media (max-width:480px){
+      .brand-badge{ left:12px; bottom: calc(var(--composer-h) + 18px); padding:6px 8px; border-radius:12px; }
+      .brand-badge img{ height:20px; } .brand-badge .wordmark{ font-size:12px; }
+    }
+
+    /* skryté aliasy pre starý messages.js (ponechané) */
     .u-hidden{ position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden; }
   </style>
 </head>
 <body class="mode-list">
 
-  <!-- prepínač pre hamburger -->
+  <!-- toggle pre mobilnú zásuvku (ľavé menu) -->
   <input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
 
-  <!-- HLAVIČKA -->
+  <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-
-      <!-- Ikona hamburgeru (len mobil) -->
-      <label for="menuToggle" class="burger" aria-label="Menu">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </label>
+      <button class="burger" id="burgerBtn" aria-label="Zobraziť zoznam konverzácií">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
 
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
-      <div class="user-chip" id="userLabel">Prihlásený:</div>
+      <div class="user-chip" id="userChip">Prihlásený:</div>
 
-      <!-- Navigácia (ľavá zásuvka na mobile) -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
-          <button class="pill" id="timelineBtn">Späť na Lištobook</button>
-          <button class="pill" id="catalogBtn">Katalóg</button>
+          <button class="pill" id="goBackBtn">Späť</button>
           <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
 
-          <!-- aliasy pre starší kód (ak by spúšťal iné ID) -->
+          <!-- aliasy pre starý messages.js -->
           <button id="backBtn" class="u-hidden" type="button" aria-hidden="true"></button>
           <button id="btnBack" class="u-hidden" type="button" aria-hidden="true"></button>
           <button id="backToTimeline" class="u-hidden" type="button" aria-hidden="true"></button>
@@ -200,31 +157,32 @@
     </div>
   </header>
 
-  <!-- OBSAH -->
+  <!-- MAIN -->
   <div class="wrap">
-    <div class="grid">
-      <section class="card list-panel" aria-labelledby="convHead">
-        <div class="head" id="convHead">Konverzácie</div>
-        <div class="body conv-list" id="convList"></div>
-      </section>
+    <!-- LEFT: conversations -->
+    <section class="card list-panel drawer" aria-labelledby="convHead">
+      <div class="head" id="convHead">Konverzácie</div>
+      <div class="body">
+        <div id="convList" class="conv-list"></div>
+      </div>
+    </section>
 
-      <section class="card thread-panel" aria-labelledby="threadHead">
-        <div class="head" id="threadHead">
-          <div id="threadTitle">Vyberte konverzáciu</div>
-          <div><button class="button" id="backBtnTop" title="Späť na zoznam">Späť</button></div>
-        </div>
-        <div class="body"><div id="thread" class="thread"></div></div>
-      </section>
-    </div>
+    <!-- RIGHT: thread -->
+    <section class="card thread-panel" aria-labelledby="threadHead">
+      <div class="head" id="threadHead">
+        <div id="threadTitle">Vyberte konverzáciu</div>
+      </div>
+      <div class="thread-wrap"><div id="thread" class="thread"></div></div>
+    </section>
   </div>
 
-  <!-- SPODNÝ COMPOSER -->
-  <div class="composer-bar" id="composerBar">
+  <!-- BOTTOM COMPOSER -->
+  <div class="composer-bar" id="composerBar" style="--composer-h: 84px">
     <div class="composer-wrap">
       <form id="composerForm" class="composer" autocomplete="off" onsubmit="return false;">
         <div class="composer-row">
           <div class="input-group">
-            <input id="toName" class="composer-input" type="text" placeholder="Komu (prezývka)..." list="peopleList" autocomplete="off" />
+            <input id="toName" class="composer-input" type="text" placeholder="Komu (prezývka)…" list="peopleList" autocomplete="off" />
             <datalist id="peopleList"></datalist>
             <textarea id="composerText" class="composer-input" placeholder="Napíšte správu… (Enter = odoslať, Shift+Enter = nový riadok)" rows="1" maxlength="2000"></textarea>
             <span id="composerCount">0 / 2000</span>
@@ -235,53 +193,38 @@
     </div>
   </div>
 
-  <!-- Konfigurácia + logika -->
+  <!-- MarSab® badge -->
+  <a class="brand-badge" href="#" aria-label="MarSab®">
+    <img src="img/marsab_logo.png" alt=""><span class="wordmark">MarSab®</span>
+  </a>
+
+  <!-- konfigurácia + pôvodná logika -->
   <script src="/js/config.js"></script>
   <script src="messages.js"></script>
   <script src="/js/push.js"></script>
 
-  <!-- Výška hlavičky + navigácia s emailom + mostík/aliasy -->
+  <!-- layout helper: výška hlavičky, zásuvka na mobile, premostenie aliasov -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      /* výška hlavičky (rezerva na body) */
+      /* dopočítaj výšku hlavičky */
       const header = document.querySelector('.app-header');
       const setHdrH = () => { if (header) document.documentElement.style.setProperty('--hdr-h', header.getBoundingClientRect().height + 'px'); };
       setHdrH(); window.addEventListener('resize', setHdrH);
 
       /* navigácia s emailom */
-      const email = new URLSearchParams(window.location.search).get("email");
-      const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+      const email = new URLSearchParams(location.search).get("email");
+      const go = (page) => { location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+      document.getElementById('goBackBtn')?.addEventListener('click', () => go('timeline.html'));
+      document.getElementById('logoutBtn')?.addEventListener('click', () => { location.href = 'index.html'; });
 
-      document.getElementById('timelineBtn')?.addEventListener('click', () => go('timeline.html'));
-      document.getElementById('catalogBtn')?.addEventListener('click', () => go('catalog.html'));
-      document.getElementById('logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
-      document.getElementById('backBtnTop')?.addEventListener('click', () => go('messages.html' + (email ? `?email=${encodeURIComponent(email)}` : '')));
+      /* mobilná zásuvka – burger toggluje checkbox */
+      const toggle = document.getElementById('menuToggle');
+      const burger = document.getElementById('burgerBtn');
+      burger?.addEventListener('click', (e)=>{ e.stopPropagation(); if (toggle){ toggle.checked = !toggle.checked; document.body.classList.toggle('no-scroll', toggle.checked); }});
+      document.addEventListener('click', (e)=>{ if (!toggle?.checked) return; const inList = e.target.closest('.list-panel'); const inHdr = e.target.closest('.app-header'); if (!inList && !inHdr){ toggle.checked=false; document.body.classList.remove('no-scroll'); } });
 
-      /* doplň prezývku do chipu (fallback = email) */
-      (async function(){
-        const chip = document.getElementById('userLabel');
-        if (!chip || !email) return;
-        async function fetchUserByEmail(em){
-          const tries = [
-            `/api/users/by-email?email=${encodeURIComponent(em)}`,
-            `/api/users/by-email/${encodeURIComponent(em)}`,
-            `/api/users/email/${encodeURIComponent(em)}`,
-            `/api/users?email=${encodeURIComponent(em)}`,
-            `/api/user?email=${encodeURIComponent(em)}`
-          ];
-          for (const u of tries){ try{ const r=await fetch(u); if(r.ok) return await r.json(); }catch(_){} }
-          return null;
-        }
-        try{
-          const u = await fetchUserByEmail(email);
-          chip.textContent = 'Prihlásený: ' + (u && (u.name || u.nickname) || email);
-        }catch{
-          chip.textContent = 'Prihlásený: ' + email;
-        }
-      })();
-
-      /* premostenie – ak starý messages.js naväzuje na aliasy/stuby */
-      const BACK_IDS=['timelineBtn','backBtn','btnBack','backToTimeline'];
+      /* alias bridging pre starý messages.js (ak by viazal handlery na iné id) */
+      const BACK_IDS=['goBackBtn','backBtn','btnBack','backToTimeline'];
       const LOGOUT_IDS=['logoutBtn','btnLogout','signOut','logout'];
       const getEl = id => document.getElementById(id) || window.__getStub?.(id) || null;
       function bridge(primaryId, ids){
@@ -291,8 +234,14 @@
         if(src) primary.onclick = src.onclick;
         els.forEach(el => { if(el!==primary) el.onclick = () => primary.click(); });
       }
-      const rebridge=()=>{ bridge('timelineBtn',BACK_IDS); bridge('logoutBtn',LOGOUT_IDS); };
+      const rebridge=()=>{ bridge('goBackBtn',BACK_IDS); bridge('logoutBtn',LOGOUT_IDS); };
       rebridge(); setTimeout(rebridge,0); setTimeout(rebridge,250); setTimeout(rebridge,700);
+
+      /* počitadlo znakov v composer-i (len vizuálne) */
+      const area = document.getElementById('composerText');
+      const counter = document.getElementById('composerCount');
+      const sync = () => { if (area && counter) counter.textContent = (area.value||'').length + ' / ' + (area.maxLength || 2000); };
+      area?.addEventListener('input', sync); sync();
     });
   </script>
 </body>
