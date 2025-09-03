@@ -14,7 +14,7 @@
       --visible: 3;     /* na mobile vidno 3 tlačidlá; 4. je posunom */
     }
 
-    /* === Jednoduchá pevná hlavička === */
+    /* === Pevná hlavička === */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 1000;
       background: #0c1f4b; border-bottom: 1px solid rgba(255,255,255,.15);
@@ -27,7 +27,24 @@
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* Vodorovne posúvateľný rad tlačidiel – mobil/desktop (pôvodné správanie) */
+    /* --- MarSab® v hlavičke (malý, neruší) --- */
+    .header-badge{
+      position:absolute; right:12px; top:10px;
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 6px; border:1px solid #ffffff33; border-radius:10px;
+      background: rgba(0,0,0,.18); backdrop-filter: blur(2px);
+      text-decoration:none; color:#fff; opacity:.95;
+    }
+    .header-badge img{ height:18px; width:auto; display:block; }
+    .header-badge .wordmark{ font-size:12px; font-weight:700; letter-spacing:.2px; }
+
+    @media (max-width: 480px){
+      .header-badge{ right:8px; top:8px; padding:3px 6px; }
+      .header-badge img{ height:16px; }
+      .header-badge .wordmark{ font-size:11px; }
+    }
+
+    /* Navigácia (pôvodná) */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
       display:flex; gap: var(--gap);
@@ -50,7 +67,6 @@
     }
     .pill-danger{ background:#000; color:#fff; border-color:#fff; }
 
-    /* Desktop: všetky 4 vedľa seba (bez scrollu) a centrované */
     @media (min-width: 768px){
       .nav-track{ overflow: visible; }
       .pill{ flex: 0 0 auto; width: auto !important; }
@@ -59,83 +75,33 @@
     /* Rezerva pod pevnú hlavičku */
     body{ padding-top: var(--hdr-h); }
 
-    /* Zvyšok (informácie + formuláre) nechávame pôvodne */
+    /* Obsah */
     .scrollable-body .main-content{
       padding-bottom: calc(var(--banner-h, 0px) + 24px);
       max-width: 500px;
       margin: 0 auto;
     }
 
-    /* MarSab® badge – nad bannerom (pôvodné správanie) */
-    .brand-badge{
-      position: fixed; left: 16px; bottom: calc(var(--banner-h, 0px) + 16px); z-index: 120;
-      display: inline-flex; align-items: center; gap: 8px;
-      background: #000; color:#fff; text-decoration:none;
-      border: 2px solid #fff; border-radius: 14px; padding: 8px 10px;
-      box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity:.96;
-    }
-    .brand-badge img{ height: 24px; width:auto; display:block; }
-    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
-    @media (max-width:480px){
-      .brand-badge{ left:12px; bottom: calc(var(--banner-h, 0px) + 12px); padding:6px 8px; border-radius:12px;}
-      .brand-badge img{ height:20px; }
-      .brand-badge .wordmark{ font-size:12px; }
-    }
+    /* Pôvodný plávajúci MarSab® badge vypneme (aby ho neprekrýval banner) */
+    .brand-badge{ display:none !important; }
 
     .fade-in { opacity:0; transform: translateY(20px); animation: fadeInUp .6s ease forwards; }
     @keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
-
-    /* ====== Mobilné MENU (bez JS) – off-canvas z toho istého <nav> ====== */
-    /* prepínač + ikona */
-    .nav-toggle{ display:none; }
-    .burger{
-      position: absolute; right: 12px; top: 10px;
-      width:44px; height:44px; display:none; align-items:center; justify-content:center;
-      border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; cursor:pointer;
-      background: transparent;
-    }
-    .burger svg{ width:22px; height:22px; }
-
-    @media (max-width: 767.98px){
-      .burger{ display:flex; }
-      /* z nav-scroller spravíme zásuvný panel; sú to TIE ISTÉ tlačidlá */
-      .nav-scroller{
-        position: fixed; top: 0; right: 0; height: 100vh;
-        width: min(80vw, 320px);
-        background: #0c1f4b;
-        padding: 88px 16px 16px;
-        box-shadow: -24px 0 36px rgba(0,0,0,.35);
-        transform: translateX(100%);
-        transition: transform .25s ease;
-      }
-      .nav-track{
-        flex-direction: column; gap: 10px; overflow: hidden; scroll-snap-type: none;
-        align-items: stretch; justify-content: flex-start;
-      }
-      .pill{ width:100% !important; height:44px; border-radius:14px; font-size:1rem; }
-
-      /* keď je checkbox zapnutý, otvor zásuvku */
-      .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
-    }
   </style>
 </head>
 <body>
 
-  <!-- Prepínač pre hamburger (musí byť pred header, aby fungoval selektor ~) -->
-  <input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
-
-  <!-- HLAVIČKA (logo + vycentrované tlačidlá) -->
+  <!-- HLAVIČKA -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
+      <!-- MarSab® v hlavičke (malé, vpravo hore) -->
+      <a class="header-badge" href="#" aria-label="MarSab®">
+        <img src="img/marsab_logo.png" alt="">
+        <span class="wordmark">MarSab®</span>
+      </a>
+
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userLabel">Prihlásený: …</div>
-
-      <!-- Ikona hamburgeru (len mobil) -->
-      <label for="menuToggle" class="burger" aria-label="Menu">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </label>
 
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track" id="navTrack">
@@ -183,7 +149,7 @@
     </div>
   </div>
 
-  <!-- MarSab® badge -->
+  <!-- (Plávajúci) MarSab® badge – deaktivovaný CSS-om, ponechaný v kóde kvôli kompatibilite -->
   <a class="brand-badge" href="#" aria-label="MarSab®">
     <img src="img/marsab_logo.png" alt="">
     <span class="wordmark">MarSab®</span>
