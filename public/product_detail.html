@@ -46,7 +46,7 @@
       .header-badge .wordmark{ font-size:11px; }
     }
 
-    /* Navigácia – desktop */
+    /* Navigácia */
     .nav-scroller{ padding: 0 var(--gap); width:100%; }
     .nav-track{
       display:flex; gap: var(--gap); justify-content:center;
@@ -58,6 +58,12 @@
       white-space:nowrap;
     }
     .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
+
+    /* 🔧 FIX na desktop: neťahaj tlačidlá na 100% šírky */
+    .app-header .nav-track .pill{
+      width: auto !important;
+      flex: 0 0 auto;
+    }
 
     /* Hamburger toggle */
     .nav-toggle{ display:none; }
