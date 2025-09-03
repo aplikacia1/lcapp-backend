@@ -27,19 +27,35 @@
     html,body{margin:0;padding:0}
     body{background:#0c1f4b; color:#fff; padding-top:var(--hdr-h);}
 
-    /* === Jednotná pevná hlavička (ako dashboard/catalog/products) === */
+    /* === Pevná hlavička (ako na ostatných stránkach) === */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 100;
       background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
     }
     .app-header-inner{
       max-width: var(--max-w); margin: 0 auto; padding: 8px var(--pad-x);
-      display:flex; flex-direction:column; align-items:center;
+      display:flex; flex-direction:column; align-items:center; position:relative;
     }
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* nav pills (mobil – posúvateľné) */
+    /* ĽAVÝ hamburger (akcie) + PRAVÝ hamburger (účastníci) — zobraz len na mobile */
+    .nav-toggle, .people-toggle{ display:none; }
+    .burger, .people{
+      position:absolute; top:10px; width:44px; height:44px; display:none;
+      align-items:center; justify-content:center; border:1px solid #ffffff33;
+      border-radius:10px; color:#e7eefc; cursor:pointer; background:transparent; z-index:101;
+    }
+    .burger{ left:12px; }
+    .people{ right:12px; }
+
+    .burger svg, .people svg{ width:22px; height:22px; }
+
+    @media (max-width: 767.98px){
+      .burger, .people{ display:flex; }
+    }
+
+    /* Vodorovne posúvateľné nav pills (mobil) */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
       display:flex; gap: var(--nav-gap);
@@ -48,6 +64,7 @@
       overscroll-behavior-x:contain;
       scrollbar-width:none;
       scroll-snap-type:x mandatory;
+      justify-content:center;
     }
     .nav-track::-webkit-scrollbar{ display:none; }
 
@@ -65,28 +82,58 @@
       .pill{ flex: 0 0 auto; width: auto !important; }
     }
 
+    /* === OFF-CANVAS MENU (ľavé) – mobil: z nav-scroller sprav zásuvku === */
+    @media (max-width: 767.98px){
+      .nav-scroller{
+        position: fixed; top: 0; left: 0; height: 100vh;
+        width: min(80vw, 320px);
+        background: #0c1f4b;
+        padding: 88px 16px 16px;
+        box-shadow: 24px 0 36px rgba(0,0,0,.35);
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+      }
+      .nav-track{ flex-direction: column; gap: 10px; overflow: hidden; scroll-snap-type: none; align-items: stretch; }
+      .pill{ width:100% !important; height:44px; font-size:1rem; border-radius:14px; }
+      /* otvor zásuvku (ľavá) */
+      .nav-toggle:checked ~ header .nav-scroller{ transform: translateX(0); }
+    }
+
     /* ===== Layout hlavného obsahu ===== */
     .main-content{
       width:100%; max-width:var(--max-w); margin:24px auto; padding:0 var(--gap);
       padding-bottom:120px; /* composer reserve */
     }
 
-    /* RIGHT PANEL – online užívatelia (PC) */
+    /* RIGHT PANEL – online užívatelia (desktop) + off-canvas (mobil) */
     .presence-panel{
       position:fixed; right:24px; top:calc(var(--hdr-h) + 16px);
       width:260px; max-height:calc(100vh - var(--hdr-h) - 120px);
       overflow:auto; background:#fff; border:1px solid #e8e8e8; border-radius:12px;
-      box-shadow:0 2px 10px rgba(0,0,0,.06); padding:10px; z-index:50; color:#111;
+      box-shadow:0 2px 10px rgba(0,0,0,.06); padding:10px; z-index:90; color:#111;
+      transition: transform .25s ease;
     }
     .presence-title{ font-weight:700; color:#0c1f4b; margin-bottom:6px }
     .presence-list{ list-style:none; padding:0; margin:0 }
-    .presence-item{ display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px dotted #eee }
+    .presence-item{ display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px dotted #eee; cursor:pointer; }
     .presence-item:last-child{ border-bottom:none }
+    .presence-item:hover{ background:#f7f7f7; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#bbb; box-shadow:0 0 0 2px #fff inset, 0 0 0 1px #ddd; }
     .dot.online{ background:#22c55e }
     .presence-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-    @media (max-width:1200px){ .presence-panel{ display:none; } }
+    @media (max-width:1200px){ .presence-panel{ display:none; } } /* skry desktop panel, ak je úzke okno */
+
+    /* Mobilné správanie – pravý off-canvas */
+    @media (max-width: 767.98px){
+      .presence-panel{
+        display:block; right:0; top:0; height:100vh; width:min(80vw, 320px);
+        border-radius:0; padding:88px 12px 12px; transform: translateX(100%);
+        box-shadow:-24px 0 36px rgba(0,0,0,.35);
+      }
+      /* otvor zásuvku (pravá) */
+      .people-toggle:checked ~ .presence-panel{ transform: translateX(0); }
+    }
 
     /* Feed / posts */
     .post{ background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px; color:#111 }
@@ -142,7 +189,7 @@
     .button{
       height:40px; display:inline-flex; align-items:center; justify-content:center;
       padding:0 12px; border:1px solid var(--ui-border); border-radius:12px;
-      background:var(--ui-bg); color:var(--ui-text); cursor:pointer; white-space:nowrap;
+      background:var(--ui-bg); color:#0c1f4b; cursor:pointer; white-space:nowrap;
     }
     .button:hover{ background:var(--ui-bg-hover); }
     .button--icon{ width:48px; padding:0; font-size:18px; }
@@ -173,9 +220,23 @@
 </head>
 <body>
 
-  <!-- HLAVIČKA (zjednotená) -->
+  <!-- prepínače (kvôli CSS ~ selektorom) -->
+  <input type="checkbox" id="navToggle" class="nav-toggle" aria-hidden="true" />
+  <input type="checkbox" id="peopleToggle" class="people-toggle" aria-hidden="true" />
+
+  <!-- HLAVIČKA -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
+      <!-- ľavý hamburger -->
+      <label for="navToggle" class="burger" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </label>
+
+      <!-- pravý hamburger (účastníci) -->
+      <label for="peopleToggle" class="people" aria-label="Účastníci">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M2 20c0-3.5 3-6 7-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="10" r="2" stroke="currentColor" stroke-width="2"/><path d="M14 20c0-2.2 1.8-4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </label>
+
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="loggedUser">Prihlásený ako: </div>
 
@@ -192,7 +253,7 @@
     </div>
   </header>
 
-  <!-- BOČNÝ PANEL – ONLINE UŽÍVATELIA (PC) -->
+  <!-- PRAVÁ ZÁSUVKA / DESKTOP PANEL – ONLINE UŽÍVATELIA -->
   <aside id="presencePanel" class="presence-panel">
     <div class="presence-title">Používatelia</div>
     <ul id="presenceList" class="presence-list"></ul>
@@ -235,7 +296,7 @@
   <!-- Timeline logika (nezmenené) -->
   <script src="timeline.js"></script>
 
-  <!-- dopočet výšky hlavičky + navigácia s prenesením emailu -->
+  <!-- dopočet výšky hlavičky + navigácia s prenesením emailu + preklik na správy adresátovi -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       /* rezerva pod pevnú hlavičku */
@@ -255,6 +316,36 @@
       document.getElementById('goBackBtn')?.addEventListener('click', () => go('catalog.html'));
       document.getElementById('openMessagesBtn')?.addEventListener('click', () => go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
+
+      /* Klik na účastníka → presmeruj na messages s ?to= */
+      const presence = document.getElementById('presenceList');
+      presence?.addEventListener('click', (e) => {
+        const li = e.target.closest('.presence-item');
+        if (!li) return;
+        const toEmail = li.getAttribute('data-email') || li.dataset.email || '';
+        const toName  = (li.querySelector('.presence-name')?.textContent || '').trim();
+        if (toEmail) {
+          const url = `messages.html?email=${encodeURIComponent(email)}&to=${encodeURIComponent(toEmail)}`;
+          window.location.href = url;
+        } else if (toName) {
+          const url = `messages.html?email=${encodeURIComponent(email)}&to=${encodeURIComponent(toName)}`;
+          window.location.href = url;
+        }
+      });
+
+      /* Po otvorení zásuviek na mobile – klik mimo zatvorí */
+      function wireAutoClose(toggleId, panelSel){
+        const chk = document.getElementById(toggleId);
+        const panel = document.querySelector(panelSel);
+        document.addEventListener('click', (e)=>{
+          if (!chk?.checked) return;
+          const inHeader = e.target.closest('header');
+          const inPanel = e.target.closest(panelSel);
+          if (!inHeader && !inPanel) chk.checked = false;
+        });
+      }
+      wireAutoClose('navToggle', '.nav-scroller');
+      wireAutoClose('peopleToggle', '.presence-panel');
     });
   </script>
 </body>
