@@ -2,7 +2,7 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Lištový dashboard</title>
   <link rel="stylesheet" href="style.css" />
 
@@ -16,18 +16,18 @@
 
     /* === Jednoduchá pevná hlavička === */
     .app-header{
-      position: fixed; inset: 0 0 auto 0; z-index: 100;
+      position: fixed; inset: 0 0 auto 0; z-index: 1000;
       background: #0c1f4b; border-bottom: 1px solid rgba(255,255,255,.15);
     }
     .app-header-inner{
       max-width: 980px; margin: 0 auto; padding: 8px var(--pad-x);
-      display:flex; flex-direction:column; align-items:center;
+      display:flex; flex-direction:column; align-items:center; position: relative;
     }
 
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* Vodorovne posúvateľný rad tlačidiel – mobil */
+    /* Vodorovne posúvateľný rad tlačidiel – mobil/desktop (pôvodné správanie) */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
       display:flex; gap: var(--gap);
@@ -36,6 +36,7 @@
       overscroll-behavior-x:contain;
       scrollbar-width:none;
       scroll-snap-type:x mandatory;
+      justify-content:center;
     }
     .nav-track::-webkit-scrollbar{ display:none; }
 
@@ -51,7 +52,7 @@
 
     /* Desktop: všetky 4 vedľa seba (bez scrollu) a centrované */
     @media (min-width: 768px){
-      .nav-track{ overflow: visible; justify-content:center; }
+      .nav-track{ overflow: visible; }
       .pill{ flex: 0 0 auto; width: auto !important; }
     }
 
@@ -65,7 +66,7 @@
       margin: 0 auto;
     }
 
-    /* MarSab® badge – nad bannerom */
+    /* MarSab® badge – nad bannerom (pôvodné správanie) */
     .brand-badge{
       position: fixed; left: 16px; bottom: calc(var(--banner-h, 0px) + 16px); z-index: 120;
       display: inline-flex; align-items: center; gap: 8px;
@@ -83,15 +84,58 @@
 
     .fade-in { opacity:0; transform: translateY(20px); animation: fadeInUp .6s ease forwards; }
     @keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
+
+    /* ====== Mobilné MENU (bez JS) – off-canvas z toho istého <nav> ====== */
+    /* prepínač + ikona */
+    .nav-toggle{ display:none; }
+    .burger{
+      position: absolute; right: 12px; top: 10px;
+      width:44px; height:44px; display:none; align-items:center; justify-content:center;
+      border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; cursor:pointer;
+      background: transparent;
+    }
+    .burger svg{ width:22px; height:22px; }
+
+    @media (max-width: 767.98px){
+      .burger{ display:flex; }
+      /* z nav-scroller spravíme zásuvný panel; sú to TIE ISTÉ tlačidlá */
+      .nav-scroller{
+        position: fixed; top: 0; right: 0; height: 100vh;
+        width: min(80vw, 320px);
+        background: #0c1f4b;
+        padding: 88px 16px 16px;
+        box-shadow: -24px 0 36px rgba(0,0,0,.35);
+        transform: translateX(100%);
+        transition: transform .25s ease;
+      }
+      .nav-track{
+        flex-direction: column; gap: 10px; overflow: hidden; scroll-snap-type: none;
+        align-items: stretch; justify-content: flex-start;
+      }
+      .pill{ width:100% !important; height:44px; border-radius:14px; font-size:1rem; }
+
+      /* keď je checkbox zapnutý, otvor zásuvku */
+      .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Prepínač pre hamburger (musí byť pred header, aby fungoval selektor ~) -->
+  <input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
 
   <!-- HLAVIČKA (logo + vycentrované tlačidlá) -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userLabel">Prihlásený: …</div>
+
+      <!-- Ikona hamburgeru (len mobil) -->
+      <label for="menuToggle" class="burger" aria-label="Menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </label>
 
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track" id="navTrack">
