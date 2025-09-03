@@ -39,6 +39,22 @@
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
+    /* MarSab® badge v hlavičke */
+    .header-badge{
+      position:absolute; right:12px; top:10px;
+      display:inline-flex; align-items:center; gap:6px;
+      padding:4px 6px; border:1px solid #ffffff33; border-radius:10px;
+      background:rgba(0,0,0,.18); backdrop-filter:blur(2px);
+      text-decoration:none; color:#fff; opacity:.95; z-index:102;
+    }
+    .header-badge img{ height:18px; width:auto; display:block; }
+    .header-badge .wordmark{ font-size:12px; font-weight:700; letter-spacing:.2px; }
+    @media (max-width:480px){
+      .header-badge{ right:64px; top:8px; padding:3px 6px; } /* nechaj priestor pre ikonu účastníkov */
+      .header-badge img{ height:16px; }
+      .header-badge .wordmark{ font-size:11px; }
+    }
+
     /* ĽAVÝ hamburger (akcie) + PRAVÝ hamburger (účastníci) — zobraz len na mobile */
     .nav-toggle, .people-toggle{ display:none; }
     .burger, .people{
@@ -48,12 +64,8 @@
     }
     .burger{ left:12px; }
     .people{ right:12px; }
-
     .burger svg, .people svg{ width:22px; height:22px; }
-
-    @media (max-width: 767.98px){
-      .burger, .people{ display:flex; }
-    }
+    @media (max-width: 767.98px){ .burger, .people{ display:flex; } }
 
     /* Vodorovne posúvateľné nav pills (mobil) */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
@@ -67,7 +79,6 @@
       justify-content:center;
     }
     .nav-track::-webkit-scrollbar{ display:none; }
-
     .pill{
       flex: 0 0 calc((100% - (var(--nav-gap) * (var(--visible) - 1))) / var(--visible));
       height:38px; padding:8px 14px; border-radius:16px;
@@ -92,11 +103,12 @@
         box-shadow: 24px 0 36px rgba(0,0,0,.35);
         transform: translateX(-100%);
         transition: transform .25s ease;
+        z-index: 110;
       }
       .nav-track{ flex-direction: column; gap: 10px; overflow: hidden; scroll-snap-type: none; align-items: stretch; }
       .pill{ width:100% !important; height:44px; font-size:1rem; border-radius:14px; }
-      /* otvor zásuvku (ľavá) */
-      .nav-toggle:checked ~ header .nav-scroller{ transform: translateX(0); }
+      /* otvor zásuvku (ľavá) – robustný selektor voči DOM poradiu */
+      body > #navToggle:checked ~ header .nav-scroller{ transform: translateX(0); }
     }
 
     /* ===== Layout hlavného obsahu ===== */
@@ -130,9 +142,10 @@
         display:block; right:0; top:0; height:100vh; width:min(80vw, 320px);
         border-radius:0; padding:88px 12px 12px; transform: translateX(100%);
         box-shadow:-24px 0 36px rgba(0,0,0,.35);
+        z-index: 111;
       }
-      /* otvor zásuvku (pravá) */
-      .people-toggle:checked ~ .presence-panel{ transform: translateX(0); }
+      /* otvor zásuvku (pravá) – robustný selektor */
+      body > #peopleToggle:checked ~ .presence-panel{ transform: translateX(0); }
     }
 
     /* Feed / posts */
@@ -161,7 +174,7 @@
     }
     .commentForm button{
       padding:10px 14px; border:1px solid var(--ui-border); border-radius:10px;
-      background:var(--ui-bg); color:var(--ui-text); cursor:pointer;
+      background:var(--ui-bg); color:#0c1f4b; cursor:pointer;   /* opravené color */
     }
     .commentForm button:hover{ background:var(--ui-bg-hover); }
 
@@ -200,22 +213,6 @@
       .button--icon{ width:44px; font-size:17px; }
       #composerCount{ font-size:11px; }
     }
-
-    /* MarSab® – badge (nad composerom) */
-    .brand-badge{
-      position: fixed; left: 16px; bottom: 120px; z-index: 70;
-      display: inline-flex; align-items: center; gap: 8px;
-      background: #000; color:#fff; text-decoration:none;
-      border: 2px solid #fff; border-radius: 14px; padding: 8px 10px;
-      box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity:.96;
-    }
-    .brand-badge img{ height: 24px; width:auto; display:block; }
-    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
-    @media (max-width:480px){
-      .brand-badge{ left:12px; bottom: 140px; padding:6px 8px; border-radius:12px; }
-      .brand-badge img{ height:20px; }
-      .brand-badge .wordmark{ font-size:12px; }
-    }
   </style>
 </head>
 <body>
@@ -236,6 +233,12 @@
       <label for="peopleToggle" class="people" aria-label="Účastníci">
         <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M2 20c0-3.5 3-6 7-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="10" r="2" stroke="currentColor" stroke-width="2"/><path d="M14 20c0-2.2 1.8-4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </label>
+
+      <!-- MarSab® v hlavičke -->
+      <a class="header-badge" href="#" aria-label="MarSab®">
+        <img src="img/marsab_logo.png" alt="">
+        <span class="wordmark">MarSab®</span>
+      </a>
 
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="loggedUser">Prihlásený ako: </div>
@@ -281,12 +284,6 @@
     </div>
   </div>
 
-  <!-- MarSab® badge -->
-  <a class="brand-badge" href="#" aria-label="MarSab®">
-    <img src="img/marsab_logo.png" alt="">
-    <span class="wordmark">MarSab®</span>
-  </a>
-
   <!-- iba tento jeden riadok navyše -->
   <script src="/js/config.js"></script>
 
@@ -296,7 +293,7 @@
   <!-- Timeline logika (nezmenené) -->
   <script src="timeline.js"></script>
 
-  <!-- dopočet výšky hlavičky + navigácia s prenesením emailu + preklik na správy adresátovi -->
+  <!-- dopočet výšky hlavičky + navigácia s prenesením emailu + preklik na správy adresátovi + auto-close zásuviek -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       /* rezerva pod pevnú hlavičku */
@@ -336,11 +333,10 @@
       /* Po otvorení zásuviek na mobile – klik mimo zatvorí */
       function wireAutoClose(toggleId, panelSel){
         const chk = document.getElementById(toggleId);
-        const panel = document.querySelector(panelSel);
         document.addEventListener('click', (e)=>{
           if (!chk?.checked) return;
           const inHeader = e.target.closest('header');
-          const inPanel = e.target.closest(panelSel);
+          const inPanel  = e.target.closest(panelSel);
           if (!inHeader && !inPanel) chk.checked = false;
         });
       }
