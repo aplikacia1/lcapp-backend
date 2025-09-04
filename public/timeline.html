@@ -219,6 +219,30 @@
       .brand-badge img{ height:20px; }
       .brand-badge .wordmark{ font-size:12px; }
     }
+
+    /* ===== Toasty (notifikácie) ===== */
+    .toast-stack{
+      position: fixed; top: calc(var(--hdr-h) + 12px); left: 50%;
+      transform: translateX(-50%);
+      display: grid; gap: 8px; z-index: 1200; width: min(92vw, 520px);
+      pointer-events: none;
+    }
+    .toast{
+      pointer-events: auto;
+      display:flex; align-items:flex-start; gap:10px;
+      background:#0b1536; color:#e9f2ff; border:1px solid #2a3b8f; border-radius:12px;
+      padding:10px 12px; box-shadow:0 10px 24px rgba(0,0,0,.35);
+    }
+    .toast.success{ border-color:#1f8f4a; }
+    .toast.info{ border-color:#2a6ad8; }
+    .toast.warn{ border-color:#d6a21e; }
+    .toast.error{ border-color:#d44242; }
+    .toast .t-ico{ font-weight:800; min-width:18px; }
+    .toast .t-msg{ flex:1; min-width:0; }
+    .toast .t-x{
+      appearance:none; border:none; background:transparent; color:#cfe2ff; cursor:pointer;
+      font-size:18px; line-height:1; padding:0 4px;
+    }
   </style>
 </head>
 <body>
@@ -243,13 +267,19 @@
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="loggedUser">Prihlásený ako: </div>
 
+      <!-- NAV – upravené tlačidlá -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
-          <button class="pill" id="goBackBtn">Späť</button>
+          <button class="pill" id="goBackBtn">Katalóg</button>
+
           <button class="pill" id="openMessagesBtn">
             Správy
             <span id="msgBadge" style="display:none; min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center;"></span>
           </button>
+
+          <button class="pill" id="gameBtn">Hra</button>
+          <button class="pill" id="accountBtn">Účet</button>
+
           <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
         </div>
       </nav>
@@ -284,13 +314,16 @@
     </div>
   </div>
 
+  <!-- Toast stack -->
+  <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
   <!-- MarSab® badge -->
   <a class="brand-badge" href="#" aria-label="MarSab®">
     <img src="img/marsab_logo.png" alt="">
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- iba tento jeden riadok navyše -->
+  <!-- config musí byť načítaný skôr -->
   <script src="/js/config.js"></script>
 
   <!-- badge neprečítaných + auto-aktualizácia -->
@@ -299,8 +332,41 @@
   <!-- Timeline logika (nezmenené) -->
   <script src="timeline.js"></script>
 
-  <!-- dopočet výšky hlavičky + navigácia s prenesením emailu + hamburger fix + preklik na správy adresátovi -->
+  <!-- Toast helper + dopočet výšky hlavičky + navigácia + hamburgre + preklik na správy adresátovi -->
   <script>
+    // --- Toast helper (success/info/warn/error) ---
+    (function(){
+      const stack = document.getElementById('toastStack');
+      const MAX = 3;
+      const ESC = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+      const icons = { success:'✓', info:'ℹ︎', warn:'!', error:'×' };
+
+      function push(type='info', message='', {duration=4000}={}){
+        if (!stack) return;
+        while (stack.children.length >= MAX) stack.firstElementChild?.remove();
+
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        el.innerHTML = `
+          <div class="t-ico">${icons[type]||'ℹ︎'}</div>
+          <div class="t-msg">${ESC(message)}</div>
+          <button class="t-x" aria-label="Zavrieť">×</button>
+        `;
+        stack.appendChild(el);
+
+        const killer = setTimeout(()=> el.remove(), duration);
+        el.querySelector('.t-x')?.addEventListener('click', () => { clearTimeout(killer); el.remove(); });
+      }
+
+      window.toast = {
+        show: (type, msg, opts) => push(type, msg, opts),
+        success: (msg, opts) => push('success', msg, opts),
+        info:    (msg, opts) => push('info', msg, opts),
+        warn:    (msg, opts) => push('warn', msg, opts),
+        error:   (msg, opts) => push('error', msg, opts),
+      };
+    })();
+
     document.addEventListener('DOMContentLoaded', () => {
       /* rezerva pod pevnú hlavičku */
       const header = document.querySelector('.app-header');
@@ -319,6 +385,10 @@
       document.getElementById('goBackBtn')?.addEventListener('click', () => go('catalog.html'));
       document.getElementById('openMessagesBtn')?.addEventListener('click', () => go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
+
+      // nové tlačidlá:
+      document.getElementById('gameBtn')?.addEventListener('click', () => go('game.html'));
+      document.getElementById('accountBtn')?.addEventListener('click', () => go('dashboard.html'));
 
       /* Klik na účastníka → presmeruj na messages s ?to= */
       const presence = document.getElementById('presenceList');

@@ -44,8 +44,14 @@
           return;
         }
 
-        // ŽIADNY local/session storage – len URL parameter
-        window.location.href = `dashboard.html?email=${encodeURIComponent(email)}`;
+        // ✅ po úspešnom logine pošli na Lištobook (timeline)
+        // podpora voliteľného ?next=..., inak predvolene timeline.html
+        const params = new URLSearchParams(location.search);
+        const next = params.get('next');
+        const dest = next || `timeline.html?email=${encodeURIComponent(email)}`;
+
+        // replace = nedá sa vrátiť späť na login po back
+        window.location.replace(dest);
       } catch (err) {
         console.error('Login error', err);
         alert('Chyba pri pripojení.');

@@ -71,8 +71,41 @@
   </a>
 
   <script>
+    // bežné tlačidlá
     document.getElementById('goRegister').addEventListener('click', ()=> location.href = 'register.html');
     document.getElementById('goLogin').addEventListener('click', ()=> location.href = 'login.html');
+
+    // ==== TAJNÝ VSTUP: 5× ťuk na logo (do 1.5 s) → admin_login.html ====
+    (function(){
+      const logo = document.querySelector('.logo-lc');
+      if (!logo) return;
+
+      let taps = 0;
+      let timer = null;
+      const WINDOW_MS = 1500;
+
+      function reset(){ taps = 0; if (timer){ clearTimeout(timer); timer = null; } }
+
+      function onTap(){
+        taps++;
+        if (!timer) timer = setTimeout(reset, WINDOW_MS);
+        if (taps >= 5){
+          reset();
+          if (navigator.vibrate) { try { navigator.vibrate(40); } catch {} }
+          location.href = 'admin_login.html';
+        }
+      }
+
+      // 1 handler pre myš aj dotyk (zabráni dvojitému sčítaniu klik+touch)
+      logo.addEventListener('pointerdown', onTap, { passive: true });
+
+      // skrytá klávesová skratka pre desktop: Ctrl/⌘ + Alt + L
+      window.addEventListener('keydown', (e)=>{
+        if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'l' || e.key === 'L')){
+          location.href = 'admin_login.html';
+        }
+      });
+    })();
   </script>
 </body>
 </html>
