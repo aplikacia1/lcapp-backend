@@ -2,26 +2,63 @@ document.addEventListener("DOMContentLoaded", init);
 
 let ADMIN = { email: '', name: 'Lištové centrum' };
 let inbox = [], outbox = [];
-let participants = []; // { email, name }
-let current = null;    // aktuálne otvorený email
+let participants = []; // { email, name, last }
+let current = null;
 
 async function init(){
   const warn = document.getElementById('warn');
 
-  // zisti admin adresu zo servera
-  const adrRes = await fetch('/api/messages/admin-address');
-  const adr = await adrRes.json();
-  if (!adr?.email) {
-    warn.textContent = 'Upozornenie: ADMIN_EMAIL nie je nastavený na serveri.';
+  // 1) admin adresa + fallback
+  try{
+    const adrRes = await fetch('/api/messages/admin-address');
+    const adr = adrRes.ok ? await adrRes.json() : null;
+    const fb = (window.__ADMIN_FALLBACK__ || {});
+    ADMIN = {
+      email: (adr && adr.email) || fb.email || 'bratislava@listovecentrum.sk',
+      name:  (adr && adr.name)  || fb.name  || 'Lištové centrum'
+    };
+    warn.textContent = (adr && adr.email) ? '' :
+      'Upozornenie: ADMIN_EMAIL nie je nastavený na serveri (používam fallback).';
+  }catch{
+    const fb = (window.__ADMIN_FALLBACK__ || {});
+    ADMIN = { email: fb.email || 'bratislava@listovecentrum.sk', name: fb.name || 'Lištové centrum' };
+    warn.textContent = 'Upozornenie: ADMIN_EMAIL nie je nastavený na serveri (používam fallback).';
   }
-  ADMIN = { email: adr.email || '', name: adr.name || 'Lištové centrum' };
+
+  // 2) UI akcie
+  document.getElementById('openNewBtn')?.addEventListener('click', async () => {
+    const raw = (document.getElementById('newToEmail')?.value || '').trim();
+    if (!raw) return;
+    const email = await resolveEmail(raw);
+    if (!email) { alert('Používateľ neexistuje.'); return; }
+    openThread(email);
+  });
+  document.getElementById('broadcastBtn')?.addEventListener('click', sendBroadcast);
+
+  // autocomplete pre nové vlákno
+  const newInput = document.getElementById('newToEmail');
+  const dl = document.getElementById('userOptions');
+  let debounceId = null;
+  newInput?.addEventListener('input', () => {
+    clearTimeout(debounceId);
+    const q = newInput.value.trim();
+    if (!q || q.includes('@')) { dl.innerHTML = ''; return; }
+    debounceId = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/messages/search-users?q=' + encodeURIComponent(q));
+        if (!res.ok) return;
+        const rows = await res.json();
+        dl.innerHTML = rows.map(r => `<option value="${escapeAttr(r.name)}">${escapeHtml(r.email)}</option>`).join('');
+      } catch {}
+    }, 250);
+  });
 
   await loadBoxes();
   buildParticipants();
   renderThreads();
   autoOpenFirst();
 
-  // refresh zoznamu každých 20s (ľahký polling)
+  // ľahký polling
   setInterval(async () => {
     const cur = current;
     await loadBoxes();
@@ -29,6 +66,26 @@ async function init(){
     renderThreads();
     if (cur) openThread(cur);
   }, 20000);
+}
+
+// --- helpers na vyhľadanie adresáta podľa vstupu (email/prezývka)
+async function resolveEmail(input){
+  const v = String(input).trim();
+  if (!v) return null;
+  if (v.includes('@')) return v; // vyzerá ako e-mail
+
+  try {
+    const res = await fetch('/api/messages/search-users?q=' + encodeURIComponent(v));
+    if (!res.ok) return null;
+    const rows = await res.json();
+    if (!rows || !rows.length) return null;
+
+    // presná zhoda na meno (case-insensitive), inak prvá zhoda
+    const exact = rows.find(r => (r.name || '').toLocaleLowerCase('sk') === v.toLocaleLowerCase('sk'));
+    return (exact || rows[0]).email || null;
+  } catch {
+    return null;
+  }
 }
 
 async function loadBoxes(){
@@ -40,21 +97,22 @@ async function loadBoxes(){
   outbox = outRes.ok ? await outRes.json() : [];
 }
 
-// zoznam účastníkov (okrem admina)
 function buildParticipants(){
   const map = new Map();
   inbox.forEach(m => {
     const key = (m.fromEmail || '').toLowerCase();
     if (key && key !== ADMIN.email.toLowerCase()) {
-      if (!map.has(key)) map.set(key, { email: m.fromEmail, name: m.fromName || m.fromEmail, last: new Date(m.createdAt).getTime() });
-      else map.get(key).last = Math.max(map.get(key).last, new Date(m.createdAt).getTime());
+      const t = new Date(m.createdAt).getTime();
+      if (!map.has(key)) map.set(key, { email: m.fromEmail, name: m.fromName || m.fromEmail, last: t });
+      else map.get(key).last = Math.max(map.get(key).last, t);
     }
   });
   outbox.forEach(m => {
     const key = (m.toEmail || '').toLowerCase();
     if (key && key !== ADMIN.email.toLowerCase()) {
-      if (!map.has(key)) map.set(key, { email: m.toEmail, name: m.toName || m.toEmail, last: new Date(m.createdAt).getTime() });
-      else map.get(key).last = Math.max(map.get(key).last, new Date(m.createdAt).getTime());
+      const t = new Date(m.createdAt).getTime();
+      if (!map.has(key)) map.set(key, { email: m.toEmail, name: m.toName || m.toEmail, last: t });
+      else map.get(key).last = Math.max(map.get(key).last, t);
     }
   });
   participants = Array.from(map.values()).sort((a,b)=>b.last-a.last);
@@ -63,9 +121,9 @@ function buildParticipants(){
 function renderThreads(){
   const ul = document.getElementById('threadList');
   ul.innerHTML = participants.map(p => `
-    <li class="thread-item ${current && current.toLowerCase()===p.email.toLowerCase() ? 'active':''}" data-email="${p.email}">
-      <div class="thread-name">${escape(p.name)}</div>
-      <div class="thread-sub">${escape(p.email)}</div>
+    <li class="thread-item ${current && current.toLowerCase()===p.email.toLowerCase() ? 'active':''}" data-email="${escapeAttr(p.email)}">
+      <div class="thread-name">${escapeHtml(p.name)}</div>
+      <div class="thread-sub">${escapeHtml(p.email)}</div>
     </li>
   `).join('') || `<li class="thread-item">Žiadne konverzácie.</li>`;
 
@@ -75,14 +133,10 @@ function renderThreads(){
 }
 
 function autoOpenFirst(){
-  if (!current && participants.length) {
-    openThread(participants[0].email);
-  } else {
-    renderThread(); // ak prázdne, vyrenderuj aj tak
-  }
+  if (!current && participants.length) openThread(participants[0].email);
+  else renderThread();
 }
 
-// otvor thread s daným emailom
 function openThread(email){
   current = email;
   renderThreads();
@@ -103,27 +157,24 @@ function renderThread(){
   }
 
   const who = participants.find(p => p.email.toLowerCase()===current.toLowerCase());
-  hdr.textContent = `${who ? who.name : current} · ${current}`;
+  hdr.textContent = `${who ? who.name : current} — ${current}`;
 
-  // všetky správy s týmto účastníkom
   const thread = [
-    ...inbox.filter(m => m.fromEmail.toLowerCase() === current.toLowerCase()),
-    ...outbox.filter(m => m.toEmail.toLowerCase() === current.toLowerCase())
+    ...inbox.filter(m => (m.fromEmail||'').toLowerCase() === current.toLowerCase()),
+    ...outbox.filter(m => (m.toEmail||'').toLowerCase()   === current.toLowerCase())
   ].sort((a,b)=> new Date(a.createdAt) - new Date(b.createdAt));
 
   box.innerHTML = thread.map(m => `
-    <div class="msg ${m.fromEmail.toLowerCase()===ADMIN.email.toLowerCase() ? 'me':''}">
+    <div class="msg ${ (m.fromEmail||'').toLowerCase()===ADMIN.email.toLowerCase() ? 'me':''}">
       <div class="meta">
-        ${escape(m.fromName || m.fromEmail)} → ${escape(m.toName || m.toEmail)}
+        ${escapeHtml(m.fromName || m.fromEmail)} → ${escapeHtml(m.toName || m.toEmail)}
         · ${new Date(m.createdAt).toLocaleString('sk-SK')}
       </div>
-      <div>${escape(m.text)}</div>
+      <div>${escapeHtml(m.text||'')}</div>
     </div>
   `).join('') || `<div class="msg">Zatiaľ žiadne správy.</div>`;
 
-  // auto-scroll na koniec
   box.scrollTop = box.scrollHeight;
-
   replyBox.style.display = 'grid';
   sendBtn.onclick = () => sendReply(current);
 }
@@ -138,11 +189,25 @@ async function sendReply(toEmail){
   });
   const data = await res.json().catch(()=>({}));
   if (!res.ok){ alert(data?.message || 'Chyba pri odoslaní.'); return; }
-
   ta.value = '';
   await loadBoxes();
   renderThread();
 }
 
+async function sendBroadcast(){
+  const ta = document.getElementById('broadcastText');
+  const text = (ta.value || '').trim();
+  if (!text) return;
+  const res = await fetch('/api/messages/broadcast', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ fromEmail: ADMIN.email, text })
+  });
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok){ alert(data?.message || 'Broadcast zlyhal.'); return; }
+  ta.value = '';
+  alert(`Odoslané všetkým. Počet: ${data?.sent ?? '—'}`);
+}
+
 // helpers
-function escape(s=''){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeHtml(s=''){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeAttr(s=''){ return String(s).replace(/"/g,'&quot;'); }

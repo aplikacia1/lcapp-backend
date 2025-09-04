@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Súkromné správy</title>
   <link rel="stylesheet" href="style.css" />
@@ -16,24 +16,51 @@
 
     .panel{ background:#ffffff10; border:1px solid #ffffff22; border-radius:12px; padding:12px; }
 
-    /* zoznam konverzácií */
-    .thread-list{ list-style:none; margin:0; padding:0; max-height:70vh; overflow:auto; }
+    /* nástroje vľavo (nová konverzácia, broadcast) */
+    .tool{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; margin-bottom:10px; }
+    .tool input{
+      height:40px; border-radius:10px; border:1px solid #bcd6ff;
+      background:#eef6ff; color:#0c1f4b; padding:0 10px;
+    }
+    .tool button{
+      height:40px; padding:0 12px; border-radius:10px; border:1px solid #bcd6ff;
+      background:#eef6ff; color:#0c1f4b; cursor:pointer;
+    }
+
+    .thread-list{ list-style:none; margin:0 0 12px 0; padding:0; max-height:50vh; overflow:auto; }
     .thread-item{ padding:10px; border-bottom:1px solid #ffffff1f; cursor:pointer; }
     .thread-item:hover{ background:#ffffff0f; }
     .thread-item.active{ background:#17306b; }
     .thread-name{ font-weight:700; }
     .thread-sub{ opacity:.8; font-size:12px; }
 
-    /* thread */
+    /* broadcast box */
+    .broadcast{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:start; }
+    .broadcast textarea{
+      width:100%; min-height:90px; border-radius:10px; padding:10px; resize:vertical;
+      border:1px solid #bcd6ff; background:#eef6ff; color:#0c1f4b;
+    }
+    .broadcast button{
+      height:40px; padding:0 12px; border-radius:10px; border:1px solid #bcd6ff;
+      background:#eef6ff; color:#0c1f4b; cursor:pointer;
+    }
+
+    /* vlákno a odpoveď */
     .msgs{ max-height:60vh; overflow:auto; }
     .msg{ background:#fff; color:#111; border-radius:10px; padding:8px 10px; margin:8px 0; }
     .msg .meta{ font-size:12px; opacity:.75; margin-bottom:4px; }
     .msg.me{ background:#eaf2ff; }
 
-    /* odpoveď */
     .reply{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:start; margin-top:12px; }
-    .reply textarea{ width:100%; min-height:90px; border:none; border-radius:10px; padding:10px; resize:vertical; background:#eef6ff; color:#0c1f4b; }
-    .reply button{ height:40px; padding:0 14px; border-radius:10px; border:1px solid #bcd6ff; background:#eef6ff; color:#0c1f4b; cursor:pointer; }
+    .reply textarea{
+      width:100%; min-height:90px; border:none; border-radius:10px; padding:10px;
+      resize:vertical; background:#eef6ff; color:#0c1f4b;
+      border:1px solid #bcd6ff;
+    }
+    .reply button{
+      height:40px; padding:0 14px; border-radius:10px; border:1px solid #bcd6ff;
+      background:#eef6ff; color:#0c1f4b; cursor:pointer;
+    }
   </style>
 </head>
 <body>
@@ -43,8 +70,22 @@
 
     <div class="layout">
       <aside class="panel">
-        <h3 style="margin:6px 0 10px">Konverzácie</h3>
+        <!-- nová konverzácia -->
+        <div class="tool">
+          <input id="newToEmail" type="email" placeholder="Nová konverzácia – e-mail príjemcu" />
+          <button id="openNewBtn">Otvoriť</button>
+        </div>
+
+        <!-- zoznam vlákien -->
         <ul id="threadList" class="thread-list"></ul>
+
+        <!-- broadcast všetkým -->
+        <div class="broadcast">
+          <textarea id="broadcastText"
+            placeholder="Rýchly oznam všetkým… (max 2000 znakov)"
+            maxlength="2000"></textarea>
+          <button id="broadcastBtn">Vysielať</button>
+        </div>
       </aside>
 
       <section class="panel">
@@ -59,7 +100,7 @@
     </div>
   </div>
 
-  <!-- ✳️ config musí byť načítaný skôr -->
+  <!-- config musí byť načítaný skôr -->
   <script src="/js/config.js"></script>
   <script src="admin_orders.js"></script>
 </body>

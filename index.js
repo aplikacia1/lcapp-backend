@@ -1,10 +1,13 @@
 // backend/index.js
-require('dotenv').config();
+
+// ✅ Načítaj .env priamo z priečinka backend (nie z pracovného diru)
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const express = require('express');
 const mongoose = require('mongoose');
-const path = require('path');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
@@ -12,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // musí byť pred routami
 
 /* --- Diagnostiky --- */
 app.get('/__whoami', (_req, res) => {
@@ -24,8 +28,8 @@ app.get('/debug/db', (_req, res) => {
 });
 
 /* --- Statické súbory (HTML/CSS/JS + UPLOADS) --- */
-app.use(express.static(path.join(__dirname, 'public')));                 // / -> backend/public
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));    // /uploads -> backend/uploads
+app.use(express.static(path.join(__dirname, 'public')));              // / -> backend/public
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // /uploads -> backend/uploads
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 /* --- Helper na mount rout --- */
@@ -40,18 +44,19 @@ function mountRoute(url, modPath) {
 }
 
 /* --- API routes --- */
-mountRoute('/api/admin',           './routes/adminRoutes');
-mountRoute('/api/users',           './routes/userRoutes');
-mountRoute('/api/categories',      './routes/categoryRoutes');
-mountRoute('/api/products',        './routes/productRoutes');
-mountRoute('/api/orders',          './routes/orderRoutes');
-mountRoute('/api/timeline',        './routes/timelineRoutes');
-mountRoute('/api/ratings',         './routes/ratingRoutes');
-mountRoute('/api/presence',        './routes/presenceRoutes');
-mountRoute('/api/banners',         './routes/bannerRoutes');
-mountRoute('/api/admin/timeline',  './routes/timelineAdminRoutes');
-mountRoute('/api/messages',        './routes/messageRoutes');
-mountRoute('/api/push',            './routes/pushRoutes');   // ⬅️ pridané
+mountRoute('/api/auth',           './routes/authRoutes');
+mountRoute('/api/admin',          './routes/adminRoutes');
+mountRoute('/api/users',          './routes/userRoutes');
+mountRoute('/api/categories',     './routes/categoryRoutes');
+mountRoute('/api/products',       './routes/productRoutes');
+mountRoute('/api/orders',         './routes/orderRoutes');
+mountRoute('/api/timeline',       './routes/timelineRoutes');
+mountRoute('/api/ratings',        './routes/ratingRoutes');
+mountRoute('/api/presence',       './routes/presenceRoutes');
+mountRoute('/api/banners',        './routes/bannerRoutes');
+mountRoute('/api/admin/timeline', './routes/timelineAdminRoutes');
+mountRoute('/api/messages',       './routes/messageRoutes');
+mountRoute('/api/push',           './routes/pushRoutes');
 
 /* --- Štart až po úspešnom Mongo pripojení --- */
 const PORT = process.env.PORT || 5000;
@@ -61,6 +66,9 @@ if (!MONGO_URI) {
   console.error('❌ Chýba MONGO_URI v .env');
   process.exit(1);
 }
+
+// (voliteľne) krátky log na kontrolu ADMIN_EMAIL
+console.log('ADMIN_EMAIL =', process.env.ADMIN_EMAIL || '(empty)');
 
 mongoose.connect(MONGO_URI)
   .then(() => {

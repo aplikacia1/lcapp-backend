@@ -6,8 +6,10 @@ const router    = express.Router();
 const Message   = require('../models/message');
 const User      = require('../models/User');
 
-const ADMIN_NAME  = 'Lištové centrum';
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || '').trim();
+// === ADMIN CONFIG (ENV + fallback) =========================
+const ADMIN_NAME  = process.env.ADMIN_NAME || 'Lištové centrum';
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'bratislava@listovecentrum.sk').trim();
+// ==========================================================
 
 // ---------- helpers ----------
 const norm      = (s = '') => String(s).trim();
@@ -269,6 +271,47 @@ router.post('/send-by-email', async (req, res) => {
   } catch (e) {
     console.error('admin send-by-email error', e);
     res.status(500).json({ message: 'Chyba servera.' });
+  }
+});
+
+/* ---------------- Broadcast všetkým (okrem admina) ---------------- */
+router.post('/broadcast', async (req, res) => {
+  try {
+    const { fromEmail, text } = req.body || {};
+    if (!fromEmail || !text) {
+      return res.status(400).json({ message: 'Chýba fromEmail alebo text.' });
+    }
+    if (!ADMIN_EMAIL) {
+      return res.status(400).json({ message: 'Admin e-mail nie je nastavený.' });
+    }
+    if (toLowerSk(fromEmail) !== toLowerSk(ADMIN_EMAIL)) {
+      return res.status(403).json({ message: 'Broadcast môže posielať iba admin.' });
+    }
+
+    // všetci okrem admina (iba email + name)
+    const users = await User.find(
+      { email: { $ne: ADMIN_EMAIL } },
+      { _id: 0, email: 1, name: 1 }
+    ).lean();
+
+    if (!users.length) return res.json({ message: 'Nie je komu odoslať.', sent: 0 });
+
+    const docs = users
+      .filter(u => !!u.email)
+      .map(u => ({
+        fromEmail: ADMIN_EMAIL,
+        fromName : ADMIN_NAME,
+        toEmail  : String(u.email).trim(),
+        toName   : (u.name && String(u.name).trim()) || String(u.email).trim(),
+        text     : String(text).slice(0, 2000),
+        isRead   : false
+      }));
+
+    const result = await Message.insertMany(docs, { ordered: false });
+    return res.json({ message: 'Broadcast odoslaný.', sent: result.length });
+  } catch (e) {
+    console.error('broadcast error', e);
+    return res.status(500).json({ message: 'Broadcast zlyhal.' });
   }
 });
 
