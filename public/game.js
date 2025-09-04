@@ -4,10 +4,13 @@ const email = params.get('email') || '';
 
 const backBtn = document.getElementById('backBtn');
 const logoutBtn = document.getElementById('logoutBtn');
+
+// ⬇️ ZMENA: späť ide na timeline.html (Lištobook)
 backBtn?.addEventListener('click', () => {
-  const url = email ? `dashboard.html?email=${encodeURIComponent(email)}` : 'dashboard.html';
+  const url = email ? `timeline.html?email=${encodeURIComponent(email)}` : 'timeline.html';
   location.href = url;
 });
+
 logoutBtn?.addEventListener('click', () => (location.href = 'index.html'));
 
 // --- state ---

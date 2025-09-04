@@ -13,7 +13,7 @@
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
   function showErr(el, msg) {
-    if (!el) return;
+    if (!el) return; // ak nemáme err element, ticho preskoč
     el.textContent = msg || '';
     el.style.display = msg ? 'block' : 'none';
   }
@@ -125,8 +125,13 @@
           return;
         }
 
-        // úspech
-        window.location.href = `dashboard.html?email=${encodeURIComponent(email)}`;
+        // ✅ úspech → presmeruj na Lištobook (timeline)
+        const params = new URLSearchParams(location.search);
+        const next = params.get('next'); // voliteľne podporíme ?next=
+        const dest = next || `timeline.html?email=${encodeURIComponent(email)}`;
+
+        // replace = nedá sa vrátiť späť na register po back
+        window.location.replace(dest);
       } catch (err) {
         console.error('Register error', err);
         showErr(emailErr(), 'Chyba pripojenia k serveru.');
