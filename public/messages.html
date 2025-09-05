@@ -43,6 +43,7 @@
     .burger svg{ width:22px; height:22px; }
     @media (max-width: 900px){ .burger{ display:grid; } }
 
+    /* ===== NAV PILLS (desktop ostáva, mobil schovám) ===== */
     .nav-scroller{ padding:0 var(--gap); width:100%; }
     .nav-track{ display:flex; gap:var(--nav-gap); justify-content:center; }
     .pill{
@@ -51,6 +52,9 @@
       background:#fff; color:#0c1f4b; font-weight:700; letter-spacing:.2px; cursor:pointer;
     }
     .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
+    @media (max-width: 900px){
+      .nav-scroller{ display:none; } /* mobil: skryť horné tlačidlá */
+    }
 
     /* ===== LAYOUT ===== */
     .wrap{
@@ -58,10 +62,10 @@
       height: calc(100vh - var(--hdr-h));
       display:grid; grid-template-columns: var(--list-w) minmax(0,1fr); gap:var(--gap);
       padding:16px; box-sizing:border-box;
-      padding-bottom: calc(var(--composer-h) + 16px); /* rezerva pod composer */
+      padding-bottom: calc(var(--composer-h) + 16px); /* rezerva pod composer (desktop) */
     }
     @media (max-width: 900px){
-      .wrap{ grid-template-columns: 1fr; }
+      .wrap{ grid-template-columns: 1fr; padding-bottom: 16px; } /* mobil: výšku vlákna vyriešime inak */
     }
 
     .card{ background:rgba(255,255,255,.04); border:1px solid var(--panel-border); border-radius:14px; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
@@ -70,14 +74,24 @@
 
     /* ===== LEFT: zoznam ===== */
     .list-panel{ min-height:0; }
-    .conv-scroller{ height:100%; overflow:auto; }
+    .conv-scroller{ height:100%; overflow:auto; -webkit-overflow-scrolling: touch; }
 
-    .head-actions{ display:flex; gap:8px; }
+    .head-actions{ display:flex; gap:8px; flex-wrap:wrap; }
     .mini-btn{
       height:32px; padding:0 10px; border-radius:10px; border:1px solid var(--ui-border);
       background:#fff; color:#0c1f4b; font-weight:700; cursor:pointer;
     }
     .mini-btn:hover{ background:#f7fbff; }
+    .mini-btn-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
+    .mini-btn-danger:hover{ filter:brightness(0.95); }
+    /* tlačidlá v menu len na mobile */
+    .mobile-only{ display:none; }
+    @media (max-width: 900px){
+      .mobile-only{ display:inline-flex; }
+    }
+    @media (min-width: 901px){
+      .mobile-only{ display:none; }
+    }
 
     .admin-tile{
       margin:12px; padding:12px; border-radius:12px;
@@ -114,8 +128,24 @@
         radial-gradient(220px 220px at 90% 0%, rgba(255,255,255,.06), transparent 60%),
         #ffffff;
       border-top:1px solid #eee;
+      -webkit-overflow-scrolling: touch; /* hladké scrollovanie na mobile */
+      padding-bottom: 12px; /* mierna medzera pod obsahom */
     }
-    .thread{ width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111; }
+    .thread{
+      width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111;
+      padding-bottom: 16px; /* rezerva pod poslednou správou */
+    }
+
+    /* — kľúčové: mobilná výška vlákna nech počíta fixný composer — */
+    @media (max-width:900px){
+      .list-panel{
+        position:fixed; top:0; left:0; height:100vh; width:min(88vw, 360px); z-index:1002;
+        transform:translateX(-100%); transition:transform .25s ease;
+      }
+      .nav-toggle:checked ~ .wrap .list-panel{ transform:translateX(0); }
+      .thread-panel{ height: calc(100vh - var(--hdr-h) - var(--composer-h)); }
+      .thread-wrap{ height:100%; } /* aby sa skutočne scrollovala táto vrstva */
+    }
 
     .msg{
       background:#f7f9ff; border:1px solid #e6eaff; border-radius:16px; padding:10px 12px; max-width:76%;
@@ -143,21 +173,6 @@
       background:var(--ui-bg); color: var(--ui-text); cursor:pointer; white-space:nowrap;
     }
     .button:hover{ background:var(--ui-hover); }
-
-    /* Mobil: ľavý panel ako zásuvka */
-    .drawer{ display:block; }
-    @media (max-width:900px){
-      .list-panel{
-        position:fixed; top:0; left:0; height:100vh; width:min(88vw, 360px); z-index:1002;
-        transform:translateX(-100%); transition:transform .25s ease;
-      }
-      .nav-toggle:checked ~ .wrap .list-panel{ transform:translateX(0); }
-      .thread-panel{ height: calc(100vh - var(--hdr-h) - var(--composer-h)); }
-    }
-
-    /* prepínanie zobrazenia poľa „Komu…“ */
-    body.mode-thread .to-field{ display:none; }
-    body.mode-list .to-field{ display:flex; }
 
     /* brand badge */
     .brand-badge{
@@ -204,6 +219,7 @@
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userChip">Prihlásený:</div>
 
+      <!-- DESKTOP: pôvodné tlačidlá ostávajú -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
           <button class="pill" id="goBackBtn">Späť</button>
@@ -220,6 +236,8 @@
       <div class="head" id="convHead">
         <span>Konverzácie</span>
         <div class="head-actions">
+          <button class="mini-btn mobile-only" id="goBackInMenuBtn" type="button" aria-label="Späť">Späť</button>
+          <button class="mini-btn mini-btn-danger mobile-only" id="logoutInMenuBtn" type="button" aria-label="Odhlásiť sa">Odhlásiť sa</button>
           <button class="mini-btn" id="newConvBtn" type="button">Nová konverzácia</button>
         </div>
       </div>
@@ -287,19 +305,35 @@
     (function(){
       const email = new URLSearchParams(location.search).get("email");
       const go = (page) => { location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+
+      // Desktop tlačidlá (ostávajú)
       document.getElementById('goBackBtn')?.addEventListener('click', () => go('timeline.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', () => { location.href = 'index.html'; });
+
+      // Mobilné tlačidlá v menu
+      document.getElementById('goBackInMenuBtn')?.addEventListener('click', () => {
+        go('timeline.html');
+      });
+      document.getElementById('logoutInMenuBtn')?.addEventListener('click', () => {
+        location.href = 'index.html';
+      });
     })();
 
     // mobilný burger ↔ zásuvka
     (function(){
       const toggle = document.getElementById('menuToggle');
       const burger = document.getElementById('burgerBtn');
-      burger?.addEventListener('click', (e)=>{ e.stopPropagation(); if (toggle){ toggle.checked = !toggle.checked; document.body.classList.toggle('no-scroll', toggle.checked); }});
+      burger?.addEventListener('click', (e)=>{ e.stopPropagation(); if (toggle){ toggle.checked = !toggle.checked; document.body.classList.toggle('no-scroll', toggle.checked); }});      
       document.addEventListener('click', (e)=>{
         if (!toggle?.checked) return;
         const inList = e.target.closest('.list-panel'); const inHdr = e.target.closest('.app-header');
         if (!inList && !inHdr){ toggle.checked=false; document.body.classList.remove('no-scroll'); }
+      });
+      // zavri zásuvku po kliknutí na linky v nej (mobil)
+      ['goBackInMenuBtn','logoutInMenuBtn','newConvBtn','adminTile'].forEach(id=>{
+        document.getElementById(id)?.addEventListener('click', ()=>{ 
+          if (toggle?.checked){ toggle.checked=false; document.body.classList.remove('no-scroll'); }
+        });
       });
     })();
 
@@ -316,10 +350,26 @@
         const toggle = document.getElementById('menuToggle');
         if (toggle?.checked){ toggle.checked = false; document.body.classList.remove('no-scroll'); }
       }else{
-        // fallback: stačí prepnúť na novú konverzáciu, pole „Komu…“ si doplní používateľ
         if (window.startNewConversation) window.startNewConversation();
       }
     });
+
+    // *** Dôležité pre pohodlné scrollovanie vlákna na mobile ***
+    (function(){
+      const setHeights = () => {
+        const header = document.querySelector('.app-header');
+        const composer = document.querySelector('.composer-bar');
+        const threadPanel = document.querySelector('.thread-panel');
+        if (!header || !composer || !threadPanel) return;
+        // aktualizuj CSS premennú podľa reálnej výšky composeru
+        document.documentElement.style.setProperty('--composer-h', composer.getBoundingClientRect().height + 'px');
+      };
+      setHeights();
+      addEventListener('resize', setHeights);
+      // keď sa textarea zväčší (auto-resize), mierne odlož a prepočítaj
+      const ta = document.getElementById('composerText');
+      ta?.addEventListener('input', ()=> setTimeout(setHeights, 0));
+    })();
   </script>
 </body>
 </html>
