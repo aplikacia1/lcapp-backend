@@ -35,8 +35,8 @@
     .logo-small{ height:48px; margin:2px auto 6px; display:block; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
 
-    /* burger = <label> → spoľahlivé na iPhone */
-    .nav-toggle{ position:absolute; opacity:0; pointer-events:none; }
+    /* burger (tlačidlo, JS toggle) */
+    .nav-toggle{ display:none; }
     .burger{
       position:absolute; left:12px; top:10px; width:44px; height:44px; display:none; place-content:center;
       border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; background:transparent; cursor:pointer;
@@ -116,17 +116,20 @@
     /* ===== RIGHT: vlákno ===== */
     .thread-panel{ display:flex; flex-direction:column; min-height:0; min-width:0; }
     .thread-wrap{
-      flex:1 1 auto; overflow:auto; width:100%;
+      flex:1 1 auto; overflow:auto; overflow-x:hidden; width:100%;
       background:
         radial-gradient(240px 240px at 20% -20%, rgba(255,255,255,.08), transparent 60%),
         radial-gradient(220px 220px at 90% 0%, rgba(255,255,255,.06), transparent 60%),
         #ffffff;
       border-top:1px solid #eee;
       -webkit-overflow-scrolling: touch;
-      /* kľúčové: vždy nechaj rezervu podľa reálnej výšky composeru */
-      padding-bottom: calc(16px + var(--composer-h));
+      padding-bottom: calc(16px + var(--composer-h)); /* rezerva nad lištou na písanie */
     }
-    .thread{ width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111; }
+    .thread{
+      width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111;
+      box-sizing:border-box; overflow-x:hidden;
+      padding-bottom: calc(16px + var(--composer-h)); /* extra rezerva pre istotu */
+    }
 
     /* Mobil (100dvh kvôli iOS) */
     @media (max-width:900px){
@@ -134,14 +137,16 @@
         position:fixed; top:0; left:0; height:100dvh; width:min(88vw, 360px); z-index:1002;
         transform:translateX(-100%); transition:transform .25s ease;
       }
-      #menuToggle:checked ~ .wrap .list-panel{ transform:translateX(0); }
+      .nav-toggle:checked ~ .wrap .list-panel{ transform:translateX(0); }
       .thread-panel{ height: calc(100dvh - var(--hdr-h)); }
       .thread-wrap{ height:100%; padding-bottom: calc(16px + var(--composer-h) + env(safe-area-inset-bottom)); }
+      .thread{ padding-bottom: calc(16px + var(--composer-h) + env(safe-area-inset-bottom)); }
     }
 
     .msg{
       background:#f7f9ff; border:1px solid #e6eaff; border-radius:16px; padding:10px 12px; max-width:76%;
       box-shadow:0 1px 0 rgba(0,0,0,.03);
+      overflow-wrap:anywhere; word-break:break-word;
     }
     .msg.me{ align-self:flex-end; background:#e8f4ff; border-color:#d8ebff; }
     .msg .meta{ font-size:12px; color:#445; display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; }
@@ -171,7 +176,7 @@
       border:2px solid #fff; border-radius:14px; padding:8px 10px; box-shadow:0 8px 18px rgba(0,0,0,.25); opacity:.96;
       transition: opacity .2s ease, transform .2s ease;
     }
-    #menuToggle:checked ~ .brand-badge{ opacity:.6; transform: translateY(6px); }
+    .nav-toggle:checked ~ .brand-badge{ opacity:.6; transform: translateY(6px); }
     .brand-badge img{ height:24px; }
     .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
     @media (max-width:480px){
@@ -202,10 +207,9 @@
   <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-      <!-- burger ako label → toggluje checkbox bez JS -->
-      <label class="burger" for="menuToggle" aria-label="Zobraziť zoznam konverzácií">
+      <button class="burger" id="burgerBtn" aria-label="Zobraziť zoznam konverzácií">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </label>
+      </button>
 
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userChip">Prihlásený:</div>
@@ -301,15 +305,16 @@
       document.getElementById('logoutInMenuBtn')?.addEventListener('click', () => { location.href = 'index.html'; });
     })();
 
-    // zavretie zásuvky klikom mimo (mobil)
+    // mobilný burger ↔ zásuvka (JS toggle)
     (function(){
       const toggle = document.getElementById('menuToggle');
+      const burger = document.getElementById('burgerBtn');
+      burger?.addEventListener('click', (e)=>{ e.stopPropagation(); if (toggle){ toggle.checked = !toggle.checked; document.body.classList.toggle('no-scroll', toggle.checked); }});
       document.addEventListener('click', (e)=>{
         if (!toggle?.checked) return;
         const inList = e.target.closest('.list-panel'); const inHdr = e.target.closest('.app-header');
         if (!inList && !inHdr){ toggle.checked=false; document.body.classList.remove('no-scroll'); }
       });
-      // zavri zásuvku po kliknutí na akcie v nej (mobil)
       ['goBackInMenuBtn','logoutInMenuBtn','adminTile'].forEach(id=>{
         document.getElementById(id)?.addEventListener('click', ()=>{ 
           if (toggle?.checked){ toggle.checked=false; document.body.classList.remove('no-scroll'); }
