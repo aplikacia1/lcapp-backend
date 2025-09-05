@@ -1,29 +1,56 @@
 // frontend/public/messages.js
+
+/* ---------- helpers ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = (s='') => String(s).replace(/[&<>"']/g, m => (
   {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
 ));
 
+/* ---------- URL params ---------- */
 const params = new URLSearchParams(location.search);
 const userEmail = params.get('email') || '';
 const toParam   = params.get('to') || '';
 if (!userEmail) location.href = 'index.html';
 
+/* ---------- globals ---------- */
 let userProfile = null;
 let ADMIN = { email:'', name:'Lištové centrum' };
 const ADMIN_FALLBACK = { email:'bratislava@listovecentrum.sk', name:'Lištové centrum' };
-window.__ADMIN_EMAIL__ = ADMIN_FALLBACK.email; // pre HTML click
+window.__ADMIN_EMAIL__ = ADMIN_FALLBACK.email; // pre HTML "Admin (broadcast)"
 
+/* stav vlákna */
 let currentOtherEmail = null;
 let currentOtherLabel = null;
-
-// incremental state
 let lastThreadStamp = 0;
+
+/* zoznam konverzácií – index */
 let convIndex = new Map();  // otherEmail -> { el, unread, lastText, updatedAt }
 let inflight = null;
 
-// draft cache
+/* koncepty */
 let draftCache = "";
+
+/* meno cache (email -> name) + helpery */
+const nameCache = new Map();
+
+async function getNameByEmail(email){
+  if (!email) return null;
+  if (nameCache.has(email)) return nameCache.get(email);
+  try{
+    const r = await fetch(`/api/users/${encodeURIComponent(email)}`);
+    const j = r.ok ? await r.json() : null;
+    const name = j?.name || null;
+    if (name) nameCache.set(email, name);
+    return name;
+  }catch{ return null; }
+}
+
+async function ensureLabelForEmail(email, label){
+  // ak label vyzerá ako meno, nechaj; ak je to email alebo chýba, doplň z DB
+  if (label && !label.includes('@')) return label;
+  const n = await getNameByEmail(email);
+  return n || label || email;
+}
 
 /* ---------- DING (zvuk) ---------- */
 let dingCtx = null;
@@ -80,54 +107,6 @@ async function loadAdmin(){
   window.__ADMIN_EMAIL__ = ADMIN.email;
 }
 
-/* ---------- MODE TOGGLING ---------- */
-function setModeThread(){
-  document.body.classList.remove('mode-list');
-  document.body.classList.add('mode-thread');
-}
-function setModeList(){
-  document.body.classList.remove('mode-thread');
-  document.body.classList.add('mode-list');
-  currentOtherEmail = null;
-  currentOtherLabel = null;
-  lastThreadStamp = 0;
-  const t = $('#thread');
-  if (t){
-    t.innerHTML = '';
-    delete t.dataset.threadOf;
-  }
-  const title = $('#threadTitle');
-  if (title) title.textContent = 'Vyberte konverzáciu';
-}
-
-// export pre „Nová konverzácia“
-window.startNewConversation = function(){
-  setModeList();
-  const f = $('#toName');
-  if (f){ f.value=''; f.focus(); }
-};
-
-/* ---------- HELPERS ---------- */
-function normalizeBase(s){
-  // zníženie, odstránenie diakritiky a zbytočných medzier
-  return (s||'')
-    .trim()
-    .toLowerCase()
-    .normalize('NFD').replace(/\p{Diacritic}/gu,'')
-    .replace(/\s+/g,' ');
-}
-function isAdminAlias(raw){
-  const n = normalizeBase(raw);
-  return (
-    n.startsWith('adm') ||          // chytí admin, admn…
-    n.includes('admin') ||
-    n.includes('listove centrum') ||
-    n.includes('listove-centrum') ||
-    n.includes('listovecentrum') ||
-    n.includes('listove')
-  );
-}
-
 /* ---------- LIST: konverzácie (diff) ---------- */
 function renderConvItem(item){
   const root = document.createElement('div');
@@ -137,7 +116,17 @@ function renderConvItem(item){
 
   const name = document.createElement('div');
   name.className = 'conv-name';
-  name.textContent = item.otherName || item.otherEmail;
+
+  // rýchly label: cache -> otherName -> email
+  const initialLabel = nameCache.get(item.otherEmail) || item.otherName || item.otherEmail;
+  name.textContent = initialLabel;
+
+  // ak je zobrazený e-mail, skús doplniť meno lazy
+  if (!item.otherName || initialLabel.includes('@')){
+    getNameByEmail(item.otherEmail).then(n=>{
+      if (n && name.firstChild) name.firstChild.textContent = n;
+    }).catch(()=>{});
+  }
 
   if (item.unread > 0){
     const bdg = document.createElement('span');
@@ -169,27 +158,19 @@ function patchConvItem(node, item){
     bdg.remove();
   }
   if (last) last.textContent = item.lastText || '';
+
+  // aktualizuj label, ak treba
+  const labelNode = name?.childNodes?.[0];
+  const currentText = labelNode?.textContent || '';
+  if (currentText.includes('@') && item.otherName){
+    labelNode.textContent = item.otherName;
+    nameCache.set(item.otherEmail, item.otherName);
+  }
 }
 function highlightActive(){
   document.querySelectorAll('.conv-item').forEach(el=>{
     el.classList.toggle('active', el.dataset.email === currentOtherEmail);
   });
-}
-function syncPeopleList(){
-  const dl = $('#peopleList');
-  if (!dl) return;
-  const seen = new Set();
-  const opts = [];
-
-  if (ADMIN?.name && !seen.has(ADMIN.name)){ opts.push(`<option value="${esc(ADMIN.name)}"></option>`); seen.add(ADMIN.name); }
-  if (ADMIN?.email && !seen.has(ADMIN.email)){ opts.push(`<option value="${esc(ADMIN.email)}"></option>`); seen.add(ADMIN.email); }
-
-  for (const [email, obj] of convIndex){
-    const nameEl = obj.el.querySelector('.conv-name');
-    const label = (nameEl?.childNodes[0]?.textContent || '').trim() || email;
-    if (!seen.has(label)){ opts.push(`<option value="${esc(label)}"></option>`); seen.add(label); }
-  }
-  dl.innerHTML = opts.join('');
 }
 async function refreshConversationsDiff(){
   const box = $('#convList');
@@ -209,7 +190,8 @@ async function refreshConversationsDiff(){
       box.innerHTML = '';
       if (rows.length) box.appendChild(frag);
       else box.innerHTML = '<div style="opacity:.8">Zatiaľ žiadne konverzácie.</div>';
-      highlightActive(); syncPeopleList(); return;
+      highlightActive();
+      return;
     }
 
     const nextKeys = new Set(rows.map(r => r.otherEmail));
@@ -235,15 +217,15 @@ async function refreshConversationsDiff(){
       }
     }
     highlightActive();
-    syncPeopleList();
     if (anyUnreadIncrease) ding();
   }catch{}
 }
 
-/* ---------- THREAD (bez miešania) ---------- */
+/* ---------- THREAD ---------- */
 function msgKey(m){
   return String(m._id || `${m.fromEmail}|${m.createdAt}|${m.text}`); 
 }
+
 async function openThread(otherEmail, otherLabel, { reset=false } = {}){
   const t = $('#thread'); if (!t) return;
 
@@ -252,7 +234,9 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
   const switching = wasFor && wasFor !== willBeFor;
 
   currentOtherEmail = otherEmail;
-  currentOtherLabel = otherLabel;
+  // doplň lepší label (prezývka) ak bol e-mail alebo chýbal
+  const displayLabel = await ensureLabelForEmail(otherEmail, otherLabel);
+  currentOtherLabel = displayLabel;
 
   if (switching || reset){
     t.innerHTML = '<div style="opacity:.8">Načítavam…</div>';
@@ -262,9 +246,10 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
     t.dataset.threadOf = otherEmail;
   }
 
+  // nadpis: "Meno — email" (ak meno existuje); inak len email
   const title = $('#threadTitle');
-  if (title) title.textContent = `${otherLabel} — ${otherEmail}`;
-  setModeThread();
+  if (title) title.textContent = (displayLabel && displayLabel !== otherEmail) ? `${displayLabel} — ${otherEmail}` : otherEmail;
+
   highlightActive();
 
   try{
@@ -288,9 +273,11 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
       el.className = 'msg' + (isMe ? ' me' : '');
       el.dataset.key = key;
       const when = m.createdAt ? new Date(m.createdAt).toLocaleString('sk-SK') : '';
+      const fromLabel = m.fromName || m.fromEmail;
+      const toLabel   = m.toName   || m.toEmail;
       el.innerHTML = `
         <div class="meta">
-          <span>${esc(m.fromName || m.fromEmail)} → ${esc(m.toName || m.toEmail)}</span>
+          <span>${esc(fromLabel)} → ${esc(toLabel)}</span>
           <span>${when}</span>
         </div>
         <div>${esc(m.text || '')}</div>
@@ -305,7 +292,7 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
     if (appended){
       const nearBottom = (t.scrollHeight - t.scrollTop - t.clientHeight) < 40;
       t.appendChild(frag);
-      if (nearBottom) requestAnimationFrame(()=> t.scrollTo({ top: t.scrollHeight, behavior: 'smooth' }));
+      if (nearBottom || reset) requestAnimationFrame(()=> t.scrollTo({ top: t.scrollHeight, behavior: 'smooth' }));
       if (hadIncoming) ding();
     }else if (!t.children.length){
       t.innerHTML = '<div style="opacity:.8">Zatiaľ žiadne správy.</div>';
@@ -321,25 +308,17 @@ async function sendMessage(){
   const rawText = area.value; const text = rawText.trim();
   if (!text) return;
 
-  let toName = null;
-
-  if (currentOtherEmail){
-    toName = currentOtherLabel || currentOtherEmail;
-  }else{
-    const toField = $('#toName');
-    toName = (toField?.value || '').trim();
-    if (!toName){ alert('Doplňte komu (prezývku).'); return; }
-
-    // Admin alias → posielame priamo na email
-    if (isAdminAlias(toName)){
-      toName = ADMIN.email || ADMIN_FALLBACK.email;
-    }
+  if (!currentOtherEmail){
+    alert('Vyberte najprv konverzáciu vľavo.');
+    return;
   }
 
-  // optimistická bublina iba ak sme v konkrétnom vlákne
+  const toName = currentOtherLabel || currentOtherEmail;
+
+  // optimistická bublina
   const optimisticKey = `opt_${Date.now()}`;
   const t = $('#thread');
-  if (t && currentOtherEmail){
+  if (t){
     const opt = document.createElement('div');
     opt.className = 'msg me';
     opt.dataset.key = optimisticKey;
@@ -374,16 +353,7 @@ async function sendMessage(){
   const optEl = $('#thread')?.querySelector(`.msg[data-key="${optimisticKey}"]`);
   if (optEl) optEl.remove();
 
-  if (currentOtherEmail){
-    await openThread(currentOtherEmail, currentOtherLabel, { reset:false });
-  }else{
-    // rozlúštiť email a rovno otvoriť vlákno (Admin aj bežní používatelia)
-    const resolved = await resolveEmailByName(toName);
-    const label = isAdminAlias(toName) ? ADMIN.name : toName;
-    const email = resolved || ADMIN.email || ADMIN_FALLBACK.email;
-    if (email){ await openThread(email, label, { reset:true }); }
-    await refreshConversationsDiff();
-  }
+  await openThread(currentOtherEmail, currentOtherLabel, { reset:false });
 }
 
 /* Enter = send, Shift+Enter = newline + počítadlo */
@@ -396,23 +366,6 @@ function wireComposerKeys(){
   });
   area?.addEventListener('input', ()=>{ draftCache = area.value; syncCount(); });
   syncCount();
-}
-
-/* Pomocník – rozlúštiť email z prezývky (ak treba) */
-async function resolveEmailByName(name){
-  const raw = (name||'').trim();
-  if (!raw) return null;
-  if (raw.includes('@')) return raw;
-  if (isAdminAlias(raw)) return ADMIN.email || ADMIN_FALLBACK.email;
-
-  try{
-    const q = encodeURIComponent(raw);
-    const r = await fetch(`/api/messages/search-users?q=${q}`);
-    const list = r.ok ? await r.json() : [];
-    const n = normalizeBase(raw);
-    const row = list.find(x => normalizeBase(x.name || '') === n) || list.find(x => normalizeBase(x.email || '') === n);
-    return row?.email || null;
-  }catch{ return null; }
 }
 
 /* ---------- SAFE REFRESH ---------- */
@@ -439,13 +392,31 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   await loadAdmin();
   await refreshConversationsDiff();
 
+  // ak prišiel ?to= (email alebo prezývka) → otvor vlákno s danou osobou
   if (toParam) {
     const isEmail = toParam.includes('@');
-    const toEmail = isEmail ? toParam : (await resolveEmailByName(toParam));
+    let toEmail = null;
+    if (isEmail) toEmail = toParam;
+    else {
+      // pokus vyhľadať podľa mena
+      try{
+        const q = encodeURIComponent(toParam);
+        const r = await fetch(`/api/messages/search-users?q=${q}`);
+        const list = r.ok ? await r.json() : [];
+        const norm = (s)=> (s||'').trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/\s+/g,' ');
+        const row = list.find(x => norm(x.name) === norm(toParam)) || list.find(x => norm(x.email) === norm(toParam));
+        toEmail = row?.email || null;
+      }catch{}
+    }
     if (toEmail) await openThread(toEmail, toParam || toEmail, { reset:true });
   } else {
     const first = document.querySelector('#convList .conv-item');
-    if (first) first.click();
+    if (first){
+      const email = first.dataset.email;
+      const label = first.querySelector('.conv-name')?.childNodes?.[0]?.textContent || email;
+      if (email && label && !label.includes('@')) nameCache.set(email, label);
+      first.click();
+    }
   }
 
   setInterval(()=> { if (!document.hidden) safeRefresh(); }, 4000);
