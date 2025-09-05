@@ -1,21 +1,26 @@
 // backend/index.js
-
-// ✅ Načítaj .env priamo z priečinka backend (nie z pracovného diru)
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const app = express();
 
-/* --- Middleware --- */
-app.use(cors());
+/* --- Základ --- */
+app.set('trust proxy', 1); // Render/reverse proxy
+const ALLOWED_ORIGINS = [
+  process.env.APP_URL,                 // napr. https://lcapp-backend.onrender.com
+  'http://localhost:3000',
+  'https://lcapp-backend.onrender.com'
+].filter(Boolean);
+
+app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser()); // musí byť pred routami
+app.use(cookieParser());
 
 /* --- Diagnostiky --- */
 app.get('/__whoami', (_req, res) => {
@@ -27,10 +32,12 @@ app.get('/debug/db', (_req, res) => {
   res.json({ state: c.readyState, db: c.name || null, host: c.host || null });
 });
 
-/* --- Statické súbory (HTML/CSS/JS + UPLOADS) --- */
-app.use(express.static(path.join(__dirname, 'public')));              // / -> backend/public
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // /uploads -> backend/uploads
-app.get('/', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+/* --- Statika --- */
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.get('/', (_req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'index.html'))
+);
 
 /* --- Helper na mount rout --- */
 function mountRoute(url, modPath) {
@@ -39,7 +46,7 @@ function mountRoute(url, modPath) {
     app.use(url, r);
     console.log(`✅ route ${url} -> ${modPath}`);
   } catch (e) {
-    console.warn(`⚠️  preskakujem ${url}: ${modPath} – ${e.message}`);
+    console.warn(`⚠️ preskakujem ${url}: ${modPath} – ${e.message}`);
   }
 }
 
@@ -58,7 +65,7 @@ mountRoute('/api/admin/timeline', './routes/timelineAdminRoutes');
 mountRoute('/api/messages',       './routes/messageRoutes');
 mountRoute('/api/push',           './routes/pushRoutes');
 
-/* --- Štart až po úspešnom Mongo pripojení --- */
+/* --- Štart po DB --- */
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -66,9 +73,6 @@ if (!MONGO_URI) {
   console.error('❌ Chýba MONGO_URI v .env');
   process.exit(1);
 }
-
-// (voliteľne) krátky log na kontrolu ADMIN_EMAIL
-console.log('ADMIN_EMAIL =', process.env.ADMIN_EMAIL || '(empty)');
 
 mongoose.connect(MONGO_URI)
   .then(() => {
