@@ -28,7 +28,7 @@
     body{background:#0c1f4b; color:#fff; padding-top:var(--hdr-h);}
     body.no-scroll{ overflow: hidden; }
 
-    /* === Pevná hlavička (ako na ostatných stránkach) === */
+    /* === Pevná hlavička === */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 1000;
       background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
@@ -40,7 +40,7 @@
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* ĽAVÝ hamburger (akcie) + PRAVÝ hamburger (účastníci) — zobraz len na mobile */
+    /* Hamburgery – len mobil */
     .nav-toggle, .people-toggle{ display:none; }
     .burger, .people{
       position:absolute; top:10px; width:44px; height:44px; display:none;
@@ -52,7 +52,7 @@
     .burger svg, .people svg{ width:22px; height:22px; }
     @media (max-width: 767.98px){ .burger, .people{ display:flex; } }
 
-    /* Vodorovne posúvateľné nav pills (mobil) */
+    /* Nav pills */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
       display:flex; gap: var(--nav-gap);
@@ -78,7 +78,7 @@
       .pill{ flex: 0 0 auto; width: auto !important; }
     }
 
-    /* === OFF-CANVAS MENU (ľavé) – mobil: z nav-scroller sprav zásuvku === */
+    /* Ľavá off-canvas zásuvka (mobil) */
     @media (max-width: 767.98px){
       .app-header .nav-scroller{
         position: fixed; top: 0; left: 0; height: 100vh;
@@ -92,17 +92,16 @@
       }
       .nav-track{ flex-direction: column; gap: 10px; overflow: hidden; scroll-snap-type: none; align-items: stretch; }
       .pill{ width:100% !important; height:44px; font-size:1rem; border-radius:14px; }
-      /* otvor zásuvku (ľavá) – viazané na checkbox pred .app-header */
       .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
     }
 
-    /* ===== Layout hlavného obsahu ===== */
+    /* Layout obsahu */
     .main-content{
       width:100%; max-width:var(--max-w); margin:24px auto; padding:0 var(--gap);
-      padding-bottom:120px; /* composer reserve */
+      padding-bottom:120px; /* priestor pre composer */
     }
 
-    /* RIGHT PANEL – online užívatelia (desktop) + off-canvas (mobil) */
+    /* Panel účastníkov / off-canvas v mobile */
     .presence-panel{
       position:fixed; right:24px; top:calc(var(--hdr-h) + 16px);
       width:260px; max-height:calc(100vh - var(--hdr-h) - 120px);
@@ -110,7 +109,8 @@
       box-shadow:0 2px 10px rgba(0,0,0,.06); padding:10px; z-index:900; color:#111;
       transition: transform .25s ease;
     }
-    .presence-title{ font-weight:700; color:#0c1f4b; margin-bottom:6px }
+    .presence-title{ font-weight:700; color:#0c1f4b; margin-bottom:2px }
+    .presence-hint{ font-size:.85rem; color:#4b5a86; margin:0 0 8px 0; }
     .presence-list{ list-style:none; padding:0; margin:0 }
     .presence-item{ display:flex; align-items:center; gap:8px; padding:6px 4px; border-bottom:1px dotted #eee; cursor:pointer; }
     .presence-item:last-child{ border-bottom:none }
@@ -119,9 +119,8 @@
     .dot.online{ background:#22c55e }
     .presence-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-    @media (max-width:1200px){ .presence-panel{ display:none; } } /* skry desktop panel, ak je úzke okno */
+    @media (max-width:1200px){ .presence-panel{ display:none; } }
 
-    /* Mobilné správanie – pravý off-canvas */
     @media (max-width: 767.98px){
       .presence-panel{
         display:block; right:0; top:0; height:100vh; width:min(80vw, 320px);
@@ -129,11 +128,10 @@
         box-shadow:-24px 0 36px rgba(0,0,0,.35);
         z-index: 1002;
       }
-      /* otvor zásuvku (pravá) – viazané na checkbox pred panelom */
       .people-toggle:checked ~ .presence-panel{ transform: translateX(0); }
     }
 
-    /* Feed / posts */
+    /* Feed */
     .post{ background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px; color:#111 }
     .post strong{ color:#0c1f4b }
     .post-image{ max-width:100%; height:auto; border-radius:10px; margin-top:8px }
@@ -146,7 +144,7 @@
     .link-btn{ background:transparent; border:none; color:#0c1f4b; cursor:pointer; padding:4px 8px; border-radius:8px; }
     .link-btn:hover{ background:rgba(12,31,75,.08); }
 
-    /* komentárový formulár */
+    /* Komentárový formulár */
     .commentForm{ display:flex; align-items:center; gap:8px; width:100%; }
     .commentForm input[type="text"]{
       flex:1 1 auto; min-width:160px; height:40px; padding:8px 12px;
@@ -159,11 +157,11 @@
     }
     .commentForm button{
       padding:10px 14px; border:1px solid var(--ui-border); border-radius:10px;
-      background:var(--ui-bg); color:var(--ui-text); cursor:pointer;
+      background:var(--ui-bg); color:#0c1f4b; cursor:pointer;
     }
     .commentForm button:hover{ background:var(--ui-bg-hover); }
 
-    /* Composer dole */
+    /* Composer */
     .composer-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:950;
       background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
@@ -199,7 +197,7 @@
       #composerCount{ font-size:11px; }
     }
 
-    /* MarSab® – badge (nad composerom) */
+    /* MarSab® badge */
     .brand-badge{
       position: fixed; left: 16px; bottom: 120px; z-index: 70;
       display: inline-flex; align-items: center; gap: 8px;
@@ -208,7 +206,6 @@
       box-shadow: 0 8px 18px rgba(0,0,0,.25); opacity:.96;
       transition: opacity .2s ease, transform .2s ease;
     }
-    /* keď je otvorená hociktorá zásuvka, badge trochu ustúpi */
     .nav-toggle:checked ~ .brand-badge,
     .people-toggle:checked ~ .brand-badge{ opacity:.6; transform: translateY(6px); }
 
@@ -220,7 +217,7 @@
       .brand-badge .wordmark{ font-size:12px; }
     }
 
-    /* ===== Toasty (notifikácie) ===== */
+    /* Toasty */
     .toast-stack{
       position: fixed; top: calc(var(--hdr-h) + 12px); left: 50%;
       transform: translateX(-50%);
@@ -239,27 +236,22 @@
     .toast.error{ border-color:#d44242; }
     .toast .t-ico{ font-weight:800; min-width:18px; }
     .toast .t-msg{ flex:1; min-width:0; }
-    .toast .t-x{
-      appearance:none; border:none; background:transparent; color:#cfe2ff; cursor:pointer;
-      font-size:18px; line-height:1; padding:0 4px;
-    }
+    .toast .t-x{ appearance:none; border:none; background:transparent; color:#cfe2ff; cursor:pointer; font-size:18px; line-height:1; padding:0 4px; }
   </style>
 </head>
 <body>
 
-  <!-- prepínače (kvôli CSS ~ selektorom) -->
+  <!-- skryté prepínače pre off-canvas -->
   <input type="checkbox" id="navToggle" class="nav-toggle" aria-hidden="true" />
   <input type="checkbox" id="peopleToggle" class="people-toggle" aria-hidden="true" />
 
   <!-- HLAVIČKA -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-      <!-- ľavý hamburger -->
       <button type="button" class="burger" aria-label="Menu" id="burgerBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
 
-      <!-- pravý hamburger (účastníci) -->
       <button type="button" class="people" aria-label="Účastníci" id="peopleBtn">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M2 20c0-3.5 3-6 7-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="10" r="2" stroke="currentColor" stroke-width="2"/><path d="M14 20c0-2.2 1.8-4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
@@ -267,28 +259,25 @@
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="loggedUser">Prihlásený ako: </div>
 
-      <!-- NAV – upravené tlačidlá -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
           <button class="pill" id="goBackBtn">Katalóg</button>
-
           <button class="pill" id="openMessagesBtn">
             Správy
             <span id="msgBadge" style="display:none; min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center;"></span>
           </button>
-
           <button class="pill" id="gameBtn">Hra</button>
           <button class="pill" id="accountBtn">Účet</button>
-
           <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
         </div>
       </nav>
     </div>
   </header>
 
-  <!-- PRAVÁ ZÁSUVKA / DESKTOP PANEL – ONLINE UŽÍVATELIA -->
+  <!-- PANEL ÚČASTNÍKOV -->
   <aside id="presencePanel" class="presence-panel">
     <div class="presence-title">Používatelia</div>
+    <div class="presence-hint">Ťukni na meno pre <strong>novú konverzáciu</strong>.</div>
     <ul id="presenceList" class="presence-list"></ul>
   </aside>
 
@@ -297,7 +286,7 @@
     <div class="post-feed" id="postFeed"></div>
   </div>
 
-  <!-- COMPOSER DOLE -->
+  <!-- COMPOSER -->
   <div class="composer-bar" id="composerBar">
     <div class="composer-wrap">
       <form id="timelineForm" class="composer" autocomplete="off" enctype="multipart/form-data">
@@ -314,7 +303,7 @@
     </div>
   </div>
 
-  <!-- Toast stack -->
+  <!-- Toasty -->
   <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
   <!-- MarSab® badge -->
@@ -325,16 +314,13 @@
 
   <!-- config musí byť načítaný skôr -->
   <script src="/js/config.js"></script>
-
-  <!-- badge neprečítaných + auto-aktualizácia -->
+  <!-- badge neprečítaných -->
   <script src="/js/unread-badge.js"></script>
-
-  <!-- Timeline logika (nezmenené) -->
+  <!-- Timeline logika -->
   <script src="timeline.js"></script>
 
-  <!-- Toast helper + dopočet výšky hlavičky + navigácia + hamburgre + preklik na správy adresátovi -->
+  <!-- Toast helper + dopočet hlavičky + navigácia + hamburgre + klik na účastníka -->
   <script>
-    // --- Toast helper (success/info/warn/error) ---
     (function(){
       const stack = document.getElementById('toastStack');
       const MAX = 3;
@@ -344,7 +330,6 @@
       function push(type='info', message='', {duration=4000}={}){
         if (!stack) return;
         while (stack.children.length >= MAX) stack.firstElementChild?.remove();
-
         const el = document.createElement('div');
         el.className = `toast ${type}`;
         el.innerHTML = `
@@ -353,11 +338,9 @@
           <button class="t-x" aria-label="Zavrieť">×</button>
         `;
         stack.appendChild(el);
-
         const killer = setTimeout(()=> el.remove(), duration);
         el.querySelector('.t-x')?.addEventListener('click', () => { clearTimeout(killer); el.remove(); });
       }
-
       window.toast = {
         show: (type, msg, opts) => push(type, msg, opts),
         success: (msg, opts) => push('success', msg, opts),
@@ -368,29 +351,24 @@
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
-      /* rezerva pod pevnú hlavičku */
       const header = document.querySelector('.app-header');
       const setHdrH = () => {
         if (!header) return;
         const h = header.getBoundingClientRect().height;
         document.documentElement.style.setProperty('--hdr-h', h + 'px');
       };
-      setHdrH();
-      window.addEventListener('resize', setHdrH);
+      setHdrH(); window.addEventListener('resize', setHdrH);
 
-      /* navigácia s emailom */
       const email = new URLSearchParams(window.location.search).get("email");
       const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
 
       document.getElementById('goBackBtn')?.addEventListener('click', () => go('catalog.html'));
       document.getElementById('openMessagesBtn')?.addEventListener('click', () => go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
-
-      // nové tlačidlá:
       document.getElementById('gameBtn')?.addEventListener('click', () => go('game.html'));
       document.getElementById('accountBtn')?.addEventListener('click', () => go('dashboard.html'));
 
-      /* Klik na účastníka → presmeruj na messages s ?to= */
+      // Klik na účastníka → presmeruj na messages s ?to=
       const presence = document.getElementById('presenceList');
       presence?.addEventListener('click', (e) => {
         const li = e.target.closest('.presence-item');
@@ -406,7 +384,7 @@
         }
       });
 
-      /* === Hamburger fallback – iOS friendly toggle === */
+      // iOS-friendly toggles
       const navChk = document.getElementById('navToggle');
       const pplChk = document.getElementById('peopleToggle');
       const burgerBtn = document.getElementById('burgerBtn');
@@ -416,33 +394,21 @@
       function updateScrollLock(){ document.body.classList.toggle('no-scroll', anyOpen()); }
 
       burgerBtn?.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        if (!navChk) return;
-        navChk.checked = !navChk.checked;
-        if (navChk.checked) { if (pplChk) pplChk.checked = false; }
-        updateScrollLock();
+        e.stopPropagation(); navChk.checked = !navChk.checked;
+        if (navChk.checked) pplChk.checked = false; updateScrollLock();
       });
       peopleBtn?.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        if (!pplChk) return;
-        pplChk.checked = !pplChk.checked;
-        if (pplChk.checked) { if (navChk) navChk.checked = false; }
-        updateScrollLock();
+        e.stopPropagation(); pplChk.checked = !pplChk.checked;
+        if (pplChk.checked) navChk.checked = false; updateScrollLock();
       });
 
-      /* Klik mimo zásuviek zatvorí */
       document.addEventListener('click', (e)=>{
         const inHeader = e.target.closest('.app-header');
         const inLeft   = e.target.closest('.nav-scroller');
         const inRight  = e.target.closest('.presence-panel');
-        if (!inHeader && !inLeft && !inRight){
-          if (navChk) navChk.checked = false;
-          if (pplChk) pplChk.checked = false;
-          updateScrollLock();
-        }
+        if (!inHeader && !inLeft && !inRight){ navChk.checked = false; pplChk.checked = false; updateScrollLock(); }
       });
 
-      /* keď sa mení stav checkboxov (napr. cez CSS label), uzamkni/odomkni scroll */
       ['change','input'].forEach(ev=>{
         navChk?.addEventListener(ev, updateScrollLock);
         pplChk?.addEventListener(ev, updateScrollLock);

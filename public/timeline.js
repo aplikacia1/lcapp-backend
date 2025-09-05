@@ -1,5 +1,3 @@
-// frontend/public/timeline.js
-
 // ───────────────────── Pomôcky ─────────────────────
 function getEmailFromURL() {
   const params = new URLSearchParams(window.location.search);
@@ -7,23 +5,29 @@ function getEmailFromURL() {
 }
 function $(sel, root = document) { return root.querySelector(sel); }
 function escapeHTML(str = "") {
-  return String(str || "").replace(/[&<>"']/g, m => (
-    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
-  ));
+  return String(str || "").replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+  );
 }
 const scroller = document.scrollingElement || document.documentElement;
 
 // Admin mód cez ?admin=1
 const isAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
 
+// KONŠTANTA: pevne pripnutý admin navrchu zoznamu
+const FIXED_ADMIN = {
+  email: "bratislava@listovecentrum.sk",
+  name: "Lištové centrum",
+  online: true
+};
+
 // Stav
 const userEmail = getEmailFromURL(); // len z URL, žiadny storage
 let userData = null;
-let tlTimer = null;          // interval na auto-refresh timeline
-let userScrollActive = false; // krátke obdobie po scrollovaní vynecháme refresh
+let tlTimer = null;
+let userScrollActive = false;
 let scrollIdleTO = null;
 
-// ak email chýba, pošleme na index
 if (!userEmail) { window.location.href = "index.html"; }
 
 // ───────────────── Dolný padding podľa výšky composeru ─────────────────
@@ -42,13 +46,11 @@ function setPresenceBottom() {
   panel.style.maxHeight = `calc(100vh - var(--header-h) - ${h + 24}px)`;
 }
 
-// Navigácia späť
+// Navigácia
 function backToCatalog(){
   const e = userEmail;
   window.location.href = e ? `catalog.html?email=${encodeURIComponent(e)}` : `catalog.html`;
 }
-
-// 🔸 Správy
 function openMessages(){
   const url = `messages.html?email=${encodeURIComponent(userEmail)}${isAdmin ? '&admin=1':''}`;
   location.href = url;
@@ -110,7 +112,7 @@ function containsBannedWords(text) {
   return bannedWords.some(word => String(text || '').toLowerCase().includes(word));
 }
 
-// ───────────────── Composer (fixne dole) ─────────────────
+// ───────────────── Composer ─────────────────
 function initComposer() {
   const form = $("#timelineForm");
   if (!form) return;
@@ -182,7 +184,7 @@ function initComposer() {
   updateUI();
 }
 
-// ── Zachovanie rozpisovaných komentárov pri refreshoch ──
+// ── Drafty komentárov (aby sa nestratili pri refreshi) ──
 function collectCommentDrafts(){
   const drafts = {};
   document.querySelectorAll('form.commentForm').forEach(f=>{
@@ -199,12 +201,11 @@ function applyCommentDrafts(drafts = {}){
   });
 }
 
-// ───────────────── Načítať príspevky (stabilný scroll) ─────────────────
+// ───────────────── Načítať príspevky ─────────────────
 async function loadPosts(opts = {}) {
   const preserveScroll = !!opts.preserveScroll;
   const postFeed = $("#postFeed");
 
-  // 1) Snapshot pozície + rozpísaných komentárov
   const drafts = collectCommentDrafts();
   const prevScrollY = preserveScroll ? (scroller.scrollTop || 0) : 0;
 
@@ -254,13 +255,11 @@ async function loadPosts(opts = {}) {
       postFeed.appendChild(el);
     });
 
-    setComposerPadding(); 
+    setComposerPadding();
     setPresenceBottom();
 
-    // 2) Obnov rozpísané komentáre
     applyCommentDrafts(drafts);
 
-    // 3) Obnov scroll (po reflow) – dva rAF pre istotu
     if (preserveScroll) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -273,7 +272,7 @@ async function loadPosts(opts = {}) {
   }
 }
 
-// ───────────────── Komentovanie ─────────────────
+// ───────────────── Komentovanie / mazanie ─────────────────
 document.addEventListener("submit", async (e) => {
   const form = e.target;
   if (form.classList && form.classList.contains("commentForm")) {
@@ -297,7 +296,6 @@ document.addEventListener("submit", async (e) => {
   }
 });
 
-// ─────────────── Mazanie príspevku / komentára ───────────────
 document.addEventListener("click", async (e) => {
   const postBtn = e.target.closest(".post-delete");
   if (postBtn) {
@@ -311,7 +309,6 @@ document.addEventListener("click", async (e) => {
         body: isAdmin ? undefined : JSON.stringify({ email: userEmail })
       });
       const data = await res.json().catch(()=>({}));
-// Ak sme v liste nižšie, po zmazaní môže výška nad nami klesnúť – nechajme restore
       if (res.ok) loadPosts({ preserveScroll: true });
       else alert((data && data.message) || "Mazanie príspevku zlyhalo.");
     } catch { alert("Server neodpovedá."); }
@@ -361,20 +358,33 @@ async function refreshPresence(){
 function renderPresence(users){
   const ul = $("#presenceList");
   if(!ul) return;
-  ul.innerHTML = users.map(u => `
-    <li class="presence-item">
+
+  // 1) deduplikácia podľa emailu
+  const seen = new Set();
+  const unique = [];
+  ([FIXED_ADMIN, ...(Array.isArray(users)?users:[])]).forEach(u=>{
+    if (!u || !u.email) return;
+    const key = u.email.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    unique.push(u);
+  });
+
+  // 2) render – admin je prvý, všetky položky majú data-email (pre klik)
+  ul.innerHTML = unique.map(u => `
+    <li class="presence-item" data-email="${escapeHTML(u.email)}" title="${escapeHTML(u.email)}">
       <span class="dot ${u.online ? 'online':''}"></span>
-      <span class="presence-name" title="${escapeHTML(u.email)}">
+      <span class="presence-name">
         ${escapeHTML(u.name || u.email)}${u.email === userEmail ? ' (ty)' : ''}
       </span>
     </li>
   `).join('');
 }
 
-// Odhlásenie (globálna funkcia z HTML)
+// Odhlásenie
 window.logout = () => { window.location.href = "index.html"; };
 
-// Pomôcky pre auto-refresh: detekcia písania/scrollu
+// Auto-refresh guardy
 function isTyping() {
   const a = document.activeElement;
   if (!a) return false;
@@ -397,28 +407,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!isAdmin) initComposer();
   await loadPosts();
 
-  // Auto-refresh timeline každých 6 s – bez skoku a šetrne
+  // Auto-refresh timeline
   const tick = () => {
-    // vynechaj, keď je karta skrytá, keď používateľ práve scrolluje alebo píše
     if (document.hidden || userScrollActive || isTyping()) return;
     loadPosts({ preserveScroll: true });
   };
   const startTL = () => { if (!tlTimer) tlTimer = setInterval(tick, 6000); };
   const stopTL  = () => { if (tlTimer) { clearInterval(tlTimer); tlTimer = null; } };
   startTL();
-
-  // šetrenie: zastav na pozadí, spusti po návrate
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopTL();
-    else startTL();
+    if (document.hidden) stopTL(); else startTL();
   });
 
-  // Presence – heartbeat + refresh
+  // Presence
   startPresenceHeartbeat();
   refreshPresence();
   setInterval(refreshPresence, 10000);
 
-  // 🔔 badge neprečítaných – prvé načítanie + interval
+  // 🔔 badge neprečítaných
   await refreshUnreadBadge();
   setInterval(refreshUnreadBadge, 20000);
 });
