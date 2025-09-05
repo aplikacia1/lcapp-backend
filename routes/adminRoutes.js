@@ -1,4 +1,5 @@
 // backend/routes/adminRoutes.js
+// BUILD: adminRoutes v-delmsgs-2
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -7,6 +8,7 @@ const mongoose = require('mongoose');
 const Admin = require('../models/adminModel');
 const User = require('../models/User');
 const TimelinePost = require('../models/timelinePost');
+const Message = require('../models/message'); // <-- presne podľa tvojho models/message.js
 
 // TODO: nahraď reálnou kontrolou admina (session/JWT)
 const requireAdmin = (_req, _res, next) => next();
@@ -104,10 +106,18 @@ router.put('/users/:id/note', requireAdmin, async (req, res) => {
 });
 
 /* ------------------------------------------------------
+ * Helpery pre bezpečné maznutie správ
+ * ------------------------------------------------------ */
+function escapeRegex(lit = '') {
+  return String(lit).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/* ------------------------------------------------------
  * DELETE /api/admin/users/:id
  * Zmaže používateľa a jeho stopu v Lištobooku
  * – TimelinePost.author === user.email alebo user.name
  * – comments.author === user.email alebo user.name
+ * – PRIVATE MESSAGES: všetky správy, kde je fromEmail==user.email alebo toEmail==user.email
  * ------------------------------------------------------ */
 router.delete('/users/:id', requireAdmin, async (req, res) => {
   const { id } = req.params;
@@ -116,12 +126,15 @@ router.delete('/users/:id', requireAdmin, async (req, res) => {
   try {
     await session.withTransaction(async () => {
       const user = await User.findById(id).session(session);
-      if (!user) return res.status(404).send('Používateľ nenájdený');
+      if (!user) {
+        res.status(404).send('Používateľ nenájdený');
+        await session.abortTransaction();
+        return;
+      }
 
-      const authorKeys = [
-        (user.email || '').trim(),
-        (user.name  || '').trim()
-      ].filter(Boolean);
+      const emailRaw = (user.email || '').trim();
+      const nameRaw  = (user.name  || '').trim();
+      const authorKeys = [emailRaw, nameRaw].filter(Boolean);
 
       // 1) Zmaž jeho príspevky
       await TimelinePost.deleteMany({ author: { $in: authorKeys } }).session(session);
@@ -132,7 +145,31 @@ router.delete('/users/:id', requireAdmin, async (req, res) => {
         { $pull: { comments: { author: { $in: authorKeys } } } }
       ).session(session);
 
-      // 3) Zmaž samotného používateľa
+      // 3) Zmaž jeho súkromné správy
+      if (emailRaw) {
+        const emailLower = emailRaw.toLowerCase();
+
+        // 3a) Rýchly delete cez rovnosť (využije indexy)
+        await Message.deleteMany({
+          $or: [
+            { fromEmail: emailRaw },
+            { toEmail:   emailRaw },
+            { fromEmail: emailLower },
+            { toEmail:   emailLower }
+          ]
+        }).session(session);
+
+        // 3b) Fallback: case-insensitive presná zhoda (pre istotu)
+        const anchored = new RegExp(`^${escapeRegex(emailRaw)}$`, 'i');
+        await Message.deleteMany({
+          $or: [
+            { fromEmail: anchored },
+            { toEmail:   anchored }
+          ]
+        }).session(session);
+      }
+
+      // 4) Zmaž samotného používateľa
       await User.deleteOne({ _id: user._id }).session(session);
     });
 
