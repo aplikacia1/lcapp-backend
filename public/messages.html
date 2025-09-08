@@ -77,7 +77,11 @@
     .card .body{ flex:1 1 auto; overflow:auto; min-height:0; }
 
     /* ===== LEFT: zoznam ===== */
-    .list-panel{ min-height:0; }
+    .list-panel{
+      min-height:0;
+      background:#0c1f4b !important; /* plné modré pozadie */
+      border:none !important;
+    }
     .conv-scroller{ height:100%; overflow:auto; -webkit-overflow-scrolling: touch; }
 
     .head-actions{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -259,7 +263,6 @@
         </div>
       </div>
       <div class="body conv-scroller">
-        <!-- Admin (broadcast) odstránený -->
         <div id="convList" class="conv-list"></div>
       </div>
     </section>
@@ -302,8 +305,13 @@
     // dopočet výšky hlavičky kvôli fixed headeru
     (function(){
       const header = document.querySelector('.app-header');
-      function setHdrH(){ if (header) document.documentElement.style.setProperty('--hdr-h', header.getBoundingClientRect().height + 'px'); }
-      setHdrH(); addEventListener('resize', setHdrH);
+      function setHdrH(){
+        if (header){
+          document.documentElement.style.setProperty('--hdr-h', header.getBoundingClientRect().height + 'px');
+        }
+      }
+      setHdrH();
+      addEventListener('resize', setHdrH);
     })();
 
     // navigácia so zachovaním ?email=
@@ -327,12 +335,18 @@
       const backdrop = document.querySelector('.backdrop');
 
       function closeDrawer(){
-        if (toggle?.checked){ toggle.checked=false; document.body.classList.remove('no-scroll'); }
+        if (toggle?.checked){
+          toggle.checked=false;
+          document.body.classList.remove('no-scroll');
+        }
       }
 
       burger?.addEventListener('click', (e)=>{
         e.stopPropagation();
-        if (toggle){ toggle.checked = !toggle.checked; document.body.classList.toggle('no-scroll', toggle.checked); }
+        if (toggle){
+          toggle.checked = !toggle.checked;
+          document.body.classList.toggle('no-scroll', toggle.checked);
+        }
       });
 
       // Klik mimo (backdrop) zavrie menu
@@ -340,7 +354,8 @@
 
       document.addEventListener('click', (e)=>{
         if (!toggle?.checked) return;
-        const inList = e.target.closest('.list-panel'); const inHdr = e.target.closest('.app-header');
+        const inList = e.target.closest('.list-panel');
+        const inHdr  = e.target.closest('.app-header');
         if (!inList && !inHdr){ closeDrawer(); }
       });
 
@@ -351,8 +366,7 @@
 
     // Rezerva nad composerom podľa reálnej výšky (desktop+mobil)
     (function(){
-      const composerBar = document.querySelector('.composer-bar');
-      const composer = composerBar;
+      const composer = document.querySelector('.composer-bar');
       const setHeights = () => {
         if (!composer) return;
         const h = Math.round(composer.getBoundingClientRect().height);
@@ -383,7 +397,6 @@
 
       apply();
       addEventListener('resize', apply);
-      // po načítaní obsahu sa môže layout pohnúť
       addEventListener('load', apply);
     })();
   </script>
