@@ -171,6 +171,12 @@ function highlightActive(){
   document.querySelectorAll('.conv-item').forEach(el=>{
     el.classList.toggle('active', el.dataset.email === currentOtherEmail);
   });
+  // *** NEW: zvýrazni admin tile, ak je aktívny admin chat
+  const adminTile = $('#adminTile');
+  if (adminTile && ADMIN?.email){
+    const on = (currentOtherEmail||'').toLowerCase() === ADMIN.email.toLowerCase();
+    adminTile.classList.toggle('active', on);
+  }
 }
 async function refreshConversationsDiff(){
   const box = $('#convList');
@@ -187,9 +193,9 @@ async function refreshConversationsDiff(){
         frag.appendChild(node);
         convIndex.set(item.otherEmail, { el: node, unread: item.unread, lastText: item.lastText, updatedAt: item.updatedAt });
       });
-      box.innerHTML = '';
+      // box.innerHTML = '';  // admin tile je v HTML, nech ostáva
       if (rows.length) box.appendChild(frag);
-      else box.innerHTML = '<div style="opacity:.8">Zatiaľ žiadne konverzácie.</div>';
+      else box.insertAdjacentHTML('beforeend','<div style="opacity:.8">Zatiaľ žiadne konverzácie.</div>');
       highlightActive();
       return;
     }
@@ -204,7 +210,13 @@ async function refreshConversationsDiff(){
       const cached = convIndex.get(item.otherEmail);
       if (!cached){
         const node = renderConvItem(item);
-        box.insertBefore(node, box.firstChild);
+        // vlož ZA admin-tile (ak existuje)
+        const anchor = $('#adminTile');
+        if (anchor && anchor.parentElement) {
+          anchor.parentElement.insertBefore(node, anchor.nextSibling);
+        } else {
+          box.insertBefore(node, box.firstChild);
+        }
         convIndex.set(item.otherEmail, { el: node, unread: item.unread, lastText: item.lastText, updatedAt: item.updatedAt });
       }else{
         if (item.unread > cached.unread && item.otherEmail !== currentOtherEmail){
@@ -245,6 +257,10 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
   }else if (!t.dataset.threadOf){
     t.dataset.threadOf = otherEmail;
   }
+
+  // *** NEW: ulož aj explicitného recipienta pre send
+  t.dataset.recipientEmail = otherEmail;
+  t.dataset.recipientNick  = displayLabel;
 
   // nadpis: "Meno — email" (ak meno existuje); inak len email
   const title = $('#threadTitle');
@@ -308,12 +324,14 @@ async function sendMessage(){
   const rawText = area.value; const text = rawText.trim();
   if (!text) return;
 
-  if (!currentOtherEmail){
+  if (!currentOtherEmail && !$('#thread')?.dataset?.recipientEmail){
     alert('Vyberte najprv konverzáciu vľavo.');
     return;
   }
 
-  const toName = currentOtherLabel || currentOtherEmail;
+  // *** NEW: preferuj explicitný e-mail príjemcu
+  const toEmail = $('#thread')?.dataset?.recipientEmail || currentOtherEmail;
+  const toName  = currentOtherLabel || $('#thread')?.dataset?.recipientNick || toEmail;
 
   // optimistická bublina
   const optimisticKey = `opt_${Date.now()}`;
@@ -336,7 +354,12 @@ async function sendMessage(){
   const r = await fetch('/api/messages/send', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ fromEmail: userEmail, toName, text })
+    body: JSON.stringify({
+      fromEmail: userEmail,
+      toEmail,               // *** NEW: pošli email príjemcu
+      toName,                // zachovaj aj name, ak ho backend používa
+      text
+    })
   });
   const j = await r.json().catch(()=>({}));
 
@@ -353,7 +376,7 @@ async function sendMessage(){
   const optEl = $('#thread')?.querySelector(`.msg[data-key="${optimisticKey}"]`);
   if (optEl) optEl.remove();
 
-  await openThread(currentOtherEmail, currentOtherLabel, { reset:false });
+  await openThread(toEmail, toName, { reset:false });
 }
 
 /* Enter = send, Shift+Enter = newline + počítadlo */
@@ -396,17 +419,24 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if (toParam) {
     const isEmail = toParam.includes('@');
     let toEmail = null;
-    if (isEmail) toEmail = toParam;
-    else {
-      // pokus vyhľadať podľa mena
-      try{
-        const q = encodeURIComponent(toParam);
-        const r = await fetch(`/api/messages/search-users?q=${q}`);
-        const list = r.ok ? await r.json() : [];
-        const norm = (s)=> (s||'').trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/\s+/g,' ');
-        const row = list.find(x => norm(x.name) === norm(toParam)) || list.find(x => norm(x.email) === norm(toParam));
-        toEmail = row?.email || null;
-      }catch{}
+    if (isEmail) {
+      toEmail = toParam;
+    } else {
+      // špeciál: ak je to "Lištové centrum", pošli na admin email
+      const norm = s => (s||'').trim().toLowerCase();
+      if (norm(toParam) === norm(ADMIN.name)) {
+        toEmail = ADMIN.email; // *** NEW: mapuj priamo na admina
+      } else {
+        // pokus vyhľadať podľa mena
+        try{
+          const q = encodeURIComponent(toParam);
+          const r = await fetch(`/api/messages/search-users?q=${q}`);
+          const list = r.ok ? await r.json() : [];
+          const nrm = (s)=> (s||'').trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/\s+/g,' ');
+          const row = list.find(x => nrm(x.name) === nrm(toParam)) || list.find(x => nrm(x.email) === nrm(toParam));
+          toEmail = row?.email || null;
+        }catch{}
+      }
     }
     if (toEmail) await openThread(toEmail, toParam || toEmail, { reset:true });
   } else {
@@ -423,4 +453,31 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) safeRefresh(); });
 
   if (draftCache && $('#composerText')) $('#composerText').value = draftCache;
+});
+
+/* ---------- PUBLIC API pre HTML admin tile (nenúti backend) ---------- */
+// *** NEW: otvorenie vlákna pre príjemcu z HTML (admin tile)
+window.openThreadForRecipient = async ({ email, nick }) => {
+  const label = nick || email;
+  await openThread(email, label, { reset:true });
+};
+
+// *** NEW: listenery na udalosti z HTML (fallbacky, nič nerozbíjajú)
+window.addEventListener('thread:open', async (e)=>{
+  const d = e?.detail || {};
+  if (!d.email) return;
+  await openThread(d.email, d.nick || d.email, { reset:true });
+});
+
+window.addEventListener('compose:send', async (e)=>{
+  const d = e?.detail || {};
+  if (!d.recipientEmail) return;
+  // predvyplň text, ak prišiel (nepovinné)
+  if (d.text && $('#composerText')) $('#composerText').value = d.text;
+  // uisti sa, že thread vie o recipientovi
+  $('#thread').dataset.recipientEmail = d.recipientEmail;
+  if (d.recipientNick) $('#thread').dataset.recipientNick = d.recipientNick;
+  currentOtherEmail = d.recipientEmail;
+  currentOtherLabel = d.recipientNick || d.recipientEmail;
+  await sendMessage();
 });
