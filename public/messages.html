@@ -21,7 +21,7 @@
 
       /* layout */
       --list-w: 360px;
-      --composer-h: 84px; /* JS prepočíta reálnu výšku */
+      --composer-h: 84px;
       --panel-border: rgba(255,255,255,.12);
 
       /* dynamická pozícia composeru na DESKTOPE */
@@ -39,7 +39,7 @@
     .logo-small{ height:48px; margin:2px auto 6px; display:block; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
 
-    /* burger (tlačidlo, JS toggle) */
+    /* burger */
     .nav-toggle{ display:none; }
     .burger{
       position:absolute; left:12px; top:10px; width:44px; height:44px; display:none; place-content:center;
@@ -48,7 +48,7 @@
     .burger svg{ width:22px; height:22px; }
     @media (max-width: 900px){ .burger{ display:grid; } }
 
-    /* ===== NAV PILLS (desktop ostáva, mobil schovám) ===== */
+    /* ===== NAV PILLS ===== */
     .nav-scroller{ padding:0 var(--gap); width:100%; }
     .nav-track{ display:flex; gap:var(--nav-gap); justify-content:center; }
     .pill{
@@ -57,9 +57,7 @@
       background:#fff; color:#0c1f4b; font-weight:700; letter-spacing:.2px; cursor:pointer;
     }
     .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
-    @media (max-width: 900px){
-      .nav-scroller{ display:none; } /* mobil: skryť horné tlačidlá */
-    }
+    @media (max-width: 900px){ .nav-scroller{ display:none; } }
 
     /* ===== LAYOUT ===== */
     .wrap{
@@ -68,20 +66,14 @@
       display:grid; grid-template-columns: var(--list-w) minmax(0,1fr); gap:var(--gap);
       padding:16px; box-sizing:border-box;
     }
-    @media (max-width: 900px){
-      .wrap{ grid-template-columns: 1fr; }
-    }
+    @media (max-width: 900px){ .wrap{ grid-template-columns: 1fr; } }
 
     .card{ background:rgba(255,255,255,.04); border:1px solid var(--panel-border); border-radius:14px; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
     .card .head{ padding:10px 12px; font-weight:700; border-bottom:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .card .body{ flex:1 1 auto; overflow:auto; min-height:0; }
 
     /* ===== LEFT: zoznam ===== */
-    .list-panel{
-      min-height:0;
-      background:#0c1f4b !important; /* plné modré pozadie */
-      border:none !important;
-    }
+    .list-panel{ min-height:0; background:#0c1f4b !important; border:none !important; }
     .conv-scroller{ height:100%; overflow:auto; -webkit-overflow-scrolling: touch; }
 
     .head-actions{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -96,6 +88,15 @@
     @media (max-width: 900px){ .mobile-only{ display:inline-flex; } }
 
     .conv-list{ padding:8px; display:flex; flex-direction:column; gap:8px; }
+
+    .admin-tile{
+      display:flex; align-items:center; gap:10px; padding:12px; border-radius:12px; cursor:pointer;
+      background:linear-gradient(90deg,#ffd33d,#ffa54d); color:#111; font-weight:800; border:1px solid rgba(255,255,255,.35);
+      box-shadow:0 2px 8px rgba(0,0,0,.18);
+    }
+    .admin-tile .dot{ width:10px; height:10px; border-radius:999px; background:#fff; box-shadow:0 0 0 2px rgba(0,0,0,.12) inset; }
+    .admin-tile small{ font-weight:700; opacity:.8; }
+
     .conv-item{
       background:rgba(255,255,255,.06); border:1px solid var(--panel-border);
       border-radius:12px; padding:10px; cursor:pointer; transition:background .15s ease, border-color .15s ease;
@@ -120,21 +121,21 @@
         #ffffff;
       border-top:1px solid #eee;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(16px + var(--composer-h)); /* rezerva nad lištou na písanie */
+      padding-bottom: calc(16px + var(--composer-h));
       position:relative; z-index:0;
     }
     .thread{
       width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111;
       box-sizing:border-box; overflow-x:hidden;
-      padding-bottom: calc(16px + var(--composer-h)); /* extra rezerva */
+      padding-bottom: calc(16px + var(--composer-h));
       position:relative; z-index:0;
     }
 
-    /* Mobil (100dvh kvôli iOS) */
+    /* Mobil */
     @media (max-width:900px){
       .list-panel{
         position:fixed; top:0; left:0; height:100dvh; width:min(88vw, 360px);
-        z-index:9999; /* zásuvka musí byť nad obsahom */
+        z-index:9999;
         transform:translateX(-100%); transition:transform .25s ease;
       }
       .nav-toggle:checked ~ .wrap .list-panel{ transform:translateX(0); }
@@ -152,7 +153,6 @@
     .msg .meta{ font-size:12px; color:#445; display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; }
 
     /* ===== COMPOSER ===== */
-    /* default – mobil: full width */
     .composer-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:950; background:#0c1f4b;
       border-top:1px solid var(--panel-border); display:flex; justify-content:center;
@@ -168,26 +168,20 @@
     #composerText{ flex:1 1 auto; min-width:0; height:28px; border:none; background:transparent; outline:none; color:#111; font-weight:500; resize:none; }
     #composerCount{ font-size:12px; color:#667; white-space:nowrap; }
 
-    /* DESKTOP: composer prispôsob pravému stĺpcu (vláknu) */
     @media (min-width: 901px){
-      .composer-bar{
-        left: var(--composer-left);     /* nastaví JS podľa .thread-panel */
-        right: auto;
-        width: var(--composer-width);   /* nastaví JS podľa .thread-panel */
-      }
+      .composer-bar{ left: var(--composer-left); right:auto; width: var(--composer-width); }
       .composer-wrap{ max-width:none; padding-left:16px; padding-right:16px; }
     }
 
     .button{
       height:40px; padding:0 12px; border:1px solid var(--ui-border); border-radius:12px;
-      background:var(--ui-bg); color: var(--ui-text); cursor:pointer; white-space:nowrap;
+      background:#eef6ff; color:#0c1f4b; cursor:pointer; white-space:nowrap;
     }
-    .button:hover{ background:var(--ui-hover); }
+    .button:hover{ background:#e3f0ff; }
 
-    /* brand badge – zdvihnutý z-index, aby neprekrýval composer */
     .brand-badge{
       position: fixed; left:16px; bottom: calc(var(--composer-h) + 24px);
-      z-index:2001; /* > composer (950) a > header (1000) */
+      z-index:2001;
       display:inline-flex; align-items:center; gap:8px; background:#000; color:#fff; text-decoration:none;
       border:2px solid #fff; border-radius:14px; padding:8px 10px; box-shadow:0 8px 18px rgba(0,0,0,.25); opacity:.96;
       transition: opacity .2s ease, transform .2s ease;
@@ -217,7 +211,7 @@
     /* === BACKDROP pre mobilnú zásuvku === */
     .backdrop{
       position:fixed; inset:0; background:rgba(0,0,0,.35);
-      z-index:9000; /* pod zásuvkou (9999), nad obsahom */
+      z-index:9000;
       opacity:0; pointer-events:none; transition:opacity .2s ease;
     }
     .nav-toggle:checked ~ .backdrop{ opacity:1; pointer-events:auto; }
@@ -225,10 +219,8 @@
 </head>
 
 <body>
-  <!-- toggle pre mobilnú zásuvku (ľavé menu) -->
+  <!-- toggle pre mobilnú zásuvku -->
   <input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
-
-  <!-- BACKDROP (klik mimo menu) -->
   <div class="backdrop" aria-hidden="true"></div>
 
   <!-- HEADER -->
@@ -241,7 +233,6 @@
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userChip">Prihlásený:</div>
 
-      <!-- DESKTOP: pôvodné tlačidlá ostávajú -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
           <button class="pill" id="goBackBtn">Späť</button>
@@ -262,8 +253,26 @@
           <button class="mini-btn mini-btn-danger mobile-only" id="logoutInMenuBtn" type="button" aria-label="Odhlásiť sa">Odhlásiť sa</button>
         </div>
       </div>
+
       <div class="body conv-scroller">
-        <div id="convList" class="conv-list"></div>
+        <div id="convList" class="conv-list">
+          <!-- PINNED ADMIN TILE -->
+          <div id="adminTile"
+               class="admin-tile"
+               role="button"
+               tabindex="0"
+               aria-label="Napísať na Lištové centrum"
+               data-admin-email="bratislava@listovecentrum.sk"
+               data-admin-nick="Lištové centrum">
+            <span class="dot" aria-hidden="true"></span>
+            <div>
+              <div>Lištové centrum</div>
+              <small>Oficiálny chat podpory</small>
+            </div>
+          </div>
+
+          <!-- sem renderuje JS ostatné konverzácie -->
+        </div>
       </div>
     </section>
 
@@ -298,11 +307,12 @@
     <img src="img/marsab_logo.png" alt=""><span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- len tieto 2 súbory + drobný inline JS -->
+  <!-- skripty -->
   <script src="/js/config.js"></script>
   <script src="messages.js"></script>
+
   <script>
-    // dopočet výšky hlavičky kvôli fixed headeru
+    /* ===== fixed header height ===== */
     (function(){
       const header = document.querySelector('.app-header');
       function setHdrH(){
@@ -314,21 +324,17 @@
       addEventListener('resize', setHdrH);
     })();
 
-    // navigácia so zachovaním ?email=
+    /* ===== navigation keep ?email ===== */
     (function(){
       const email = new URLSearchParams(location.search).get("email");
       const go = (page) => { location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
-
-      // Desktop tlačidlá (ostávajú)
       document.getElementById('goBackBtn')?.addEventListener('click', () => go('timeline.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', () => { location.href = 'index.html'; });
-
-      // Mobilné tlačidlá v menu
       document.getElementById('goBackInMenuBtn')?.addEventListener('click', () => go('timeline.html'));
       document.getElementById('logoutInMenuBtn')?.addEventListener('click', () => { location.href = 'index.html'; });
     })();
 
-    // mobilný burger ↔ zásuvka (JS toggle)
+    /* ===== mobile drawer toggle ===== */
     (function(){
       const toggle  = document.getElementById('menuToggle');
       const burger  = document.getElementById('burgerBtn');
@@ -349,7 +355,6 @@
         }
       });
 
-      // Klik mimo (backdrop) zavrie menu
       backdrop?.addEventListener('click', closeDrawer);
 
       document.addEventListener('click', (e)=>{
@@ -362,9 +367,14 @@
       ['goBackInMenuBtn','logoutInMenuBtn','adminTile'].forEach(id=>{
         document.getElementById(id)?.addEventListener('click', closeDrawer);
       });
+
+      // auto-close pri výbere ľubovoľnej konverzácie
+      document.getElementById('convList')?.addEventListener('click', (e)=>{
+        if (e.target.closest('.conv-item')) closeDrawer();
+      });
     })();
 
-    // Rezerva nad composerom podľa reálnej výšky (desktop+mobil)
+    /* ===== composer dynamic height ===== */
     (function(){
       const composer = document.querySelector('.composer-bar');
       const setHeights = () => {
@@ -377,27 +387,83 @@
       document.getElementById('composerText')?.addEventListener('input', ()=> setTimeout(setHeights, 0));
     })();
 
-    // DESKTOP: prispôsob pozíciu/šírku composeru šírke pravého stĺpca (vlákno)
+    /* ===== desktop composer align to thread column ===== */
     (function(){
       const threadPanel = document.querySelector('.thread-panel');
       const apply = () => {
         const isDesktop = window.matchMedia('(min-width: 901px)').matches;
         if (!isDesktop || !threadPanel) {
-          // mobil – full width
           document.documentElement.style.setProperty('--composer-left', '0px');
           document.documentElement.style.setProperty('--composer-width', '100vw');
           return;
         }
         const rect = threadPanel.getBoundingClientRect();
-        const left = Math.max(0, Math.round(rect.left));
-        const width = Math.round(rect.width);
-        document.documentElement.style.setProperty('--composer-left', left + 'px');
-        document.documentElement.style.setProperty('--composer-width', width + 'px');
+        document.documentElement.style.setProperty('--composer-left', Math.max(0, Math.round(rect.left)) + 'px');
+        document.documentElement.style.setProperty('--composer-width', Math.round(rect.width) + 'px');
       };
-
       apply();
       addEventListener('resize', apply);
       addEventListener('load', apply);
+    })();
+
+    /* ============================================================
+       ADMIN PIN – SPOĽAHLIVÉ PREPNUTIE A OTVORENIE VLÁKNA
+       ============================================================ */
+    (function(){
+      const ADMIN_EMAIL = 'bratislava@listovecentrum.sk';
+      const ADMIN_NICK  = 'Lištové centrum';
+
+      const convList     = document.getElementById('convList');
+      const adminTile    = document.getElementById('adminTile');
+      const threadTitle  = document.getElementById('threadTitle');
+      const threadEl     = document.getElementById('thread');
+      const composerText = document.getElementById('composerText');
+      const menuToggle   = document.getElementById('menuToggle');
+
+      function markActiveAdmin(){
+        convList?.querySelectorAll('.conv-item.active')?.forEach(el=> el.classList.remove('active'));
+        adminTile?.classList.add('active');
+      }
+
+      function setRecipient(email, nick){
+        threadEl.dataset.recipientEmail = email;
+        threadEl.dataset.recipientNick  = nick;
+        threadTitle.textContent = nick;
+        if (composerText && !composerText.placeholder.includes(nick)) {
+          composerText.placeholder = `Napíšte správu pre ${nick}… (Enter = odoslať, Shift+Enter = nový riadok)`;
+        }
+      }
+
+      function closeDrawerIfOpen(){
+        if (menuToggle && menuToggle.checked){
+          menuToggle.checked = false;
+          document.body.classList.remove('no-scroll');
+        }
+      }
+
+      function openAdminThread(){
+        markActiveAdmin();
+        setRecipient(ADMIN_EMAIL, ADMIN_NICK);
+
+        if (typeof window.openThreadForRecipient === 'function') {
+          window.openThreadForRecipient({ email: ADMIN_EMAIL, nick: ADMIN_NICK });
+        } else {
+          window.dispatchEvent(new CustomEvent('thread:open', {
+            detail: { email: ADMIN_EMAIL, nick: ADMIN_NICK, source: 'adminTile' }
+          }));
+        }
+        closeDrawerIfOpen();
+      }
+
+      adminTile?.addEventListener('click', openAdminThread);
+      adminTile?.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAdminThread(); }
+      });
+
+      // keď sa klikne na inú konverzáciu, zruš zvýraznenie admin tile
+      convList?.addEventListener('click', (e)=>{
+        if (e.target.closest('.conv-item')) adminTile?.classList.remove('active');
+      });
     })();
   </script>
 </body>
