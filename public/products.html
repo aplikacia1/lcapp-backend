@@ -130,6 +130,20 @@
 
       .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
     }
+
+    /* === PC layout: dlaždice vedľa seba, centrované, lepšie využitie šírky === */
+    @media (min-width: 1024px){
+      .main{
+        max-width: min(1600px, 96vw);
+      }
+      .grid{
+        grid-template-columns: repeat(auto-fit, minmax(260px, 260px)); /* pevná šírka kartičiek */
+        justify-content: center;  /* centrovanie stĺpcov */
+        gap: 18px;
+      }
+      .card{ width: 260px; }
+      .card-img{ height: 180px; }
+    }
   </style>
 </head>
 <body>
@@ -193,10 +207,7 @@
     });
   </script>
 
-  <!-- iba tento jeden riadok navyše -->
   <script src="/js/config.js"></script>
-
-  <!-- LOGIKA STRÁNKY (nezmenené) -->
   <script src="products.js"></script>
 
   <!-- navigácia – prenes email v URL (rovnako ako na dashboarde/katalógu) -->
