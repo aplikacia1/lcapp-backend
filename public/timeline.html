@@ -25,7 +25,11 @@
       --visible: 3;          /* mobil: vidno 3 tlačidlá, 4. posunom */
     }
     html,body{margin:0;padding:0}
-    body{background:#0c1f4b; color:#fff; padding-top:var(--hdr-h);}
+    /* 🔹 Jemný modrý preliv pozadia (iba dizajn, nič nemení na funkčnosti) */
+    body{
+      background: linear-gradient(135deg, #0c1f4b 0%, #061c47 50%, #0c1f4b 100%);
+      color:#fff; padding-top:var(--hdr-h);
+    }
     body.no-scroll{ overflow: hidden; }
 
     /* === Pevná hlavička === */
@@ -161,7 +165,7 @@
     }
     .commentForm button:hover{ background:var(--ui-bg-hover); }
 
-    /* Composer */
+    /* Composer (pevne dole) */
     .composer-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:950;
       background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
@@ -195,6 +199,22 @@
       .button{ padding:0 10px; }
       .button--icon{ width:44px; font-size:17px; }
       #composerCount{ font-size:11px; }
+    }
+
+    /* 🔹 Mini banner – nenápadný modul nad composerom */
+    .mini-banner-container{
+      width:100%; max-width:var(--max-w); margin:18px auto 0; padding:0 var(--gap);
+    }
+    /* miesto pre samotný banner mountovaný z banners.js */
+    .mini-banner{
+      height:120px;           /* desktop výška */
+      border-radius:14px; overflow:hidden;
+      box-shadow:0 8px 18px rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.18);
+      background:#061c47;
+    }
+    @media (max-width: 640px){
+      .mini-banner{ height:90px; } /* mobil výška */
     }
 
     /* MarSab® badge */
@@ -284,6 +304,11 @@
   <!-- OBSAH -->
   <div class="main-content">
     <div class="post-feed" id="postFeed"></div>
+
+    <!-- 🔹 MINI BANNER – nenápadný, v toku layoutu, tesne nad composerom -->
+    <div class="mini-banner-container">
+      <div id="miniBannerSlot" class="mini-banner" aria-live="polite"></div>
+    </div>
   </div>
 
   <!-- COMPOSER -->
@@ -318,8 +343,10 @@
   <script src="/js/unread-badge.js"></script>
   <!-- Timeline logika -->
   <script src="timeline.js"></script>
+  <!-- Banner rotátor (použijeme rovnaké cesty a API ako na katalógu) -->
+  <script src="banners.js"></script>
 
-  <!-- Toast helper + dopočet hlavičky + navigácia + hamburgre + klik na účastníka -->
+  <!-- Toast helper + dopočet hlavičky + navigácia + hamburgre + klik na účastníka + mount mini banner -->
   <script>
     (function(){
       const stack = document.getElementById('toastStack');
@@ -413,6 +440,19 @@
         navChk?.addEventListener(ev, updateScrollLock);
         pplChk?.addEventListener(ev, updateScrollLock);
       });
+
+      /* 🔹 Mount mini banner – rovnaké API ako na katalógu
+         - fix: false → banner je v toku layoutu (nenaruší composer)
+         - výšky ladíme cez CSS .mini-banner, tu len interval a kontajner
+      */
+      if (window.mountBannerRotator) {
+        mountBannerRotator('miniBannerSlot', {
+          fixed: false,
+          interval: 7000,
+          height: 120,       // informatívne pre banners.js, CSS drží finálnu výšku
+          heightMobile: 90
+        });
+      }
     });
   </script>
 </body>
