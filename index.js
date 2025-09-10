@@ -11,13 +11,50 @@ const app = express();
 
 /* --- Základ --- */
 app.set('trust proxy', 1); // Render/reverse proxy
+
+// NEW: produkčná doména (na presmerovanie www -> apex)
+const PROD_DOMAIN = 'listobook.sk';
+
+// NEW: povolené originy pre CORS
 const ALLOWED_ORIGINS = [
-  process.env.APP_URL,                 // napr. https://lcapp-backend.onrender.com
+  process.env.APP_URL,                  // napr. https://lcapp-backend.onrender.com z .env (ak máš)
   'http://localhost:3000',
-  'https://lcapp-backend.onrender.com'
+  'https://lcapp-backend.onrender.com',
+  'https://listobook.sk',
+  'https://www.listobook.sk'
 ].filter(Boolean);
 
-app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+// NEW: presmeruj www -> apex (napr. www.listobook.sk -> listobook.sk)
+app.use((req, res, next) => {
+  const host = req.headers.host;
+  if (host === `www.${PROD_DOMAIN}`) {
+    return res.redirect(301, `https://${PROD_DOMAIN}${req.originalUrl}`);
+  }
+  next();
+});
+
+// NEW: vynúť HTTPS (za proxy na Renderi)
+app.use((req, res, next) => {
+  if (req.secure || req.headers['x-forwarded-proto'] === 'https') return next();
+  return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+});
+
+// NEW: HSTS pre lepšie zabezpečenie
+app.use((req, res, next) => {
+  res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  next();
+});
+
+// CORS (používaš ho už teraz – len doplnené originy vyššie)
+app.use(cors({
+  origin: (origin, cb) => {
+    // povol aj nástroje bez Origin hlavičky (curl, healthchecky)
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

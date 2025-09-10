@@ -13,13 +13,12 @@
       --lc-bg:#0c1f4b; --lc-surface:#fff; --lc-border:#e8e8e8;
       --lc-surface-2:#eef6ff; --lc-border-2:#bcd6ff; --lc-text:#0c1f4b;
       --lc-radius:12px; --lc-shadow:0 2px 10px rgba(0,0,0,.08);
-      /* ★ farba hviezdičiek */
       --star:#ffc107;
     }
     html, body { margin:0; padding:0; background:#061c47; color:#fff; font-family:Arial, sans-serif; }
     body{ padding-top: var(--hdr-h); }
 
-    /* === Jednotná pevná hlavička (ako ostatné stránky) === */
+    /* ===== HLAVIČKA ===== */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 1000;
       background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
@@ -28,10 +27,22 @@
       max-width: var(--max-w); margin: 0 auto; padding: 8px var(--gap);
       display:flex; flex-direction:column; align-items:center; position: relative;
     }
+
+    /* ŠÍPKA SPÄŤ – JEDINÝ OVLÁDAČ VĽAVO HORE */
+    .back-btn{
+      position:absolute; left:12px; top:10px;
+      width:40px; height:40px; border-radius:10px;
+      display:inline-flex; align-items:center; justify-content:center;
+      color:#ffffff; background:rgba(255,255,255,.10);
+      border:1px solid #ffffff33; text-decoration:none;
+      backdrop-filter: blur(4px);
+    }
+    .back-btn svg{ width:22px; height:22px; display:block; }
+
     .logo-small{ display:block; height:40px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* --- MarSab® v hlavičke --- */
+    /* MarSab® v hlavičke (vpravo hore) */
     .header-badge{
       position:absolute; right:12px; top:10px;
       display:inline-flex; align-items:center; gap:6px;
@@ -46,55 +57,10 @@
       .header-badge{ right:8px; top:8px; padding:3px 6px; }
       .header-badge img{ height:16px; }
       .header-badge .wordmark{ font-size:11px; }
+      .back-btn{ left:8px; top:8px; width:36px; height:36px; }
     }
 
-    /* Navigácia */
-    .nav-scroller{ padding: 0 var(--gap); width:100%; }
-    .nav-track{
-      display:flex; gap: var(--gap); justify-content:center;
-    }
-    .pill{
-      flex: 0 0 auto; padding:8px 14px; border-radius:16px;
-      border:1px solid rgba(255,255,255,.35);
-      background:#fff; color:#0c1f4b; cursor:pointer;
-      white-space:nowrap;
-    }
-    .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
-
-    /* 🔧 FIX na desktop: neťahaj tlačidlá na 100% šírky */
-    .app-header .nav-track .pill{
-      width: auto !important;
-      flex: 0 0 auto;
-    }
-
-    /* Hamburger toggle */
-    .nav-toggle{ display:none; }
-    .burger{
-      position: absolute; left:12px; top:10px;
-      width:44px; height:44px; display:none; align-items:center; justify-content:center;
-      border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; cursor:pointer;
-      background: transparent; z-index: 1001;
-    }
-    .burger svg{ width:22px; height:22px; }
-
-    @media (max-width: 767.98px){
-      .burger{ display:flex; }
-      .nav-scroller{
-        position: fixed; top: 0; right: 0; height: 100vh;
-        width: min(80vw, 320px);
-        background: #0c1f4b;
-        padding: 88px 16px 16px;
-        box-shadow: -24px 0 36px rgba(0,0,0,.35);
-        transform: translateX(100%);
-        transition: transform .25s ease;
-        z-index: 1000;
-      }
-      .nav-track{ flex-direction: column; gap: 10px; align-items: stretch; }
-      .pill{ width:100%; height:44px; font-size:1rem; border-radius:14px; }
-      .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
-    }
-
-    /* OBSAH */
+    /* ===== OBSAH ===== */
     .wrap{ max-width:var(--max-w); margin:16px auto; padding:0 var(--gap) 140px; }
     .product-image{
       width:100%; max-height:360px; object-fit:contain;
@@ -106,11 +72,9 @@
     .meta{ margin:6px 0 12px; font-size:14px; }
     p{ line-height:1.5; }
 
-    /* sumár hodnotení */
     .summary{ margin:10px 0 18px; }
     .stars-line{ font-size:20px; letter-spacing:.5px; }
 
-    /* recenzie */
     .review{
       background:#05163d; border:1px solid rgba(255,255,255,.12);
       border-radius:12px; padding:10px 12px; margin:10px 0; box-shadow:var(--lc-shadow);
@@ -130,7 +94,6 @@
       display:grid; grid-template-columns: auto 1fr auto; gap:8px; align-items:center;
     }
 
-    /* ★ HVIEZDIČKY – ZLATÉ */
     .rate-stars span{
       cursor:pointer; font-size:22px; margin-right:2px;
       color: var(--star);
@@ -150,32 +113,25 @@
 </head>
 <body>
 
-  <!-- Toggle pre hamburger -->
-  <input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
-
   <!-- HLAVIČKA -->
   <header class="app-header">
     <div class="app-header-inner">
+      <!-- Šípka späť -->
+      <a id="backToProducts" class="back-btn" aria-label="Späť">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <!-- Badge vpravo -->
       <a class="header-badge" href="#" aria-label="MarSab®">
         <img src="img/marsab_logo.png" alt="">
         <span class="wordmark">MarSab®</span>
       </a>
 
-      <label for="menuToggle" class="burger" aria-label="Menu">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </label>
-
+      <!-- Logo a info o používateľovi -->
       <img src="logo_lc.jpg" class="logo-small" alt="Logo">
       <div class="user-chip" id="userGreeting">Prihlásený:</div>
-
-      <nav class="nav-scroller" aria-label="Hlavné sekcie">
-        <div class="nav-track">
-          <button id="backBtn" class="pill">Späť</button>
-          <button id="logoutBtn" class="pill pill-danger">Odhlásiť sa</button>
-        </div>
-      </nav>
     </div>
   </header>
 
@@ -207,6 +163,16 @@
   </div>
 
   <script src="/js/config.js"></script>
+  <script>
+    // nastav odkaz šípky – zachová ?email=... ak je v URL
+    (function(){
+      const params = new URLSearchParams(location.search);
+      const email = params.get('email');
+      const back = document.getElementById('backToProducts');
+      const q = email ? ('?email=' + encodeURIComponent(email)) : '';
+      back.href = 'products.html' + q;
+    })();
+  </script>
   <script src="product_detail.js"></script>
 </body>
 </html>
