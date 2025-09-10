@@ -24,11 +24,14 @@
       --nav-gap: 8px;
       --visible: 3;          /* mobil: vidno 3 tlačidlá, 4. posunom */
     }
+
     html,body{margin:0;padding:0}
-    /* jemný modrý preliv */
+
+    /* jemný modrý preliv pozadia */
     body{
       background: linear-gradient(135deg, #0c1f4b 0%, #061c47 50%, #0c1f4b 100%);
-      color:#fff; padding-top:var(--hdr-h);
+      color:#fff;
+      padding-top:var(--hdr-h);
     }
     body.no-scroll{ overflow: hidden; }
 
@@ -99,10 +102,10 @@
       .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
     }
 
-    /* Obsah – viac miesta dole (composer + banner) */
+    /* Obsah – rezerva dole kvôli pevnej lište (composer + banner) */
     .main-content{
       width:100%; max-width:var(--max-w); margin:24px auto; padding:0 var(--gap);
-      padding-bottom:240px; /* rezerva pre pevnú lištu aj s bannerom */
+      padding-bottom:200px; /* rezerva pre pevnú lištu aj s bannerom */
     }
 
     /* Panel účastníkov */
@@ -148,13 +151,13 @@
     .link-btn{ background:transparent; border:none; color:#0c1f4b; cursor:pointer; padding:4px 8px; border-radius:8px; }
     .link-btn:hover{ background:rgba(12,31,75,.08); }
 
-    /* Spodná lišta (pevná) – teraz obsahuje aj mini-banner POD formulárom */
+    /* Spodná lišta (pevná) – obsahuje aj mini-banner POD formulárom */
     .composer-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:950;
       background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
       display:flex; justify-content:center; padding:10px 12px;
     }
-    /* dôležité: stĺpcovo, aby sa nič neprekrývalo */
+    /* stĺpcovo, aby sa nič neprekrývalo */
     .composer-wrap{
       width:100%; max-width:var(--max-w); padding:0 var(--gap);
       display:flex; flex-direction:column; gap:10px;
@@ -190,19 +193,32 @@
 
     /* Mini-banner (v tej istej lište, POD formulárom) */
     .mini-banner{
-      height:90px;            /* jemný banner; nech neruší */
+      height:90px;            /* mobil: jemný banner; nech neruší */
       border-radius:14px; overflow:hidden;
       box-shadow:0 8px 18px rgba(0,0,0,.18);
       border:1px solid rgba(255,255,255,.18);
       background:#061c47;
     }
-    @media (min-width: 768px){
-      .mini-banner{ height:110px; }
+    .mini-banner img{ width:100%; height:100%; object-fit:cover; display:block; }
+    @media (min-width: 992px){
+      .mini-banner{ height:80px; } /* desktop nižší banner */
     }
 
-    /* MarSab® badge */
+    /* POISTKA: čokoľvek fixed v slote zmeníme na static, aby nič neprekrývalo composer */
+    #miniBannerSlot{ position:relative; }
+    #miniBannerSlot [style*="position:fixed"],
+    #miniBannerSlot .fixed,
+    #miniBannerSlot .banner-fixed,
+    #miniBannerSlot .lc-fixed{
+      position: static !important;
+      inset: auto !important;
+      top:auto !important; right:auto !important; bottom:auto !important; left:auto !important;
+      z-index:auto !important;
+    }
+
+    /* MarSab® badge (posunutý nad spodnú lištu) */
     .brand-badge{
-      position: fixed; left: 16px; bottom: 160px; z-index: 70;
+      position: fixed; left: 16px; bottom: 140px; z-index: 70;
       display: inline-flex; align-items: center; gap: 8px;
       background: #000; color:#fff; text-decoration:none;
       border: 2px solid #fff; border-radius: 14px; padding: 8px 10px;
@@ -211,11 +227,10 @@
     }
     .nav-toggle:checked ~ .brand-badge,
     .people-toggle:checked ~ .brand-badge{ opacity:.6; transform: translateY(6px); }
-
-    .brand-badge img{ height: 24px; width:auto; display:block; }
+    .brand-badge img{ height:24px; width:auto; display:block; }
     .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
     @media (max-width:480px){
-      .brand-badge{ left:12px; bottom: 180px; padding:6px 8px; border-radius:12px; }
+      .brand-badge{ left:12px; bottom: 160px; padding:6px 8px; border-radius:12px; }
       .brand-badge img{ height:20px; }
       .brand-badge .wordmark{ font-size:12px; }
     }
@@ -427,8 +442,8 @@
         mountBannerRotator('miniBannerSlot', {
           fixed: false,      // slot je už vo fixed lište, netreba vlastný fixed
           interval: 7000,
-          height: 110,
-          heightMobile: 90
+          height: 80,        // desktop cieľ
+          heightMobile: 90   // mobil jemný
         });
       }
     });
