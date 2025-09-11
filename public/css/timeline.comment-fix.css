@@ -1,0 +1,50 @@
+/* LCAPP – Timeline: fix komentárového inputu (scoped len na .commentForm)
+   Cieľ: input je vždy viditeľný vedľa tlačidla, bez horizontálneho scrollu.
+   Nezasahuje do spodného composeru ani do iných častí stránky. */
+
+.commentForm {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;           /* umožní deťom reálne sa zmenšiť vo flex kontejnery */
+  overflow: visible;
+}
+
+/* Textové pole – pružné, vždy viditeľné */
+.commentForm input[type="text"] {
+  display: block !important;
+  flex: 1 1 180px;        /* nedovolí „stlačenie na nulu“ */
+  min-width: 160px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  background: #fff;
+  color: #111;
+  border: 1px solid #bcd6ff;
+  border-radius: 10px;
+  outline: none;
+}
+.commentForm input[type="text"]:focus {
+  border-color: #6aa8ff;
+  box-shadow: 0 0 0 3px rgba(106,168,255,.25);
+}
+
+/* Tlačidlo – pevná šírka, aby „nezjedlo“ miesto inputu */
+.commentForm button {
+  width: auto !important;   /* prepíše globálne button { width:100% } */
+  flex: 0 0 auto;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #bcd6ff;
+  background: #eef6ff;
+  color: #0c1f4b;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.commentForm button:hover {
+  background: #e3f0ff;
+}
+
+/* Prevencia horizontálneho posuvníka v sekcii komentárov */
+.comments { overflow-x: hidden; }
