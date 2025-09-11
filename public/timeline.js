@@ -43,7 +43,7 @@ function setPresenceBottom() {
   const panel = $("#presencePanel");
   if (!bar || !panel) return;
   const h = bar.offsetHeight || 120;
-  // fix: správna CSS premenná --hdr-h
+  // dôležitý fix: správna CSS premenná je --hdr-h
   panel.style.maxHeight = `calc(100vh - var(--hdr-h) - ${h + 24}px)`;
 }
 
@@ -185,7 +185,7 @@ function initComposer() {
   updateUI();
 }
 
-// ── Drafty komentárov ──
+// ── Drafty komentárov (aby sa nestratili pri refreshi) ──
 function collectCommentDrafts(){
   const drafts = {};
   document.querySelectorAll('form.commentForm').forEach(f=>{
@@ -408,7 +408,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!isAdmin) initComposer();
   await loadPosts();
 
-  // A0: Auto-refresh timeline ZRUŠENÉ
+  // A0: Auto-refresh timeline ZRUŠENÉ (žiadny interval ani prerender)
 
   // Presence
   startPresenceHeartbeat();
