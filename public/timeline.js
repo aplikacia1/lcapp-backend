@@ -6,7 +6,7 @@ function getEmailFromURL() {
 function $(sel, root = document) { return root.querySelector(sel); }
 function escapeHTML(str = "") {
   return String(str || "").replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;',"'" :'&#39;' }[m])
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
   );
 }
 const scroller = document.scrollingElement || document.documentElement;
@@ -43,7 +43,7 @@ function setPresenceBottom() {
   const panel = $("#presencePanel");
   if (!bar || !panel) return;
   const h = bar.offsetHeight || 120;
-  // B2: použime rovnakú CSS premennú ako v HTML/CSS: --hdr-h
+  // fix: správna CSS premenná --hdr-h
   panel.style.maxHeight = `calc(100vh - var(--hdr-h) - ${h + 24}px)`;
 }
 
@@ -185,7 +185,7 @@ function initComposer() {
   updateUI();
 }
 
-// ── Drafty komentárov (aby sa nestratili pri refreshi) ──
+// ── Drafty komentárov ──
 function collectCommentDrafts(){
   const drafts = {};
   document.querySelectorAll('form.commentForm').forEach(f=>{
@@ -408,7 +408,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!isAdmin) initComposer();
   await loadPosts();
 
-  // A0: Auto-refresh timeline ZRUŠENÉ (žiadny interval ani prerender)
+  // A0: Auto-refresh timeline ZRUŠENÉ
 
   // Presence
   startPresenceHeartbeat();
