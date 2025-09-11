@@ -24,7 +24,7 @@ const FIXED_ADMIN = {
 // Stav
 const userEmail = getEmailFromURL(); // len z URL, žiadny storage
 let userData = null;
-let tlTimer = null;
+// let tlTimer = null;  // A0: auto-refresh vypnutý – timer už nepotrebujeme
 let userScrollActive = false;
 let scrollIdleTO = null;
 
@@ -384,7 +384,7 @@ function renderPresence(users){
 // Odhlásenie
 window.logout = () => { window.location.href = "index.html"; };
 
-// Auto-refresh guardy
+// Auto-refresh guardy – nechávame (môžu sa hodiť pre iné intervaly), ale nič nevolá reload
 function isTyping() {
   const a = document.activeElement;
   if (!a) return false;
@@ -407,17 +407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!isAdmin) initComposer();
   await loadPosts();
 
-  // Auto-refresh timeline
-  const tick = () => {
-    if (document.hidden || userScrollActive || isTyping()) return;
-    loadPosts({ preserveScroll: true });
-  };
-  const startTL = () => { if (!tlTimer) tlTimer = setInterval(tick, 6000); };
-  const stopTL  = () => { if (tlTimer) { clearInterval(tlTimer); tlTimer = null; } };
-  startTL();
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopTL(); else startTL();
-  });
+  // A0: Auto-refresh timeline ZRUŠENÉ (žiadny interval ani prerender)
 
   // Presence
   startPresenceHeartbeat();
