@@ -50,12 +50,13 @@
 .comments { overflow-x: hidden; }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* Mini-banner (timeline) – DESKTOP: zobraz menší obraz bez orezania */
+/* Mini-banner (timeline) – DESKTOP: jemne zmenši obraz, ale ponechaj cover */
 @media (min-width: 992px){
-  /* obrázok z rotátora v slote miniBannerSlot */
+  #miniBannerSlot .bnr-frame { background: #061c47; }
   #miniBannerSlot .bnr-img,
   #miniBannerSlot img {
-    object-fit: contain !important;  /* zobraz celý obraz (žiadne orezanie) */
-    background: #061c47;             /* jemné pozadie okolo (letterbox) */
+    object-fit: cover !important;  /* žiadne „letterbox“ pásy ako pri contain */
+    transform: scale(0.94);        /* mierne zmenšenie (kompromis) */
+    transform-origin: center;
   }
 }
