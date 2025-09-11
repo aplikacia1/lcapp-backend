@@ -48,3 +48,14 @@
 
 /* Prevencia horizontálneho posuvníka v sekcii komentárov */
 .comments { overflow-x: hidden; }
+
+/* ─────────────────────────────────────────────────────────────── */
+/* Mini-banner (timeline) – DESKTOP: zobraz menší obraz bez orezania */
+@media (min-width: 992px){
+  /* obrázok z rotátora v slote miniBannerSlot */
+  #miniBannerSlot .bnr-img,
+  #miniBannerSlot img {
+    object-fit: contain !important;  /* zobraz celý obraz (žiadne orezanie) */
+    background: #061c47;             /* jemné pozadie okolo (letterbox) */
+  }
+}
