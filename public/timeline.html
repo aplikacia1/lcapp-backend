@@ -1,10 +1,10 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lištobook – Časová os</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="/css/timeline.comment-fix.css?v=fixA2">
 
   <meta name="description" content="Lištobook – komunita majstrov v oblasti líšt, recenzie, fotky, komentáre, skúsenosti.">
   <meta name="keywords" content="lištové centrum, lišty, montáž líšt, recenzie, skúsenosti, komunita, časová os">
@@ -14,7 +14,7 @@
     :root{
       --max-w: 820px;
       --gap: 16px;
-      --hdr-h: 96px;          /* reálna výška sa dopočíta v skripte nižšie */
+      --hdr-h: 96px; /* dopočíta sa v skripte nižšie */
       --ui-bg: #eef6ff;
       --ui-border: #bcd6ff;
       --ui-text: #0c1f4b;
@@ -22,7 +22,7 @@
       --ui-bg-hover: #e3f0ff;
       --pad-x: 12px;
       --nav-gap: 8px;
-      --visible: 3;          /* mobil: vidno 3 tlačidlá, 4. posunom */
+      --visible: 3;
     }
 
     html,body{margin:0;padding:0}
@@ -105,7 +105,7 @@
     /* Obsah – rezerva dole kvôli pevnej lište (composer + banner) */
     .main-content{
       width:100%; max-width:var(--max-w); margin:24px auto; padding:0 var(--gap);
-      padding-bottom:270px; /* ↑ zväčšené: rezerva pre pevnú lištu aj s bannerom */
+      padding-bottom:200px;
     }
 
     /* Panel účastníkov */
@@ -157,7 +157,6 @@
       background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
       display:flex; justify-content:center; padding:10px 12px;
     }
-    /* stĺpcovo, aby sa nič neprekrývalo */
     .composer-wrap{
       width:100%; max-width:var(--max-w); padding:0 var(--gap);
       display:flex; flex-direction:column; gap:10px;
@@ -193,7 +192,7 @@
 
     /* Mini-banner (v tej istej lište, POD formulárom) */
     .mini-banner{
-      height:90px;            /* mobil: jemný banner; nech neruší */
+      height:90px; /* mobil: jemný banner */
       border-radius:14px; overflow:hidden;
       box-shadow:0 8px 18px rgba(0,0,0,.18);
       border:1px solid rgba(255,255,255,.18);
@@ -257,6 +256,7 @@
     .toast .t-x{ appearance:none; border:none; background:transparent; color:#cfe2ff; cursor:pointer; font-size:18px; line-height:1; padding:0 4px; }
   </style>
 
+  <!-- KROK A: fix komentárového inputu -->
   <link rel="stylesheet" href="/css/timeline.comment-fix.css?v=fixA1">
 </head>
 <body>
@@ -346,109 +346,111 @@
 
   <!-- Toast helper + dopočet hlavičky + navigácia + hamburgre + klik na účastníka + mount mini banner -->
   <script>
-    (function(){
-      const stack = document.getElementById('toastStack');
-      const MAX = 3;
-      const ESC = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&quot;'}[m]));
-      const icons = { success:'✓', info:'ℹ︎', warn:'!', error:'×' };
+  (function(){
+    const stack = document.getElementById('toastStack');
+    const MAX = 3;
+    const ESC = s => String(s||'').replace(/[&<>"']/g, m => (
+      {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+    ));
+    const icons = { success:'ok', info:'i', warn:'!', error:'x' };
 
-      function push(type='info', message='', {duration=4000}={}){
-        if (!stack) return;
-        while (stack.children.length >= MAX) stack.firstElementChild?.remove();
-        const el = document.createElement('div');
-        el.className = `toast ${type}`;
-        el.innerHTML = `
-          <div class="t-ico">${icons[type]||'ℹ︎'}</div>
-          <div class="t-msg">${ESC(message)}</div>
-          <button class="t-x" aria-label="Zavrieť">×</button>
-        `;
-        stack.appendChild(el);
-        const killer = setTimeout(()=> el.remove(), duration);
-        el.querySelector('.t-x')?.addEventListener('click', () => { clearTimeout(killer); el.remove(); });
-      }
-      window.toast = {
-        show: (type, msg, opts) => push(type, msg, opts),
-        success: (msg, opts) => push('success', msg, opts),
-        info:    (msg, opts) => push('info', msg, opts),
-        warn:    (msg, opts) => push('warn', msg, opts),
-        error:   (msg, opts) => push('error', msg, opts),
-      };
-    })();
+    function push(type='info', message='', {duration=4000}={}){
+      if (!stack) return;
+      while (stack.children.length >= MAX) stack.firstElementChild?.remove();
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `
+        <div class="t-ico">${icons[type]||'i'}</div>
+        <div class="t-msg">${ESC(message)}</div>
+        <button class="t-x" aria-label="Zavrieť">×</button>
+      `;
+      stack.appendChild(el);
+      const killer = setTimeout(()=> el.remove(), duration);
+      el.querySelector('.t-x')?.addEventListener('click', () => { clearTimeout(killer); el.remove(); });
+    }
+    window.toast = {
+      show: (type, msg, opts) => push(type, msg, opts),
+      success: (msg, opts) => push('success', msg, opts),
+      info:    (msg, opts) => push('info', msg, opts),
+      warn:    (msg, opts) => push('warn', msg, opts),
+      error:   (msg, opts) => push('error', msg, opts),
+    };
+  })();
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const header = document.querySelector('.app-header');
-      const setHdrH = () => {
-        if (!header) return;
-        const h = header.getBoundingClientRect().height;
-        document.documentElement.style.setProperty('--hdr-h', h + 'px');
-      };
-      setHdrH(); window.addEventListener('resize', setHdrH);
+  document.addEventListener('DOMContentLoaded', () => {
+    const header = document.querySelector('.app-header');
+    const setHdrH = () => {
+      if (!header) return;
+      const h = header.getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--hdr-h', h + 'px');
+    };
+    setHdrH(); window.addEventListener('resize', setHdrH);
 
-      const email = new URLSearchParams(window.location.search).get("email");
-      const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+    const email = new URLSearchParams(window.location.search).get("email");
+    const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
 
-      document.getElementById('goBackBtn')?.addEventListener('click', () => go('catalog.html'));
-      document.getElementById('openMessagesBtn')?.addEventListener('click', () => go('messages.html'));
-      document.getElementById('logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
-      document.getElementById('gameBtn')?.addEventListener('click', () => go('game.html'));
-      document.getElementById('accountBtn')?.addEventListener('click', () => go('dashboard.html'));
+    document.getElementById('goBackBtn')?.addEventListener('click', () => go('catalog.html'));
+    document.getElementById('openMessagesBtn')?.addEventListener('click', () => go('messages.html'));
+    document.getElementById('logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
+    document.getElementById('gameBtn')?.addEventListener('click', () => go('game.html'));
+    document.getElementById('accountBtn')?.addEventListener('click', () => go('dashboard.html'));
 
-      // Klik na účastníka → presmeruj na messages s ?to=
-      const presence = document.getElementById('presenceList');
-      presence?.addEventListener('click', (e) => {
-        const li = e.target.closest('.presence-item');
-        if (!li) return;
-        const toEmail = li.getAttribute('data-email') || li.dataset.email || '';
-        const toName  = (li.querySelector('.presence-name')?.textContent || '').trim();
-        if (toEmail) {
-          const url = `messages.html?email=${encodeURIComponent(email)}&to=${encodeURIComponent(toEmail)}`;
-          window.location.href = url;
-        } else if (toName) {
-          const url = `messages.html?email=${encodeURIComponent(email)}&to=${encodeURIComponent(toName)}`;
-          window.location.href = url;
-        }
-      });
-
-      // iOS-friendly toggles
-      const navChk = document.getElementById('navToggle');
-      const pplChk = document.getElementById('peopleToggle');
-      const burgerBtn = document.getElementById('burgerBtn');
-      const peopleBtn = document.getElementById('peopleBtn');
-
-      function anyOpen(){ return !!(navChk?.checked || pplChk?.checked); }
-      function updateScrollLock(){ document.body.classList.toggle('no-scroll', anyOpen()); }
-
-      burgerBtn?.addEventListener('click', (e)=>{
-        e.stopPropagation(); navChk.checked = !navChk.checked;
-        if (navChk.checked) pplChk.checked = false; updateScrollLock();
-      });
-      peopleBtn?.addEventListener('click', (e)=>{
-        e.stopPropagation(); pplChk.checked = !pplChk.checked;
-        if (pplChk.checked) navChk.checked = false; updateScrollLock();
-      });
-
-      document.addEventListener('click', (e)=>{
-        const inHeader = e.target.closest('.app-header');
-        const inLeft   = e.target.closest('.nav-scroller');
-        const inRight  = e.target.closest('.presence-panel');
-        if (!inHeader && !inLeft && !inRight){ navChk.checked = false; pplChk.checked = false; updateScrollLock(); }
-      });
-
-      ['change','input'].forEach(ev=>{
-        navChk?.addEventListener(ev, updateScrollLock);
-        pplChk?.addEventListener(ev, updateScrollLock);
-      });
-
-      /* Mount mini banner – v spodnej lište (pod formulárom) */
-      if (window.mountBannerRotator) {
-        mountBannerRotator('miniBannerSlot', {
-          fixed: false,      // slot je už vo fixed lište, netreba vlastný fixed
-          interval: 7000,
-          height: 80,        // desktop cieľ
-          heightMobile: 90   // mobil jemný
-        });
+    // Klik na účastníka → presmeruj na messages s ?to=
+    const presence = document.getElementById('presenceList');
+    presence?.addEventListener('click', (e) => {
+      const li = e.target.closest('.presence-item');
+      if (!li) return;
+      const toEmail = li.getAttribute('data-email') || li.dataset.email || '';
+      const toName  = (li.querySelector('.presence-name')?.textContent || '').trim();
+      if (toEmail) {
+        const url = `messages.html?email=${encodeURIComponent(email)}&to=${encodeURIComponent(toEmail)}`;
+        window.location.href = url;
+      } else if (toName) {
+        const url = `messages.html?email=${encodeURIComponent(email)}&to=${encodeURIComponent(toName)}`;
+        window.location.href = url;
       }
     });
+
+    // iOS-friendly toggles
+    const navChk = document.getElementById('navToggle');
+    const pplChk = document.getElementById('peopleToggle');
+    const burgerBtn = document.getElementById('burgerBtn');
+    const peopleBtn = document.getElementById('peopleBtn');
+
+    function anyOpen(){ return !!(navChk?.checked || pplChk?.checked); }
+    function updateScrollLock(){ document.body.classList.toggle('no-scroll', anyOpen()); }
+
+    burgerBtn?.addEventListener('click', (e)=>{
+      e.stopPropagation(); navChk.checked = !navChk.checked;
+      if (navChk.checked) pplChk.checked = false; updateScrollLock();
+    });
+    peopleBtn?.addEventListener('click', (e)=>{
+      e.stopPropagation(); pplChk.checked = !pplChk.checked;
+      if (pplChk.checked) navChk.checked = false; updateScrollLock();
+    });
+
+    document.addEventListener('click', (e)=>{
+      const inHeader = e.target.closest('.app-header');
+      const inLeft   = e.target.closest('.nav-scroller');
+      const inRight  = e.target.closest('.presence-panel');
+      if (!inHeader && !inLeft && !inRight){ navChk.checked = false; pplChk.checked = false; updateScrollLock(); }
+    });
+
+    ['change','input'].forEach(ev=>{
+      navChk?.addEventListener(ev, updateScrollLock);
+      pplChk?.addEventListener(ev, updateScrollLock);
+    });
+
+    /* Mount mini banner – v spodnej lište (pod formulárom) */
+    if (window.mountBannerRotator) {
+      mountBannerRotator('miniBannerSlot', {
+        fixed: false,      // slot je už vo fixed lište
+        interval: 7000,
+        height: 80,        // desktop cieľ
+        heightMobile: 90   // mobil jemný
+      });
+    }
+  });
   </script>
 </body>
 </html>
