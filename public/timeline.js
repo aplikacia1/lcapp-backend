@@ -6,7 +6,7 @@ function getEmailFromURL() {
 function $(sel, root = document) { return root.querySelector(sel); }
 function escapeHTML(str = "") {
   return String(str || "").replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;',"'" :'&#39;' }[m])
   );
 }
 const scroller = document.scrollingElement || document.documentElement;
@@ -43,7 +43,8 @@ function setPresenceBottom() {
   const panel = $("#presencePanel");
   if (!bar || !panel) return;
   const h = bar.offsetHeight || 120;
-  panel.style.maxHeight = `calc(100vh - var(--header-h) - ${h + 24}px)`;
+  // B2: použime rovnakú CSS premennú ako v HTML/CSS: --hdr-h
+  panel.style.maxHeight = `calc(100vh - var(--hdr-h) - ${h + 24}px)`;
 }
 
 // Navigácia
