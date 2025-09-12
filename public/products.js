@@ -1,3 +1,4 @@
+// public/products.js
 // ===== helpers =====
 function getParams() {
   const p = new URLSearchParams(window.location.search);
@@ -60,15 +61,19 @@ async function loadProducts() {
   empty.style.display = 'none';
 
   if (!categoryId) {
+    const saved = sessionStorage.getItem('lastCategoryId');
+    if (saved) {
+      const url = `products.html?categoryId=${encodeURIComponent(saved)}${email ? `&email=${encodeURIComponent(email)}` : ''}`;
+      window.location.replace(url);
+      return;
+    }
     empty.style.display = 'block';
     empty.textContent = 'Chýba categoryId v URL.';
     return;
   }
 
   try {
-    // primárna novšia trasa
     let res = await fetch(`/api/products/category/${encodeURIComponent(categoryId)}`);
-    // fallback na staršie API, ak by bolo nasadené
     if (!res.ok) {
       res = await fetch(`/api/products/byCategory/${encodeURIComponent(categoryId)}`);
     }
@@ -101,13 +106,11 @@ function render(list) {
   grid.innerHTML = list.map(p => {
     const title = p?.name || 'Bez názvu';
 
-    // Cena: 12,34 € / m2 (alebo / ks)
     let price = '';
     if (p?.price !== null && p?.price !== undefined && isFinite(Number(p.price))) {
       price = `${EUR.format(Number(p.price))}${p?.unit ? ` / ${p.unit}` : ''}`;
     }
 
-    // (ak máš priemery z backendu, vieš sem doplniť p.averageRating / p.ratingCount)
     const ratingStr = p?.ratingCount
       ? `★ ${(Number(p.averageRating) || 0).toFixed(1)} (${p.ratingCount})`
       : '—';

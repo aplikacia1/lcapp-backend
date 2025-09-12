@@ -11,27 +11,15 @@
       --max-w: 1120px;
       --gap: 16px;
       --hdr-h: 96px;
-      --nav-gap: 8px;
-
-      /* UI farby */
-      --ui-bg: #eef6ff;
-      --ui-border: #bcd6ff;
-      --ui-text:#0c1f4b;
-      --ui-hover:#e3f0ff;
-
-      /* layout */
+      --panel-border: rgba(255,255,255,.12);
       --list-w: 360px;
       --composer-h: 84px;
-      --panel-border: rgba(255,255,255,.12);
-
-      /* dynamická pozícia composeru na DESKTOPE */
       --composer-left: 0px;
       --composer-width: 100vw;
     }
 
     html,body{margin:0;padding:0;height:100%}
     body{ background:#0c1f4b; color:#fff; padding-top:var(--hdr-h); overflow:hidden; }
-    body.no-scroll{ overflow:hidden; }
 
     /* ===== HEADER ===== */
     .app-header{ position:fixed; inset:0 0 auto 0; z-index:1000; background:#0c1f4b; border-bottom:1px solid var(--panel-border); }
@@ -39,25 +27,14 @@
     .logo-small{ height:48px; margin:2px auto 6px; display:block; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
 
-    /* burger */
-    .nav-toggle{ display:none; }
-    .burger{
-      position:absolute; left:12px; top:10px; width:44px; height:44px; display:none; place-content:center;
+    /* 🔙 ikonové tlačidlo späť */
+    .icon-btn{
+      position:absolute; top:10px; left:12px; width:44px; height:44px; display:grid; place-content:center;
       border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; background:transparent; cursor:pointer;
     }
-    .burger svg{ width:22px; height:22px; }
-    @media (max-width: 900px){ .burger{ display:grid; } }
-
-    /* ===== NAV PILLS ===== */
-    .nav-scroller{ padding:0 var(--gap); width:100%; }
-    .nav-track{ display:flex; gap:var(--nav-gap); justify-content:center; }
-    .pill{
-      height:38px; padding:8px 14px; border-radius:16px;
-      border:1px solid rgba(255,255,255,.35);
-      background:#fff; color:#0c1f4b; font-weight:700; letter-spacing:.2px; cursor:pointer;
-    }
-    .pill-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
-    @media (max-width: 900px){ .nav-scroller{ display:none; } }
+    .icon-btn svg{ width:22px; height:22px; }
+    /* skryj staré pilule */
+    .nav-scroller{ display:none !important; }
 
     /* ===== LAYOUT ===== */
     .wrap{
@@ -72,31 +49,15 @@
     .card .head{ padding:10px 12px; font-weight:700; border-bottom:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .card .body{ flex:1 1 auto; overflow:auto; min-height:0; }
 
-    /* ===== LEFT: zoznam ===== */
-    .list-panel{ min-height:0; background:#0c1f4b !important; border:none !important; }
-    .conv-scroller{ height:100%; overflow:auto; -webkit-overflow-scrolling: touch; }
-
-    .head-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-    .mini-btn{
-      height:32px; padding:0 10px; border-radius:10px; border:1px solid var(--ui-border);
-      background:#fff; color:#0c1f4b; font-weight:700; cursor:pointer;
-    }
-    .mini-btn:hover{ background:#f7fbff; }
-    .mini-btn-danger{ background:#ff4d4d; color:#fff; border-color:#ff4d4d; }
-    .mini-btn-danger:hover{ filter:brightness(0.95); }
-    .mobile-only{ display:none; }
-    @media (max-width: 900px){ .mobile-only{ display:inline-flex; } }
-
+    /* LEFT list */
+    .list-panel{ background:#0c1f4b !important; border:none !important; }
     .conv-list{ padding:8px; display:flex; flex-direction:column; gap:8px; }
-
     .admin-tile{
       display:flex; align-items:center; gap:10px; padding:12px; border-radius:12px; cursor:pointer;
       background:linear-gradient(90deg,#ffd33d,#ffa54d); color:#111; font-weight:800; border:1px solid rgba(255,255,255,.35);
       box-shadow:0 2px 8px rgba(0,0,0,.18);
     }
     .admin-tile .dot{ width:10px; height:10px; border-radius:999px; background:#fff; box-shadow:0 0 0 2px rgba(0,0,0,.12) inset; }
-    .admin-tile small{ font-weight:700; opacity:.8; }
-
     .conv-item{
       background:rgba(255,255,255,.06); border:1px solid var(--panel-border);
       border-radius:12px; padding:10px; cursor:pointer; transition:background .15s ease, border-color .15s ease;
@@ -104,14 +65,10 @@
     .conv-item:hover{ background:rgba(255,255,255,.10); }
     .conv-item.active{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.22); }
     .conv-name{ font-weight:700; color:#fff; display:flex; align-items:center; gap:8px; }
-    .conv-name .badge{
-      min-width:18px; height:18px; padding:0 6px; border-radius:999px;
-      background:#ffcc00; color:#111; font-weight:800; font-size:12px;
-      display:inline-flex; align-items:center; justify-content:center;
-    }
+    .conv-name .badge{ min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center; }
     .conv-last{ opacity:.85; font-size:13px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    /* ===== RIGHT: vlákno ===== */
+    /* RIGHT thread */
     .thread-panel{ display:flex; flex-direction:column; min-height:0; min-width:0; }
     .thread-wrap{
       flex:1 1 auto; overflow:auto; overflow-x:hidden; width:100%;
@@ -124,35 +81,13 @@
       padding-bottom: calc(16px + var(--composer-h));
       position:relative; z-index:0;
     }
-    .thread{
-      width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111;
-      box-sizing:border-box; overflow-x:hidden;
-      padding-bottom: calc(16px + var(--composer-h));
-      position:relative; z-index:0;
-    }
+    .thread{ width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111; box-sizing:border-box; overflow-x:hidden; padding-bottom: calc(16px + var(--composer-h)); }
 
-    /* Mobil */
-    @media (max-width:900px){
-      .list-panel{
-        position:fixed; top:0; left:0; height:100dvh; width:min(88vw, 360px);
-        z-index:9999;
-        transform:translateX(-100%); transition:transform .25s ease;
-      }
-      .nav-toggle:checked ~ .wrap .list-panel{ transform:translateX(0); }
-      .thread-panel{ height: calc(100dvh - var(--hdr-h)); }
-      .thread-wrap{ height:100%; padding-bottom: calc(16px + var(--composer-h) + env(safe-area-inset-bottom)); }
-      .thread{ padding-bottom: calc(16px + var(--composer-h) + env(safe-area-inset-bottom)); }
-    }
-
-    .msg{
-      background:#f7f9ff; border:1px solid #e6eaff; border-radius:16px; padding:10px 12px; max-width:76%;
-      box-shadow:0 1px 0 rgba(0,0,0,.03);
-      overflow-wrap:anywhere; word-break:break-word;
-    }
+    .msg{ background:#f7f9ff; border:1px solid #e6eaff; border-radius:16px; padding:10px 12px; max-width:76%; box-shadow:0 1px 0 rgba(0,0,0,.03); overflow-wrap:anywhere; word-break:break-word; }
     .msg.me{ align-self:flex-end; background:#e8f4ff; border-color:#d8ebff; }
     .msg .meta{ font-size:12px; color:#445; display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; }
 
-    /* ===== COMPOSER ===== */
+    /* Composer */
     .composer-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:950; background:#0c1f4b;
       border-top:1px solid var(--panel-border); display:flex; justify-content:center;
@@ -161,78 +96,37 @@
     .composer-wrap{ width:100%; max-width:var(--max-w); padding:0 var(--gap); }
     .composer{ background:#fff; border:1px solid #eee; border-radius:14px; padding:10px; }
     .composer-row{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; }
-    .input-group{
-      display:flex; align-items:center; gap:8px; width:100%; background:var(--ui-bg);
-      border:1px solid var(--ui-border); border-radius:12px; padding:6px 8px; box-sizing:border-box;
-    }
+    .input-group{ display:flex; align-items:center; gap:8px; width:100%; background:#eef6ff; border:1px solid #bcd6ff; border-radius:12px; padding:6px 8px; box-sizing:border-box; }
     #composerText{ flex:1 1 auto; min-width:0; height:28px; border:none; background:transparent; outline:none; color:#111; font-weight:500; resize:none; }
     #composerCount{ font-size:12px; color:#667; white-space:nowrap; }
-
-    @media (min-width: 901px){
-      .composer-bar{ left: var(--composer-left); right:auto; width: var(--composer-width); }
-      .composer-wrap{ max-width:none; padding-left:16px; padding-right:16px; }
-    }
-
-    .button{
-      height:40px; padding:0 12px; border:1px solid var(--ui-border); border-radius:12px;
-      background:#eef6ff; color:#0c1f4b; cursor:pointer; white-space:nowrap;
-    }
+    .button{ height:40px; padding:0 12px; border:1px solid #bcd6ff; border-radius:12px; background:#eef6ff; color:#0c1f4b; cursor:pointer; }
     .button:hover{ background:#e3f0ff; }
 
-    .brand-badge{
-      position: fixed; left:16px; bottom: calc(var(--composer-h) + 24px);
-      z-index:2001;
-      display:inline-flex; align-items:center; gap:8px; background:#000; color:#fff; text-decoration:none;
-      border:2px solid #fff; border-radius:14px; padding:8px 10px; box-shadow:0 8px 18px rgba(0,0,0,.25); opacity:.96;
-      transition: opacity .2s ease, transform .2s ease;
-    }
-    .nav-toggle:checked ~ .brand-badge{ opacity:.6; transform: translateY(6px); }
-    .brand-badge img{ height:24px; }
-    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
-    @media (max-width:480px){
-      .brand-badge{ left:12px; bottom: calc(var(--composer-h) + 18px); padding:6px 8px; border-radius:12px; }
-      .brand-badge img{ height:20px; } .brand-badge .wordmark{ font-size:12px; }
-    }
-
-    .conv-item:focus, .button:focus, .admin-tile:focus{ outline:2px solid #6aa8ff; outline-offset:2px; }
-
-    /* === FULL-WIDTH DESKTOP OVERRIDES === */
+    /* full width desktop */
     @media (min-width: 901px){
       :root{ --max-w: 100vw; }
       .app-header-inner, .composer-wrap{ max-width:none; width:100%; }
-      .wrap{
-        max-width:none; width:100%;
-        padding-left:24px; padding-right:24px;
-        grid-template-columns: minmax(320px, 28vw) minmax(0, 1fr);
-      }
+      .wrap{ max-width:none; width:100%; padding-left:24px; padding-right:24px; grid-template-columns: minmax(320px, 28vw) minmax(0, 1fr); }
       .list-panel{ min-width:320px; }
     }
-
-    /* === BACKDROP pre mobilnú zásuvku === */
-    .backdrop{
-      position:fixed; inset:0; background:rgba(0,0,0,.35);
-      z-index:9000;
-      opacity:0; pointer-events:none; transition:opacity .2s ease;
-    }
-    .nav-toggle:checked ~ .backdrop{ opacity:1; pointer-events:auto; }
   </style>
 </head>
 
 <body>
-  <!-- toggle pre mobilnú zásuvku -->
-  <input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
-  <div class="backdrop" aria-hidden="true"></div>
-
   <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-      <button class="burger" id="burgerBtn" aria-label="Zobraziť zoznam konverzácií">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <!-- 🔙 späť na timeline -->
+      <button class="icon-btn" id="backBtn" aria-label="Späť na časovú os">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
       </button>
 
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userChip">Prihlásený:</div>
 
+      <!-- (skryté) fallback tlačidlá – nechávame kvôli JS id -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
           <button class="pill" id="goBackBtn">Späť</button>
@@ -245,22 +139,12 @@
   <!-- MAIN -->
   <div class="wrap">
     <!-- LEFT: conversations -->
-    <section class="card list-panel drawer" aria-labelledby="convHead">
-      <div class="head" id="convHead">
-        <span>Konverzácie</span>
-        <div class="head-actions">
-          <button class="mini-btn mobile-only" id="goBackInMenuBtn" type="button" aria-label="Späť">Späť</button>
-          <button class="mini-btn mini-btn-danger mobile-only" id="logoutInMenuBtn" type="button" aria-label="Odhlásiť sa">Odhlásiť sa</button>
-        </div>
-      </div>
-
-      <div class="body conv-scroller">
+    <section class="card list-panel" aria-labelledby="convHead">
+      <div class="head" id="convHead"><span>Konverzácie</span></div>
+      <div class="body">
         <div id="convList" class="conv-list">
           <!-- PINNED ADMIN TILE -->
-          <div id="adminTile"
-               class="admin-tile"
-               role="button"
-               tabindex="0"
+          <div id="adminTile" class="admin-tile" role="button" tabindex="0"
                aria-label="Napísať na Lištové centrum"
                data-admin-email="bratislava@listovecentrum.sk"
                data-admin-nick="Lištové centrum">
@@ -270,7 +154,6 @@
               <small>Oficiálny chat podpory</small>
             </div>
           </div>
-
           <!-- sem renderuje JS ostatné konverzácie -->
         </div>
       </div>
@@ -278,12 +161,8 @@
 
     <!-- RIGHT: thread -->
     <section class="card thread-panel" aria-labelledby="threadHead">
-      <div class="head" id="threadHead">
-        <div id="threadTitle">Vyberte konverzáciu</div>
-      </div>
-      <div class="thread-wrap">
-        <div id="thread" class="thread"></div>
-      </div>
+      <div class="head" id="threadHead"><div id="threadTitle">Vyberte konverzáciu</div></div>
+      <div class="thread-wrap"><div id="thread" class="thread"></div></div>
     </section>
   </div>
 
@@ -302,17 +181,12 @@
     </div>
   </div>
 
-  <!-- MarSab® badge -->
-  <a class="brand-badge" href="#" aria-label="MarSab®">
-    <img src="img/marsab_logo.png" alt=""><span class="wordmark">MarSab®</span>
-  </a>
-
   <!-- skripty -->
   <script src="/js/config.js"></script>
   <script src="messages.js"></script>
 
   <script>
-    /* ===== fixed header height ===== */
+    /* pevná výška hlavičky → padding-top */
     (function(){
       const header = document.querySelector('.app-header');
       function setHdrH(){
@@ -320,61 +194,19 @@
           document.documentElement.style.setProperty('--hdr-h', header.getBoundingClientRect().height + 'px');
         }
       }
-      setHdrH();
-      addEventListener('resize', setHdrH);
+      setHdrH(); addEventListener('resize', setHdrH);
     })();
 
-    /* ===== navigation keep ?email ===== */
+    /* šípka späť + logout (ponechané id pre kompatibilitu) */
     (function(){
       const email = new URLSearchParams(location.search).get("email");
       const go = (page) => { location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+      document.getElementById('backBtn')?.addEventListener('click', () => go('timeline.html'));
       document.getElementById('goBackBtn')?.addEventListener('click', () => go('timeline.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', () => { location.href = 'index.html'; });
-      document.getElementById('goBackInMenuBtn')?.addEventListener('click', () => go('timeline.html'));
-      document.getElementById('logoutInMenuBtn')?.addEventListener('click', () => { location.href = 'index.html'; });
     })();
 
-    /* ===== mobile drawer toggle ===== */
-    (function(){
-      const toggle  = document.getElementById('menuToggle');
-      const burger  = document.getElementById('burgerBtn');
-      const backdrop = document.querySelector('.backdrop');
-
-      function closeDrawer(){
-        if (toggle?.checked){
-          toggle.checked=false;
-          document.body.classList.remove('no-scroll');
-        }
-      }
-
-      burger?.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        if (toggle){
-          toggle.checked = !toggle.checked;
-          document.body.classList.toggle('no-scroll', toggle.checked);
-        }
-      });
-
-      backdrop?.addEventListener('click', closeDrawer);
-
-      document.addEventListener('click', (e)=>{
-        if (!toggle?.checked) return;
-        const inList = e.target.closest('.list-panel');
-        const inHdr  = e.target.closest('.app-header');
-        if (!inList && !inHdr){ closeDrawer(); }
-      });
-
-      ['goBackInMenuBtn','logoutInMenuBtn','adminTile'].forEach(id=>{
-        document.getElementById(id)?.addEventListener('click', closeDrawer);
-      });
-
-      // auto-close pri výbere ľubovoľnej konverzácie
-      document.getElementById('convList')?.addEventListener('click', (e)=>{
-        if (e.target.closest('.conv-item')) closeDrawer();
-      });
-    })();
-
-    /* ===== composer dynamic height ===== */
+    /* composer → dynamická výška */
     (function(){
       const composer = document.querySelector('.composer-bar');
       const setHeights = () => {
@@ -382,12 +214,11 @@
         const h = Math.round(composer.getBoundingClientRect().height);
         document.documentElement.style.setProperty('--composer-h', h + 'px');
       };
-      setHeights();
-      addEventListener('resize', setHeights);
+      setHeights(); addEventListener('resize', setHeights);
       document.getElementById('composerText')?.addEventListener('input', ()=> setTimeout(setHeights, 0));
     })();
 
-    /* ===== desktop composer align to thread column ===== */
+    /* desktop – composer zarovnať na pravý stĺpec */
     (function(){
       const threadPanel = document.querySelector('.thread-panel');
       const apply = () => {
@@ -401,30 +232,23 @@
         document.documentElement.style.setProperty('--composer-left', Math.max(0, Math.round(rect.left)) + 'px');
         document.documentElement.style.setProperty('--composer-width', Math.round(rect.width) + 'px');
       };
-      apply();
-      addEventListener('resize', apply);
-      addEventListener('load', apply);
+      apply(); addEventListener('resize', apply); addEventListener('load', apply);
     })();
 
-    /* ============================================================
-       ADMIN PIN – SPOĽAHLIVÉ PREPNUTIE A OTVORENIE VLÁKNA
-       ============================================================ */
+    /* ADMIN tile – otvor vlákno s LC (ponechané) */
     (function(){
       const ADMIN_EMAIL = 'bratislava@listovecentrum.sk';
       const ADMIN_NICK  = 'Lištové centrum';
-
-      const convList     = document.getElementById('convList');
-      const adminTile    = document.getElementById('adminTile');
-      const threadTitle  = document.getElementById('threadTitle');
-      const threadEl     = document.getElementById('thread');
+      const convList  = document.getElementById('convList');
+      const adminTile = document.getElementById('adminTile');
+      const threadEl  = document.getElementById('thread');
+      const threadTitle = document.getElementById('threadTitle');
       const composerText = document.getElementById('composerText');
-      const menuToggle   = document.getElementById('menuToggle');
 
       function markActiveAdmin(){
         convList?.querySelectorAll('.conv-item.active')?.forEach(el=> el.classList.remove('active'));
         adminTile?.classList.add('active');
       }
-
       function setRecipient(email, nick){
         threadEl.dataset.recipientEmail = email;
         threadEl.dataset.recipientNick  = nick;
@@ -433,37 +257,18 @@
           composerText.placeholder = `Napíšte správu pre ${nick}… (Enter = odoslať, Shift+Enter = nový riadok)`;
         }
       }
-
-      function closeDrawerIfOpen(){
-        if (menuToggle && menuToggle.checked){
-          menuToggle.checked = false;
-          document.body.classList.remove('no-scroll');
-        }
-      }
-
       function openAdminThread(){
         markActiveAdmin();
         setRecipient(ADMIN_EMAIL, ADMIN_NICK);
-
         if (typeof window.openThreadForRecipient === 'function') {
           window.openThreadForRecipient({ email: ADMIN_EMAIL, nick: ADMIN_NICK });
         } else {
-          window.dispatchEvent(new CustomEvent('thread:open', {
-            detail: { email: ADMIN_EMAIL, nick: ADMIN_NICK, source: 'adminTile' }
-          }));
+          window.dispatchEvent(new CustomEvent('thread:open', { detail: { email: ADMIN_EMAIL, nick: ADMIN_NICK } }));
         }
-        closeDrawerIfOpen();
       }
-
       adminTile?.addEventListener('click', openAdminThread);
-      adminTile?.addEventListener('keydown', (e)=>{
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAdminThread(); }
-      });
-
-      // keď sa klikne na inú konverzáciu, zruš zvýraznenie admin tile
-      convList?.addEventListener('click', (e)=>{
-        if (e.target.closest('.conv-item')) adminTile?.classList.remove('active');
-      });
+      adminTile?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); openAdminThread(); } });
+      convList?.addEventListener('click', (e)=>{ if (e.target.closest('.conv-item')) adminTile?.classList.remove('active'); });
     })();
   </script>
 </body>

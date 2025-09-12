@@ -79,6 +79,13 @@ window.addEventListener('keydown', initDing, { once:true });
 
 /* ---------- NAV / HEADER ---------- */
 function wireHeader(){
+  // šípka späť → timeline.html s email parametrom
+  $('#backBtn')?.addEventListener('click', () => {
+    const url = userEmail ? `timeline.html?email=${encodeURIComponent(userEmail)}` : 'timeline.html';
+    location.href = url;
+  });
+
+  // ak by niekde bol logoutBtn (napr. v menu), ponechajme podporu
   $('#logoutBtn')?.addEventListener('click', () => location.href = 'index.html');
 }
 
@@ -171,7 +178,7 @@ function highlightActive(){
   document.querySelectorAll('.conv-item').forEach(el=>{
     el.classList.toggle('active', el.dataset.email === currentOtherEmail);
   });
-  // *** NEW: zvýrazni admin tile, ak je aktívny admin chat
+  // zvýrazni admin tile, ak je aktívny admin chat
   const adminTile = $('#adminTile');
   if (adminTile && ADMIN?.email){
     const on = (currentOtherEmail||'').toLowerCase() === ADMIN.email.toLowerCase();
@@ -193,7 +200,6 @@ async function refreshConversationsDiff(){
         frag.appendChild(node);
         convIndex.set(item.otherEmail, { el: node, unread: item.unread, lastText: item.lastText, updatedAt: item.updatedAt });
       });
-      // box.innerHTML = '';  // admin tile je v HTML, nech ostáva
       if (rows.length) box.appendChild(frag);
       else box.insertAdjacentHTML('beforeend','<div style="opacity:.8">Zatiaľ žiadne konverzácie.</div>');
       highlightActive();
@@ -210,7 +216,6 @@ async function refreshConversationsDiff(){
       const cached = convIndex.get(item.otherEmail);
       if (!cached){
         const node = renderConvItem(item);
-        // vlož ZA admin-tile (ak existuje)
         const anchor = $('#adminTile');
         if (anchor && anchor.parentElement) {
           anchor.parentElement.insertBefore(node, anchor.nextSibling);
@@ -246,7 +251,6 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
   const switching = wasFor && wasFor !== willBeFor;
 
   currentOtherEmail = otherEmail;
-  // doplň lepší label (prezývka) ak bol e-mail alebo chýbal
   const displayLabel = await ensureLabelForEmail(otherEmail, otherLabel);
   currentOtherLabel = displayLabel;
 
@@ -258,11 +262,10 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
     t.dataset.threadOf = otherEmail;
   }
 
-  // *** NEW: ulož aj explicitného recipienta pre send
+  // explicitný recipient pre odoslanie
   t.dataset.recipientEmail = otherEmail;
   t.dataset.recipientNick  = displayLabel;
 
-  // nadpis: "Meno — email" (ak meno existuje); inak len email
   const title = $('#threadTitle');
   if (title) title.textContent = (displayLabel && displayLabel !== otherEmail) ? `${displayLabel} — ${otherEmail}` : otherEmail;
 
@@ -329,11 +332,9 @@ async function sendMessage(){
     return;
   }
 
-  // *** NEW: preferuj explicitný e-mail príjemcu
   const toEmail = $('#thread')?.dataset?.recipientEmail || currentOtherEmail;
   const toName  = currentOtherLabel || $('#thread')?.dataset?.recipientNick || toEmail;
 
-  // optimistická bublina
   const optimisticKey = `opt_${Date.now()}`;
   const t = $('#thread');
   if (t){
@@ -356,8 +357,8 @@ async function sendMessage(){
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
       fromEmail: userEmail,
-      toEmail,               // *** NEW: pošli email príjemcu
-      toName,                // zachovaj aj name, ak ho backend používa
+      toEmail,
+      toName,
       text
     })
   });
@@ -422,12 +423,10 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     if (isEmail) {
       toEmail = toParam;
     } else {
-      // špeciál: ak je to "Lištové centrum", pošli na admin email
       const norm = s => (s||'').trim().toLowerCase();
       if (norm(toParam) === norm(ADMIN.name)) {
-        toEmail = ADMIN.email; // *** NEW: mapuj priamo na admina
+        toEmail = ADMIN.email;
       } else {
-        // pokus vyhľadať podľa mena
         try{
           const q = encodeURIComponent(toParam);
           const r = await fetch(`/api/messages/search-users?q=${q}`);
@@ -455,14 +454,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if (draftCache && $('#composerText')) $('#composerText').value = draftCache;
 });
 
-/* ---------- PUBLIC API pre HTML admin tile (nenúti backend) ---------- */
-// *** NEW: otvorenie vlákna pre príjemcu z HTML (admin tile)
+/* ---------- PUBLIC API pre HTML admin tile ---------- */
 window.openThreadForRecipient = async ({ email, nick }) => {
   const label = nick || email;
   await openThread(email, label, { reset:true });
 };
 
-// *** NEW: listenery na udalosti z HTML (fallbacky, nič nerozbíjajú)
 window.addEventListener('thread:open', async (e)=>{
   const d = e?.detail || {};
   if (!d.email) return;
@@ -472,9 +469,7 @@ window.addEventListener('thread:open', async (e)=>{
 window.addEventListener('compose:send', async (e)=>{
   const d = e?.detail || {};
   if (!d.recipientEmail) return;
-  // predvyplň text, ak prišiel (nepovinné)
   if (d.text && $('#composerText')) $('#composerText').value = d.text;
-  // uisti sa, že thread vie o recipientovi
   $('#thread').dataset.recipientEmail = d.recipientEmail;
   if (d.recipientNick) $('#thread').dataset.recipientNick = d.recipientNick;
   currentOtherEmail = d.recipientEmail;

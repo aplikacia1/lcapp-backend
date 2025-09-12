@@ -12,7 +12,7 @@
   function escapeHTML(s=""){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   const cleanUploadPath = (s="") => String(s).replace(/^\/?uploads[\\/]/i,"").replace(/^\/+/,"");
 
-  // ✅ inline placeholder – žiadny súbor netreba, a zabránime nekonečnému onerror
+  // ✅ inline placeholder
   const IMG_PLACEHOLDER =
     'data:image/svg+xml;utf8,' +
     encodeURIComponent(
@@ -29,10 +29,16 @@
   const { id: productId, categoryId, email } = getParams();
   let selectedStars = 5;
 
+  // 🔹 uloženie categoryId pre návrat
+  if (categoryId) {
+    sessionStorage.setItem("lastCategoryId", categoryId);
+  }
+
   function goBack(){
-    const url = categoryId
-      ? `products.html?categoryId=${encodeURIComponent(categoryId)}${email?`&email=${encodeURIComponent(email)}`:""}`
-      : (email?`catalog.html?email=${encodeURIComponent(email)}`:"catalog.html");
+    const cat = categoryId || sessionStorage.getItem("lastCategoryId") || "";
+    const url = cat
+      ? `products.html?categoryId=${encodeURIComponent(cat)}${email ? `&email=${encodeURIComponent(email)}` : ""}`
+      : (email ? `catalog.html?email=${encodeURIComponent(email)}` : "catalog.html");
     location.href = url;
   }
   window.goBack = goBack;
@@ -120,12 +126,8 @@
 
       const imgEl = $("#productImage");
       if(imgEl){
-        // primárny zdroj
         const src = p.image ? `/uploads/${cleanUploadPath(p.image)}` : IMG_PLACEHOLDER;
-        imgEl.onerror = () => {              // ✅ jednorazový fallback, bez nekonečného loopu
-          imgEl.onerror = null;
-          imgEl.src = IMG_PLACEHOLDER;
-        };
+        imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = IMG_PLACEHOLDER; };
         imgEl.src = src;
         imgEl.alt = p.name || "Produkt";
       }
