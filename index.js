@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const fs = require('fs');
 
 const app = express();
 
@@ -70,8 +71,14 @@ app.get('/debug/db', (_req, res) => {
 });
 
 /* --- Statika --- */
+const uploadsDir = process.env.UPLOADS_DIR || '/var/data/listobook/uploads';
+fs.mkdirSync(uploadsDir, { recursive: true });
+
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// publikujeme PERSISTENT disk na URL /uploads
+app.use('/uploads', express.static(uploadsDir));
+
 app.get('/', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 );
@@ -101,6 +108,7 @@ mountRoute('/api/banners',        './routes/bannerRoutes');
 mountRoute('/api/admin/timeline', './routes/timelineAdminRoutes');
 mountRoute('/api/messages',       './routes/messageRoutes');
 mountRoute('/api/push',           './routes/pushRoutes');
+mountRoute('/api/uploads',       './routes/uploadRoutes');
 
 /* --- Štart po DB --- */
 const PORT = process.env.PORT || 5000;
