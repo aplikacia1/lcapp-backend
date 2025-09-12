@@ -71,12 +71,17 @@ app.get('/debug/db', (_req, res) => {
   res.json({ state: c.readyState, db: c.name || null, host: c.host || null });
 });
 
-/* --- Statika --- */
-const uploadsDir = process.env.UPLOADS_DIR
-  || (IS_PROD ? '/var/data/listobook/uploads' : path.join(__dirname, 'uploads'));
+/* --- Statika / Uploads --- */
+const uploadsDir =
+  process.env.UPLOADS_DIR ||
+  (IS_PROD ? '/var/data/listobook/uploads' : path.join(__dirname, 'uploads'));
 
 fs.mkdirSync(uploadsDir, { recursive: true });
 
+// sprístupni cestu uploadov aj do routerov
+app.set('UPLOADS_DIR', uploadsDir);
+
+// public (HTML/JS/CSS)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // /uploads: primárne persistent disk, potom fallbacky pre staré umiestnenia
@@ -84,6 +89,7 @@ app.use('/uploads', express.static(uploadsDir, { fallthrough: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads'), { fallthrough: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// landing
 app.get('/', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 );
@@ -113,7 +119,7 @@ mountRoute('/api/banners',        './routes/bannerRoutes');
 mountRoute('/api/admin/timeline', './routes/timelineAdminRoutes');
 mountRoute('/api/messages',       './routes/messageRoutes');
 mountRoute('/api/push',           './routes/pushRoutes');
-mountRoute('/api/uploads',        './routes/uploadRoutes');
+mountRoute('/api/uploads',        './routes/uploadRoutes'); // ping/debug
 
 /* --- Štart po DB --- */
 const PORT = process.env.PORT || 5000;
