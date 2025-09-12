@@ -13,20 +13,21 @@ const app = express();
 /* --- Základ --- */
 app.set('trust proxy', 1); // Render/reverse proxy
 
-// NEW: produkčná doména (na presmerovanie www -> apex)
+const IS_PROD = process.env.NODE_ENV === 'production';
 const PROD_DOMAIN = 'listobook.sk';
 
-// NEW: povolené originy pre CORS
+// povolené originy pre CORS
 const ALLOWED_ORIGINS = [
-  process.env.APP_URL,                  // napr. https://lcapp-backend.onrender.com z .env (ak máš)
+  process.env.APP_URL,
   'http://localhost:3000',
   'https://lcapp-backend.onrender.com',
   'https://listobook.sk',
   'https://www.listobook.sk'
 ].filter(Boolean);
 
-// NEW: presmeruj www -> apex (napr. www.listobook.sk -> listobook.sk)
+// presmeruj www -> apex (iba v produkcii)
 app.use((req, res, next) => {
+  if (!IS_PROD) return next();
   const host = req.headers.host;
   if (host === `www.${PROD_DOMAIN}`) {
     return res.redirect(301, `https://${PROD_DOMAIN}${req.originalUrl}`);
@@ -34,22 +35,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// NEW: vynúť HTTPS (za proxy na Renderi)
+// vynúť HTTPS (iba v produkcii)
 app.use((req, res, next) => {
+  if (!IS_PROD) return next();
   if (req.secure || req.headers['x-forwarded-proto'] === 'https') return next();
   return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
 });
 
-// NEW: HSTS pre lepšie zabezpečenie
+// HSTS (iba v produkcii)
 app.use((req, res, next) => {
-  res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  if (IS_PROD) res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   next();
 });
 
-// CORS (používaš ho už teraz – len doplnené originy vyššie)
+// CORS
 app.use(cors({
   origin: (origin, cb) => {
-    // povol aj nástroje bez Origin hlavičky (curl, healthchecky)
     if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
     cb(new Error('Not allowed by CORS'));
   },
@@ -71,13 +72,17 @@ app.get('/debug/db', (_req, res) => {
 });
 
 /* --- Statika --- */
-const uploadsDir = process.env.UPLOADS_DIR || '/var/data/listobook/uploads';
+const uploadsDir = process.env.UPLOADS_DIR
+  || (IS_PROD ? '/var/data/listobook/uploads' : path.join(__dirname, 'uploads'));
+
 fs.mkdirSync(uploadsDir, { recursive: true });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// publikujeme PERSISTENT disk na URL /uploads
-app.use('/uploads', express.static(uploadsDir));
+// /uploads: primárne persistent disk, potom fallbacky pre staré umiestnenia
+app.use('/uploads', express.static(uploadsDir, { fallthrough: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads'), { fallthrough: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
@@ -108,7 +113,7 @@ mountRoute('/api/banners',        './routes/bannerRoutes');
 mountRoute('/api/admin/timeline', './routes/timelineAdminRoutes');
 mountRoute('/api/messages',       './routes/messageRoutes');
 mountRoute('/api/push',           './routes/pushRoutes');
-mountRoute('/api/uploads',       './routes/uploadRoutes');
+mountRoute('/api/uploads',        './routes/uploadRoutes');
 
 /* --- Štart po DB --- */
 const PORT = process.env.PORT || 5000;
