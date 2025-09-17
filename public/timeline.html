@@ -126,6 +126,16 @@
     .dot.online{ background:#22c55e }
     .presence-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
+    /* 🔔 badge pri mene v zozname účastníkov */
+    .presence-badge{
+      margin-left:auto;
+      min-width:18px; height:18px; padding:0 6px;
+      border-radius:999px; background:#ffcc00; color:#111;
+      font-weight:800; font-size:12px; display:none; /* zobrazíme až keď je hodnota */
+      align-items:center; justify-content:center;
+    }
+    .presence-badge:empty{ display:none; }
+
     @media (max-width:1200px){ .presence-panel{ display:none; } }
 
     @media (max-width: 767.98px){
@@ -281,13 +291,13 @@
 
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
-          <button class="pill" id="goBackBtn">Katalóg</button>
+          <button class="pill" id="goBackBtn">Centrum hodnotenia</button>
           <button class="pill" id="openMessagesBtn">
-            Správy
+            Centrum správ
             <span id="msgBadge" style="display:none; min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center;"></span>
           </button>
-          <button class="pill" id="gameBtn">Hra</button>
-          <button class="pill" id="accountBtn">Účet</button>
+          <button class="pill" id="gameBtn">Centrum zábavy</button>
+          <button class="pill" id="accountBtn">Centrum Lištobook</button>
           <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
         </div>
       </nav>
@@ -349,7 +359,7 @@
     (function(){
       const stack = document.getElementById('toastStack');
       const MAX = 3;
-      const ESC = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&quot;'}[m]));
+      const ESC = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&gt;','>':'&quot;'}[m]));
       const icons = { success:'✓', info:'ℹ︎', warn:'!', error:'×' };
 
       function push(type='info', message='', {duration=4000}={}){

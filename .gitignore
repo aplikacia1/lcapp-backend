@@ -3,13 +3,14 @@
 .env.*
 *.env
 
+# závislosti
 node_modules/
 
-# runtime uploady (nechceme v gite)
+# runtime uploady (perzistentné, nie do gitu)
 uploads/
 uploads/**/*
 
-# logy (pre istotu)
+# logy
 npm-debug.log*
 yarn-debug.log*
 *.log

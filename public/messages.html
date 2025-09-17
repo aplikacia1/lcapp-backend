@@ -109,6 +109,21 @@
       .wrap{ max-width:none; width:100%; padding-left:24px; padding-right:24px; grid-template-columns: minmax(320px, 28vw) minmax(0, 1fr); }
       .list-panel{ min-width:320px; }
     }
+
+    /* --- Mobile: jedno okno s vláknom (bez ľavého zoznamu) --- */
+    @media (max-width: 900px){
+      .wrap{
+        grid-template-columns: 1fr;
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .list-panel{
+        display: none !important;
+      }
+      .thread-panel{
+        min-height: calc(100vh - var(--hdr-h));
+      }
+    }
   </style>
 </head>
 

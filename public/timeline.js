@@ -56,7 +56,7 @@ function openMessages(){
   location.href = url;
 }
 
-// 🔔 Badge neprečítaných správ
+// 🔔 Badge neprečítaných správ (globálny – pilulka v hlavičke)
 async function refreshUnreadBadge(){
   if(!userEmail) return;
   try{
@@ -71,6 +71,44 @@ async function refreshUnreadBadge(){
     }else{
       b.style.display = 'none';
     }
+  }catch{}
+}
+
+// 🔔 Badge helper (per-user)
+function formatBadge(n){
+  const num = Number(n||0);
+  if (num <= 0) return '';
+  return num > 9 ? '9+' : String(num);
+}
+function applyPresenceBadges(map){
+  // map: lowercased otherEmail -> unread count
+  document.querySelectorAll('.presence-badge').forEach(el=>{
+    const email = (el.dataset.email || '').toLowerCase();
+    const n = Number(map.get(email) || 0);
+    const text = formatBadge(n);
+    if (text){
+      el.textContent = text;
+      el.setAttribute('aria-label', `Neprečítané správy: ${n}`);
+      el.style.display = 'inline-flex';
+    }else{
+      el.textContent = '';
+      el.removeAttribute('aria-label');
+      el.style.display = 'none';
+    }
+  });
+}
+async function refreshPresenceCounts(){
+  if(!userEmail) return;
+  try{
+    const res = await fetch(`/api/messages/conversations/${encodeURIComponent(userEmail)}`);
+    const rows = res.ok ? await res.json() : [];
+    const m = new Map();
+    rows.forEach(r=>{
+      const k = String(r.otherEmail||'').toLowerCase();
+      const v = Number(r.unread||0);
+      if (k) m.set(k, v);
+    });
+    applyPresenceBadges(m);
   }catch{}
 }
 
@@ -353,6 +391,8 @@ async function refreshPresence(){
     if(!res.ok) return;
     const users = await res.json();
     renderPresence(users);
+    // po každom rendri doplň badge z konverzácií
+    refreshPresenceCounts();
   }catch(e){}
 }
 function renderPresence(users){
@@ -370,13 +410,14 @@ function renderPresence(users){
     unique.push(u);
   });
 
-  // 2) render – admin je prvý, všetky položky majú data-email (pre klik)
+  // 2) render – admin je prvý, všetky položky majú data-email (pre klik) + prázdny badge
   ul.innerHTML = unique.map(u => `
     <li class="presence-item" data-email="${escapeHTML(u.email)}" title="${escapeHTML(u.email)}">
       <span class="dot ${u.online ? 'online':''}"></span>
       <span class="presence-name">
         ${escapeHTML(u.name || u.email)}${u.email === userEmail ? ' (ty)' : ''}
       </span>
+      <span class="presence-badge" data-email="${escapeHTML(u.email)}"></span>
     </li>
   `).join('');
 }
@@ -407,14 +448,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!isAdmin) initComposer();
   await loadPosts();
 
-  // A0: Auto-refresh timeline ZRUŠENÉ (žiadny interval ani prerender)
-
   // Presence
   startPresenceHeartbeat();
   refreshPresence();
   setInterval(refreshPresence, 10000);
 
-  // 🔔 badge neprečítaných
+  // 🔔 badge neprečítaných (globál)
   await refreshUnreadBadge();
   setInterval(refreshUnreadBadge, 20000);
 });

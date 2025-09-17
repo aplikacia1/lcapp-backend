@@ -240,7 +240,7 @@ async function refreshConversationsDiff(){
 
 /* ---------- THREAD ---------- */
 function msgKey(m){
-  return String(m._id || `${m.fromEmail}|${m.createdAt}|${m.text}`); 
+  return String(m._id || `${m.fromEmail}|${m.createdAt}|${m.text}`);
 }
 
 async function openThread(otherEmail, otherLabel, { reset=false } = {}){
@@ -439,13 +439,18 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     }
     if (toEmail) await openThread(toEmail, toParam || toEmail, { reset:true });
   } else {
-    const first = document.querySelector('#convList .conv-item');
-    if (first){
-      const email = first.dataset.email;
-      const label = first.querySelector('.conv-name')?.childNodes?.[0]?.textContent || email;
-      if (email && label && !label.includes('@')) nameCache.set(email, label);
-      first.click();
+    // 🖥️ IBA DESKTOP: automaticky otvor prvú konverzáciu
+    const isDesktop = window.matchMedia('(min-width: 901px)').matches;
+    if (isDesktop){
+      const first = document.querySelector('#convList .conv-item');
+      if (first){
+        const email = first.dataset.email;
+        const label = first.querySelector('.conv-name')?.childNodes?.[0]?.textContent || email;
+        if (email && label && !label.includes('@')) nameCache.set(email, label);
+        first.click();
+      }
     }
+    // 📱 MOBILE: nič neotvárame – používateľ prišiel z timeline s ?to=
   }
 
   setInterval(()=> { if (!document.hidden) safeRefresh(); }, 4000);
