@@ -97,21 +97,21 @@
       gap:12px;
     }
 
-    /* 🔹 Desktop – dlaždice vedľa seba, centrované (robustné cez flex) */
+    /* 🔹 Desktop – dlaždice vedľa seba, centrované (pevne prebijeme globálne CSS) */
     @media (min-width: 992px){
       #categoryGrid{
-        display:flex;               /* prepni na flex */
-        flex-wrap:wrap;             /* zalamovanie do ďalších riadkov */
-        gap:16px;                   /* medzery medzi kartami */
-        justify-content:center;     /* centrovanie zo stredu */
+        display:flex !important;
+        flex-wrap:wrap;
+        gap:16px;
+        justify-content:center;
         align-items:stretch;
       }
-      /* akékoľvek priame deti gridu (div, a, atď.) – pevná „dlaždicová“ šírka */
       #categoryGrid > *{
-        flex:0 1 300px;             /* cieľ ~300 px, prispôsobí sa */
-        max-width:320px;
-        width:100%;
-        margin:0 !important;        /* zruš staré auto-centrovanie */
+        flex:0 1 300px !important;   /* cieľ ~300 px */
+        max-width:320px !important;
+        width:auto !important;       /* zruší 100% šírku zo style.css */
+        margin:0 !important;
+        box-sizing:border-box;
       }
     }
 
@@ -196,8 +196,8 @@
 
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
-          <button class="pill" id="accountBtn">Účet</button>
-          <button class="pill" id="timelineBtn">Lištobook</button>
+          <button class="pill" id="accountBtn">Centrum zmeny účtu</button>
+          <button class="pill" id="timelineBtn">Centrum LIštobook</button>
           <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
         </div>
       </nav>

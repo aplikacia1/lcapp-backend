@@ -1,22 +1,15 @@
-// public/banner_view.js
 (function () {
   const $ = (s, r = document) => r.querySelector(s);
   const params = new URLSearchParams(location.search);
 
-  const bannerId = params.get("id");               // ak je, zobrazujeme tento konkrétny banner
-  const sec = Math.min(60, Math.max(2, Number(params.get("sec") || params.get("s") || 6))); // 2..60 s
+  const bannerId = params.get("id");
+  const sec = Math.min(60, Math.max(2, Number(params.get("sec") || params.get("s") || 6)));
   const INTERVAL_MS = sec * 1000;
 
   let rotateTimer = null;
   let refreshListTimer = null;
   let list = [];
   let idx = 0;
-
-  function normUploadUrl(val = "") {
-    const s = String(val || "");
-    // ak už začína na /uploads/, nechaj tak; inak pridaj prefix
-    return s.startsWith("/uploads/") ? s : (s ? `/uploads/${s}` : "");
-  }
 
   function renderBanner(b) {
     if (!b) {
@@ -27,8 +20,9 @@
       return;
     }
     $("#bTitle").textContent = b.title || "Banner";
-    const url = normUploadUrl(b.image);
-    if (url) $("#bImg").src = url; else $("#bImg").removeAttribute("src");
+    // ✅ ak je v DB už /uploads/…, nepridávaj znova prefix
+    const src = (b.image || "").startsWith("/uploads/") ? b.image : `/uploads/${b.image || ""}`;
+    $("#bImg").src = src;
     $("#bImg").alt = b.title || "Banner";
     $("#bDesc").textContent = b.description || "";
   }
@@ -109,11 +103,8 @@
   });
 
   async function init() {
-    if (bannerId) {
-      await startSingleMode();
-    } else {
-      await startRotateMode();
-    }
+    if (bannerId) await startSingleMode();
+    else await startRotateMode();
   }
 
   document.addEventListener("DOMContentLoaded", init);
