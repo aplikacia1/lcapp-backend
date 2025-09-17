@@ -1,148 +1,133 @@
-// frontend/public/banners.js
-(() => {
-  const CSS = `
-  /* --- scoped len pre banner (bnr-*) --- */
-  .bnr-rot{max-width:1100px; margin:0 auto; padding:0 12px;}
-  .bnr-rot .bnr-frame{
-    position:relative; display:block; width:100%;
-    height:var(--bnr-h,220px);
-    border-radius:var(--bnr-r,16px); overflow:hidden;
-    box-shadow:0 10px 24px rgba(0,0,0,.25);
-    background:#0b1e48;
-  }
-  .bnr-rot .bnr-img{width:100%; height:100%; display:block; object-fit:cover;}
+// public/banners.js
+(function(){
+  const $ = (s, r=document) => r.querySelector(s);
 
-  /* FIXED mód – banner je stále viditeľný */
-  .bnr-fixed{
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(1100px, calc(100vw - 24px));
-    z-index: 1000;
-  }
-  .bnr-fixed.bnr-top    { top: var(--bnr-off, 12px); }
-  .bnr-fixed.bnr-bottom { bottom: 16px; }
-
-  @media (max-width:640px){
-    .bnr-rot .bnr-frame{height:var(--bnr-h-m,160px)}
-  }
-  `;
-
-  function injectCSS(){
-    if (document.getElementById('bnr-css')) return;
-    const s = document.createElement('style');
-    s.id = 'bnr-css';
-    s.textContent = CSS;
-    document.head.appendChild(s);
+  // Normalizácia cesty k obrázku
+  function toSrc(p){
+    const s = String(p || '');
+    return s.startsWith('/uploads/') ? s : (s ? `/uploads/${s}` : '');
   }
 
-  async function fetchBanners(query='?active=1'){
+  // Načíta aktívne bannery (najnovšie navrchu)
+  async function fetchActiveBanners(){
     try{
-      const res = await fetch(`/api/banners${query}`);
-      if (!res.ok) throw new Error('fetch banners failed');
-      return await res.json() || [];
+      const res = await fetch('/api/banners');
+      if(!res.ok) throw new Error();
+      const items = await res.json();
+      return (items || [])
+        .filter(b => b && b.isActive)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }catch{
       return [];
     }
   }
 
-  function el(tag, attrs={}, ...kids){
-    const n = document.createElement(tag);
-    Object.entries(attrs||{}).forEach(([k,v])=>{
-      if (k === 'style' && v && typeof v === 'object'){ Object.assign(n.style, v); }
-      else if (v != null){ n.setAttribute(k, v); }
-    });
-    kids.flat().forEach(k => k && n.appendChild(typeof k==='string' ? document.createTextNode(k) : k));
-    return n;
+  // Vytvor DOM rotátora
+  function createBannerDOM(height){
+    const wrap = document.createElement('div');
+    wrap.className = 'lb-banner-rotator';
+    wrap.style.cssText = `
+      width:100%;
+      background:#0c1f4b;
+      border-top:1px solid rgba(255,255,255,.15);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
+    `;
+
+    const img = document.createElement('img');
+    img.alt = 'Banner';
+    img.loading = 'lazy';
+    img.style.cssText = `
+      width:100%; height:${height}px; object-fit:cover; display:block;
+    `;
+    wrap.appendChild(img);
+
+    return { wrap, img };
   }
 
-  /**
-   * mountBannerRotator(slotId, {
-   *   interval: 30000,
-   *   height: 220,
-   *   heightMobile: 160,
-   *   radius: 16,
-   *   query: '?active=1',
-   *   fixed: true|false,            // 👈 NOVÉ
-   *   position: 'top'|'bottom',     // 👈 NOVÉ (len keď fixed)
-   *   pushContent: true|false,      // 👈 NOVÉ (odsunie obsah, aby banner neprekryl)
-   *   topGapSelector: '.header'     // 👈 NOVÉ (ak fixed top: pripočíta výšku hlavičky)
-   * })
-   */
-  window.mountBannerRotator = async function mountBannerRotator(slotId, opts={}){
-    injectCSS();
-    const slot = document.getElementById(slotId);
-    if (!slot) return;
+  // Verejné API
+  window.mountBannerRotator = async function mountBannerRotator(
+    containerId,
+    {
+      fixed = true,
+      position = 'bottom',   // 'bottom' | 'top'
+      pushContent = true,    // či má posúvať obsah (pri fixed)
+      height = 160,
+      heightMobile = 120,
+      interval = 30000
+    } = {}
+  ){
+    const host = document.getElementById(containerId);
+    if(!host) return;
 
-    const {
-      interval = 30000,
-      height   = 220,
-      heightMobile = 160,
-      radius   = 16,
-      query    = '?active=1',
-      fixed    = false,
-      position = 'top',          // 'top' alebo 'bottom'
-      pushContent = true,
-      topGapSelector = '.header' // na stránkach s hlavičkou
-    } = opts;
+    // výška podľa šírky zariadenia
+    const isMobile = window.matchMedia('(max-width: 767.98px)').matches;
+    const h = isMobile ? heightMobile : height;
 
-    const items = await fetchBanners(query);
-    if (!items.length){ slot.style.display='none'; return; }
+    const { wrap, img } = createBannerDOM(h);
 
-    // obal
-    const wrap  = el('div', { class:'bnr-rot' });
-    wrap.style.setProperty('--bnr-h',   `${height}px`);
-    wrap.style.setProperty('--bnr-h-m', `${heightMobile}px`);
-    wrap.style.setProperty('--bnr-r',   `${radius}px`);
-
-    const anchor = el('a', { class:'bnr-frame', href:'#', title:'' });
-    const img    = el('img', { class:'bnr-img', alt:'Banner' });
-    anchor.appendChild(img);
-    wrap.appendChild(anchor);
-
-    slot.innerHTML = '';
-    slot.appendChild(wrap);
-
-    // FIXED mód – stále viditeľný
-    if (fixed){
-      wrap.classList.add('bnr-fixed');
-      if (position === 'bottom') wrap.classList.add('bnr-bottom');
-      else                       wrap.classList.add('bnr-top');
-
-      // odsun obsahu, aby ho banner neprekrýval
-      if (pushContent){
-        // keď je hore: odsunieme slot o výšku banneru
-        if (position === 'top'){
-          // pripočítaj výšku hlavičky (ak existuje)
-          const topEl = document.querySelector(topGapSelector);
-          const off = (topEl?.offsetHeight || 0) + 12;
-          wrap.style.setProperty('--bnr-off', `${off}px`);
-          slot.style.minHeight = (height + off + 12) + 'px';
-        }else{
-          // keď je dole: pridáme spodný padding
-          document.body.style.paddingBottom = Math.max(
-            parseInt(getComputedStyle(document.body).paddingBottom) || 0,
-            height + 24
-          ) + 'px';
-        }
+    // fixed umiestnenie
+    if (fixed) {
+      wrap.style.position = 'fixed';
+      wrap.style.left = '0';
+      wrap.style.right = '0';
+      wrap.style.zIndex = '900';
+      if (position === 'top') {
+        wrap.style.top = '0';
+        document.documentElement.style.setProperty('--banner-h', `${h}px`);
+        if (pushContent) document.body.style.paddingTop = `calc(var(--hdr-h, 0px) + ${h}px)`;
+      } else {
+        wrap.style.bottom = '0';
+        document.documentElement.style.setProperty('--banner-h', `${h}px`);
+        if (pushContent) document.body.style.paddingBottom = `calc(var(--banner-h) + 0px)`;
       }
+      document.body.appendChild(wrap);
+    } else {
+      // vlož priamo do kontajnera
+      host.innerHTML = '';
+      host.appendChild(wrap);
     }
 
+    // Načítanie a rotácia
+    let list = await fetchActiveBanners();
     let idx = 0;
-    function show(i){
-      const it = items[i];
-      img.src  = it?.image ? `/uploads/${it.image}` : 'placeholder_cat.png';
-      img.alt  = it?.title || 'Banner';
-      anchor.title = it?.title || '';
-      anchor.onclick = (e)=>{
-        e.preventDefault();
-        window.location.href = `banner_view.html?id=${encodeURIComponent(it._id)}`;
-      };
-    }
-    show(0);
+    let timer = null;
+    let refreshTimer = null;
 
-    if (items.length > 1){
-      setInterval(()=>{ idx = (idx+1) % items.length; show(idx); }, interval);
+    function show(i){
+      if(!list.length){ img.removeAttribute('src'); return; }
+      const b = list[i % list.length];
+      const src = toSrc(b?.image || '');
+      if (src) img.src = src; else img.removeAttribute('src');
+      img.alt = b?.title || 'Banner';
     }
+
+    function start(){
+      stop();
+      show(idx);
+      timer = setInterval(() => {
+        if (!list.length) return;
+        idx = (idx + 1) % list.length;
+        show(idx);
+      }, Math.max(2000, interval));
+      // priebežne obnovuj zoznam (kvôli zmenám v admin rozhraní)
+      refreshTimer = setInterval(async () => {
+        const prevLen = list.length;
+        list = await fetchActiveBanners();
+        if (!list.length) { img.removeAttribute('src'); return; }
+        if (list.length !== prevLen) idx = 0; // reset pri zmene počtu
+      }, 60000);
+    }
+
+    function stop(){
+      if (timer) { clearInterval(timer); timer = null; }
+      if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop(); else start();
+    });
+
+    start();
   };
 })();
