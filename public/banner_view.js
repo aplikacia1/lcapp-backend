@@ -3,7 +3,7 @@
   const params = new URLSearchParams(location.search);
 
   const bannerId = params.get("id");
-  const sec = Math.min(60, Math.max(2, Number(params.get("sec") || params.get("s") || 6)));
+  const sec = Math.min(60, Math.max(2, Number(params.get("sec") || params.get("s") || 7)));
   const INTERVAL_MS = sec * 1000;
 
   let rotateTimer = null;
@@ -19,11 +19,19 @@
       $("#bDesc").textContent = "";
       return;
     }
+
     $("#bTitle").textContent = b.title || "Banner";
-    // ✅ ak je v DB už /uploads/…, nepridávaj znova prefix
-    const src = (b.image || "").startsWith("/uploads/") ? b.image : `/uploads/${b.image || ""}`;
-    $("#bImg").src = src;
-    $("#bImg").alt = b.title || "Banner";
+
+    // ✅ teraz berieme image URL presne tak, ako príde z DB
+    // (napr. "img/banners/moj_banner.jpg"), bez pridávania /uploads/
+    if (b.image) {
+      $("#bImg").src = b.image;
+      $("#bImg").alt = b.title || "Banner";
+    } else {
+      $("#bImg").removeAttribute("src");
+      $("#bImg").alt = "";
+    }
+
     $("#bDesc").textContent = b.description || "";
   }
 
@@ -43,7 +51,9 @@
       const res = await fetch(`/api/banners`);
       if (!res.ok) throw new Error();
       const items = await res.json();
-      list = (items || []).filter(b => b.isActive).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      list = (items || [])
+        .filter(b => b.isActive)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       if (idx >= list.length) idx = 0;
     } catch {
       list = [];

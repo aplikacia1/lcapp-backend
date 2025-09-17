@@ -1,16 +1,42 @@
-# nezverejňovať citlivé a ťažké veci
+# --- Env súbory ---
 .env
 .env.*
 *.env
 
-# závislosti
+# --- Node závislosti ---
 node_modules/
 
-# runtime uploady (perzistentné, nie do gitu)
+# --- Build/artefakty ---
+dist/
+build/
+coverage/
+
+# --- Dočasné súbory a logy ---
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.log
+
+# --- OS/IDE drobnosti ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Mobilné platformy (Capacitor/Cordova) ---
+android/
+ios/
+**/Pods/
+**/xcuserdata/
+**/*.xcworkspace/
+
+# --- Uploady (runtime; nie do gitu) ---
 uploads/
 uploads/**/*
 
-# logy
-npm-debug.log*
-yarn-debug.log*
-*.log
+# ponechaj prázdny adresár ak chceš: odkomentuj ďalšie 2 riadky a pridaj súbor uploads/.gitkeep
+#!uploads/.gitkeep
+
+# --- Lokálne backupy a pomocné priečinky ---
+backup/
+git/
