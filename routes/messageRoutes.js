@@ -122,7 +122,7 @@ router.post('/send', async (req, res) => {
   }
 });
 
-/* ---------------- Inbox / Outbox (legacy kompatibilita) ---------------- */
+/* ---------------- Inbox / Outbox ---------------- */
 router.get('/inbox/:email', async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email || '');
@@ -315,7 +315,7 @@ router.post('/broadcast', async (req, res) => {
   }
 });
 
-/* ---------------- Mazanie (s kontrolou) + fallback ---------------- */
+/* ---------------- Mazanie jednej správy ---------------- */
 router.delete('/:id', async (req, res) => {
   try {
     const id = String(req.params.id || '');
@@ -365,6 +365,51 @@ router.delete('/delete/:id', async (req, res) => {
     res.json({ message: 'Správa zmazaná.' });
   } catch (e) {
     console.error('delete message (fallback) error', e);
+    res.status(500).json({ message: 'Chyba servera.' });
+  }
+});
+
+/* ---------------- NOVÉ: Mazanie celej konverzácie ---------------- */
+router.delete('/conversation', async (req, res) => {
+  try {
+    const user  = norm(req.query.user  || '');
+    const other = norm(req.query.other || '');
+    const dry   = req.query.dry === '1';
+
+    if (!user || !other) {
+      return res.status(400).json({ message: 'Chýba parameter user alebo other.' });
+    }
+
+    const isAdmin = ADMIN_EMAIL && toLowerSk(user) === toLowerSk(ADMIN_EMAIL);
+    if (!isAdmin && toLowerSk(user) !== toLowerSk(other)) {
+      // musí byť účastníkom dvojice
+      const anyMsg = await Message.findOne({
+        $or: [
+          { fromEmail: user, toEmail: other },
+          { fromEmail: other, toEmail: user }
+        ]
+      }).lean();
+      if (!anyMsg) {
+        return res.status(403).json({ message: 'Nemáte oprávnenie alebo konverzácia neexistuje.' });
+      }
+    }
+
+    const filter = {
+      $or: [
+        { fromEmail: user,  toEmail: other },
+        { fromEmail: other, toEmail: user  }
+      ]
+    };
+
+    if (dry) {
+      const count = await Message.countDocuments(filter);
+      return res.json({ wouldDelete: count });
+    }
+
+    const result = await Message.deleteMany(filter);
+    return res.json({ deleted: result.deletedCount || 0 });
+  } catch (e) {
+    console.error('delete conversation error', e);
     res.status(500).json({ message: 'Chyba servera.' });
   }
 });

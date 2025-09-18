@@ -24,7 +24,6 @@ const FIXED_ADMIN = {
 // Stav
 const userEmail = getEmailFromURL(); // len z URL, žiadny storage
 let userData = null;
-// let tlTimer = null;  // A0: auto-refresh vypnutý – timer už nepotrebujeme
 let userScrollActive = false;
 let scrollIdleTO = null;
 
@@ -54,6 +53,16 @@ function backToCatalog(){
 function openMessages(){
   const url = `messages.html?email=${encodeURIComponent(userEmail)}${isAdmin ? '&admin=1':''}`;
   location.href = url;
+}
+
+// → NOVÉ: otvorenie súkromného chatu podľa PREZÝVKY (nie e-mailu)
+function openPrivateChat(targetNickname){
+  if (!targetNickname) {
+    alert("Tento používateľ nemá nastavenú prezývku. Najprv ju musí pridať v nastaveniach účtu.");
+    return;
+  }
+  const url = `messages.html?email=${encodeURIComponent(userEmail)}&to=${encodeURIComponent(targetNickname)}${isAdmin ? '&admin=1':''}`;
+  window.location.href = url;
 }
 
 // 🔔 Badge neprečítaných správ (globálny – pilulka v hlavičke)
@@ -370,6 +379,20 @@ document.addEventListener("click", async (e) => {
       else alert((data && data.message) || "Mazanie komentára zlyhalo.");
     } catch { alert("Server neodpovedá."); }
   }
+
+  // → NOVÉ: klik na človeka v pravom zozname otvorí chat s jeho PREZÝVKOU
+  const presenceItem = e.target.closest(".presence-item");
+  if (presenceItem) {
+    // neberieme text s " (ty)", použijeme čisté data-name
+    const targetNick = presenceItem.dataset.name || "";
+    if (presenceItem.dataset.email &&
+        presenceItem.dataset.email.toLowerCase() === (userEmail || "").toLowerCase()) {
+      // klik na seba – otvoríme všeobecné správy (bez to=)
+      openMessages();
+    } else {
+      openPrivateChat(targetNick);
+    }
+  }
 });
 
 // ───────────────── Online presence ─────────────────
@@ -410,22 +433,29 @@ function renderPresence(users){
     unique.push(u);
   });
 
-  // 2) render – admin je prvý, všetky položky majú data-email (pre klik) + prázdny badge
-  ul.innerHTML = unique.map(u => `
-    <li class="presence-item" data-email="${escapeHTML(u.email)}" title="${escapeHTML(u.email)}">
-      <span class="dot ${u.online ? 'online':''}"></span>
-      <span class="presence-name">
-        ${escapeHTML(u.name || u.email)}${u.email === userEmail ? ' (ty)' : ''}
-      </span>
-      <span class="presence-badge" data-email="${escapeHTML(u.email)}"></span>
-    </li>
-  `).join('');
+  // 2) render – admin je prvý, položky dostanú data-email aj data-name
+  ul.innerHTML = unique.map(u => {
+    const name = String(u.name || "").trim();
+    const isSelf = u.email === userEmail;
+    return `
+      <li class="presence-item"
+          data-email="${escapeHTML(u.email)}"
+          data-name="${escapeHTML(name)}"
+          title="${escapeHTML(u.email)}">
+        <span class="dot ${u.online ? 'online':''}"></span>
+        <span class="presence-name">
+          ${escapeHTML(name || u.email)}${isSelf ? ' (ty)' : ''}
+        </span>
+        <span class="presence-badge" data-email="${escapeHTML(u.email)}"></span>
+      </li>
+    `;
+  }).join('');
 }
 
 // Odhlásenie
 window.logout = () => { window.location.href = "index.html"; };
 
-// Auto-refresh guardy – nechávame (môžu sa hodiť pre iné intervaly), ale nič nevolá reload
+// Auto-refresh guardy
 function isTyping() {
   const a = document.activeElement;
   if (!a) return false;
