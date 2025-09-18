@@ -486,4 +486,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 🔔 badge neprečítaných (globál)
   await refreshUnreadBadge();
   setInterval(refreshUnreadBadge, 20000);
+
+  // === Centrum zábavy → entertainment.html (s prenesením ?email=) ===
+  const gameBtn = document.getElementById('gameBtn');
+  if (gameBtn) {
+    gameBtn.addEventListener('click', (e) => {
+      // zablokuj starý handler (ak je niekde v HTML nastavený na game.html)
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      const url = userEmail
+        ? `entertainment.html?email=${encodeURIComponent(userEmail)}`
+        : 'entertainment.html';
+      window.location.href = url;
+    });
+  }
 });

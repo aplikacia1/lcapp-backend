@@ -17,9 +17,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#goTimelineBtn')?.addEventListener('click', ()=>{
     window.location.href = `timeline.html?email=${encodeURIComponent(email)}`;
   });
-  // ak máš tlačidlo Hra v headeri, môžeš:
+  // Centrum zábavy → entertainment.html (namiesto game.html)
   $('#goGameBtn')?.addEventListener('click', ()=>{
-    window.location.href = `game.html?email=${encodeURIComponent(email)}`;
+    window.location.href = `entertainment.html?email=${encodeURIComponent(email)}`;
   });
   $('#logoutBtn')?.addEventListener('click', ()=>{
     window.location.href = 'index.html';
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // zmena hesla (voliteľne; endpoint z nášho backendu)
+  // zmena hesla
   $('#passwordForm')?.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const oldPassword = $('#oldPassword').value;

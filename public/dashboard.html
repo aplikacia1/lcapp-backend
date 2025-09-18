@@ -8,13 +8,12 @@
 
   <style>
     :root{
-      --hdr-h: 96px;    /* reálnu výšku dopočíta JS */
+      --hdr-h: 96px;
       --pad-x: 12px;
       --gap: 8px;
-      --visible: 3;     /* na mobile vidno 3 tlačidlá; 4. je posunom */
+      --visible: 3;
     }
 
-    /* === Pevná hlavička === */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 1000;
       background: #0c1f4b; border-bottom: 1px solid rgba(255,255,255,.15);
@@ -27,7 +26,6 @@
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* --- MarSab® v hlavičke (malý, neruší) --- */
     .header-badge{
       position:absolute; right:12px; top:10px;
       display:inline-flex; align-items:center; gap:6px;
@@ -43,7 +41,6 @@
       .header-badge .wordmark{ font-size:11px; }
     }
 
-    /* Navigácia (pôvodná – desktop vodorovne) */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
       display:flex; gap: var(--gap);
@@ -71,23 +68,19 @@
       .pill{ flex: 0 0 auto; width: auto !important; }
     }
 
-    /* Rezerva pod pevnú hlavičku */
     body{ padding-top: var(--hdr-h); }
 
-    /* Obsah */
     .scrollable-body .main-content{
       padding-bottom: calc(var(--banner-h, 0px) + 24px);
       max-width: 500px;
       margin: 0 auto;
     }
 
-    /* Vypneme starý plávajúci badge (už ho nepotrebujeme) */
     .brand-badge{ display:none !important; }
 
     .fade-in { opacity:0; transform: translateY(20px); animation: fadeInUp .6s ease forwards; }
     @keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
 
-    /* ====== Hamburger OFF-CANVAS (len mobil) ====== */
     .nav-toggle{ display:none; }
     .burger{
       position: absolute; left:12px; top:10px;
@@ -120,10 +113,8 @@
 </head>
 <body>
 
-  <!-- Prepínač pre hamburger (pred headerom kvôli selektoru ~) -->
   <input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
 
-  <!-- HLAVIČKA -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <a class="header-badge" href="#" aria-label="MarSab®">
@@ -140,7 +131,6 @@
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userLabel">Prihlásený: …</div>
 
-      <!-- Navigácia (iba texty zmenené) -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track" id="navTrack">
           <button class="pill" id="goCatalogBtn">Centrum hodnotenia</button>
@@ -152,10 +142,8 @@
     </div>
   </header>
 
-  <!-- SLOT pre banner -->
   <div id="bannerSlot" aria-live="polite"></div>
 
-  <!-- OBSAH -->
   <div class="scrollable-body">
     <div class="main-content fade-in">
 
@@ -167,14 +155,12 @@
         prosím, aby ste nepoužívali vulgarizmy prípadne urážali ostatných. v takom prípade vás odhlásime.
       </div>
 
-      <!-- FORMULÁR NA MENO + MESTO -->
       <form id="userForm">
         <input type="text" id="name" placeholder="Prezývka" />
         <input type="text" id="note" placeholder="Mesto" />
         <button type="submit">Uložiť údaje</button>
       </form>
 
-      <!-- FORMULÁR NA HESLO -->
       <form id="passwordForm">
         <h3>Zmena hesla</h3>
         <input type="password" id="oldPassword" placeholder="Staré heslo" />
@@ -187,25 +173,23 @@
     </div>
   </div>
 
-  <!-- (Starý plávajúci badge je v kóde, ale skrytý CSS-om) -->
   <a class="brand-badge" href="#" aria-label="MarSab®">
     <img src="img/marsab_logo.png" alt="">
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- Navigácia (tvoja pôvodná logika) -->
+  <!-- Navigácia (ponechaná, len zmenený cieľ z game.html na entertainment.html) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const email = new URLSearchParams(window.location.search).get("email");
       const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
       document.getElementById("goCatalogBtn")?.addEventListener("click", ()=> go("catalog.html"));
       document.getElementById("goTimelineBtn")?.addEventListener("click", ()=> go("timeline.html"));
-      document.getElementById("goGameBtn")?.addEventListener("click", ()=> go("game.html"));
+      document.getElementById("goGameBtn")?.addEventListener("click", ()=> go("entertainment.html")); /* ← zmena tu */
       document.getElementById("logoutBtn")?.addEventListener("click", () => { window.location.href = "index.html"; });
     });
   </script>
 
-  <!-- Hlavička: dopočet výšky (rezerva pod fixed header) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const header = document.querySelector('.app-header');

@@ -5,9 +5,11 @@ const email = params.get('email') || '';
 const backBtn = document.getElementById('backBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
-// ⬇️ ZMENA: späť ide na timeline.html (Lištobook)
-backBtn?.addEventListener('click', () => {
-  const url = email ? `timeline.html?email=${encodeURIComponent(email)}` : 'timeline.html';
+// ⬇️ ZMENA: späť ide na entertainment.html (Centrum zábavy)
+backBtn?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopImmediatePropagation?.();
+  const url = email ? `entertainment.html?email=${encodeURIComponent(email)}` : 'entertainment.html';
   location.href = url;
 });
 
