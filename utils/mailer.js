@@ -10,7 +10,7 @@ const {
   SMTP_PORT = '465',                          // SSL port
   SMTP_SECURE = 'true',                       // pri 465 = true
   SMTP_USER = 'no-reply@listobook.sk',
-  SMTP_PASS = 'tatraBanka78',                             // >>> DOPLŇ HESLO, ak nepoužívaš .env <<<
+  SMTP_PASS = 'benadiCka22&',                             // >>> DOPLŇ HESLO, ak nepoužívaš .env <<<
   ADMIN_EMAIL = 'no-reply@listobook.sk',      // zobrazí sa ako from
   APP_NAME = 'Lištobook',
   APP_URL = 'https://listobook.sk',

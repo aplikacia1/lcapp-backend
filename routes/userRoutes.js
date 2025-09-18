@@ -8,12 +8,12 @@ const User = require('../models/User');
 const Rating = require('../models/rating');
 const TimelinePost = require('../models/timelinePost');
 
-// ⬇️ pridané
+// ⭐ pridané – použijeme na uvítací e-mail po prvom nastavení prezývky
 const { sendWelcomeEmail } = require('../utils/mailer');
 
 /* ========= AUTH ========= */
 
-// REGISTER – doplnené o poslanie uvítacieho e-mailu
+// REGISTER – bez uvítacieho mailu (pošleme až po prvom nastavení prezývky)
 router.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -24,12 +24,17 @@ router.post('/register', async (req, res) => {
     if (exists) return res.status(409).json({ message: 'Účet už existuje.' });
 
     const hash = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hash, name: '', nameLower: null, note: '' });
+    const user = new User({
+      email,
+      password: hash,
+      name: '',
+      nameLower: null,
+      note: ''
+      // profileWelcomeSentAt: null  // default z modelu
+    });
     await user.save();
 
-    // fire-and-forget; ak zlyhá, nezblokuje registráciu
-    sendWelcomeEmail(user.email).catch(() => {});
-
+    // ⭐ (ZMENENÉ) už NEposielame welcome tu – pošleme až po prvom nastavení prezývky
     res.status(201).json({ message: 'Registrácia úspešná', email: user.email });
   } catch (e) {
     console.error('register error', e);
@@ -213,8 +218,14 @@ router.put('/:email', async (req, res) => {
     const rawName = (req.body?.name ?? '').trim();
     const note = (req.body?.note ?? '').trim();
 
-    const nameLower = rawName ? rawName.toLocaleLowerCase('sk') : null;
+    // ⭐ načítame pôvodného používateľa, aby sme vedeli zistiť hadName
+    const orig = await User.findOne({ email });
+    if (!orig) return res.status(404).json({ message: 'Používateľ nenájdený.' });
 
+    const hadName = !!(orig.name && orig.name.trim());
+
+    // validácia jedinečnosti prezývky
+    const nameLower = rawName ? rawName.toLocaleLowerCase('sk') : null;
     if (nameLower) {
       const clash = await User.findOne({ nameLower, email: { $ne: email } });
       if (clash) return res.status(409).json({ message: 'Táto prezývka je už obsadená.' });
@@ -230,6 +241,21 @@ router.put('/:email', async (req, res) => {
       { new: true, projection: { password: 0 } }
     );
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
+
+    // ⭐ po prvom nastavení prezývky pošli uvítací e-mail (ak ešte nebol)
+    const hasNameNow = !!(user.name && user.name.trim());
+    if (!hadName && hasNameNow && !orig.profileWelcomeSentAt) {
+      try {
+        await sendWelcomeEmail(user.email, user.name.trim());
+        await User.updateOne(
+          { _id: orig._id },
+          { $set: { profileWelcomeSentAt: new Date() } }
+        );
+      } catch (err) {
+        console.warn('Welcome po nastavení prezývky zlyhal:', err?.message || err);
+        // neblokujeme odpoveď – len log
+      }
+    }
 
     res.json({ message: 'Údaje uložené', user });
   } catch (e) {

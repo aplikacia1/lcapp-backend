@@ -1,3 +1,4 @@
+// models/User.js
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
@@ -10,6 +11,9 @@ const userSchema = new mongoose.Schema(
     nameLower: { type: String, default: null },      // normalizované meno na jedinečnosť
     note:      { type: String, default: '' },
     role:      { type: String, default: 'user' },
+
+    // ➕ bude vyplnené po prvom úspešnom odoslaní uvítacieho e-mailu
+    profileWelcomeSentAt: { type: Date, default: null },
 
     // pre online stav (panel používateľov)
     lastSeen:  { type: Date, default: Date.now }
