@@ -243,6 +243,35 @@ function msgKey(m){
   return String(m._id || `${m.fromEmail}|${m.createdAt}|${m.text}`);
 }
 
+function setThreadHeaderActions(otherEmail, displayLabel){
+  const head = $('#threadHead');
+  const title = $('#threadTitle');
+  if (!head || !title) return;
+
+  // nastav text
+  title.textContent = (displayLabel && displayLabel !== otherEmail)
+    ? `${displayLabel} — ${otherEmail}`
+    : otherEmail;
+
+  // odstráň staré tlačidlo, ak existuje
+  const oldBtn = $('#deleteConvBtn');
+  if (oldBtn) oldBtn.remove();
+
+  // pridaj nové len keď máme platného adresáta
+  if (otherEmail){
+    const btn = document.createElement('button');
+    btn.id = 'deleteConvBtn';
+    btn.type = 'button';
+    btn.textContent = '🗑️ Vymazať';
+    btn.style.marginLeft = '8px';
+    btn.style.padding = '2px 6px';
+    btn.style.fontSize = '12px';
+    btn.style.cursor = 'pointer';
+    btn.addEventListener('click', () => deleteConversationUser(otherEmail, displayLabel));
+    head.appendChild(btn);
+  }
+}
+
 async function openThread(otherEmail, otherLabel, { reset=false } = {}){
   const t = $('#thread'); if (!t) return;
 
@@ -266,8 +295,8 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
   t.dataset.recipientEmail = otherEmail;
   t.dataset.recipientNick  = displayLabel;
 
-  const title = $('#threadTitle');
-  if (title) title.textContent = (displayLabel && displayLabel !== otherEmail) ? `${displayLabel} — ${otherEmail}` : otherEmail;
+  // header + delete button
+  setThreadHeaderActions(otherEmail, displayLabel);
 
   highlightActive();
 
@@ -390,6 +419,46 @@ function wireComposerKeys(){
   });
   area?.addEventListener('input', ()=>{ draftCache = area.value; syncCount(); });
   syncCount();
+}
+
+/* ---------- DELETE CONVERSATION (user) ---------- */
+async function deleteConversationUser(otherEmail, otherLabel){
+  if (!otherEmail) return;
+  const lbl = otherLabel && !otherLabel.includes('@') ? otherLabel : otherEmail;
+  if (!confirm(`Naozaj chcete vymazať celú konverzáciu s ${lbl}? Zmaže sa u oboch strán.`)) return;
+
+  try{
+    const url = `/api/messages/conversation?user=${encodeURIComponent(userEmail)}&other=${encodeURIComponent(otherEmail)}`;
+    const res = await fetch(url, { method:'DELETE' });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok){
+      alert(data?.message || 'Mazanie zlyhalo.');
+      return;
+    }
+    alert(`Vymazané správy: ${data.deleted ?? 0}`);
+
+    // Reset UI
+    currentOtherEmail = null;
+    currentOtherLabel = null;
+    lastThreadStamp = 0;
+
+    const t = $('#thread');
+    if (t){
+      t.innerHTML = '<div style="opacity:.8">Vyberte konverzáciu vľavo.</div>';
+      t.dataset.threadOf = '';
+      t.dataset.recipientEmail = '';
+      t.dataset.recipientNick  = '';
+    }
+    const title = $('#threadTitle');
+    if (title) title.textContent = 'Vyberte konverzáciu';
+
+    const oldBtn = $('#deleteConvBtn');
+    if (oldBtn) oldBtn.remove();
+
+    await refreshConversationsDiff();
+  }catch(e){
+    alert('Server neodpovedá.');
+  }
 }
 
 /* ---------- SAFE REFRESH ---------- */

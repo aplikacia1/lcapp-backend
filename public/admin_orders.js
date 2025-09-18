@@ -35,30 +35,11 @@ async function init(){
   });
   document.getElementById('broadcastBtn')?.addEventListener('click', sendBroadcast);
 
-  // autocomplete pre nové vlákno
-  const newInput = document.getElementById('newToEmail');
-  const dl = document.getElementById('userOptions');
-  let debounceId = null;
-  newInput?.addEventListener('input', () => {
-    clearTimeout(debounceId);
-    const q = newInput.value.trim();
-    if (!q || q.includes('@')) { dl.innerHTML = ''; return; }
-    debounceId = setTimeout(async () => {
-      try {
-        const res = await fetch('/api/messages/search-users?q=' + encodeURIComponent(q));
-        if (!res.ok) return;
-        const rows = await res.json();
-        dl.innerHTML = rows.map(r => `<option value="${escapeAttr(r.name)}">${escapeHtml(r.email)}</option>`).join('');
-      } catch {}
-    }, 250);
-  });
-
   await loadBoxes();
   buildParticipants();
   renderThreads();
   autoOpenFirst();
 
-  // ľahký polling
   setInterval(async () => {
     const cur = current;
     await loadBoxes();
@@ -68,19 +49,16 @@ async function init(){
   }, 20000);
 }
 
-// --- helpers na vyhľadanie adresáta podľa vstupu (email/prezývka)
 async function resolveEmail(input){
   const v = String(input).trim();
   if (!v) return null;
-  if (v.includes('@')) return v; // vyzerá ako e-mail
+  if (v.includes('@')) return v;
 
   try {
     const res = await fetch('/api/messages/search-users?q=' + encodeURIComponent(v));
     if (!res.ok) return null;
     const rows = await res.json();
     if (!rows || !rows.length) return null;
-
-    // presná zhoda na meno (case-insensitive), inak prvá zhoda
     const exact = rows.find(r => (r.name || '').toLocaleLowerCase('sk') === v.toLocaleLowerCase('sk'));
     return (exact || rows[0]).email || null;
   } catch {
@@ -157,7 +135,10 @@ function renderThread(){
   }
 
   const who = participants.find(p => p.email.toLowerCase()===current.toLowerCase());
-  hdr.textContent = `${who ? who.name : current} — ${current}`;
+  hdr.innerHTML = `
+    ${escapeHtml(who ? who.name : current)} — ${escapeHtml(current)}
+    <button id="deleteConvBtn" style="margin-left:8px; padding:2px 6px; font-size:12px; cursor:pointer;">🗑️ Vymazať</button>
+  `;
 
   const thread = [
     ...inbox.filter(m => (m.fromEmail||'').toLowerCase() === current.toLowerCase()),
@@ -177,6 +158,8 @@ function renderThread(){
   box.scrollTop = box.scrollHeight;
   replyBox.style.display = 'grid';
   sendBtn.onclick = () => sendReply(current);
+
+  document.getElementById('deleteConvBtn')?.addEventListener('click', () => deleteConversation(current));
 }
 
 async function sendReply(toEmail){
@@ -206,6 +189,24 @@ async function sendBroadcast(){
   if (!res.ok){ alert(data?.message || 'Broadcast zlyhal.'); return; }
   ta.value = '';
   alert(`Odoslané všetkým. Počet: ${data?.sent ?? '—'}`);
+}
+
+async function deleteConversation(otherEmail){
+  if (!confirm(`Naozaj chcete vymazať celú konverzáciu s ${otherEmail}? Zmaže sa u oboch strán.`)) return;
+  try{
+    const url = `/api/messages/conversation?user=${encodeURIComponent(ADMIN.email)}&other=${encodeURIComponent(otherEmail)}`;
+    const res = await fetch(url, { method: 'DELETE' });
+    const data = await res.json().catch(()=>({}));
+    if (!res.ok){ alert(data?.message || 'Mazanie zlyhalo.'); return; }
+    alert(`Vymazané správy: ${data.deleted ?? 0}`);
+    await loadBoxes();
+    buildParticipants();
+    renderThreads();
+    current = null;
+    renderThread();
+  }catch(e){
+    alert('Server neodpovedá.');
+  }
 }
 
 // helpers

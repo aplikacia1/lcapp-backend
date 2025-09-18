@@ -33,14 +33,12 @@ function buildAutoReplyText() {
 async function maybeSendAdminAutoReply(toEmail, toNiceName) {
   if (!ADMIN_EMAIL) return;
 
-  // posledná auto odpoveď admina tomuto človeku
   const last = await Message.findOne({
     fromEmail: ADMIN_EMAIL,
     toEmail,
     isAuto: true
   }).sort({ createdAt: -1 });
 
-  // max 1× za 12 hodín
   if (last) {
     const diffMs = Date.now() - new Date(last.createdAt).getTime();
     if (diffMs < 12 * 60 * 60 * 1000) return;
@@ -110,7 +108,6 @@ router.post('/send', async (req, res) => {
       isRead   : false
     }).save();
 
-    // Auto-reply ak ide na admina
     if (ADMIN_EMAIL && toLowerSk(toEmail) === toLowerSk(ADMIN_EMAIL)) {
       await maybeSendAdminAutoReply(norm(fromEmail), fromNice);
     }
@@ -188,7 +185,6 @@ router.get('/conversations/:email', async (req, res) => {
 
     const rows = await Message.aggregate(pipeline).exec();
 
-    // pridaj admina, ak nie je
     if (ADMIN_EMAIL && !rows.some(r => (r.otherEmail || '').toLowerCase() === ADMIN_EMAIL.toLowerCase())) {
       rows.unshift({ otherEmail: ADMIN_EMAIL, otherName: ADMIN_NAME, lastText: '', lastAt: null, unread: 0 });
     }
@@ -214,7 +210,6 @@ router.get('/thread', async (req, res) => {
       ]
     }).sort({ createdAt: 1 }).limit(500);
 
-    // označ ako prečítané správy THEM -> ME
     await Message.updateMany(
       { fromEmail: them, toEmail: me, isRead: false },
       { $set: { isRead: true } }
@@ -288,7 +283,6 @@ router.post('/broadcast', async (req, res) => {
       return res.status(403).json({ message: 'Broadcast môže posielať iba admin.' });
     }
 
-    // všetci okrem admina (iba email + name)
     const users = await User.find(
       { email: { $ne: ADMIN_EMAIL } },
       { _id: 0, email: 1, name: 1 }
@@ -312,6 +306,52 @@ router.post('/broadcast', async (req, res) => {
   } catch (e) {
     console.error('broadcast error', e);
     return res.status(500).json({ message: 'Broadcast zlyhal.' });
+  }
+});
+
+/* ---------------- NOVÉ: Mazanie celej konverzácie ---------------- */
+// POZOR: musí byť nad '/:id', inak by to pohltilo ako id = "conversation"
+router.delete('/conversation', async (req, res) => {
+  try {
+    // podpora oboch názvov parametrov
+    const user  = norm(req.query.user  || req.query.me   || '');
+    const other = norm(req.query.other || req.query.with || '');
+    const dry   = req.query.dry === '1';
+
+    if (!user || !other) {
+      return res.status(400).json({ message: 'Chýba parameter user/other.' });
+    }
+
+    const isAdmin = ADMIN_EMAIL && toLowerSk(user) === toLowerSk(ADMIN_EMAIL);
+    if (!isAdmin) {
+      const anyMsg = await Message.findOne({
+        $or: [
+          { fromEmail: user, toEmail: other },
+          { fromEmail: other, toEmail: user }
+        ]
+      }).lean();
+      if (!anyMsg) {
+        return res.status(403).json({ message: 'Nemáte oprávnenie alebo konverzácia neexistuje.' });
+      }
+    }
+
+    const filter = {
+      $or: [
+        { fromEmail: user,  toEmail: other },
+        { fromEmail: other, toEmail: user  }
+      ]
+    };
+
+    if (dry) {
+      const count = await Message.countDocuments(filter);
+      return res.json({ wouldDelete: count });
+    }
+
+    const result = await Message.deleteMany(filter);
+    return res.json({ deleted: result.deletedCount || 0 });
+  } catch (e) {
+    console.error('delete conversation error', e);
+    res.status(500).json({ message: 'Chyba servera.' });
   }
 });
 
@@ -365,51 +405,6 @@ router.delete('/delete/:id', async (req, res) => {
     res.json({ message: 'Správa zmazaná.' });
   } catch (e) {
     console.error('delete message (fallback) error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
-  }
-});
-
-/* ---------------- NOVÉ: Mazanie celej konverzácie ---------------- */
-router.delete('/conversation', async (req, res) => {
-  try {
-    const user  = norm(req.query.user  || '');
-    const other = norm(req.query.other || '');
-    const dry   = req.query.dry === '1';
-
-    if (!user || !other) {
-      return res.status(400).json({ message: 'Chýba parameter user alebo other.' });
-    }
-
-    const isAdmin = ADMIN_EMAIL && toLowerSk(user) === toLowerSk(ADMIN_EMAIL);
-    if (!isAdmin && toLowerSk(user) !== toLowerSk(other)) {
-      // musí byť účastníkom dvojice
-      const anyMsg = await Message.findOne({
-        $or: [
-          { fromEmail: user, toEmail: other },
-          { fromEmail: other, toEmail: user }
-        ]
-      }).lean();
-      if (!anyMsg) {
-        return res.status(403).json({ message: 'Nemáte oprávnenie alebo konverzácia neexistuje.' });
-      }
-    }
-
-    const filter = {
-      $or: [
-        { fromEmail: user,  toEmail: other },
-        { fromEmail: other, toEmail: user  }
-      ]
-    };
-
-    if (dry) {
-      const count = await Message.countDocuments(filter);
-      return res.json({ wouldDelete: count });
-    }
-
-    const result = await Message.deleteMany(filter);
-    return res.json({ deleted: result.deletedCount || 0 });
-  } catch (e) {
-    console.error('delete conversation error', e);
     res.status(500).json({ message: 'Chyba servera.' });
   }
 });
