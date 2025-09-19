@@ -1,86 +1,33 @@
 // routes/userRoutes.js
+// Správa používateľov BEZ posielania e-mailov.
+// (Registrácia a login sú v routes/authRoutes.js)
+
 const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
+
+const router = express.Router();
 
 const User = require('../models/User');
 const Rating = require('../models/rating');
 const TimelinePost = require('../models/timelinePost');
 
-// ⭐ pridané – použijeme na uvítací e-mail po prvom nastavení prezývky
-const { sendWelcomeEmail } = require('../utils/mailer');
+/* ========= CHECK NAME (dostupnosť prezývky) ========= */
 
-/* ========= AUTH ========= */
-
-// REGISTER – bez uvítacieho mailu (pošleme až po prvom nastavení prezývky)
-router.post('/register', async (req, res) => {
-  try {
-    const { email, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Chýba e-mail alebo heslo.' });
-    }
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(409).json({ message: 'Účet už existuje.' });
-
-    const hash = await bcrypt.hash(password, 10);
-    const user = new User({
-      email,
-      password: hash,
-      name: '',
-      nameLower: null,
-      note: ''
-      // profileWelcomeSentAt: null  // default z modelu
-    });
-    await user.save();
-
-    // ⭐ (ZMENENÉ) už NEposielame welcome tu – pošleme až po prvom nastavení prezývky
-    res.status(201).json({ message: 'Registrácia úspešná', email: user.email });
-  } catch (e) {
-    console.error('register error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
-  }
-});
-
-// LOGIN
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Chýba e-mail alebo heslo.' });
-    }
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: 'Nesprávny e-mail alebo heslo.' });
-
-    const ok = await bcrypt.compare(password, user.password || '');
-    if (!ok) return res.status(401).json({ message: 'Nesprávny e-mail alebo heslo.' });
-
-    res.json({
-      message: 'Prihlásenie OK',
-      email: user.email,
-      name: user.name || '',
-      note: user.note || ''
-    });
-  } catch (e) {
-    console.error('login error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
-  }
-});
-
-// LIVE kontrola prezývky
 router.get('/check-name', async (req, res) => {
   try {
     const raw = (req.query.name || '').trim();
     if (!raw) return res.json({ available: true });
     const nameLower = raw.toLocaleLowerCase('sk');
     const clash = await User.findOne({ nameLower });
-    res.json({ available: !clash });
+    return res.json({ available: !clash });
   } catch (e) {
-    res.status(500).json({ message: 'Chyba servera.' });
+    console.error('GET /check-name error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
 
-/* ========= ADMIN DELETE & NOTE ========= */
+/* ========= ADMIN: DELETE používateľa + jeho stopa ========= */
 
 router.delete('/:id', async (req, res) => {
   try {
@@ -97,8 +44,10 @@ router.delete('/:id', async (req, res) => {
     const nick   = (user.name || '').trim();
     const nickRX = nick ? new RegExp(`^${nick}$`, 'i') : null;
 
+    // 1) hodnotenia
     const ratingsResult = await Rating.deleteMany({ email });
 
+    // 2) príspevky
     const postOwnerFilter = {
       $or: [
         { email }, { userEmail: email }, { authorEmail: email },
@@ -113,6 +62,7 @@ router.delete('/:id', async (req, res) => {
     };
     const postsResult = await TimelinePost.deleteMany(postOwnerFilter);
 
+    // 3) komentáre
     const pullOr = [
       { email }, { userEmail: email }, { authorEmail: email },
       { 'author.email': email },
@@ -126,6 +76,7 @@ router.delete('/:id', async (req, res) => {
     }
     const commentsPull = await TimelinePost.updateMany({}, { $pull: { comments: { $or: pullOr } } });
 
+    // 4) samotný používateľ
     await User.findByIdAndDelete(id);
 
     return res.json({
@@ -138,9 +89,11 @@ router.delete('/:id', async (req, res) => {
     });
   } catch (e) {
     console.error('DELETE /api/users/:id error', e);
-    res.status(500).json({ message: 'Chyba servera pri mazaní používateľa.' });
+    return res.status(500).json({ message: 'Chyba servera pri mazaní používateľa.' });
   }
 });
+
+/* ========= ADMIN: poznámka k používateľovi ========= */
 
 router.put('/:id/note', async (req, res) => {
   try {
@@ -149,16 +102,20 @@ router.put('/:id/note', async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'Neplatné ID.' });
     }
-    const u = await User.findByIdAndUpdate(id, { note: String(note) }, { new: true, projection: { password: 0 } });
+    const u = await User.findByIdAndUpdate(
+      id,
+      { note: String(note) },
+      { new: true, projection: { password: 0 } }
+    );
     if (!u) return res.status(404).json({ message: 'Používateľ nenájdený.' });
-    res.json({ message: 'Poznámka uložená.', user: u });
+    return res.json({ message: 'Poznámka uložená.', user: u });
   } catch (e) {
     console.error('PUT /api/users/:id/note error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
+    return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
 
-/* ========= pôvodné DELETE aliasy ========= */
+/* ========= STARÉ DELETE aliasy (zachované kvôli kompatibilite) ========= */
 
 router.delete('/id/:id', async (req, res) => {
   try {
@@ -168,10 +125,10 @@ router.delete('/id/:id', async (req, res) => {
     }
     const deleted = await User.findByIdAndDelete(id);
     if (!deleted) return res.status(404).json({ message: 'Používateľ nenájdený.' });
-    res.json({ message: 'Používateľ vymazaný.', id });
+    return res.json({ message: 'Používateľ vymazaný.', id });
   } catch (e) {
-    console.error('delete by-id error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
+    console.error('DELETE by-id error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
 
@@ -180,14 +137,14 @@ router.delete('/by-email/:email', async (req, res) => {
     const email = decodeURIComponent(req.params.email);
     const deleted = await User.findOneAndDelete({ email });
     if (!deleted) return res.status(404).json({ message: 'Používateľ nenájdený.' });
-    res.json({ message: 'Používateľ vymazaný.', email });
+    return res.json({ message: 'Používateľ vymazaný.', email });
   } catch (e) {
-    console.error('delete by-email error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
+    console.error('DELETE by-email error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
 
-/* ========= UPDATE ========= */
+/* ========= UPDATE HESLA ========= */
 
 router.put('/:email/password', async (req, res) => {
   try {
@@ -205,12 +162,14 @@ router.put('/:email/password', async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
-    res.json({ message: 'Heslo zmenené.' });
+    return res.json({ message: 'Heslo zmenené.' });
   } catch (e) {
-    console.error('password change error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
+    console.error('PUT password error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
+
+/* ========= UPDATE PROFILU (prezývka + poznámka) ========= */
 
 router.put('/:email', async (req, res) => {
   try {
@@ -218,13 +177,10 @@ router.put('/:email', async (req, res) => {
     const rawName = (req.body?.name ?? '').trim();
     const note = (req.body?.note ?? '').trim();
 
-    // ⭐ načítame pôvodného používateľa, aby sme vedeli zistiť hadName
     const orig = await User.findOne({ email });
     if (!orig) return res.status(404).json({ message: 'Používateľ nenájdený.' });
 
-    const hadName = !!(orig.name && orig.name.trim());
-
-    // validácia jedinečnosti prezývky
+    // jedinečnosť prezývky
     const nameLower = rawName ? rawName.toLocaleLowerCase('sk') : null;
     if (nameLower) {
       const clash = await User.findOne({ nameLower, email: { $ne: email } });
@@ -242,28 +198,14 @@ router.put('/:email', async (req, res) => {
     );
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
 
-    // ⭐ po prvom nastavení prezývky pošli uvítací e-mail (ak ešte nebol)
-    const hasNameNow = !!(user.name && user.name.trim());
-    if (!hadName && hasNameNow && !orig.profileWelcomeSentAt) {
-      try {
-        await sendWelcomeEmail(user.email, user.name.trim());
-        await User.updateOne(
-          { _id: orig._id },
-          { $set: { profileWelcomeSentAt: new Date() } }
-        );
-      } catch (err) {
-        console.warn('Welcome po nastavení prezývky zlyhal:', err?.message || err);
-        // neblokujeme odpoveď – len log
-      }
-    }
-
-    res.json({ message: 'Údaje uložené', user });
+    // ŽIADNE e-maily sa tu neposielajú
+    return res.json({ message: 'Údaje uložené', user });
   } catch (e) {
     if (e?.code === 11000) {
       return res.status(409).json({ message: 'Táto prezývka je už obsadená.' });
     }
-    console.error('update user error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
+    console.error('PUT user error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
 
@@ -274,10 +216,10 @@ router.get('/:email', async (req, res) => {
     const email = decodeURIComponent(req.params.email);
     const user = await User.findOne({ email }, { password: 0 });
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
-    res.json(user);
+    return res.json(user);
   } catch (e) {
-    console.error('get user error', e);
-    res.status(500).json({ message: 'Chyba servera.' });
+    console.error('GET user error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
 

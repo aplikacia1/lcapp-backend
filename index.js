@@ -120,7 +120,6 @@ mountRoute('/api/admin/timeline', './routes/timelineAdminRoutes');
 mountRoute('/api/messages',       './routes/messageRoutes');
 mountRoute('/api/push',           './routes/pushRoutes');
 mountRoute('/api/uploads',        './routes/uploadRoutes'); // ping/debug
-mountRoute('/api/admin/smtp', './routes/adminSmtpRoutes');
 
 /* --- Štart po DB --- */
 const PORT = process.env.PORT || 5000;
