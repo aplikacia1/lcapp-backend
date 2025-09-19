@@ -1,5 +1,5 @@
-// backend/utils/mailer.js
-// Dočasná fixná FROM adresa (obíde chybnú ENV hodnotu SMTP_USER bez '@')
+// utils/mailer.js
+// Dočasná fixná FROM adresa + spätná kompatibilita: sendWelcomeEmail -> alias na sendSignupEmail
 
 const nodemailer = require('nodemailer');
 
@@ -7,14 +7,14 @@ const {
   SMTP_HOST = 'smtp.websupport.sk',
   SMTP_PORT = process.env.SMTP_PORT || '465',
   SMTP_SECURE = process.env.SMTP_SECURE || 'true',
-  // !!! DOČASNE IGNORUJEME ENV.SMTP_USER (má chybnú hodnotu bez @)
+  // ENV SMTP_USER teraz zámerne NEpoužijeme (mával chybnú hodnotu). Dočasne fixne:
   SMTP_PASS,
   APP_NAME = 'Lištobook',
   APP_URL = 'https://listobook.sk',
   EMAIL_DEBUG = 'true',
 } = process.env;
 
-// Dočasný tvrdý user – jediná zmena oproti predchádzajúcej verzii:
+// DOČASNE pevne:
 const user = 'no-reply@listobook.sk';
 
 const host = String(SMTP_HOST || '').trim();
@@ -30,7 +30,7 @@ if (!pass) {
 const transporter = nodemailer.createTransport({
   host,
   port,
-  secure,                 // 465 => true, 587 => false
+  secure,                 // 465 => true, 587 => false (STARTTLS)
   auth: { user, pass },
   requireTLS: true,
   pool: false,
@@ -65,8 +65,8 @@ async function sendMail({ to, subject, html, text }) {
   });
 }
 
-/** Mail po registrácii – bez oslovenia, vysvetlí prezývku */
-function signupEmailTemplate(toEmail) {
+// --- Templáty ---
+function signupEmailTemplate() {
   const subject = `Vitajte v ${APP_NAME}! Dokončite profil`;
   const html = `
   <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0c1f4b">
@@ -82,13 +82,20 @@ function signupEmailTemplate(toEmail) {
   return { subject, html };
 }
 
+// --- API funkcie ---
 async function sendSignupEmail(toEmail) {
-  const { subject, html } = signupEmailTemplate(toEmail);
+  const { subject, html } = signupEmailTemplate();
   return sendMail({ to: toEmail, subject, html });
 }
 
+// Spätná kompatibilita: ak starý kód volá sendWelcomeEmail, pošli rovnaký info e-mail
+async function sendWelcomeEmail(toEmail /*, nick = '' */) {
+  return sendSignupEmail(toEmail);
+}
+
 module.exports = {
-  sendMail,
   ensureConnection,
+  sendMail,
   sendSignupEmail,
+  sendWelcomeEmail, // <- dôležité pre staré volania
 };
