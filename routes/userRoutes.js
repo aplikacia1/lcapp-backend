@@ -1,6 +1,7 @@
 // routes/userRoutes.js
-// Správa používateľov BEZ posielania e-mailov.
-// (Registrácia a login sú v routes/authRoutes.js)
+// Správa používateľov. Navyše COMPAT registrácia na /api/users/register,
+// aby fungovali existujúce volania z frontendu.
+// (Nový oficiálny endpoint je /api/auth/register)
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
@@ -11,6 +12,55 @@ const router = express.Router();
 const User = require('../models/User');
 const Rating = require('../models/rating');
 const TimelinePost = require('../models/timelinePost');
+const { sendSignupEmail } = require('../utils/mailer'); // na info mail po registrácii
+
+/* ========= COMPAT: REGISTRÁCIA (POST /api/users/register) ========= */
+
+router.post('/register', async (req, res) => {
+  try {
+    let { email, password, name } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Chýba email alebo heslo' });
+    }
+
+    email = String(email).trim();
+    name = String(name || '').trim();
+
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(409).json({ message: 'Používateľ už existuje' });
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Heslo musí mať aspoň 6 znakov' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const doc = {
+      email,
+      password: passwordHash,
+      name: name || '',
+      note: '',
+      role: 'user',
+    };
+    if (doc.name) doc.nameLower = doc.name.toLowerCase();
+
+    const newUser = await User.create(doc);
+
+    // Po registrácii pošleme INFO e-mail (bez oslovenia)
+    try {
+      await sendSignupEmail(newUser.email);
+      console.log('Signup email (compat) sent to', newUser.email);
+    } catch (e) {
+      console.error('Signup email (compat) failed:', e?.message || e);
+      // mail neblokuje registráciu
+    }
+
+    return res.status(201).json({ message: 'Registrácia úspešná', userId: newUser._id });
+  } catch (err) {
+    console.error('Compat register error:', err);
+    return res.status(500).json({ message: 'Chyba servera' });
+  }
+});
 
 /* ========= CHECK NAME (dostupnosť prezývky) ========= */
 
@@ -198,7 +248,6 @@ router.put('/:email', async (req, res) => {
     );
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
 
-    // ŽIADNE e-maily sa tu neposielajú
     return res.json({ message: 'Údaje uložené', user });
   } catch (e) {
     if (e?.code === 11000) {
