@@ -1,142 +1,163 @@
 // backend/routes/authRoutes.js
+// Čistý auth: registrácia -> pošle info mail (bez oslovenia), login/logout cez JWT cookie, /me
+
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const router = express.Router();
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/User');
-const { sendWelcomeEmail } = require('../utils/mailer'); // 👈 pridané
+const { sendSignupEmail } = require('../utils/mailer');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-change-me';
-const COOKIE_NAME = 'li_auth';
-const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '10', 10);
+const router = express.Router();
 
-// ───────── helpers ─────────
-function signToken(user) {
-  return jwt.sign(
-    { uid: String(user._id), email: user.email, nickname: user.name || null },
-    JWT_SECRET,
-    { expiresIn: '30d' }
-  );
-}
+const IS_PROD = process.env.NODE_ENV === 'production';
+const JWT_SECRET = (process.env.JWT_SECRET || 'change-me').trim();
 
-function cookieOpts(remember) {
-  const isProd = process.env.NODE_ENV === 'production';
+// Helper: nastavenie cookie pre JWT
+function jwtCookieOptions(days = 7) {
+  const maxAgeMs = days * 24 * 60 * 60 * 1000;
   return {
     httpOnly: true,
     sameSite: 'lax',
-    secure: isProd,
-    ...(remember ? { maxAge: 1000 * 60 * 60 * 24 * 30 } : {}) // 30 dní
+    secure: IS_PROD,     // v produkcii len cez HTTPS
+    path: '/',
+    maxAge: maxAgeMs,
   };
 }
 
-// ───────── REGISTER ─────────
-// POST /api/auth/register  { email, password, name?, note?, remember? }
+// Helper: vytvorenie JWT
+function signJwt(payload, days = 7) {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: `${days}d` });
+}
+
+// -------------------------
+// POST /api/auth/register
+// Body: { email, password, name? }
+// - vytvorí používateľa (nick môže byť prázdny; zvolí si ho neskôr)
+// - odošle informačný e-mail s inštrukciou na prezývku
+// -------------------------
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name = '', note = '', remember = true } = req.body || {};
+    let { email, password, name } = req.body || {};
     if (!email || !password) {
       return res.status(400).json({ message: 'Chýba email alebo heslo' });
     }
 
-    // existuje už?
-    const existing = await User.findOne({ email }).lean();
-    if (existing) {
-      return res.status(409).json({ message: 'Tento e-mail je už zaregistrovaný' });
+    email = String(email).trim();
+    name = String(name || '').trim();
+
+    // existuje?
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(409).json({ message: 'Používateľ už existuje' });
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Heslo musí mať aspoň 6 znakov' });
     }
 
-    // vytvor používateľa
-    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    const user = await User.create({
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Pozn.: prezývku (name) môže použiť hneď, alebo neskôr — unikátnosť rieši index (nameLower)
+    const doc = {
       email,
-      passwordHash,
-      name: (name || '').trim(),
-      note: (note || '').trim()
-    });
+      password: passwordHash,
+      name: name || '',                // môže ostať prázdne – vyžiada si ho appka
+      note: '',                        // voliteľné pole v tvojom modeli
+      role: 'user',
+    };
+    if (doc.name) doc.nameLower = doc.name.toLowerCase(); // ak tvoj model toto pole má
 
-    // prihlásime hneď po registrácii (ako doteraz cookie štýl)
-    const token = signToken(user);
-    res.cookie(COOKIE_NAME, token, cookieOpts(!!remember));
+    const newUser = await User.create(doc);
 
-    // vítací e-mail (fire-and-forget, nech nebrzdí odpoveď)
-    const shouldSend = (process.env.SEND_WELCOME_EMAIL || 'true').toLowerCase() === 'true';
-    if (shouldSend) {
-      sendWelcomeEmail(user.email, user.name).catch(err => {
-        console.error('welcome email error:', err?.message || err);
-      });
+    // Po registrácii pošleme informačný e-mail (bez oslovenia)
+    try {
+      await sendSignupEmail(newUser.email);
+      console.log('Signup email sent to', newUser.email);
+    } catch (e) {
+      console.error('Signup email failed:', e && e.message ? e.message : e);
+      // e-mail neblokuje registráciu
     }
 
-    return res.status(201).json({
-      ok: true,
-      email: user.email,
-      nickname: user.name || null
-    });
-  } catch (e) {
-    console.error('auth/register error:', e);
-    return res.status(500).json({ message: 'Chyba servera pri registrácii' });
-  }
-});
+    // Voliteľne môžeme rovno prihlásiť (ak to chceš). Nechávam default: neprihlasujeme.
+    // Ak chceš prihlásiť automaticky, odkomentuj:
+    // const token = signJwt({ sub: newUser._id.toString(), email: newUser.email });
+    // res.cookie('token', token, jwtCookieOptions());
+    // return res.status(201).json({ message: 'Registrácia úspešná', userId: newUser._id });
 
-// ───────── LOGIN ─────────
-// POST /api/auth/login  { email, password, remember?: boolean }
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password, remember = false } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Chýba email alebo heslo' });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: 'Neplatné prihlasovacie údaje' });
-
-    // Podpora oboch variant (plain vs. hash) podľa staršej DB
-    let ok = false;
-    if (user.passwordHash) {
-      ok = await bcrypt.compare(password, user.passwordHash);
-    } else {
-      ok = user.password === password; // legacy
-    }
-    if (!ok) return res.status(401).json({ message: 'Neplatné prihlasovacie údaje' });
-
-    const token = signToken(user);
-    res.cookie(COOKIE_NAME, token, cookieOpts(!!remember));
-    return res.json({ ok: true, email: user.email, nickname: user.name || null });
-  } catch (e) {
-    console.error('auth/login error:', e);
+    return res.status(201).json({ message: 'Registrácia úspešná', userId: newUser._id });
+  } catch (err) {
+    console.error('Register error:', err);
     return res.status(500).json({ message: 'Chyba servera' });
   }
 });
 
-// ───────── LOGOUT ─────────
-router.post('/logout', (req, res) => {
-  res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: 'lax' });
-  res.json({ ok: true });
+// -------------------------
+// POST /api/auth/login
+// Body: { email, password }
+// - overí heslo
+// - nastaví httpOnly JWT cookie (na 7 dní)
+// -------------------------
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Chýba email alebo heslo' });
+    }
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Používateľ neexistuje' });
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ message: 'Nesprávne heslo' });
+
+    const token = signJwt({ sub: user._id.toString(), email: user.email });
+    res.cookie('token', token, jwtCookieOptions());
+    return res.json({
+      message: 'Prihlásenie úspešné',
+      email: user.email,
+      name: user.name || '',
+      role: user.role || 'user',
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    return res.status(500).json({ message: 'Chyba servera' });
+  }
 });
 
-// ───────── ME ─────────
+// -------------------------
+// POST /api/auth/logout
+// - vymaže JWT cookie
+// -------------------------
+router.post('/logout', (_req, res) => {
+  res.clearCookie('token', { path: '/' });
+  return res.json({ message: 'Odhlásenie úspešné' });
+});
+
+// -------------------------
 // GET /api/auth/me
+// - vráti základné info o používateľovi z JWT cookie, ak je platná
+// -------------------------
 router.get('/me', async (req, res) => {
   try {
-    const raw = req.cookies?.[COOKIE_NAME];
-    if (!raw) return res.status(401).json({ ok: false });
+    const token = req.cookies && req.cookies.token;
+    if (!token) return res.status(401).json({ message: 'Neprihlásený' });
 
     let payload;
     try {
-      payload = jwt.verify(raw, JWT_SECRET);
+      payload = jwt.verify(token, JWT_SECRET);
     } catch {
-      return res.status(401).json({ ok: false });
+      return res.status(401).json({ message: 'Neplatný token' });
     }
 
-    const user = await User.findById(payload.uid, 'email name').lean();
-    if (!user) return res.status(401).json({ ok: false });
+    const user = await User.findById(payload.sub).select('email name note role');
+    if (!user) return res.status(404).json({ message: 'Používateľ neexistuje' });
 
     return res.json({
-      ok: true,
       email: user.email,
-      nickname: user.name || null
+      name: user.name || '',
+      note: user.note || '',
+      role: user.role || 'user',
     });
-  } catch (e) {
-    console.error('auth/me error:', e);
+  } catch (err) {
+    console.error('Me error:', err);
     return res.status(500).json({ message: 'Chyba servera' });
   }
 });
