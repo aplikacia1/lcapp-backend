@@ -11,6 +11,10 @@
     return $('#loginForm') || $('form');
   }
 
+  // Backend beží na rovnakom pôvode (napr. http://localhost:3000),
+  // preto voláme RELATÍVNE cesty (žiadne :5000).
+  const API_BASE = '';
+
   document.addEventListener('DOMContentLoaded', () => {
     const form = pickForm();
     if (!form) {
@@ -32,9 +36,10 @@
       }
 
       try {
-        const res = await fetch('/api/users/login', {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // nech sa nastaví JWT cookie
           body: JSON.stringify({ email, password })
         });
         const data = await res.json().catch(() => ({}));
@@ -44,13 +49,10 @@
           return;
         }
 
-        // ✅ po úspešnom logine pošli na Lištobook (timeline)
-        // podpora voliteľného ?next=..., inak predvolene timeline.html
+        // presmerovanie po úspechu
         const params = new URLSearchParams(location.search);
         const next = params.get('next');
         const dest = next || `timeline.html?email=${encodeURIComponent(email)}`;
-
-        // replace = nedá sa vrátiť späť na login po back
         window.location.replace(dest);
       } catch (err) {
         console.error('Login error', err);

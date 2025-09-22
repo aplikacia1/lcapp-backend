@@ -13,10 +13,19 @@ const router = express.Router();
 const IS_PROD = process.env.NODE_ENV === 'production';
 const JWT_SECRET = (process.env.JWT_SECRET || 'change-me').trim();
 
+/**
+ * Cookie vo výrobe MUSÍ mať:
+ *  - secure: true (iba HTTPS)
+ *  - sameSite: 'none' (kvôli cross-site medzi listobook.sk a onrender.com)
+ * Lokálne (dev) necháme lax, aby sa dalo testovať bez HTTPS.
+ */
 function jwtCookieOptions(days = 7) {
   const maxAgeMs = days * 24 * 60 * 60 * 1000;
-  return { httpOnly: true, sameSite: 'lax', secure: IS_PROD, path: '/', maxAge: maxAgeMs };
+  return IS_PROD
+    ? { httpOnly: true, sameSite: 'none', secure: true, path: '/', maxAge: maxAgeMs }
+    : { httpOnly: true, sameSite: 'lax',  secure: false, path: '/', maxAge: maxAgeMs };
 }
+
 function signJwt(payload, days = 7) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: `${days}d` });
 }
@@ -71,7 +80,12 @@ router.post('/login', async (req, res) => {
 
     const token = signJwt({ sub: user._id.toString(), email: user.email });
     res.cookie('token', token, jwtCookieOptions());
-    return res.json({ message: 'Prihlásenie úspešné', email: user.email, name: user.name || '', role: user.role || 'user' });
+    return res.json({
+      message: 'Prihlásenie úspešné',
+      email: user.email,
+      name: user.name || '',
+      role: user.role || 'user'
+    });
   } catch (err) {
     console.error('Login error:', err);
     return res.status(500).json({ message: 'Chyba servera' });
@@ -80,7 +94,11 @@ router.post('/login', async (req, res) => {
 
 // POST /api/auth/logout
 router.post('/logout', (_req, res) => {
-  res.clearCookie('token', { path: '/' });
+  // pri mazaní je dôležité použiť rovnaké parametre, inak cookie nemusí zaniknúť
+  const clearOpts = IS_PROD
+    ? { path: '/', sameSite: 'none', secure: true }
+    : { path: '/', sameSite: 'lax',  secure: false };
+  res.clearCookie('token', clearOpts);
   return res.json({ message: 'Odhlásenie úspešné' });
 });
 
@@ -97,7 +115,12 @@ router.get('/me', async (req, res) => {
     const user = await User.findById(payload.sub).select('email name note role');
     if (!user) return res.status(404).json({ message: 'Používateľ neexistuje' });
 
-    return res.json({ email: user.email, name: user.name || '', note: user.note || '', role: user.role || 'user' });
+    return res.json({
+      email: user.email,
+      name: user.name || '',
+      note: user.note || '',
+      role: user.role || 'user'
+    });
   } catch (err) {
     console.error('Me error:', err);
     return res.status(500).json({ message: 'Chyba servera' });

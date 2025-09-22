@@ -102,8 +102,18 @@ function imgSrc(prod) {
 }
 
 function render(list) {
+  // 🔽 klientsky sort: order ASC (nižšie číslo = vyššie), potom createdAt DESC
+  const sorted = [...list].sort((a, b) => {
+    const ao = Number.isFinite(+a?.order) ? +a.order : 9999;
+    const bo = Number.isFinite(+b?.order) ? +b.order : 9999;
+    if (ao !== bo) return ao - bo;
+    const at = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bt = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bt - at;
+  });
+
   const grid = $('#productGrid');
-  grid.innerHTML = list.map(p => {
+  grid.innerHTML = sorted.map(p => {
     const title = p?.name || 'Bez názvu';
 
     let price = '';

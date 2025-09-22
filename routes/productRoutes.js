@@ -23,9 +23,7 @@ function deleteFileSafe(app, relUrl) {
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
     const dir = req.app.get("UPLOADS_DIR");
-    try {
-      fs.mkdirSync(dir, { recursive: true });
-    } catch {}
+    try { fs.mkdirSync(dir, { recursive: true }); } catch {}
     cb(null, dir);
   },
   filename: (_req, file, cb) => cb(null, safeName(file.originalname)),
@@ -45,7 +43,8 @@ router.get("/", async (req, res) => {
       where.$or = [{ name: rx }, { code: rx }];
     }
 
-    let sortObj = { createdAt: -1 };
+    // defaultné triedenie: order ASC, potom createdAt DESC
+    let sortObj = { order: 1, createdAt: -1 };
     if (sort) {
       const [field, dir] = String(sort).split(":");
       if (field) sortObj = { [field]: Number(dir) === 1 ? 1 : -1 };
@@ -55,11 +54,7 @@ router.get("/", async (req, res) => {
     const lim = Math.min(500, Math.max(1, Number(limit) || 100));
 
     const [items, total] = await Promise.all([
-      Product.find(where)
-        .sort(sortObj)
-        .skip((pg - 1) * lim)
-        .limit(lim)
-        .lean(),
+      Product.find(where).sort(sortObj).skip((pg - 1) * lim).limit(lim).lean(),
       Product.countDocuments(where),
     ]);
 
@@ -73,8 +68,9 @@ router.get("/", async (req, res) => {
 /* ---------- GET /api/products/category/:categoryId ---------- */
 router.get("/category/:categoryId", async (req, res) => {
   try {
-    const items = await Product.find({ categoryId: req.params.categoryId })
-      .sort({ createdAt: -1 })
+    const items = await Product
+      .find({ categoryId: req.params.categoryId })
+      .sort({ order: 1, createdAt: -1 })
       .lean();
     res.json(items);
   } catch (e) {
@@ -107,6 +103,11 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     const image = req.file ? `/uploads/${req.file.filename}` : null;
 
+    const order =
+      req.body.order !== undefined && req.body.order !== null && req.body.order !== ""
+        ? Number(req.body.order)
+        : 9999;
+
     const doc = await Product.create({
       name,
       code: code || "",
@@ -114,7 +115,8 @@ router.post("/", upload.single("image"), async (req, res) => {
       unit: unit || "",
       categoryId,
       description: description || "",
-      image, // uložené ako URL /uploads/<file>
+      image,
+      order
     });
 
     res.status(201).json(doc);
@@ -143,6 +145,11 @@ router.put("/:id", upload.single("image"), async (req, res) => {
     if (typeof unit !== "undefined") item.unit = unit;
     if (typeof description !== "undefined") item.description = description;
 
+    if (typeof req.body.order !== "undefined") {
+      const n = Number(req.body.order);
+      if (Number.isFinite(n)) item.order = n;
+    }
+
     if (typeof categoryId !== "undefined") {
       const cat = await Category.findById(categoryId);
       if (!cat) return res.status(400).json({ message: "Neplatná kategória" });
@@ -154,6 +161,20 @@ router.put("/:id", upload.single("image"), async (req, res) => {
   } catch (e) {
     console.error("PUT /products/:id error:", e);
     res.status(500).json({ message: "Chyba pri úprave produktu" });
+  }
+});
+
+/* ---------- RÝCHLA ZMENA IBA PORADIA ---------- */
+router.put("/:id/order", async (req, res) => {
+  try {
+    const n = Number(req.body?.order);
+    if (!Number.isFinite(n)) return res.status(400).json({ message: "Neplatné poradie" });
+    const item = await Product.findByIdAndUpdate(req.params.id, { order: n }, { new: true });
+    if (!item) return res.status(404).json({ message: "Produkt nenájdený" });
+    res.json(item);
+  } catch (e) {
+    console.error("PUT /products/:id/order error:", e);
+    res.status(500).json({ message: "Chyba pri zmene poradia" });
   }
 });
 
@@ -187,17 +208,9 @@ router.get("/stats/count-by-category/all", async (_req, res) => {
         },
       },
       { $unwind: { path: "$cat", preserveNullAndEmptyArrays: true } },
-      {
-        $project: {
-          _id: 0,
-          categoryId: "$_id",
-          categoryName: "$cat.name",
-          count: 1,
-        },
-      },
+      { $project: { _id: 0, categoryId: "$_id", categoryName: "$cat.name", count: 1 } },
       { $sort: { count: -1 } },
     ]);
-
     res.json(rows);
   } catch (e) {
     console.error("stats/count-by-category error:", e);

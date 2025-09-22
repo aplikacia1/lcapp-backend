@@ -11,7 +11,10 @@ const productSchema = new mongoose.Schema(
     unit:         { type: String, default: "" },     // napr. ks, m, m2
     description:  { type: String, default: "" },
 
-    // ⬇️ dôležité: sem sa zapisuje sumár z hodnotení
+    // nové: ručné poradie v rámci kategórie (nižšie = vyššie v zozname)
+    order:        { type: Number, default: 9999, index: true },
+
+    // ⬇️ sumár z hodnotení
     averageRating:{ type: Number, default: 0 },
     ratingCount:  { type: Number, default: 0 }
   },
