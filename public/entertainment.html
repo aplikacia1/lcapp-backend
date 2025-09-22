@@ -11,6 +11,7 @@
       --gap: 16px;
       --hdr-h: 96px;
       --panel-border: rgba(255,255,255,.12);
+      --desk-footer-h: 36px; /* výška PC info pásika */
     }
     html,body{margin:0;padding:0;height:100%}
     body{ background:#0c1f4b; color:#fff; padding-top:var(--hdr-h); }
@@ -29,8 +30,13 @@
     /* LAYOUT */
     .wrap{
       max-width:var(--max-w); margin:0 auto; padding:16px;
-      /* rezerva pod fixným bannerom */
+      /* mobil: rezerva pod fixným bannerom */
       padding-bottom: calc(var(--banner-h, 0px) + 16px);
+      position: relative; z-index: 1; /* nad neon pásmi */
+    }
+    /* PC: banner vypneme, dáme rezervu pre info pásik */
+    @media (min-width: 992px){
+      .wrap{ padding-bottom: calc(var(--desk-footer-h) + 16px); }
     }
 
     /* Dlaždice (výber) */
@@ -60,6 +66,88 @@
 
     /* zobrazenia */
     [hidden]{ display:none !important; }
+
+    /* ========= PC ONLY: neónové pásy (zelená, červená, zlatá) ========= */
+    @media (min-width: 992px){
+      .party-beams{
+        position: fixed; inset: var(--hdr-h) 0 0 0;
+        pointer-events: none; z-index: 0;
+      }
+      .beam{
+        position: absolute; top: 0; bottom: 0; width: 10vw; max-width: 160px;
+        filter: blur(12px); opacity: .22; will-change: opacity, transform;
+        animation: beamPulse 5.5s ease-in-out infinite, beamDrift 12s ease-in-out infinite;
+      }
+      .beam.green{
+        background:
+          linear-gradient(180deg, rgba(34,197,94,0) 0%, rgba(34,197,94,.65) 50%, rgba(34,197,94,0) 100%),
+          linear-gradient(90deg,  rgba(16,185,129,0) 0%, rgba(16,185,129,.55) 40%, rgba(16,185,129,0) 100%);
+      }
+      .beam.red{
+        background:
+          linear-gradient(180deg, rgba(239,68,68,0) 0%, rgba(239,68,68,.65) 50%, rgba(239,68,68,0) 100%),
+          linear-gradient(90deg,  rgba(220,38,38,0) 0%, rgba(220,38,38,.55) 40%, rgba(220,38,38,0) 100%);
+      }
+      .beam.gold{
+        background:
+          linear-gradient(180deg, rgba(245,197,24,0) 0%, rgba(245,197,24,.65) 50%, rgba(245,197,24,0) 100%),
+          linear-gradient(90deg,  rgba(245,158,11,0) 0%, rgba(245,158,11,.55) 40%, rgba(245,158,11,0) 100%);
+      }
+      .beam.left{ left: 0; transform-origin: left center; }
+      .beam.right{ right: 0; transform-origin: right center; }
+      .beam.pos1{ --tx: -4%; }
+      .beam.pos2{ --tx: 0%;  animation-delay: .8s; }
+      .beam.pos3{ --tx: 4%;  animation-delay: 1.6s; }
+
+      @keyframes beamPulse{
+        0%,100%{ opacity:.18; }
+        50%   { opacity:.32; }
+      }
+      @keyframes beamDrift{
+        0%,100%{ transform: translateX(var(--tx,0)) translateY(0) scaleX(1); }
+        50%    { transform: translateX(var(--tx,0)) translateY(-2%) scaleX(1.06); }
+      }
+
+      .glow{
+        position:absolute; width:18vw; max-width:240px; height:18vw; max-height:240px;
+        filter: blur(24px); opacity:.16; animation: glowPulse 7s ease-in-out infinite;
+      }
+      .glow.left{ left:-6vw; }
+      .glow.right{ right:-6vw; }
+      .glow.top1{ top:12%; }
+      .glow.top2{ top:46%; }
+      .glow.green{ background: radial-gradient(circle, rgba(16,185,129,.35) 0%, rgba(16,185,129,0) 60%); }
+      .glow.red{   background: radial-gradient(circle, rgba(239,68,68,.35) 0%,  rgba(239,68,68,0) 60%); }
+      .glow.gold{  background: radial-gradient(circle, rgba(245,197,24,.35) 0%, rgba(245,197,24,0) 60%); }
+      .glow.d1{ animation-delay: .4s; }
+      .glow.d2{ animation-delay: 1.1s; }
+      .glow.d3{ animation-delay: 1.8s; }
+
+      @keyframes glowPulse{
+        0%,100%{ opacity:.10; transform: scale(1); }
+        50%    { opacity:.22; transform: scale(1.08); }
+      }
+    }
+
+    /* ===== Banner len na mobile; na desktope statický pásik ===== */
+    @media (min-width: 992px){
+      #bannerSlot{ display: none !important; }
+    }
+    #desktopFooter{ display:none; }
+    @media (min-width: 992px){
+      #desktopFooter{
+        display:block;
+        position:fixed; left:0; right:0; bottom:0;
+        height:var(--desk-footer-h);
+        padding:0 12px;
+        background:rgba(7,18,44,.92);
+        backdrop-filter:blur(6px);
+        border-top:1px solid rgba(255,255,255,.12);
+        color:#cfe2ff; font-size:12px; line-height:var(--desk-footer-h);
+        text-align:center; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
+        z-index:930;
+      }
+    }
   </style>
 </head>
 <body>
@@ -76,16 +164,28 @@
     </div>
   </header>
 
+  <!-- PC ONLY: party beams -->
+  <div class="party-beams" aria-hidden="true">
+    <span class="beam left green pos1"></span>
+    <span class="beam left gold  pos2"></span>
+    <span class="beam left red   pos3"></span>
+    <span class="beam right red   pos1"></span>
+    <span class="beam right gold  pos2"></span>
+    <span class="beam right green pos3"></span>
+    <span class="glow left  green top1 d1"></span>
+    <span class="glow left  gold  top2 d2"></span>
+    <span class="glow right red   top1 d3"></span>
+    <span class="glow right green top2 d2"></span>
+  </div>
+
   <!-- MAIN -->
   <main class="wrap">
     <h1 style="margin:6px 0 14px;">🎉 Centrum zábavy</h1>
 
     <!-- VIEW: výber dlaždíc -->
     <section id="tilesView" class="tiles">
-      <!-- tile: HRA -->
       <article class="tile" id="tileGame" role="button" tabindex="0" aria-label="Zahraj si hru">
         <div class="tile-icon" aria-hidden="true">
-          <!-- gamepad -->
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 12h4m-2-2v4M15 13h.01M18 11h.01" />
             <path d="M5 15l-1.5 1.5a3.5 3.5 0 105-5L7 5" stroke-linecap="round"/>
@@ -98,10 +198,8 @@
         </div>
       </article>
 
-      <!-- tile: YOUTUBE -->
       <article class="tile" id="tileYoutube" role="button" tabindex="0" aria-label="Zabav sa s hudbou od Lištového centra">
         <div class="tile-icon" aria-hidden="true">
-          <!-- YouTube logo -->
           <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
             <path d="M23.5 7.2a4 4 0 00-2.8-2.8C18.6 4 12 4 12 4s-6.6 0-8.7.4A4 4 0 00.5 7.2 41 41 0 000 12a41 41 0 00.5 4.8 4 4 0 002.8 2.8C5.4 20 12 20 12 20s6.6 0 8.7-.4a4 4 0 002.8-2.8A41 41 0 0024 12a41 41 0 00-.5-4.8zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
           </svg>
@@ -117,9 +215,7 @@
     <section id="youtubeView" class="card" hidden aria-labelledby="ytHead">
       <div class="head" id="ytHead">
         <span>🎵 Videá — Lištové centrum (YouTube)</span>
-        <div>
-          <button class="btn" id="backToTiles">Späť na výber</button>
-        </div>
+        <div><button class="btn" id="backToTiles">Späť na výber</button></div>
       </div>
       <div class="body">
         <iframe id="ytPlayer" class="yt-player"
@@ -132,12 +228,44 @@
     </section>
   </main>
 
-  <!-- SLOT pre rotujúci banner (fixne dole) -->
+  <!-- SLOT pre rotujúci banner -->
   <div id="bannerSlot" aria-live="polite"></div>
+  <!-- PC: statický info pásik -->
+  <div id="desktopFooter" role="contentinfo">
+    Lištobook by Lištové centrum EU, s.r.o. ©, Sasinkova 13, 010 01 Žilina — 2025, verzia 1.0
+  </div>
 
   <script src="/js/config.js"></script>
   <script src="entertainment.js"></script>
   <script src="banners.js"></script>
+
+  <!-- Helper: banner iba na mobile -->
+  <script>
+    function mountBannerMobileOnly(slotId, options){
+      const mql  = window.matchMedia('(max-width: 991.98px)');
+      const slot = document.getElementById(slotId);
+      if (!slot) return;
+
+      function mount(){
+        if (slot.dataset.mounted || !window.mountBannerRotator) return;
+        slot.style.display = '';
+        window.mountBannerRotator(slotId, options);
+        slot.dataset.mounted = '1';
+      }
+      function unmount(){
+        slot.innerHTML = '';
+        slot.style.display = 'none';
+        delete slot.dataset.mounted;
+        document.documentElement.style.removeProperty('--banner-h');
+      }
+      function update(){ mql.matches ? mount() : unmount(); }
+
+      update();
+      if (mql.addEventListener) mql.addEventListener('change', update);
+      else mql.addListener(update);
+    }
+  </script>
+
   <script>
     /* dopočet výšky hlavičky → padding-top */
     (function(){
@@ -150,18 +278,16 @@
       setHdrH(); addEventListener('resize', setHdrH);
     })();
 
-    /* mount banner rotátora – rovnaké nastavenia ako na dashboarde */
+    /* Banner: len na mobile */
     document.addEventListener('DOMContentLoaded', () => {
-      if (window.mountBannerRotator) {
-        mountBannerRotator('bannerSlot', {
-          fixed: true,
-          position: 'bottom',
-          pushContent: true,
-          height: 160,
-          heightMobile: 120,
-          interval: 7000
-        });
-      }
+      mountBannerMobileOnly('bannerSlot', {
+        fixed: true,
+        position: 'bottom',
+        pushContent: true,
+        height: 160,
+        heightMobile: 120,
+        interval: 7000
+      });
     });
   </script>
 </body>

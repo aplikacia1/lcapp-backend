@@ -102,10 +102,12 @@
       .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
     }
 
-    /* Obsah – rezerva dole kvôli pevnej lište (composer + banner) */
+    /* Obsah – rezerva dole kvôli pevnej lište (composer + banner/info) */
     .main-content{
       width:100%; max-width:var(--max-w); margin:24px auto; padding:0 var(--gap);
       padding-bottom:200px; /* rezerva pre pevnú lištu aj s bannerom */
+      position: relative;   /* nad neon pásmi */
+      z-index: 1;
     }
 
     /* Panel účastníkov */
@@ -131,7 +133,7 @@
       margin-left:auto;
       min-width:18px; height:18px; padding:0 6px;
       border-radius:999px; background:#ffcc00; color:#111;
-      font-weight:800; font-size:12px; display:none; /* zobrazíme až keď je hodnota */
+      font-weight:800; font-size:12px; display:none;
       align-items:center; justify-content:center;
     }
     .presence-badge:empty{ display:none; }
@@ -161,16 +163,16 @@
     .link-btn{ background:transparent; border:none; color:#0c1f4b; cursor:pointer; padding:4px 8px; border-radius:8px; }
     .link-btn:hover{ background:rgba(12,31,75,.08); }
 
-    /* Spodná lišta (pevná) – obsahuje aj mini-banner POD formulárom */
+    /* Spodná lišta (pevná) – obsahuje aj mini-banner/infobar POD formulárom */
     .composer-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:950;
       background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
       display:flex; justify-content:center; padding:10px 12px;
     }
-    /* stĺpcovo, aby sa nič neprekrývalo */
     .composer-wrap{
       width:100%; max-width:var(--max-w); padding:0 var(--gap);
       display:flex; flex-direction:column; gap:10px;
+      position: relative; z-index: 1; /* nad neon pásmi */
     }
     .composer{ background:#fff; border:1px solid #eee; border-radius:14px; padding:10px; }
     .composer-row{ display:grid; grid-template-columns: 1fr auto auto; gap:8px; align-items:center; }
@@ -201,9 +203,9 @@
       #composerCount{ font-size:11px; }
     }
 
-    /* Mini-banner (v tej istej lište, POD formulárom) */
+    /* Mini-banner (v tej istej lište, POD formulárom) – len mobil; desktop skryjeme */
     .mini-banner{
-      height:90px;            /* mobil: jemný banner; nech neruší */
+      height:90px;
       border-radius:14px; overflow:hidden;
       box-shadow:0 8px 18px rgba(0,0,0,.18);
       border:1px solid rgba(255,255,255,.18);
@@ -211,7 +213,21 @@
     }
     .mini-banner img{ width:100%; height:100%; object-fit:cover; display:block; }
     @media (min-width: 992px){
-      .mini-banner{ height:80px; } /* desktop nižší banner */
+      #miniBannerSlot{ display:none !important; }   /* PC: banner vypnúť */
+    }
+
+    /* PC-only: jemná info "lištička" v spodnej lište, namiesto bannera */
+    .desktop-infobar{ display:none; }
+    @media (min-width: 992px){
+      .desktop-infobar{
+        display:block;
+        height:30px; line-height:30px;
+        text-align:center; font-size:12px; color:#cfe2ff;
+        background:rgba(7,18,44,.92);
+        border:1px solid rgba(255,255,255,.12);
+        border-radius:10px;
+        backdrop-filter: blur(6px);
+      }
     }
 
     /* POISTKA: čokoľvek fixed v slote zmeníme na static, aby nič neprekrývalo composer */
@@ -265,6 +281,46 @@
     .toast .t-ico{ font-weight:800; min-width:18px; }
     .toast .t-msg{ flex:1; min-width:0; }
     .toast .t-x{ appearance:none; border:none; background:transparent; color:#cfe2ff; cursor:pointer; font-size:18px; line-height:1; padding:0 4px; }
+
+    /* ========= PC ONLY: Neon pulzujúce pásy po stranách ========= */
+    @media (min-width: 992px){
+      .neon-beams{
+        position: fixed;
+        inset: var(--hdr-h) 0 0 0;    /* pod hlavičkou, cez celú výšku */
+        pointer-events: none;
+        z-index: 0;                   /* úplne v pozadí – nič neprekrýva */
+      }
+      .beam{
+        position: absolute; top: 0; bottom: 0; width: 12vw; max-width: 180px;
+        filter: blur(12px); opacity: .22;
+        background:
+          linear-gradient(180deg, rgba(33,102,214,0) 0%, rgba(33,102,214,.6) 50%, rgba(33,102,214,0) 100%),
+          linear-gradient(90deg,  rgba(88,173,255,0) 0%, rgba(88,173,255,.55) 40%, rgba(88,173,255,0) 100%);
+        animation: beamPulse 5.5s ease-in-out infinite, beamDrift 12s ease-in-out infinite;
+        will-change: opacity, transform;
+      }
+      .beam.left{ left: 0; transform-origin: left center; }
+      .beam.right{ right: 0; transform-origin: right center; }
+      @keyframes beamPulse{
+        0%,100%{ opacity:.18; }
+        50%   { opacity:.32; }
+      }
+      @keyframes beamDrift{
+        0%,100%{ transform: translateY(0) scaleX(1); }
+        50%    { transform: translateY(-2%) scaleX(1.06); }
+      }
+      .glow{
+        position:absolute; top:12%; width:18vw; max-width:240px; height:18vw; max-height:240px;
+        background: radial-gradient(circle, rgba(88,173,255,.35) 0%, rgba(88,173,255,0) 60%);
+        filter: blur(24px); opacity:.15; animation: glowPulse 7s ease-in-out infinite;
+      }
+      .glow.left{ left:-6vw; }
+      .glow.right{ right:-6vw; animation-delay: 1.5s; }
+      @keyframes glowPulse{
+        0%,100%{ opacity:.10; transform: scale(1); }
+        50%    { opacity:.22; transform: scale(1.08); }
+      }
+    }
   </style>
 
   <link rel="stylesheet" href="/css/timeline.comment-fix.css?v=fixA1">
@@ -292,8 +348,7 @@
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
           <button class="pill" id="goBackBtn">Centrum hodnotenia</button>
-            <span id="msgBadge" style="display:none; min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center;"></span>
-          </button>
+          <span id="msgBadge" style="display:none; min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center;"></span>
           <button class="pill" id="gameBtn">Centrum zábavy</button>
           <button class="pill" id="accountBtn">Centrum zmeny účtu</button>
           <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
@@ -301,6 +356,14 @@
       </nav>
     </div>
   </header>
+
+  <!-- PC ONLY neon beams (vizuálne, neklikateľné) -->
+  <div class="neon-beams" aria-hidden="true">
+    <span class="beam left"></span>
+    <span class="beam right"></span>
+    <span class="glow left"></span>
+    <span class="glow right"></span>
+  </div>
 
   <!-- PANEL ÚČASTNÍKOV -->
   <aside id="presencePanel" class="presence-panel">
@@ -314,7 +377,7 @@
     <div class="post-feed" id="postFeed"></div>
   </div>
 
-  <!-- SPODNÁ LIŠTA: písanie + MINI-BANNER POD NÍM -->
+  <!-- SPODNÁ LIŠTA: písanie + MINI-BANNER / INFO -->
   <div class="composer-bar" id="composerBar">
     <div class="composer-wrap">
       <form id="timelineForm" class="composer" autocomplete="off" enctype="multipart/form-data">
@@ -329,8 +392,13 @@
         </div>
       </form>
 
-      <!-- Mini-banner (POD formulárom, stále v spodnej lište) -->
+      <!-- Mini-banner (POD formulárom) – len mobil -->
       <div id="miniBannerSlot" class="mini-banner" aria-live="polite"></div>
+
+      <!-- PC info pásik (iba desktop) -->
+      <div id="desktopInfo" class="desktop-infobar" role="contentinfo">
+        Lištobook by Lištové centrum EU, s.r.o. ©, Sasinkova 13, 010 01 Žilina — 2025, verzia 1.0
+      </div>
     </div>
   </div>
 
@@ -352,12 +420,38 @@
   <!-- Banner rotátor -->
   <script src="banners.js"></script>
 
-  <!-- Toast helper + dopočet hlavičky + navigácia + hamburgre + klik na účastníka + mount mini banner -->
+  <!-- Helper: banner iba na mobile (PC vypnúť) -->
+  <script>
+    function mountBannerMobileOnly(slotId, options){
+      const mql  = window.matchMedia('(max-width: 991.98px)');
+      const slot = document.getElementById(slotId);
+      if (!slot) return;
+
+      function mount(){
+        if (slot.dataset.mounted || !window.mountBannerRotator) return;
+        slot.style.display = '';
+        window.mountBannerRotator(slotId, options);
+        slot.dataset.mounted = '1';
+      }
+      function unmount(){
+        slot.innerHTML = '';
+        slot.style.display = 'none';
+        delete slot.dataset.mounted;
+      }
+      function update(){ mql.matches ? mount() : unmount(); }
+
+      update();
+      if (mql.addEventListener) mql.addEventListener('change', update);
+      else mql.addListener(update);
+    }
+  </script>
+
+  <!-- Toast helper + dopočet hlavičky + navigácia + hamburgre + klik na účastníka + mount mini banner (MOBILE ONLY) -->
   <script>
     (function(){
       const stack = document.getElementById('toastStack');
       const MAX = 3;
-      const ESC = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&gt;','>':'&quot;'}[m]));
+      const ESC = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
       const icons = { success:'✓', info:'ℹ︎', warn:'!', error:'×' };
 
       function push(type='info', message='', {duration=4000}={}){
@@ -447,15 +541,13 @@
         pplChk?.addEventListener(ev, updateScrollLock);
       });
 
-      /* Mount mini banner – v spodnej lište (pod formulárom) */
-      if (window.mountBannerRotator) {
-        mountBannerRotator('miniBannerSlot', {
-          fixed: false,      // slot je už vo fixed lište, netreba vlastný fixed
-          interval: 7000,
-          height: 80,        // desktop cieľ
-          heightMobile: 90   // mobil jemný
-        });
-      }
+      /* Mini banner: len na MOBILE */
+      mountBannerMobileOnly('miniBannerSlot', {
+        fixed: false,      // slot je už vo fixed lište
+        interval: 7000,
+        height: 80,        // desktop by sa nepoužil, keďže PC vypíname
+        heightMobile: 90   // mobil jemný
+      });
     });
   </script>
 </body>

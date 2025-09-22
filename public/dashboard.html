@@ -12,8 +12,13 @@
       --pad-x: 12px;
       --gap: 8px;
       --visible: 3;
+      --desk-footer-h: 36px; /* výška PC info pásika */
     }
 
+    /* Pozadie (základ) */
+    body{ padding-top: var(--hdr-h); background:#0c1f4b; color:#fff; }
+
+    /* === HLAVIČKA === */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 1000;
       background: #0c1f4b; border-bottom: 1px solid rgba(255,255,255,.15);
@@ -41,6 +46,7 @@
       .header-badge .wordmark{ font-size:11px; }
     }
 
+    /* Navigácia */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
       display:flex; gap: var(--gap);
@@ -58,8 +64,7 @@
       height:38px; padding:8px 14px; border-radius:16px;
       border:1px solid rgba(255,255,255,.35);
       background:#fff; color:#0c1f4b; cursor:pointer;
-      scroll-snap-align:start;
-      white-space:nowrap;
+      scroll-snap-align:start; white-space:nowrap;
     }
     .pill-danger{ background:#000; color:#fff; border-color:#fff; }
 
@@ -68,19 +73,28 @@
       .pill{ flex: 0 0 auto; width: auto !important; }
     }
 
-    body{ padding-top: var(--hdr-h); }
-
+    /* Obsah + rezerva pre banner (mobil) / info pásik (PC) */
     .scrollable-body .main-content{
       padding-bottom: calc(var(--banner-h, 0px) + 24px);
       max-width: 500px;
       margin: 0 auto;
+      position: relative;   /* nad neon pásmi */
+      z-index: 1;
+    }
+    @media (min-width: 992px){
+      .scrollable-body .main-content{
+        padding-bottom: calc(var(--desk-footer-h) + 24px);
+      }
     }
 
-    .brand-badge{ display:none !important; }
-
+    /* drobná animácia kontajnera */
     .fade-in { opacity:0; transform: translateY(20px); animation: fadeInUp .6s ease forwards; }
     @keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
 
+    /* MarSab plávajúci badge vypnutý */
+    .brand-badge{ display:none !important; }
+
+    /* Hamburger – mobil */
     .nav-toggle{ display:none; }
     .burger{
       position: absolute; left:12px; top:10px;
@@ -108,6 +122,67 @@
       }
       .pill{ width:100% !important; height:44px; border-radius:14px; font-size:1rem; }
       .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
+    }
+
+    /* ========== PC ONLY: neónové pulzujúce pásy pri okrajoch ========== */
+    @media (min-width: 992px){
+      .neon-beams{
+        position: fixed; inset: var(--hdr-h) 0 0 0;  /* pod hlavičkou, po celej výške */
+        pointer-events: none; z-index: 0;            /* neklikateľné, úplne vzadu */
+      }
+      .beam{
+        position: absolute; top: 0; bottom: 0; width: 12vw; max-width: 180px;
+        filter: blur(12px); opacity: .22;
+        background:
+          linear-gradient(180deg, rgba(33,102,214,0) 0%, rgba(33,102,214,.6) 50%, rgba(33,102,214,0) 100%),
+          linear-gradient(90deg,  rgba(88,173,255,0) 0%, rgba(88,173,255,.55) 40%, rgba(88,173,255,0) 100%);
+        animation: beamPulse 5.5s ease-in-out infinite, beamDrift 12s ease-in-out infinite;
+        will-change: opacity, transform;
+      }
+      .beam.left{ left: 0; transform-origin: left center; }
+      .beam.right{ right: 0; transform-origin: right center; }
+
+      @keyframes beamPulse{
+        0%,100%{ opacity:.18; }
+        50%   { opacity:.32; }
+      }
+      @keyframes beamDrift{
+        0%,100%{ transform: translateY(0) scaleX(1); }
+        50%    { transform: translateY(-2%) scaleX(1.06); }
+      }
+
+      .glow{
+        position:absolute; top:12%; width:18vw; max-width:240px; height:18vw; max-height:240px;
+        background: radial-gradient(circle, rgba(88,173,255,.35) 0%, rgba(88,173,255,0) 60%);
+        filter: blur(24px); opacity:.15; animation: glowPulse 7s ease-in-out infinite;
+      }
+      .glow.left{ left:-6vw; }
+      .glow.right{ right:-6vw; animation-delay: 1.5s; }
+
+      @keyframes glowPulse{
+        0%,100%{ opacity:.10; transform: scale(1); }
+        50%    { opacity:.22; transform: scale(1.08); }
+      }
+    }
+
+    /* ===== Banner len na mobile; na desktope statický info pásik ===== */
+    @media (min-width: 992px){
+      #bannerSlot{ display: none !important; }
+    }
+    #desktopFooter{ display:none; }
+    @media (min-width: 992px){
+      #desktopFooter{
+        display:block;
+        position:fixed; left:0; right:0; bottom:0;
+        height:var(--desk-footer-h);
+        padding:0 12px;
+        background:rgba(7,18,44,.92);
+        backdrop-filter:blur(6px);
+        border-top:1px solid rgba(255,255,255,.12);
+        color:#cfe2ff; font-size:12px; line-height:var(--desk-footer-h);
+        text-align:center; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
+        z-index:930;
+      }
     }
   </style>
 </head>
@@ -142,7 +217,20 @@
     </div>
   </header>
 
+  <!-- PC ONLY: neonové pásy -->
+  <div class="neon-beams" aria-hidden="true">
+    <span class="beam left"></span>
+    <span class="beam right"></span>
+    <span class="glow left"></span>
+    <span class="glow right"></span>
+  </div>
+
+  <!-- slot pre banner -->
   <div id="bannerSlot" aria-live="polite"></div>
+  <!-- PC: statický info pásik -->
+  <div id="desktopFooter" role="contentinfo">
+    Lištobook by Lištové centrum EU, s.r.o. ©, Sasinkova 13, 010 01 Žilina — 2025, verzia 1.0
+  </div>
 
   <div class="scrollable-body">
     <div class="main-content fade-in">
@@ -173,11 +261,6 @@
     </div>
   </div>
 
-  <a class="brand-badge" href="#" aria-label="MarSab®">
-    <img src="img/marsab_logo.png" alt="">
-    <span class="wordmark">MarSab®</span>
-  </a>
-
   <!-- Navigácia (ponechaná, len zmenený cieľ z game.html na entertainment.html) -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -185,11 +268,12 @@
       const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
       document.getElementById("goCatalogBtn")?.addEventListener("click", ()=> go("catalog.html"));
       document.getElementById("goTimelineBtn")?.addEventListener("click", ()=> go("timeline.html"));
-      document.getElementById("goGameBtn")?.addEventListener("click", ()=> go("entertainment.html")); /* ← zmena tu */
+      document.getElementById("goGameBtn")?.addEventListener("click", ()=> go("entertainment.html"));
       document.getElementById("logoutBtn")?.addEventListener("click", () => { window.location.href = "index.html"; });
     });
   </script>
 
+  <!-- dopočet výšky hlavičky -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const header = document.querySelector('.app-header');
@@ -206,9 +290,35 @@
   <script src="/js/config.js"></script>
   <script src="dashboard.js"></script>
   <script src="banners.js"></script>
+
+  <!-- Banner: len na mobile -->
   <script>
+    function mountBannerMobileOnly(slotId, options){
+      const mql  = window.matchMedia('(max-width: 991.98px)');
+      const slot = document.getElementById(slotId);
+      if (!slot) return;
+
+      function mount(){
+        if (slot.dataset.mounted || !window.mountBannerRotator) return;
+        slot.style.display = '';
+        window.mountBannerRotator(slotId, options);
+        slot.dataset.mounted = '1';
+      }
+      function unmount(){
+        slot.innerHTML = '';
+        slot.style.display = 'none';
+        delete slot.dataset.mounted;
+        document.documentElement.style.removeProperty('--banner-h');
+      }
+      function update(){ mql.matches ? mount() : unmount(); }
+
+      update();
+      if (mql.addEventListener) mql.addEventListener('change', update);
+      else mql.addListener(update);
+    }
+
     document.addEventListener('DOMContentLoaded', ()=>{
-      mountBannerRotator('bannerSlot', {
+      mountBannerMobileOnly('bannerSlot', {
         fixed: true,
         position: 'bottom',
         pushContent: true,

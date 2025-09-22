@@ -11,7 +11,8 @@
       --hdr-h: 96px;
       --pad-x: 12px;
       --gap: 8px;
-      --visible: 3;   /* mobil: vidno 3 tlačidlá */
+      --visible: 3;
+      --desk-footer-h: 36px;  /* výška spodného PC pásika */
     }
 
     /* === Jednotná pevná hlavička === */
@@ -105,24 +106,14 @@
     }
     .card:hover{ transform:translateY(-2px); box-shadow:0 12px 22px rgba(0,0,0,.20); }
 
-    /* ✅ Obrázky bez deformácie (contain + pevný pomer strán) */
+    /* Obrázky bez deformácie */
     .card-img{
-      width:100%;
-      height:auto;
-      aspect-ratio: 16 / 9;         /* drží pomer, výška sa prispôsobí */
-      object-fit: contain;           /* neoreže a nenaťahuje */
-      display:block;
-      background:#f5f7fb;            /* jemné pozadie za obrázkom */
-      padding:8px;                   /* trošku „air“ okolo loga/obr. */
-      box-sizing:border-box;
+      width:100%; height:auto; aspect-ratio:16/9;
+      object-fit:contain; display:block; background:#f5f7fb; padding:8px; box-sizing:border-box;
     }
-
     .card-body{ padding:10px 12px; }
     .card-title{ margin:0; font-size:14px; font-weight:700; line-height:1.25; }
-
-    @media (min-width: 992px){
-      .card-title{ font-size:16px; }
-    }
+    @media (min-width: 992px){ .card-title{ font-size:16px; } }
 
     /* starý plávajúci badge vypneme */
     .brand-badge{ display:none !important; }
@@ -139,7 +130,6 @@
 
     @media (max-width: 767.98px){
       .burger{ display:flex; }
-
       .nav-scroller{
         position: fixed; top: 0; right: 0; height: 100vh;
         width: min(80vw, 320px);
@@ -156,6 +146,69 @@
       }
       .pill{ width:100% !important; height:44px; border-radius:14px; font-size:1rem; }
       .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
+    }
+
+    /* ========= PC ONLY: Neon pulzujúce pásy po stranách ========= */
+    @media (min-width: 992px){
+      .neon-beams{
+        position: fixed; inset: var(--hdr-h) 0 0 0;   /* pod hlavičkou, cez celú výšku */
+        pointer-events: none; z-index: 0;             /* nebráni klikom, úplne v pozadí */
+      }
+      .beam{
+        position: absolute; top: 0; bottom: 0; width: 12vw; max-width: 180px;
+        filter: blur(12px); opacity: .22;             /* jemnosť */
+        background:
+          linear-gradient(180deg, rgba(33,102,214,.00) 0%, rgba(33,102,214,.6) 50%, rgba(33,102,214,.00) 100%),
+          linear-gradient(90deg,  rgba(88,173,255,.00) 0%, rgba(88,173,255,.55) 40%, rgba(88,173,255,.00) 100%);
+        animation: beamPulse 5.5s ease-in-out infinite, beamDrift 12s ease-in-out infinite;
+        will-change: opacity, transform;
+      }
+      .beam.left{ left: 0; transform-origin: left center; }
+      .beam.right{ right: 0; transform-origin: right center; }
+      @keyframes beamPulse{
+        0%,100%{ opacity:.18; }
+        50%   { opacity:.32; }
+      }
+      @keyframes beamDrift{
+        0%,100%{ transform: translateY(0) scaleX(1); }
+        50%    { transform: translateY(-2%) scaleX(1.06); }
+      }
+      /* jemné svetelné body pri okrajoch */
+      .glow{
+        position:absolute; top:10%; width:18vw; max-width:240px; height:18vw; max-height:240px;
+        background: radial-gradient(circle, rgba(88,173,255,.35) 0%, rgba(88,173,255,0) 60%);
+        filter: blur(24px); opacity:.15; animation: glowPulse 7s ease-in-out infinite;
+      }
+      .glow.left{ left:-6vw; }
+      .glow.right{ right:-6vw; animation-delay: 1.5s; }
+      @keyframes glowPulse{
+        0%,100%{ opacity:.10; transform: scale(1); }
+        50%    { opacity:.22; transform: scale(1.08); }
+      }
+    }
+
+    /* ===== Banner len na mobile; na desktope statický pásik ===== */
+    /* schovaj banner slot na desktope */
+    @media (min-width: 992px){
+      #bannerSlot{ display: none !important; }
+      /* rezerva pre PC pásik, aby ho obsah neprekrýval */
+      .grid-wrap{ padding-bottom: calc(var(--desk-footer-h) + 24px) !important; }
+    }
+    /* desktopový statický pásik */
+    #desktopFooter{ display:none; }
+    @media (min-width: 992px){
+      #desktopFooter{
+        display:block;
+        position:fixed; left:0; right:0; bottom:0;
+        height:var(--desk-footer-h);
+        padding:0 12px;
+        background:rgba(7,18,44,.92);
+        backdrop-filter:blur(6px);
+        border-top:1px solid rgba(255,255,255,.12);
+        color:#cfe2ff; font-size:12px; line-height:var(--desk-footer-h);
+        text-align:center; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
+        z-index:930;
+      }
     }
   </style>
 </head>
@@ -191,8 +244,20 @@
     </div>
   </header>
 
-  <!-- slot pre banner (fixed dole, posúva obsah) -->
+  <!-- PC ONLY neon beams (vizuálne, neklikateľné) -->
+  <div class="neon-beams" aria-hidden="true">
+    <span class="beam left"></span>
+    <span class="beam right"></span>
+    <span class="glow left"></span>
+    <span class="glow right"></span>
+  </div>
+
+  <!-- slot pre banner (len mobil ho používa) -->
   <div id="bannerSlot" aria-live="polite"></div>
+  <!-- PC: statický info pásik -->
+  <div id="desktopFooter" role="contentinfo">
+    Lištobook by Lištové centrum EU, s.r.o. ©, Sasinkova 13, 010 01 Žilina — 2025, verzia 1.0
+  </div>
 
   <!-- Hlavička katalógu + hľadanie -->
   <div class="catalog-head">
@@ -231,15 +296,41 @@
   <script src="/js/config.js"></script>
   <script src="catalog.js"></script>
   <script src="banners.js"></script>
+
+  <!-- Banner len na mobile (s automatickým zap/vyp pri zmene šírky) -->
   <script>
-    // banner – pevnú výšku držíme cez options, obsah sa posunie
+    // Helper: montuj banner iba na mobile; na desktope odmontuj
+    function mountBannerMobileOnly(slotId, options){
+      const mql  = window.matchMedia('(max-width: 991.98px)');
+      const slot = document.getElementById(slotId);
+      if (!slot) return;
+
+      function mount(){
+        if (slot.dataset.mounted || !window.mountBannerRotator) return;
+        slot.style.display = '';
+        window.mountBannerRotator(slotId, options);
+        slot.dataset.mounted = '1';
+      }
+      function unmount(){
+        slot.innerHTML = '';
+        slot.style.display = 'none';
+        delete slot.dataset.mounted;
+        document.documentElement.style.removeProperty('--banner-h');
+      }
+      function update(){ mql.matches ? mount() : unmount(); }
+
+      update();
+      if (mql.addEventListener) mql.addEventListener('change', update);
+      else mql.addListener(update);
+    }
+
     document.addEventListener('DOMContentLoaded', ()=>{
-      mountBannerRotator('bannerSlot', {
+      mountBannerMobileOnly('bannerSlot', {
         fixed: true,
         position: 'bottom',
         pushContent: true,
-        height: 160,          // desktop
-        heightMobile: 120,    // mobil
+        height: 160,
+        heightMobile: 120,
         interval: 7000
       });
     });

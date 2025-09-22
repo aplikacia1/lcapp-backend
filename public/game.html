@@ -6,13 +6,34 @@
   <title>Hra – 8-puzzle</title>
   <link rel="stylesheet" href="style.css"/>
   <style>
+    :root{
+      --hdr-h: 64px;          /* dopočíta sa v skripte podľa skutočnej výšky hlavičky */
+      --desk-footer-h: 36px;  /* výška PC info pásika */
+    }
+
     body{background:#061c47;color:#fff;margin:0;font-family:Arial, sans-serif}
-    .header{display:flex;align-items:center;gap:12px;justify-content:center;height:64px;border-bottom:1px solid rgba(255,255,255,.12)}
+
+    /* HLAVIČKA */
+    .header{
+      display:flex;align-items:center;gap:12px;justify-content:center;
+      height:64px;border-bottom:1px solid rgba(255,255,255,.12);
+      position: relative; z-index: 2; /* nad neonmi */
+      background:#061c47;
+    }
     .header-inner{width:100%;max-width:820px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
     .logo-small{height:28px}
     .btn{height:36px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:#fff;color:#0c1f4b;cursor:pointer}
     .btn--danger{background:#ff6b6b;color:#fff;border:none}
-    .wrap{max-width:820px;margin:16px auto;padding:0 16px}
+
+    /* OBSAH */
+    .wrap{
+      max-width:820px;margin:16px auto;padding:0 16px;
+      position: relative; z-index: 1; /* nad neonmi */
+    }
+    @media (min-width: 992px){
+      /* na desktope miesto pre spodný info pásik */
+      .wrap{ padding-bottom: calc(var(--desk-footer-h) + 16px); }
+    }
 
     /* Board */
     .board{width:360px;max-width:92vw;aspect-ratio:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 auto 16px}
@@ -42,7 +63,93 @@
       box-shadow:0 8px 18px rgba(0,0,0,.25);opacity:.96
     }
     .brand-badge img{height:24px;width:auto}
-    @media (max-width:480px){ .brand-badge{left:12px;bottom:12px;padding:6px 8px;border-radius:12px} .brand-badge img{height:20px} }
+    @media (max-width:480px){
+      .brand-badge{left:12px;bottom:12px;padding:6px 8px;border-radius:12px}
+      .brand-badge img{height:20px}
+    }
+    /* nech badge nenaráža do info pásika na desktope */
+    @media (min-width: 992px){
+      .brand-badge{ bottom: calc(16px + var(--desk-footer-h)); }
+    }
+
+    /* ========= PC ONLY: zábavné neónové pásy (zelená/červená/zlatá) ========= */
+    @media (min-width: 992px){
+      .party-beams{
+        position: fixed; inset: var(--hdr-h) 0 0 0;   /* pod hlavičkou, cez celú výšku */
+        pointer-events: none; z-index: 0;             /* úplne v pozadí */
+      }
+      .beam{
+        position: absolute; top: 0; bottom: 0; width: 10vw; max-width: 160px;
+        filter: blur(12px); opacity: .22; will-change: opacity, transform;
+        animation: beamPulse 5.5s ease-in-out infinite, beamDrift 12s ease-in-out infinite;
+      }
+      .beam.green{
+        background:
+          linear-gradient(180deg, rgba(34,197,94,0) 0%, rgba(34,197,94,.65) 50%, rgba(34,197,94,0) 100%),
+          linear-gradient(90deg,  rgba(16,185,129,0) 0%, rgba(16,185,129,.55) 40%, rgba(16,185,129,0) 100%);
+      }
+      .beam.red{
+        background:
+          linear-gradient(180deg, rgba(239,68,68,0) 0%, rgba(239,68,68,.65) 50%, rgba(239,68,68,0) 100%),
+          linear-gradient(90deg,  rgba(220,38,38,0) 0%, rgba(220,38,38,.55) 40%, rgba(220,38,38,0) 100%);
+      }
+      .beam.gold{
+        background:
+          linear-gradient(180deg, rgba(245,197,24,0) 0%, rgba(245,197,24,.65) 50%, rgba(245,197,24,0) 100%),
+          linear-gradient(90deg,  rgba(245,158,11,0) 0%, rgba(245,158,11,.55) 40%, rgba(245,158,11,0) 100%);
+      }
+      .beam.left{ left: 0; transform-origin: left center; }
+      .beam.right{ right: 0; transform-origin: right center; }
+      .beam.pos1{ --tx: -4%; }
+      .beam.pos2{ --tx: 0%;  animation-delay: .8s; }
+      .beam.pos3{ --tx: 4%;  animation-delay: 1.6s; }
+
+      @keyframes beamPulse{
+        0%,100%{ opacity:.18; }
+        50%   { opacity:.32; }
+      }
+      @keyframes beamDrift{
+        0%,100%{ transform: translateX(var(--tx,0)) translateY(0) scaleX(1); }
+        50%    { transform: translateX(var(--tx,0)) translateY(-2%) scaleX(1.06); }
+      }
+
+      .glow{
+        position:absolute; width:18vw; max-width:240px; height:18vw; max-height:240px;
+        filter: blur(24px); opacity:.16; animation: glowPulse 7s ease-in-out infinite;
+      }
+      .glow.left{ left:-6vw; }
+      .glow.right{ right:-6vw; }
+      .glow.top1{ top:12%; }
+      .glow.top2{ top:46%; }
+      .glow.green{ background: radial-gradient(circle, rgba(16,185,129,.35) 0%, rgba(16,185,129,0) 60%); }
+      .glow.red{   background: radial-gradient(circle, rgba(239,68,68,.35) 0%,  rgba(239,68,68,0) 60%); }
+      .glow.gold{  background: radial-gradient(circle, rgba(245,197,24,.35) 0%, rgba(245,197,24,0) 60%); }
+      .glow.d1{ animation-delay: .4s; }
+      .glow.d2{ animation-delay: 1.1s; }
+      .glow.d3{ animation-delay: 1.8s; }
+
+      @keyframes glowPulse{
+        0%,100%{ opacity:.10; transform: scale(1); }
+        50%    { opacity:.22; transform: scale(1.08); }
+      }
+    }
+
+    /* ===== PC: statický info pásik dole ===== */
+    #desktopFooter{ display:none; }
+    @media (min-width: 992px){
+      #desktopFooter{
+        display:block;
+        position:fixed; left:0; right:0; bottom:0;
+        height:var(--desk-footer-h);
+        padding:0 12px;
+        background:rgba(7,18,44,.92);
+        backdrop-filter:blur(6px);
+        border-top:1px solid rgba(255,255,255,.12);
+        color:#cfe2ff; font-size:12px; line-height:var(--desk-footer-h);
+        text-align:center; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
+        z-index:930;
+      }
+    }
   </style>
 </head>
 <body>
@@ -55,6 +162,23 @@
       </div>
     </div>
   </header>
+
+  <!-- PC ONLY: party beams -->
+  <div class="party-beams" aria-hidden="true">
+    <!-- ľavá strana -->
+    <span class="beam left green pos1"></span>
+    <span class="beam left gold  pos2"></span>
+    <span class="beam left red   pos3"></span>
+    <!-- pravá strana -->
+    <span class="beam right red   pos1"></span>
+    <span class="beam right gold  pos2"></span>
+    <span class="beam right green pos3"></span>
+    <!-- žiary -->
+    <span class="glow left  green top1 d1"></span>
+    <span class="glow left  gold  top2 d2"></span>
+    <span class="glow right red   top1 d3"></span>
+    <span class="glow right green top2 d2"></span>
+  </div>
 
   <main class="wrap">
     <div id="board" class="board" aria-label="8-puzzle hracie pole"></div>
@@ -91,6 +215,25 @@
   <a class="brand-badge" href="#" aria-label="MarSab®">
     <img src="img/marsab_logo.png" alt=""><span class="wordmark">MarSab®</span>
   </a>
+
+  <!-- PC: statický info pásik -->
+  <div id="desktopFooter" role="contentinfo">
+    Lištobook by Lištové centrum EU, s.r.o. ©, Sasinkova 13, 010 01 Žilina — 2025, verzia 1.0
+  </div>
+
+  <!-- dopočet výšky hlavičky pre neóny -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const header = document.querySelector('.header');
+      if (header){
+        const setHdr = () => {
+          document.documentElement.style.setProperty('--hdr-h', header.getBoundingClientRect().height + 'px');
+        };
+        setHdr();
+        window.addEventListener('resize', setHdr);
+      }
+    });
+  </script>
 
   <script src="game.js"></script>
 </body>
