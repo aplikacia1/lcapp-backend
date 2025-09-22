@@ -1,116 +1,99 @@
 // routes/categoryRoutes.js
 const express = require('express');
-const router = express.Router();
-
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 
+const router = express.Router();
 const Category = require('../models/category');
-const Product  = require('../models/product');
 
-// ---------- Multer: ukladanie obrázkov do backend/uploads ----------
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+/* ===== helpers ===== */
+function safeName(original = '') {
+  const base = String(original).replace(/[^a-z0-9.\-_]/gi, '_').toLowerCase();
+  return `${Date.now()}-${Math.round(Math.random() * 1e9)}-${base}`;
 }
+function deleteFileSafe(app, relUrl) {
+  if (!relUrl) return;
+  // v DB uchovávame buď "xyz.jpg" alebo "/uploads/xyz.jpg" – pokryjeme obe
+  const base = relUrl.replace(/^\/?uploads[\\/]/i, '').trim();
+  if (!base) return;
+  const full = path.join(app.get('UPLOADS_DIR'), base);
+  fs.unlink(full, () => {});
+}
+
+/* ===== Multer – ukladáme do UPLOADS_DIR ===== */
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const safe = String(file.originalname || 'img').replace(/\s+/g, '_');
-    cb(null, `${Date.now()}-${safe}`);
+  destination: (req, _file, cb) => {
+    const dir = req.app.get('UPLOADS_DIR');
+    try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+    cb(null, dir);
   },
+  filename: (_req, file, cb) => cb(null, safeName(file.originalname)),
 });
 const upload = multer({ storage });
 
-// Pomocník: bezpečné zmazanie súboru
-function deleteFileSafe(filename) {
-  if (!filename) return;
-  const full = path.join(uploadDir, filename);
-  fs.stat(full, (err, st) => {
-    if (!err && st.isFile()) fs.unlink(full, () => {});
-  });
-}
-
-/* =========================================================================
- * GET /api/categories  – zoznam kategórií
- * ========================================================================= */
+/* --- GET /api/categories --- */
 router.get('/', async (_req, res) => {
   try {
-    const list = await Category.find().sort({ name: 1 }).lean();
-    res.json(list);
+    const items = await Category.find({}).sort({ createdAt: -1 }).lean();
+    res.json(items);
   } catch (e) {
-    console.error('GET /api/categories error:', e);
-    res.status(500).json({ message: 'Chyba pri načítaní kategórií.' });
+    console.error('GET /categories error:', e);
+    res.status(500).json({ message: 'Chyba pri načítaní kategórií' });
   }
 });
 
-/* =========================================================================
- * POST /api/categories  – vytvorenie kategórie (multipart/form-data)
- *  polia: name (povinné), image (file, voliteľne)
- * ========================================================================= */
+/* --- POST /api/categories --- */
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { name } = req.body || {};
-    if (!name || !name.trim()) {
-      // ak prišla fotka a meno chýba, zmažeme ju, nech sa nehromadia siroty
-      if (req.file) deleteFileSafe(req.file.filename);
-      return res.status(400).json({ message: 'Chýba názov kategórie.' });
-    }
+    if (!name) return res.status(400).json({ message: 'Chýba názov kategórie' });
 
-    const doc = await Category.create({
-      name: name.trim(),
-      image: req.file ? req.file.filename : undefined,
-    });
-
+    const image = req.file ? req.file.filename : '';
+    const doc = await Category.create({ name: String(name).trim(), image });
     res.status(201).json(doc);
   } catch (e) {
-    console.error('POST /api/categories error:', e);
-    res.status(500).json({ message: 'Chyba pri vytváraní kategórie.' });
+    console.error('POST /categories error:', e);
+    res.status(500).json({ message: 'Chyba pri vytvorení kategórie' });
   }
 });
 
-/* =========================================================================
- * DELETE /api/categories/:id  – zmazanie kategórie
- *  - ak kategóriu používajú produkty, vráti 409 (Conflict)
- * ========================================================================= */
-router.delete('/:id', async (req, res) => {
+/* --- PUT /api/categories/:id --- */
+router.put('/:id', upload.single('image'), async (req, res) => {
   try {
-    const { id } = req.params;
+    const item = await Category.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: 'Kategória nenájdená' });
 
-    const inUse = await Product.countDocuments({ categoryId: id });
-    if (inUse > 0) {
-      return res
-        .status(409)
-        .json({ message: `Kategóriu nie je možné vymazať – obsahuje ${inUse} produkt(ov).` });
+    if (typeof req.body.name !== 'undefined') {
+      item.name = String(req.body.name).trim();
     }
 
-    const cat = await Category.findById(id);
-    if (!cat) return res.status(404).json({ message: 'Kategória nenájdená.' });
+    if (req.file) {
+      // zmaž starý obrázok (ak bol)
+      if (item.image) deleteFileSafe(req.app, item.image);
+      item.image = req.file.filename; // v DB držíme len názov súboru
+    }
 
-    // zmaž súbor s obrázkom, ak existuje
-    deleteFileSafe(cat.image);
-
-    await cat.deleteOne();
-    res.json({ ok: true });
+    await item.save();
+    res.json(item);
   } catch (e) {
-    console.error('DELETE /api/categories/:id error:', e);
-    res.status(500).json({ message: 'Chyba pri mazaní kategórie.' });
+    console.error('PUT /categories/:id error:', e);
+    res.status(500).json({ message: 'Chyba pri úprave kategórie' });
   }
 });
 
-/* =========================================================================
- * (Kompatibilita) GET /api/categories/items/:categoryId
- *  - vráti produkty danej kategórie (niektoré staršie skripty to volajú)
- * ========================================================================= */
-router.get('/items/:categoryId', async (req, res) => {
+/* --- DELETE /api/categories/:id --- */
+router.delete('/:id', async (req, res) => {
   try {
-    const { categoryId } = req.params;
-    const items = await Product.find({ categoryId }).sort({ createdAt: -1 }).lean();
-    res.json(items);
+    const item = await Category.findById(req.params.id);
+    if (!item) return res.status(404).json({ message: 'Kategória nenájdená' });
+
+    if (item.image) deleteFileSafe(req.app, item.image);
+    await item.deleteOne();
+    res.json({ ok: true });
   } catch (e) {
-    console.error('GET /api/categories/items/:categoryId error:', e);
-    res.status(500).json({ message: 'Chyba pri načítaní produktov kategórie.' });
+    console.error('DELETE /categories/:id error:', e);
+    res.status(500).json({ message: 'Chyba pri mazaní kategórie' });
   }
 });
 

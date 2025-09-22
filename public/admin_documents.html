@@ -6,7 +6,6 @@
   <title>Admin – Dokumenty</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* čitateľná tabuľka na tmavom pozadí */
     .table{ width:100%; border-collapse:collapse; }
     .table th, .table td{
       padding:10px 12px; text-align:center;
@@ -22,10 +21,29 @@
       background:#fff; color:#0c1f4b; border:1px solid rgba(255,255,255,.35);
     }
     .table .danger{ background:#ff6b6b; color:#fff; border:none; }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; z-index:9999;
+    }
+    .modal{
+      width:min(520px, 92vw); background:#0f245f; border:1px solid #fff2;
+      border-radius:14px; padding:18px; color:#fff;
+      box-shadow:0 14px 40px rgba(0,0,0,.45);
+    }
+    .modal h3{ margin:6px 0 12px; }
+    .modal .row{ margin-top:10px; }
+    .modal input[type="text"],
+    .modal input[type="file"]{
+      width:100%; padding:10px; border-radius:8px; border:none;
+      background:#eef6ff; color:#022; box-sizing:border-box;
+    }
+    .modal .actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
   </style>
 </head>
 <body>
-  <!-- FORMULÁR: ostáva v karte -->
+  <!-- FORM: pridať kategóriu -->
   <div class="container center-content">
     <div class="card" style="max-width:680px">
       <h2>Pridať novú kategóriu</h2>
@@ -41,13 +59,34 @@
     </div>
   </div>
 
-  <!-- TABUĽKA: mimo karty, bez rámika -->
+  <!-- ZOZNAM -->
   <div style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
     <h3 style="color: white;">Existujúce kategórie</h3>
     <div id="category-list" style="margin-top: 20px;"></div>
   </div>
 
-  <!-- ✳️ config musí byť načítaný skôr -->
+  <!-- Modal: Zmeniť kategóriu -->
+  <div id="editModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <h3 id="editTitle">Zmeniť kategóriu</h3>
+      <form id="editForm" enctype="multipart/form-data">
+        <input type="hidden" id="editId" name="id" />
+        <div class="row">
+          <label for="editName">Názov:</label>
+          <input type="text" id="editName" name="name" required />
+        </div>
+        <div class="row">
+          <label for="editImage">Nový obrázok (nechaj prázdne ak nemeníš):</label>
+          <input type="file" id="editImage" name="image" accept="image/png, image/jpeg" />
+        </div>
+        <div class="actions">
+          <button type="button" id="editCancel">Zavrieť</button>
+          <button type="submit">Uložiť zmeny</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/config.js"></script>
   <script src="admin_documents.js"></script>
 </body>
