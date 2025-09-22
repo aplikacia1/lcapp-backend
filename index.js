@@ -1,6 +1,35 @@
 // backend/index.js
 require('dotenv').config();
 
+/* ===== DOČASNÁ DIAGNOSTIKA SMTP ENV (po vyriešení pokojne zmaž) ===== */
+(function () {
+  try {
+    const u = process.env.SMTP_USER || '';
+    const p = process.env.SMTP_PASS || '';
+    const host = process.env.SMTP_HOST || '';
+    const port = process.env.SMTP_PORT || '';
+    const secure = process.env.SMTP_SECURE || '';
+    const authMethod = (process.env.SMTP_AUTH_METHOD || '(unset)').toString();
+
+    const passLen = p.length;
+    const tailHex = Buffer.from(p).toString('hex').slice(-8); // posledné 4 bajty v HEX
+
+    console.log(
+      '[BOOT SMTP ENV]',
+      'user=', JSON.stringify(u),
+      'passLen=', passLen,
+      'tailHex=', tailHex,
+      'host=', host,
+      'port=', port,
+      'secure=', secure,
+      'authMethod=', authMethod
+    );
+  } catch (e) {
+    console.warn('SMTP env debug failed:', e?.message || e);
+  }
+})();
+/* ==================================================================== */
+
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
