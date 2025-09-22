@@ -10,17 +10,19 @@ const {
   APP_NAME = 'Lištobook',
   APP_URL = 'https://listobook.sk',
   EMAIL_DEBUG = 'false',
+  SMTP_AUTH_METHOD = '', // voliteľné: LOGIN alebo PLAIN
 } = process.env;
 
 // --- očistenie a defaulty ---
 const host = String(SMTP_HOST || '').trim();
 const port = Number(String(SMTP_PORT || '').trim()) || 587;
-// ak je port 465 -> secure:true (implicit TLS), inak použijeme hodnotu z env (587 => false)
+// 465 => implicit TLS; inak sa riadime podľa SMTP_SECURE
 const secure =
   port === 465 ? true : String(SMTP_SECURE || 'false').trim().toLowerCase() === 'true';
 const user = String(SMTP_USER || '').trim();
 const pass = String(SMTP_PASS || '').trim();
 const debug = String(EMAIL_DEBUG || 'false').trim().toLowerCase() === 'true';
+const authMethod = String(SMTP_AUTH_METHOD || '').trim().toUpperCase() || null;
 
 if (!user || !pass) {
   console.error('❌ SMTP_USER alebo SMTP_PASS chýba.');
@@ -31,13 +33,11 @@ const transporter = nodemailer.createTransport({
   port,
   secure,
   auth: { user, pass },
-  // 587 => STARTTLS; 465 => implicit TLS; necháme TLS >=1.2
+  ...(authMethod ? { authMethod } : {}), // vynútenie LOGIN/PLAIN ak treba
   tls: { minVersion: 'TLSv1.2' },
-  // robustnejšie časové limity (ms)
   connectionTimeout: 15000,
   greetingTimeout: 15000,
   socketTimeout: 20000,
-  // pool netreba na jednotlivé správy
   pool: false,
   logger: debug,
   debug,
@@ -49,9 +49,11 @@ async function verifyOnce() {
   try {
     await transporter.verify();
     _verified = true;
-    console.log(`✅ SMTP ready as ${user} @ ${host}:${port} (secure=${secure})`);
+    console.log(
+      `✅ SMTP ready as ${user} @ ${host}:${port} (secure=${secure}${authMethod ? `, auth=${authMethod}` : ''})`
+    );
   } catch (err) {
-    console.error('❌ SMTP verify failed:', err && err.message ? err.message : err);
+    console.error('❌ SMTP verify failed:', err?.message || err);
     throw err;
   }
 }
@@ -66,10 +68,8 @@ function escapeAttr(s = '') { return escapeHtml(s).replace(/"/g, '&quot;'); }
 
 async function sendMail({ to, subject, html, text }) {
   if (!to) throw new Error('sendMail: "to" je povinné');
-
-  await verifyOnce(); // jasný log, ak by čokoľvek nešlo
-
-  const fromPretty = `${APP_NAME} <${user}>`; // MUSÍ = SMTP_USER (DMARC/SPF)
+  await verifyOnce();
+  const fromPretty = `${APP_NAME} <${user}>`; // musí = SMTP_USER kvôli SPF/DMARC
   const info = await transporter.sendMail({
     from: fromPretty,
     to,
@@ -81,7 +81,7 @@ async function sendMail({ to, subject, html, text }) {
   return info;
 }
 
-// Info mail po registrácii – „zvoľte prezývku“
+// --------- TEMPLATES ---------
 function signupTemplate() {
   const subject = `Vitajte v ${APP_NAME}! Dokončite profil`;
   const html = `
@@ -100,12 +100,13 @@ function signupTemplate() {
   return { subject, html };
 }
 
+// verejné API
 async function sendSignupEmail(toEmail) {
   const { subject, html } = signupTemplate();
   return sendMail({ to: toEmail, subject, html });
 }
 
-// alias kvôli kompatibilite
+// alias kvôli kompatibilite so starými volaniami
 async function sendWelcomeEmail(toEmail) {
   return sendSignupEmail(toEmail);
 }
