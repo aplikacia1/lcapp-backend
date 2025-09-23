@@ -125,13 +125,17 @@
           return;
         }
 
-        // ✅ úspech → presmeruj na Lištobook (timeline)
-        const params = new URLSearchParams(location.search);
-        const next = params.get('next'); // voliteľne podporíme ?next=
-        const dest = next || `timeline.html?email=${encodeURIComponent(email)}`;
+        // ✅ ÚSPECH → PRESMEROBAŤ NA ONBOARDING
+        // prenesieme prípadný ?next=... ďalej, aby onboarding vedel kam pokračovať
+        const urlParams = new URLSearchParams(location.search);
+        const next = urlParams.get('next'); // voliteľné
+
+        const onboarding = new URL('onboarding.html', location.origin);
+        onboarding.searchParams.set('email', email);
+        if (next) onboarding.searchParams.set('next', next);
 
         // replace = nedá sa vrátiť späť na register po back
-        window.location.replace(dest);
+        window.location.replace(onboarding.pathname + '?' + onboarding.searchParams.toString());
       } catch (err) {
         console.error('Register error', err);
         showErr(emailErr(), 'Chyba pripojenia k serveru.');
