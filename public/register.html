@@ -14,9 +14,20 @@
     h1{margin:12px 0 18px}
     form{display:flex;flex-direction:column;gap:12px}
     input,button{height:42px;border-radius:10px;border:1px solid #bcd6ff;padding:0 12px}
+    input.is-invalid{ border-color:#ff9aa3; box-shadow:0 0 0 3px rgba(255,154,163,.25); }
     button{background:#fff;color:#0c1f4b;border:1px solid rgba(255,255,255,.3);cursor:pointer}
     button:disabled{opacity:.6;cursor:not-allowed}
     .link-row{margin-top:4px;font-size:.95rem}
+
+    /* Error bubliny pod vstupmi */
+    .err{
+      display:none; margin-top:-6px; margin-bottom:4px;
+      font-size:.92rem; line-height:1.25;
+      color:#3b0a0e; background:#ffe6e9; border:1px solid #ff9aa3;
+      border-radius:8px; padding:8px 10px;
+    }
+    /* ERR: zobraz vždy, keď nie je prázdny */
+    .err:not(:empty){display:block}
 
     /* Malý odznak MarSab vľavo dole */
     .brand-badge{
@@ -38,8 +49,12 @@
     <h1>Registrácia</h1>
 
     <form id="registerForm" novalidate>
-      <input id="email" type="email" placeholder="E-mail" autocomplete="username" required />
-      <input id="password" type="password" placeholder="Heslo" autocomplete="new-password" minlength="6" required />
+      <input id="email" type="email" placeholder="E-mail" autocomplete="username" required aria-describedby="emailErr" />
+      <small id="emailErr" class="err" role="alert" aria-live="polite" data-target="#email"></small>
+
+      <input id="password" type="password" placeholder="Heslo (min. 6 znakov)" autocomplete="new-password" minlength="6" required aria-describedby="passErr" />
+      <small id="passErr" class="err" role="alert" aria-live="polite" data-target="#password"></small>
+
       <button id="registerBtn" type="submit">Registrovať</button>
       <p style="font-size:.86rem;line-height:1.25;color:#cfe2ffb0;margin:6px 0 0">
         Pri registrácii súhlasíte so spracovaním e-mailu pre účely prihlásenia do aplikácie. Občas vám môžeme poslať novinky z Lištového centra. Odhlásiť sa môžete kedykoľvek.
@@ -52,6 +67,6 @@
     <img src="img/marsab_logo.png" alt=""><span>MarSab®</span>
   </a>
 
-  <script src="register.js" defer></script>
+  <script src="register.js?v=20250923-2" defer></script>
 </body>
 </html>

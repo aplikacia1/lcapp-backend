@@ -12,10 +12,22 @@
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
-  function showErr(el, msg) {
-    if (!el) return; // ak nemáme err element, ticho preskoč
-    el.textContent = msg || '';
-    el.style.display = msg ? 'block' : 'none';
+  // Zobrazí/Skryje chybovú hlášku a označí vstup ako ne/platný
+  function showErr(errEl, msg) {
+    if (!errEl) return;
+    const targetSel = errEl.getAttribute('data-target');
+    const input = targetSel ? $(targetSel) : null;
+
+    const text = msg || '';
+    errEl.textContent = text;
+    // Poistka: zobrazí ak je text
+    errEl.style.display = text ? 'block' : 'none';
+    errEl.classList.toggle('show', !!text);
+
+    if (input) {
+      input.classList.toggle('is-invalid', !!text);
+      input.setAttribute('aria-invalid', text ? 'true' : 'false');
+    }
   }
 
   function validateEmailFormat(value) {
@@ -40,7 +52,7 @@
   async function checkEmailExists(email) {
     try {
       const res = await fetch(`/api/users/check-email?email=${encodeURIComponent(email)}`);
-      if (!res.ok) return null; // endpoint neexistuje alebo chyba – preskočíme
+      if (!res.ok) return null;
       const data = await res.json();
       return !!data.exists;
     } catch {
@@ -55,19 +67,17 @@
     // live validácia e-mailu
     const runEmailChecks = debounce(async () => {
       const value = (emailEl()?.value || '').trim();
-      let formatOK = validateEmailFormat(value);
-      if (!formatOK) {
+      if (!validateEmailFormat(value)) {
         showErr(emailErr(), 'Zadajte platný e-mail (napr. meno@domena.sk).');
         return;
       }
-      // voliteľná kontrola dostupnosti
       const exists = await checkEmailExists(value);
       if (exists === true) {
         showErr(emailErr(), 'Tento e-mail je už zaregistrovaný.');
       } else {
         showErr(emailErr(), '');
       }
-    }, 350);
+    }, 250);
 
     emailEl()?.addEventListener('input', runEmailChecks);
     emailEl()?.addEventListener('blur', runEmailChecks);
@@ -98,16 +108,20 @@
       } else {
         showErr(passErr(), '');
       }
-      if (!ok) return;
 
-      // (voliteľne) skúsime ešte dostupnosť e-mailu, ak API existuje
-      const exists = await checkEmailExists(email);
-      if (exists === true) {
-        showErr(emailErr(), 'Tento e-mail je už zaregistrovaný.');
+      if (!ok) {
+        if (emailEl()?.classList.contains('is-invalid')) { emailEl().focus(); }
+        else if (passEl()?.classList.contains('is-invalid')) { passEl().focus(); }
         return;
       }
 
-      // Odoslanie
+      const exists = await checkEmailExists(email);
+      if (exists === true) {
+        showErr(emailErr(), 'Tento e-mail je už zaregistrovaný.');
+        emailEl()?.focus();
+        return;
+      }
+
       const btn = btnEl();
       btn && (btn.disabled = true);
 
@@ -120,21 +134,19 @@
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          // server by mal vracať message: napr. "Email už existuje."
           showErr(emailErr(), data?.message || 'Registrácia zlyhala.');
+          emailEl()?.focus();
           return;
         }
 
-        // ✅ ÚSPECH → PRESMEROBAŤ NA ONBOARDING
-        // prenesieme prípadný ?next=... ďalej, aby onboarding vedel kam pokračovať
+        // ✅ ÚSPECH → PRESMEROVAŤ NA ONBOARDING
         const urlParams = new URLSearchParams(location.search);
-        const next = urlParams.get('next'); // voliteľné
+        const next = urlParams.get('next');
 
         const onboarding = new URL('onboarding.html', location.origin);
         onboarding.searchParams.set('email', email);
         if (next) onboarding.searchParams.set('next', next);
 
-        // replace = nedá sa vrátiť späť na register po back
         window.location.replace(onboarding.pathname + '?' + onboarding.searchParams.toString());
       } catch (err) {
         console.error('Register error', err);
