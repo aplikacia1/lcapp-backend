@@ -14,7 +14,7 @@
     :root{
       --max-w: 820px;
       --gap: 16px;
-      --hdr-h: 96px;          /* reálna výška sa dopočíta v skripte nižšie */
+      --hdr-h: 96px;
       --ui-bg: #eef6ff;
       --ui-border: #bcd6ff;
       --ui-text: #0c1f4b;
@@ -22,12 +22,11 @@
       --ui-bg-hover: #e3f0ff;
       --pad-x: 12px;
       --nav-gap: 8px;
-      --visible: 3;          /* mobil: vidno 3 tlačidlá, 4. posunom */
+      --visible: 3;
     }
 
     html,body{margin:0;padding:0}
 
-    /* jemný modrý preliv pozadia */
     body{
       background: linear-gradient(135deg, #0c1f4b 0%, #061c47 50%, #0c1f4b 100%);
       color:#fff;
@@ -35,7 +34,6 @@
     }
     body.no-scroll{ overflow: hidden; }
 
-    /* === Pevná hlavička === */
     .app-header{
       position: fixed; inset: 0 0 auto 0; z-index: 1000;
       background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
@@ -47,7 +45,6 @@
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* Hamburgery – len mobil */
     .nav-toggle, .people-toggle{ display:none; }
     .burger, .people{
       position:absolute; top:10px; width:44px; height:44px; display:none;
@@ -59,7 +56,6 @@
     .burger svg, .people svg{ width:22px; height:22px; }
     @media (max-width: 767.98px){ .burger, .people{ display:flex; } }
 
-    /* Nav pills */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
       display:flex; gap: var(--nav-gap);
@@ -85,7 +81,6 @@
       .pill{ flex: 0 0 auto; width: auto !important; }
     }
 
-    /* Ľavá off-canvas zásuvka (mobil) */
     @media (max-width: 767.98px){
       .app-header .nav-scroller{
         position: fixed; top: 0; left: 0; height: 100vh;
@@ -102,15 +97,13 @@
       .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
     }
 
-    /* Obsah – rezerva dole kvôli pevnej lište (composer + banner/info) */
     .main-content{
       width:100%; max-width:var(--max-w); margin:24px auto; padding:0 var(--gap);
-      padding-bottom:200px; /* rezerva pre pevnú lištu aj s bannerom */
-      position: relative;   /* nad neon pásmi */
+      padding-bottom:200px;
+      position: relative;
       z-index: 1;
     }
 
-    /* Panel účastníkov */
     .presence-panel{
       position:fixed; right:24px; top:calc(var(--hdr-h) + 16px);
       width:260px; max-height:calc(100vh - var(--hdr-h) - 120px);
@@ -128,7 +121,6 @@
     .dot.online{ background:#22c55e }
     .presence-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-    /* 🔔 badge pri mene v zozname účastníkov */
     .presence-badge{
       margin-left:auto;
       min-width:18px; height:18px; padding:0 6px;
@@ -150,7 +142,6 @@
       .people-toggle:checked ~ .presence-panel{ transform: translateX(0); }
     }
 
-    /* Feed */
     .post{ background:#fff; border:1px solid #eee; border-radius:12px; padding:12px; margin-bottom:12px; color:#111 }
     .post strong{ color:#0c1f4b }
     .post-image{ max-width:100%; height:auto; border-radius:10px; margin-top:8px }
@@ -163,7 +154,6 @@
     .link-btn{ background:transparent; border:none; color:#0c1f4b; cursor:pointer; padding:4px 8px; border-radius:8px; }
     .link-btn:hover{ background:rgba(12,31,75,.08); }
 
-    /* Spodná lišta (pevná) – obsahuje aj mini-banner/infobar POD formulárom */
     .composer-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:950;
       background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
@@ -172,7 +162,7 @@
     .composer-wrap{
       width:100%; max-width:var(--max-w); padding:0 var(--gap);
       display:flex; flex-direction:column; gap:10px;
-      position: relative; z-index: 1; /* nad neon pásmi */
+      position: relative; z-index: 1;
     }
     .composer{ background:#fff; border:1px solid #eee; border-radius:14px; padding:10px; }
     .composer-row{ display:grid; grid-template-columns: 1fr auto auto; gap:8px; align-items:center; }
@@ -203,7 +193,6 @@
       #composerCount{ font-size:11px; }
     }
 
-    /* Mini-banner (v tej istej lište, POD formulárom) – len mobil; desktop skryjeme */
     .mini-banner{
       height:90px;
       border-radius:14px; overflow:hidden;
@@ -213,10 +202,9 @@
     }
     .mini-banner img{ width:100%; height:100%; object-fit:cover; display:block; }
     @media (min-width: 992px){
-      #miniBannerSlot{ display:none !important; }   /* PC: banner vypnúť */
+      #miniBannerSlot{ display:none !important; }
     }
 
-    /* PC-only: jemná info "lištička" v spodnej lište, namiesto bannera */
     .desktop-infobar{ display:none; }
     @media (min-width: 992px){
       .desktop-infobar{
@@ -230,7 +218,6 @@
       }
     }
 
-    /* POISTKA: čokoľvek fixed v slote zmeníme na static, aby nič neprekrývalo composer */
     #miniBannerSlot{ position:relative; }
     #miniBannerSlot [style*="position:fixed"],
     #miniBannerSlot .fixed,
@@ -242,7 +229,6 @@
       z-index:auto !important;
     }
 
-    /* MarSab® badge (posunutý nad spodnú lištu) */
     .brand-badge{
       position: fixed; left: 16px; bottom: 140px; z-index: 70;
       display: inline-flex; align-items: center; gap: 8px;
@@ -261,7 +247,6 @@
       .brand-badge .wordmark{ font-size:12px; }
     }
 
-    /* Toasty */
     .toast-stack{
       position: fixed; top: calc(var(--hdr-h) + 12px); left: 50%;
       transform: translateX(-50%);
@@ -282,13 +267,12 @@
     .toast .t-msg{ flex:1; min-width:0; }
     .toast .t-x{ appearance:none; border:none; background:transparent; color:#cfe2ff; cursor:pointer; font-size:18px; line-height:1; padding:0 4px; }
 
-    /* ========= PC ONLY: Neon pulzujúce pásy po stranách ========= */
     @media (min-width: 992px){
       .neon-beams{
         position: fixed;
-        inset: var(--hdr-h) 0 0 0;    /* pod hlavičkou, cez celú výšku */
+        inset: var(--hdr-h) 0 0 0;
         pointer-events: none;
-        z-index: 0;                   /* úplne v pozadí – nič neprekrýva */
+        z-index: 0;
       }
       .beam{
         position: absolute; top: 0; bottom: 0; width: 12vw; max-width: 180px;
@@ -327,11 +311,9 @@
 </head>
 <body>
 
-  <!-- skryté prepínače pre off-canvas -->
   <input type="checkbox" id="navToggle" class="nav-toggle" aria-hidden="true" />
   <input type="checkbox" id="peopleToggle" class="people-toggle" aria-hidden="true" />
 
-  <!-- HLAVIČKA -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <button type="button" class="burger" aria-label="Menu" id="burgerBtn">
@@ -357,7 +339,6 @@
     </div>
   </header>
 
-  <!-- PC ONLY neon beams (vizuálne, neklikateľné) -->
   <div class="neon-beams" aria-hidden="true">
     <span class="beam left"></span>
     <span class="beam right"></span>
@@ -365,19 +346,16 @@
     <span class="glow right"></span>
   </div>
 
-  <!-- PANEL ÚČASTNÍKOV -->
   <aside id="presencePanel" class="presence-panel">
     <div class="presence-title">Používatelia</div>
     <div class="presence-hint">Ťukni na meno pre <strong>novú konverzáciu</strong>.</div>
     <ul id="presenceList" class="presence-list"></ul>
   </aside>
 
-  <!-- OBSAH -->
   <div class="main-content">
     <div class="post-feed" id="postFeed"></div>
   </div>
 
-  <!-- SPODNÁ LIŠTA: písanie + MINI-BANNER / INFO -->
   <div class="composer-bar" id="composerBar">
     <div class="composer-wrap">
       <form id="timelineForm" class="composer" autocomplete="off" enctype="multipart/form-data">
@@ -392,35 +370,26 @@
         </div>
       </form>
 
-      <!-- Mini-banner (POD formulárom) – len mobil -->
       <div id="miniBannerSlot" class="mini-banner" aria-live="polite"></div>
 
-      <!-- PC info pásik (iba desktop) -->
       <div id="desktopInfo" class="desktop-infobar" role="contentinfo">
         Lištobook by Lištové centrum EU, s.r.o. ©, Sasinkova 13, 010 01 Žilina — 2025, verzia 1.0
       </div>
     </div>
   </div>
 
-  <!-- Toasty -->
   <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- MarSab® badge -->
   <a class="brand-badge" href="#" aria-label="MarSab®">
     <img src="img/marsab_logo.png" alt="">
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- config musí byť načítaný skôr -->
   <script src="/js/config.js"></script>
-  <!-- badge neprečítaných -->
   <script src="/js/unread-badge.js"></script>
-  <!-- Timeline logika -->
   <script src="timeline.js"></script>
-  <!-- Banner rotátor -->
   <script src="banners.js"></script>
 
-  <!-- Helper: banner iba na mobile (PC vypnúť) -->
   <script>
     function mountBannerMobileOnly(slotId, options){
       const mql  = window.matchMedia('(max-width: 991.98px)');
@@ -446,7 +415,7 @@
     }
   </script>
 
-  <!-- Toast helper + dopočet hlavičky + navigácia + hamburgre + klik na účastníka + mount mini banner (MOBILE ONLY) -->
+  <!-- Helpery + navigácia + hamburgre + mount mini banner (MOBILE ONLY) -->
   <script>
     (function(){
       const stack = document.getElementById('toastStack');
@@ -490,63 +459,27 @@
       const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
 
       document.getElementById('goBackBtn')?.addEventListener('click', () => go('catalog.html'));
-      document.getElementById('openMessagesBtn')?.addEventListener('click', () => go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', () => { window.location.href = 'index.html'; });
       document.getElementById('gameBtn')?.addEventListener('click', () => go('game.html'));
       document.getElementById('accountBtn')?.addEventListener('click', () => go('dashboard.html'));
 
-      // Klik na účastníka → presmeruj na messages s ?to=
+      // Klik na účastníka → súkromná správa podľa prezývky (email sa NIKDY nepoužije)
       const presence = document.getElementById('presenceList');
       presence?.addEventListener('click', (e) => {
         const li = e.target.closest('.presence-item');
         if (!li) return;
-        const toEmail = li.getAttribute('data-email') || li.dataset.email || '';
-        const toName  = (li.querySelector('.presence-name')?.textContent || '').trim();
-        if (toEmail) {
-          const url = `messages.html?email=${encodeURIComponent(email)}&to=${encodeURIComponent(toEmail)}`;
-          window.location.href = url;
-        } else if (toName) {
-          const url = `messages.html?email=${encodeURIComponent(email)}&to=${encodeURIComponent(toName)}`;
-          window.location.href = url;
-        }
+        const toName = (li.dataset.name || '').trim();
+        if (!toName) return;
+        const url = `messages.html?email=${encodeURIComponent(email || '')}&to=${encodeURIComponent(toName)}`;
+        window.location.href = url;
       });
 
-      // iOS-friendly toggles
-      const navChk = document.getElementById('navToggle');
-      const pplChk = document.getElementById('peopleToggle');
-      const burgerBtn = document.getElementById('burgerBtn');
-      const peopleBtn = document.getElementById('peopleBtn');
-
-      function anyOpen(){ return !!(navChk?.checked || pplChk?.checked); }
-      function updateScrollLock(){ document.body.classList.toggle('no-scroll', anyOpen()); }
-
-      burgerBtn?.addEventListener('click', (e)=>{
-        e.stopPropagation(); navChk.checked = !navChk.checked;
-        if (navChk.checked) pplChk.checked = false; updateScrollLock();
-      });
-      peopleBtn?.addEventListener('click', (e)=>{
-        e.stopPropagation(); pplChk.checked = !pplChk.checked;
-        if (pplChk.checked) navChk.checked = false; updateScrollLock();
-      });
-
-      document.addEventListener('click', (e)=>{
-        const inHeader = e.target.closest('.app-header');
-        const inLeft   = e.target.closest('.nav-scroller');
-        const inRight  = e.target.closest('.presence-panel');
-        if (!inHeader && !inLeft && !inRight){ navChk.checked = false; pplChk.checked = false; updateScrollLock(); }
-      });
-
-      ['change','input'].forEach(ev=>{
-        navChk?.addEventListener(ev, updateScrollLock);
-        pplChk?.addEventListener(ev, updateScrollLock);
-      });
-
-      /* Mini banner: len na MOBILE */
+      // Mini banner: iba mobil
       mountBannerMobileOnly('miniBannerSlot', {
-        fixed: false,      // slot je už vo fixed lište
+        fixed: false,
         interval: 7000,
-        height: 80,        // desktop by sa nepoužil, keďže PC vypíname
-        heightMobile: 90   // mobil jemný
+        height: 80,
+        heightMobile: 90
       });
     });
   </script>

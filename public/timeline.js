@@ -14,7 +14,7 @@ const scroller = document.scrollingElement || document.documentElement;
 // Admin mód cez ?admin=1
 const isAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
 
-// KONŠTANTA: pevne pripnutý admin navrchu zoznamu
+// FIXED admin položka – interne držíme email kvôli backendu, ale NEzobrazujeme ho
 const FIXED_ADMIN = {
   email: "bratislava@listovecentrum.sk",
   name: "Lištové centrum",
@@ -46,16 +46,12 @@ function setPresenceBottom() {
 }
 
 // Navigácia
-function backToCatalog(){
-  const e = userEmail;
-  window.location.href = e ? `catalog.html?email=${encodeURIComponent(e)}` : `catalog.html`;
-}
 function openMessages(){
   const url = `messages.html?email=${encodeURIComponent(userEmail)}${isAdmin ? '&admin=1':''}`;
   location.href = url;
 }
 
-// → NOVÉ: otvorenie súkromného chatu podľa PREZÝVKY (nie e-mailu)
+// → Otvorenie súkromného chatu podľa PREZÝVKY (nie e-mailu)
 function openPrivateChat(targetNickname){
   if (!targetNickname) {
     alert("Tento používateľ nemá nastavenú prezývku. Najprv ju musí pridať v nastaveniach účtu.");
@@ -65,35 +61,16 @@ function openPrivateChat(targetNickname){
   window.location.href = url;
 }
 
-// 🔔 Badge neprečítaných správ (globálny – pilulka v hlavičke)
-async function refreshUnreadBadge(){
-  if(!userEmail) return;
-  try{
-    const r = await fetch(`/api/messages/unread-count/${encodeURIComponent(userEmail)}`);
-    const j = r.ok ? await r.json() : { count: 0 };
-    const n = Number(j?.count || 0);
-    const b = document.getElementById('msgBadge');
-    if(!b) return;
-    if(n > 0){
-      b.style.display = 'inline-flex';
-      b.textContent = n > 99 ? '99+' : String(n);
-    }else{
-      b.style.display = 'none';
-    }
-  }catch{}
-}
-
-// 🔔 Badge helper (per-user)
+// 🔔 Badge – mapovanie podľa prezývky (lowercase)
 function formatBadge(n){
   const num = Number(n||0);
   if (num <= 0) return '';
   return num > 9 ? '9+' : String(num);
 }
-function applyPresenceBadges(map){
-  // map: lowercased otherEmail -> unread count
+function applyPresenceBadgesByName(mapByNameLower){
   document.querySelectorAll('.presence-badge').forEach(el=>{
-    const email = (el.dataset.email || '').toLowerCase();
-    const n = Number(map.get(email) || 0);
+    const key = String(el.dataset.key || '').toLowerCase(); // key = nameLower
+    const n = Number(mapByNameLower.get(key) || 0);
     const text = formatBadge(n);
     if (text){
       el.textContent = text;
@@ -111,17 +88,18 @@ async function refreshPresenceCounts(){
   try{
     const res = await fetch(`/api/messages/conversations/${encodeURIComponent(userEmail)}`);
     const rows = res.ok ? await res.json() : [];
+    // mapujeme podľa otherName (prezývka), nie podľa emailu
     const m = new Map();
     rows.forEach(r=>{
-      const k = String(r.otherEmail||'').toLowerCase();
-      const v = Number(r.unread||0);
-      if (k) m.set(k, v);
+      const key = String(r.otherName || '').toLocaleLowerCase('sk');
+      const v = Number(r.unread || 0);
+      if (key) m.set(key, v);
     });
-    applyPresenceBadges(m);
+    applyPresenceBadgesByName(m);
   }catch{}
 }
 
-// Načítať údaje používateľa
+// Načítať údaje používateľa (bez zobrazovania e-mailu)
 async function loadUserInfo() {
   try {
     const res = await fetch(`/api/users/${encodeURIComponent(userEmail)}`);
@@ -131,7 +109,8 @@ async function loadUserInfo() {
 
     const label = $("#loggedUser");
     const roleBadge = isAdmin ? " (admin mód)" : "";
-    if (label) label.textContent = `Prihlásený ako: ${data.name || data.email}${roleBadge}`;
+    const nice = (data.name && data.name.trim()) ? data.name.trim() : "Anonym";
+    if (label) label.textContent = `Prihlásený ako: ${nice}${roleBadge}`;
 
     const logoutBtn = document.querySelector(".btn.btn--danger");
     if (logoutBtn) logoutBtn.style.display = "inline-flex";
@@ -195,7 +174,7 @@ function initComposer() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const text = textInput.value.trim();
+    const text = (textInput.value || '').trim();
     const image = fileInput.files[0] || null;
 
     if (!userData || !userData.name || userData.name.trim() === "") {
@@ -231,7 +210,7 @@ function initComposer() {
   updateUI();
 }
 
-// ── Drafty komentárov (aby sa nestratili pri refreshi) ──
+// ── Drafty komentárov
 function collectCommentDrafts(){
   const drafts = {};
   document.querySelectorAll('form.commentForm').forEach(f=>{
@@ -262,7 +241,7 @@ async function loadPosts(opts = {}) {
     postFeed.innerHTML = "";
 
     posts.forEach(post => {
-      const author   = escapeHTML(post.author || "Neznámy");
+      const author   = escapeHTML(post.author || "Anonym");
       const text     = escapeHTML(post.text || "");
       const comments = Array.isArray(post.comments) ? post.comments : [];
 
@@ -285,7 +264,7 @@ async function loadPosts(opts = {}) {
               const canDeleteComment = (isAdmin || (userData && userData.name && (userData.name === c.author))) && c._id;
               return `
                 <li>
-                  <span class="comment-text"><strong>${escapeHTML(c.author || "Anon")}</strong>: ${escapeHTML(c.text || "")}</span>
+                  <span class="comment-text"><strong>${escapeHTML(c.author || "Anonym")}</strong>: ${escapeHTML(c.text || "")}</span>
                   <span class="comment-actions">
                     ${canDeleteComment ? `<button class="link-btn comment-delete" data-post="${post._id}" data-id="${c._id}">Zmazať</button>` : ""}
                   </span>
@@ -380,14 +359,14 @@ document.addEventListener("click", async (e) => {
     } catch { alert("Server neodpovedá."); }
   }
 
-  // → NOVÉ: klik na človeka v pravom zozname otvorí chat s jeho PREZÝVKOU
+  // Klik v pravom zozname → otvor chat podľa prezývky
   const presenceItem = e.target.closest(".presence-item");
   if (presenceItem) {
-    // neberieme text s " (ty)", použijeme čisté data-name
-    const targetNick = presenceItem.dataset.name || "";
-    if (presenceItem.dataset.email &&
-        presenceItem.dataset.email.toLowerCase() === (userEmail || "").toLowerCase()) {
-      // klik na seba – otvoríme všeobecné správy (bez to=)
+    const targetNick = (presenceItem.dataset.name || '').trim();
+    if (!targetNick) return;
+    // klik na seba → otvoríme všeobecné správy
+    const selfNick = (userData?.name || '').trim();
+    if (selfNick && targetNick.toLocaleLowerCase('sk') === selfNick.toLocaleLowerCase('sk')) {
       openMessages();
     } else {
       openPrivateChat(targetNick);
@@ -414,7 +393,7 @@ async function refreshPresence(){
     if(!res.ok) return;
     const users = await res.json();
     renderPresence(users);
-    // po každom rendri doplň badge z konverzácií
+    // doplň badge z konverzácií (podľa prezývky)
     refreshPresenceCounts();
   }catch(e){}
 }
@@ -422,31 +401,29 @@ function renderPresence(users){
   const ul = $("#presenceList");
   if(!ul) return;
 
-  // 1) deduplikácia podľa emailu
   const seen = new Set();
   const unique = [];
   ([FIXED_ADMIN, ...(Array.isArray(users)?users:[])]).forEach(u=>{
-    if (!u || !u.email) return;
-    const key = u.email.toLowerCase();
+    if (!u) return;
+    const key = String(u.email || u.name || Math.random()).toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
     unique.push(u);
   });
 
-  // 2) render – admin je prvý, položky dostanú data-email aj data-name
   ul.innerHTML = unique.map(u => {
-    const name = String(u.name || "").trim();
-    const isSelf = u.email === userEmail;
+    const rawName = String(u.name || '').trim();
+    const display = rawName || "Anonym"; // nikdy nezobraz email
+    const nameLower = display.toLocaleLowerCase('sk');
+
+    // data-key = nameLower (na párovanie badge), data-name = display (na navigáciu)
     return `
       <li class="presence-item"
-          data-email="${escapeHTML(u.email)}"
-          data-name="${escapeHTML(name)}"
-          title="${escapeHTML(u.email)}">
+          data-name="${escapeHTML(display)}"
+          data-key="${escapeHTML(nameLower)}">
         <span class="dot ${u.online ? 'online':''}"></span>
-        <span class="presence-name">
-          ${escapeHTML(name || u.email)}${isSelf ? ' (ty)' : ''}
-        </span>
-        <span class="presence-badge" data-email="${escapeHTML(u.email)}"></span>
+        <span class="presence-name">${escapeHTML(display)}${(userData?.name && display === userData.name) ? ' (ty)' : ''}</span>
+        <span class="presence-badge" data-key="${escapeHTML(nameLower)}"></span>
       </li>
     `;
   }).join('');
@@ -484,20 +461,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   setInterval(refreshPresence, 10000);
 
   // 🔔 badge neprečítaných (globál)
-  await refreshUnreadBadge();
-  setInterval(refreshUnreadBadge, 20000);
-
-  // === Centrum zábavy → entertainment.html (s prenesením ?email=) ===
-  const gameBtn = document.getElementById('gameBtn');
-  if (gameBtn) {
-    gameBtn.addEventListener('click', (e) => {
-      // zablokuj starý handler (ak je niekde v HTML nastavený na game.html)
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      const url = userEmail
-        ? `entertainment.html?email=${encodeURIComponent(userEmail)}`
-        : 'entertainment.html';
-      window.location.href = url;
-    });
-  }
+  // (globálnu pilulku/číslo necháva tvoj /js/unread-badge.js)
 });

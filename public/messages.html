@@ -17,26 +17,21 @@
       --composer-left: 0px;
       --composer-width: 100vw;
     }
-
     html,body{margin:0;padding:0;height:100%}
     body{ background:#0c1f4b; color:#fff; padding-top:var(--hdr-h); overflow:hidden; }
 
-    /* ===== HEADER ===== */
     .app-header{ position:fixed; inset:0 0 auto 0; z-index:1000; background:#0c1f4b; border-bottom:1px solid var(--panel-border); }
     .app-header-inner{ max-width:var(--max-w); margin:0 auto; padding:8px var(--gap); display:flex; flex-direction:column; align-items:center; position:relative; }
     .logo-small{ height:48px; margin:2px auto 6px; display:block; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
 
-    /* 🔙 ikonové tlačidlo späť */
     .icon-btn{
       position:absolute; top:10px; left:12px; width:44px; height:44px; display:grid; place-content:center;
       border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; background:transparent; cursor:pointer;
     }
     .icon-btn svg{ width:22px; height:22px; }
-    /* skryj staré pilule */
     .nav-scroller{ display:none !important; }
 
-    /* ===== LAYOUT ===== */
     .wrap{
       max-width:var(--max-w); margin:0 auto;
       height: calc(100vh - var(--hdr-h));
@@ -49,7 +44,6 @@
     .card .head{ padding:10px 12px; font-weight:700; border-bottom:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .card .body{ flex:1 1 auto; overflow:auto; min-height:0; }
 
-    /* LEFT list */
     .list-panel{ background:#0c1f4b !important; border:none !important; }
     .conv-list{ padding:8px; display:flex; flex-direction:column; gap:8px; }
     .admin-tile{
@@ -68,7 +62,6 @@
     .conv-name .badge{ min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center; }
     .conv-last{ opacity:.85; font-size:13px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    /* RIGHT thread */
     .thread-panel{ display:flex; flex-direction:column; min-height:0; min-width:0; }
     .thread-wrap{
       flex:1 1 auto; overflow:auto; overflow-x:hidden; width:100%;
@@ -87,7 +80,6 @@
     .msg.me{ align-self:flex-end; background:#e8f4ff; border-color:#d8ebff; }
     .msg .meta{ font-size:12px; color:#445; display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; }
 
-    /* Composer */
     .composer-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:950; background:#0c1f4b;
       border-top:1px solid var(--panel-border); display:flex; justify-content:center;
@@ -102,63 +94,36 @@
     .button{ height:40px; padding:0 12px; border:1px solid #bcd6ff; border-radius:12px; background:#eef6ff; color:#0c1f4b; cursor:pointer; }
     .button:hover{ background:#e3f0ff; }
 
-    /* full width desktop */
     @media (min-width: 901px){
       :root{ --max-w: 100vw; }
       .app-header-inner, .composer-wrap{ max-width:none; width:100%; }
       .wrap{ max-width:none; width:100%; padding-left:24px; padding-right:24px; grid-template-columns: minmax(320px, 28vw) minmax(0, 1fr); }
       .list-panel{ min-width:320px; }
     }
-
-    /* --- Mobile: jedno okno s vláknom (bez ľavého zoznamu) --- */
     @media (max-width: 900px){
-      .wrap{
-        grid-template-columns: 1fr;
-        padding-left: 12px;
-        padding-right: 12px;
-      }
-      .list-panel{
-        display: none !important;
-      }
-      .thread-panel{
-        min-height: calc(100vh - var(--hdr-h));
-      }
+      .wrap{ grid-template-columns: 1fr; padding-left: 12px; padding-right: 12px; }
+      .list-panel{ display: none !important; }
+      .thread-panel{ min-height: calc(100vh - var(--hdr-h)); }
     }
 
-    /* štýl pre tlačidlo vymazania (doplnok) */
     #deleteConvBtn{
-      margin-left:8px;
-      padding:2px 6px;
-      font-size:12px;
-      border-radius:6px;
-      border:1px solid #bcd6ff;
-      background:#eef6ff;
-      color:#0c1f4b;
-      cursor:pointer;
+      margin-left:8px; padding:2px 6px; font-size:12px; border-radius:6px;
+      border:1px solid #bcd6ff; background:#eef6ff; color:#0c1f4b; cursor:pointer;
     }
-    #deleteConvBtn:hover{
-      background:#ffdddd;
-      border-color:#ffaaaa;
-      color:#600;
-    }
+    #deleteConvBtn:hover{ background:#ffdddd; border-color:#ffaaaa; color:#600; }
   </style>
 </head>
 
 <body>
-  <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-      <!-- 🔙 späť na timeline -->
       <button class="icon-btn" id="backBtn" aria-label="Späť na časovú os">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </button>
 
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userChip">Prihlásený:</div>
 
-      <!-- (skryté) fallback tlačidlá – nechávame kvôli JS id -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
           <button class="pill" id="goBackBtn">Späť</button>
@@ -168,14 +133,12 @@
     </div>
   </header>
 
-  <!-- MAIN -->
   <div class="wrap">
-    <!-- LEFT: conversations -->
+    <!-- LEFT -->
     <section class="card list-panel" aria-labelledby="convHead">
       <div class="head" id="convHead"><span>Konverzácie</span></div>
       <div class="body">
         <div id="convList" class="conv-list">
-          <!-- PINNED ADMIN TILE -->
           <div id="adminTile" class="admin-tile" role="button" tabindex="0"
                aria-label="Napísať na Lištové centrum"
                data-admin-email="bratislava@listovecentrum.sk"
@@ -186,19 +149,17 @@
               <small>Oficiálny chat podpory</small>
             </div>
           </div>
-          <!-- sem renderuje JS ostatné konverzácie -->
         </div>
       </div>
     </section>
 
-    <!-- RIGHT: thread -->
+    <!-- RIGHT -->
     <section class="card thread-panel" aria-labelledby="threadHead">
       <div class="head" id="threadHead"><div id="threadTitle">Vyberte konverzáciu</div></div>
       <div class="thread-wrap"><div id="thread" class="thread"></div></div>
     </section>
   </div>
 
-  <!-- BOTTOM COMPOSER -->
   <div class="composer-bar" id="composerBar">
     <div class="composer-wrap">
       <form id="composerForm" class="composer" autocomplete="off" onsubmit="return false;">
@@ -213,24 +174,17 @@
     </div>
   </div>
 
-  <!-- skripty -->
   <script src="/js/config.js"></script>
   <script src="messages.js"></script>
 
   <script>
-    /* pevná výška hlavičky → padding-top */
-    (function(){
+    (function(){  // výška hlavičky → padding
       const header = document.querySelector('.app-header');
-      function setHdrH(){
-        if (header){
-          document.documentElement.style.setProperty('--hdr-h', header.getBoundingClientRect().height + 'px');
-        }
-      }
+      function setHdrH(){ if (header) document.documentElement.style.setProperty('--hdr-h', header.getBoundingClientRect().height + 'px'); }
       setHdrH(); addEventListener('resize', setHdrH);
     })();
 
-    /* šípka späť + logout (ponechané id pre kompatibilitu) */
-    (function(){
+    (function(){  // späť + logout
       const email = new URLSearchParams(location.search).get("email");
       const go = (page) => { location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
       document.getElementById('backBtn')?.addEventListener('click', () => go('timeline.html'));
@@ -238,8 +192,7 @@
       document.getElementById('logoutBtn')?.addEventListener('click', () => { location.href = 'index.html'; });
     })();
 
-    /* composer → dynamická výška */
-    (function(){
+    (function(){  // composer výška
       const composer = document.querySelector('.composer-bar');
       const setHeights = () => {
         if (!composer) return;
@@ -250,8 +203,7 @@
       document.getElementById('composerText')?.addEventListener('input', ()=> setTimeout(setHeights, 0));
     })();
 
-    /* desktop – composer zarovnať na pravý stĺpec */
-    (function(){
+    (function(){ // desktop zarovnanie composeru
       const threadPanel = document.querySelector('.thread-panel');
       const apply = () => {
         const isDesktop = window.matchMedia('(min-width: 901px)').matches;
@@ -267,8 +219,7 @@
       apply(); addEventListener('resize', apply); addEventListener('load', apply);
     })();
 
-    /* ADMIN tile – otvor vlákno s LC (ponechané) */
-    (function(){
+    (function(){ // admin tile → vlákno s LC
       const ADMIN_EMAIL = 'bratislava@listovecentrum.sk';
       const ADMIN_NICK  = 'Lištové centrum';
       const convList  = document.getElementById('convList');
@@ -284,7 +235,7 @@
       function setRecipient(email, nick){
         threadEl.dataset.recipientEmail = email;
         threadEl.dataset.recipientNick  = nick;
-        threadTitle.textContent = nick;
+        threadTitle.textContent = nick; // ✅ iba prezývka
         if (composerText && !composerText.placeholder.includes(nick)) {
           composerText.placeholder = `Napíšte správu pre ${nick}… (Enter = odoslať, Shift+Enter = nový riadok)`;
         }
