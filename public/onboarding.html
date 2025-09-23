@@ -7,33 +7,14 @@
   <meta name="description" content="Úvod po registrácii: čo je Lištobook, kde hodnotiť tovary, kde písať príspevky a ako poslať správu." />
   <style>
     :root{
-      --bg: #0a1029;
-      --text: #ecf2ff;
-      --muted: #a8b3d6;
-      --border: rgba(255,255,255,.12);
-      --radius: 18px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-
-      /* desktop default */
-      --pad-card: 18px;
-      --icon: 52px;
-      --fs-h1: clamp(1.5rem,3.6vw,2.1rem);
-      --fs-h2: 1.12rem;
-      --fs-body: 16px;
-      --btn-pad-y: 12px;
-      --btn-pad-x: 16px;
-      --gap: 16px;
+      --bg:#0a1029; --text:#ecf2ff; --muted:#a8b3d6; --border:rgba(255,255,255,.12);
+      --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
+      --pad-card:18px; --icon:52px; --fs-h1:clamp(1.5rem,3.6vw,2.1rem); --fs-h2:1.12rem; --fs-body:16px; --gap:16px;
     }
-
     *{box-sizing:border-box}
-    html,body{height:100%}
-    html,body{overflow-x:hidden} /* zabráni vodorovnému scrollu na mobile */
-
+    html,body{height:100%; overflow-x:hidden}
     body{
-      margin:0;
-      font:var(--fs-body)/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial;
-      color:var(--text);
-      /* Jemnejšie pozadie + mäkký „flak“ (bez tvrdého pásu) */
+      margin:0; color:var(--text); font:var(--fs-body)/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial;
       background:
         radial-gradient(1100px 760px at 8% -10%, #13255d 0%, transparent 60%),
         radial-gradient(900px 660px at 100% 0%, #0d1e4a 0%, transparent 60%),
@@ -41,105 +22,49 @@
         var(--bg);
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
-
     .wrap{max-width:980px;margin:0 auto;padding:28px 18px 64px}
-
-    /* hero s logom */
-    .hero{
-      display:flex;flex-direction:column;align-items:center;text-align:center;
-      gap:12px;margin-bottom:22px;
-    }
+    .hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:22px}
     .hero-logo{height:100px;max-width:240px;object-fit:contain}
     h1{font-size:var(--fs-h1);margin:0}
     .lead{color:var(--muted);margin:8px 0 22px}
 
-    /* grid + karty */
-    .grid{display:grid;grid-template-columns: repeat(12,1fr);gap:var(--gap)}
-    .span12{grid-column: span 12}
-    @media (min-width: 720px){ .span6{grid-column: span 6} }
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap)}
+    .span12{grid-column:span 12}
+    /* default = 1 stĺpec (mobil); až od 720px dva stĺpce */
+    .span6{grid-column:span 12}
+    @media (min-width:720px){ .span6{grid-column:span 6} }
 
     .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      padding:var(--pad-card);
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(6px);
+      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
+      border:1px solid var(--border); border-radius:var(--radius); padding:var(--pad-card);
+      box-shadow:var(--shadow); backdrop-filter:blur(6px);
     }
-
     .iconline{display:flex;gap:12px;align-items:flex-start}
-    .icon{
-      width:var(--icon);height:var(--icon);flex:0 0 var(--icon);
-      border-radius:14px;background:rgba(77,163,255,.18);
-      display:grid;place-items:center;border:1px solid var(--border)
-    }
-    .icon svg{width:calc(var(--icon) * .5);height:calc(var(--icon) * .5)}
-
+    .icon{width:var(--icon);height:var(--icon);flex:0 0 var(--icon);border-radius:14px;background:rgba(77,163,255,.18);display:grid;place-items:center;border:1px solid var(--border)}
+    .icon svg{width:calc(var(--icon)*.5);height:calc(var(--icon)*.5)}
     h2{font-size:var(--fs-h2);margin:0 0 6px}
     .muted{color:var(--muted)}
-    .hr{height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);margin:12px 0}
+    .hr{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);margin:12px 0}
 
-    /* tlačidlá */
     .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-    .btn{
-      appearance:none;border:0;cursor:pointer;
-      padding:var(--btn-pad-y) var(--btn-pad-x);
-      border-radius:14px;background:#1a2b59;color:var(--text);
-      border:1px solid var(--border);font-weight:700;text-decoration:none;
-      display:inline-flex;align-items:center;gap:8px;
-      transition:transform .05s ease, background .2s ease, border-color .2s ease;
-    }
+    .btn{appearance:none;border:1px solid var(--border);cursor:pointer;padding:12px 16px;border-radius:14px;background:#1a2b59;color:var(--text);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .05s ease, background .2s ease, border-color .2s ease}
     .btn:hover{transform:translateY(-1px);background:#22336b;border-color:rgba(255,255,255,.2)}
-    .btn.primary{background:linear-gradient(135deg,#4da3ff,#7cd2ff); color:#0a1029;border:0}
-    .btn.good{background:linear-gradient(135deg,#22c55e,#86efac); color:#06220e;border:0}
-    .btn.warn{background:linear-gradient(135deg,#f59e0b,#fde68a); color:#3d2a05;border:0}
+    .btn.primary{background:linear-gradient(135deg,#4da3ff,#7cd2ff);color:#0a1029;border:0}
+    .btn.good{background:linear-gradient(135deg,#22c55e,#86efac);color:#06220e;border:0}
+    .btn.warn{background:linear-gradient(135deg,#f59e0b,#fde68a);color:#3d2a05;border:0}
 
     .steps{margin:8px 0 0;padding-left:18px}
     .steps li{margin:6px 0;color:var(--muted)}
-
     footer{margin-top:28px;color:var(--muted);font-size:.95rem;text-align:center}
 
-    /* ---- Mobilné úpravy (<=430px) ---- */
     @media (max-width:430px){
-      :root{
-        --pad-card: 13px;
-        --icon: 38px;
-        --fs-h1: 1.32rem;
-        --fs-h2: 1.0rem;
-        --fs-body: 15px;
-        --btn-pad-y: 11px;
-        --btn-pad-x: 14px;
-        --gap: 12px;
-        --radius: 14px;
-      }
+      :root{--pad-card:13px;--icon:38px;--fs-h1:1.32rem;--fs-h2:1rem;--fs-body:15px;--gap:12px;--radius:14px}
       .wrap{padding:20px 12px 40px}
       .hero-logo{height:72px;max-width:180px}
-      .card{backdrop-filter: blur(4px)}
       .cta-row .btn{width:100%;justify-content:center}
-      .icon{border-radius:12px}
-      /* jemnejší, menší „flak“ na mobile (žiadny pruh) */
-      body{
-        background:
-          radial-gradient(800px 560px at 6% -8%, #13255d 0%, transparent 60%),
-          radial-gradient(700px 520px at 100% -4%, #0d1e4a 0%, transparent 62%),
-          radial-gradient(380px 280px at 50% 24%, rgba(255,255,255,.10) 0%, rgba(255,255,255,.06) 40%, rgba(255,255,255,.025) 66%, transparent 80%),
-          var(--bg);
-      }
     }
-
-    /* extra malé telefóny (<=360px) */
     @media (max-width:360px){
-      :root{
-        --pad-card: 12px;
-        --icon: 34px;
-        --fs-h1: 1.24rem;
-        --fs-h2: .97rem;
-        --fs-body: 14.5px;
-        --btn-pad-y: 10px;
-        --btn-pad-x: 12px;
-        --gap: 10px;
-        --radius: 12px;
-      }
+      :root{--pad-card:12px;--icon:34px;--fs-h1:1.24rem;--fs-h2:.97rem;--fs-body:14.5px;--gap:10px;--radius:12px}
       .hero-logo{height:64px;max-width:160px}
     }
   </style>
@@ -154,7 +79,6 @@
       </div>
     </header>
 
-    <!-- Jednoduché vysvetlenie -->
     <section class="card span12" aria-labelledby="uvod">
       <h2 id="uvod">O čo tu ide?</h2>
       <p class="muted" style="margin:0">
@@ -164,7 +88,6 @@
     </section>
 
     <div class="grid" style="margin-top:10px">
-      <!-- Menu/centrá -->
       <section class="card span6" aria-labelledby="menu">
         <div class="iconline">
           <div class="icon" aria-hidden="true">
@@ -172,9 +95,7 @@
           </div>
           <div>
             <h2 id="menu">Ako sa pohybujem?</h2>
-            <p class="muted" style="margin:0">
-              Vpravo hore je <strong>ikona menu</strong>. Odtiaľ sa dostanete do jednotlivých „<strong>centier</strong>“:
-            </p>
+            <p class="muted" style="margin:0">Vpravo hore je <strong>ikona menu</strong>. Odtiaľ sa dostanete do jednotlivých „<strong>centier</strong>“:</p>
             <div class="hr"></div>
             <ul class="steps">
               <li><strong>Centrum hodnotenia</strong> – tu <u>hodnotíte tovary</u>.</li>
@@ -185,7 +106,6 @@
         </div>
       </section>
 
-      <!-- Hodnotenia -->
       <section class="card span6" aria-labelledby="hodnotenia">
         <div class="iconline">
           <div class="icon" aria-hidden="true">
@@ -195,56 +115,49 @@
             <h2 id="hodnotenia">Chcem hodnotiť tovar</h2>
             <p class="muted" style="margin:0">Otvorím <strong>Centrum hodnotenia</strong>, vyberiem produkt a dám mu <strong>hodnotenie</strong>.</p>
             <div class="cta-row">
-              <a id="btn-products" class="btn good" href="/products.html">Hodnotiť produkty</a>
+              <!-- ☑ správna stránka: catalog.html -->
+              <a id="btn-products" class="btn good" href="/catalog.html">Hodnotiť produkty</a>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Lištobook + správy -->
       <section class="card span6" aria-labelledby="listobook">
         <div class="iconline">
           <div class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-              <path d="M21 12a8 8 0 1 0-15.5 3.5L3 21l5.5-2.5A8 8 0 0 0 21 12z"></path><path d="M8 10h8M8 14h6"></path>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a8 8 0 1 0-15.5 3.5L3 21l5.5-2.5A8 8 0 0 0 21 12z"></path><path d="M8 10h8M8 14h6"></path></svg>
           </div>
           <div>
             <h2 id="listobook">Chcem pridať príspevok</h2>
             <p class="muted" style="margin:0">V <strong>Lištobooku</strong> píšete príspevky, pridávate fotky a komentujete iných.</p>
-            <p class="muted" style="margin:8px 0 0">
-              <strong>Súkromná správa:</strong> v Lištobooku vľavo hore je <em>ikonka správy</em> – cez ňu napíšete konkrétnemu používateľovi.
-            </p>
+            <p class="muted" style="margin:8px 0 0"><strong>Súkromná správa:</strong> v Lištobooku vľavo hore je <em>ikonka správy</em> – cez ňu napíšete konkrétnemu používateľovi.</p>
             <div class="cta-row">
+              <!-- ☑ Lištobook = timeline.html -->
               <a id="btn-timeline" class="btn" href="/timeline.html">Otvoriť Lištobook</a>
+              <!-- ☑ Správy -->
               <a id="btn-messages" class="btn warn" href="/messages.html">Otvoriť správy</a>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Prezývka -->
       <section class="card span6" aria-labelledby="prezyvka">
         <div class="iconline">
           <div class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-              <circle cx="12" cy="8" r="4"></circle><path d="M4 20a8 8 0 0 1 16 0"></path>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 20a8 8 0 0 1 16 0"></path></svg>
           </div>
           <div>
             <h2 id="prezyvka">Dôležité: prezývka</h2>
-            <p class="muted" style="margin:0">
-              Bez <strong>prezývky</strong> nemôžete <u>pridať príspevok</u>, <u>hodnotiť</u> ani <u>písať správy</u>. Nastavíte ju v <strong>Centre zmeny účtu</strong>.
-            </p>
+            <p class="muted" style="margin:0">Bez <strong>prezývky</strong> nemôžete <u>pridať príspevok</u>, <u>hodnotiť</u> ani <u>písať správy</u>. Nastavíte ju v <strong>Centre zmeny účtu</strong>.</p>
             <div class="cta-row">
-              <a id="btn-profile" class="btn primary" href="/profile.html">Nastaviť prezývku</a>
+              <!-- ☑ nastavenie prezývky = dashboard.html -->
+              <a id="btn-profile" class="btn primary" href="/dashboard.html">Nastaviť prezývku</a>
             </div>
           </div>
         </div>
       </section>
     </div>
 
-    <!-- Rýchly plán -->
     <section class="card span12" style="margin-top:10px">
       <h2>Rýchly plán na 30 sekúnd</h2>
       <div class="hr"></div>
@@ -252,7 +165,7 @@
         <li>Otvorím <strong>Nastaviť prezývku</strong> a vyplním si ju.</li>
         <li>Chcem <strong>hodnotiť</strong> → kliknem na <em>Hodnotiť produkty</em>.</li>
         <li>Chcem <strong>písať príspevky</strong> → otvorím <em>Lištobook</em>.</li>
-        <li>Chcem <strong>správu</strong> → v Lištobooku kliknem na <em>ikonku správy</em> (vľavo hore) alebo otvorím <em>Správy</em>.</li>
+        <li>Chcem <strong>správu</strong> → v Lištobooku kliknem na <em>ikonku správy</em> alebo otvorím <em>Správy</em>.</li>
       </ol>
     </section>
 
@@ -273,7 +186,6 @@
         if (next) url.searchParams.set('next', next);
         return url.pathname + '?' + url.searchParams.toString();
       }
-
       ['btn-products','btn-timeline','btn-messages','btn-profile'].forEach(id=>{
         const a = document.getElementById(id);
         if(a){ a.setAttribute('href', addParams(a.getAttribute('href'))); }
