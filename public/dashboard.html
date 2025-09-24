@@ -184,6 +184,21 @@
         z-index:930;
       }
     }
+
+    /* --- Newsletter row --- */
+    .newsletter-row{
+      display:flex; align-items:flex-start; gap:10px; margin:6px 0 10px;
+      font-size:.95rem; color:#e6efff;
+    }
+    .newsletter-row input[type="checkbox"]{
+      width:18px; height:18px; margin-top:2px; cursor:pointer;
+    }
+    .newsletter-row label{
+      cursor:pointer; line-height:1.35;
+    }
+    .newsletter-hint{
+      font-size:.82rem; color:#cfe2ffb0; margin-top:-6px; margin-bottom:8px;
+    }
   </style>
 </head>
 <body>
@@ -246,6 +261,18 @@
       <form id="userForm">
         <input type="text" id="name" placeholder="Prezývka" />
         <input type="text" id="note" placeholder="Mesto" />
+
+        <!-- Newsletter opt-in (voliteľný) -->
+        <div class="newsletter-row">
+          <input type="checkbox" id="newsletterOptIn" />
+          <label for="newsletterOptIn">
+            Chcem dostávať nepravidelný newsletter e-mailom (voliteľné).
+          </label>
+        </div>
+        <div class="newsletter-hint">
+          Kedykoľvek si to môžeš vypnúť opäť tu v nastaveniach.
+        </div>
+
         <button type="submit">Uložiť údaje</button>
       </form>
 

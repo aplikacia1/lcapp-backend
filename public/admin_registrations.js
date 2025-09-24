@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("searchInput");
   const authWarn = document.getElementById("authWarn");
 
-  const API = (window.API_BASE || "").replace(/\/$/, ""); // ak nemáš config.js, nechaj prázdne => relatívne
+  const API = (window.API_BASE || "").replace(/\/$/, ""); 
 
   let allUsers = [];
 
@@ -31,9 +31,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const div = document.createElement("div");
       div.className = "user-box";
       const safeNote = (user.note || "").replace(/"/g, "&quot;");
+      const newsletterIcon = user.newsletter
+        ? `<span class="newsletter-flag green">✔️ newsletter</span>`
+        : `<span class="newsletter-flag red">❌ newsletter</span>`;
 
       div.innerHTML = `
-        <p><strong>${index + 1}. ${user.email || "(bez e-mailu)"}${user.role === "admin" ? " • ADMIN" : ""}</strong></p>
+        <p><strong>${index + 1}. ${user.email || "(bez e-mailu)"}${user.role === "admin" ? " • ADMIN" : ""}</strong> ${newsletterIcon}</p>
         ${user.name ? `<p>Meno / prezývka: ${user.name}</p>` : ""}
         <label>Poznámka: <input type="text" value="${safeNote}" data-id="${user._id}" class="note-input"/></label>
         <button class="delete-button" data-id="${user._id}" ${user.role === "admin" ? "disabled title='Nedá sa vymazať admin účty'" : ""}>❌ Vymazať</button>

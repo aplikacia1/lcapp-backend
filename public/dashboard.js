@@ -38,22 +38,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // predvyplň formulár
     $('#name').value = u?.name || '';
     $('#note').value = u?.note || '';
+
+    // newsletter checkbox (default: false, ak chýba)
+    const chb = $('#newsletterOptIn');
+    if (chb) chb.checked = !!u?.newsletter;
+
   }catch(e){
     const label = $('#userLabel');
     label.textContent = `Prihlásený: ${email}`;
   }
 
-  // uloženie mena + mesta
+  // uloženie mena + mesta + newslettera
   $('#userForm')?.addEventListener('submit', async (e)=>{
     e.preventDefault();
     const name = ($('#name').value || '').trim();
     const note = ($('#note').value || '').trim();
+    const newsletter = !!$('#newsletterOptIn')?.checked;
 
     try{
       const res = await fetch(`/api/users/${encodeURIComponent(email)}`, {
         method:'PUT',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ name, note })
+        body: JSON.stringify({ name, note, newsletter })
       });
       const data = await res.json().catch(()=>({}));
 

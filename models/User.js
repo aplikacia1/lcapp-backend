@@ -12,6 +12,9 @@ const userSchema = new mongoose.Schema(
     note:      { type: String, default: '' },
     role:      { type: String, default: 'user' },
 
+    // newsletter – voliteľný súhlas používateľa
+    newsletter: { type: Boolean, default: false },
+
     // ➕ bude vyplnené po prvom úspešnom odoslaní uvítacieho e-mailu
     profileWelcomeSentAt: { type: Date, default: null },
 

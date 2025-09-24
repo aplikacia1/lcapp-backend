@@ -41,6 +41,8 @@ router.post('/register', async (req, res) => {
       name: name || '',
       note: '',
       role: 'user',
+      // ⬇️ doplnené: defaultne newsletter vypnutý
+      newsletter: false
     };
     if (doc.name) doc.nameLower = doc.name.toLowerCase();
 
@@ -219,13 +221,26 @@ router.put('/:email/password', async (req, res) => {
   }
 });
 
-/* ========= UPDATE PROFILU (prezývka + poznámka) ========= */
+/* ========= UPDATE PROFILU (prezývka + poznámka + newsletter) ========= */
 
 router.put('/:email', async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email);
     const rawName = (req.body?.name ?? '').trim();
     const note = (req.body?.note ?? '').trim();
+
+    // robustné načítanie newsletteru (berie boolean aj string)
+    let newsletter; // undefined = nezmeníme
+    if (typeof req.body?.newsletter !== 'undefined') {
+      const v = req.body.newsletter;
+      if (typeof v === 'boolean') newsletter = v;
+      else if (typeof v === 'number') newsletter = v !== 0;
+      else if (typeof v === 'string') {
+        newsletter = ['true', '1', 'on', 'yes', 'y'].includes(v.toLowerCase());
+      } else {
+        newsletter = false;
+      }
+    }
 
     const orig = await User.findOne({ email });
     if (!orig) return res.status(404).json({ message: 'Používateľ nenájdený.' });
@@ -238,6 +253,8 @@ router.put('/:email', async (req, res) => {
     }
 
     const update = { name: rawName, note };
+    if (typeof newsletter !== 'undefined') update.newsletter = newsletter;
+
     if (nameLower) update.nameLower = nameLower;
     else update.$unset = { nameLower: 1 };
 

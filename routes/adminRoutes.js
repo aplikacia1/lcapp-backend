@@ -66,7 +66,10 @@ router.put('/password', async (req, res) => {
  * ------------------------------------------------------ */
 router.get('/users', requireAdmin, async (_req, res) => {
   try {
-    const users = await User.find({}, 'email name note role lastSeen createdAt updatedAt').lean();
+    const users = await User.find(
+      {},
+      'email name note role lastSeen createdAt updatedAt newsletter' // ← pridaný newsletter
+    ).lean();
     return res.json(users);
   } catch (err) {
     console.error('Chyba pri načítaní používateľov:', err);
