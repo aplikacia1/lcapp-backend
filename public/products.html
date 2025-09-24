@@ -53,6 +53,23 @@
 
     /* === Obsah produktov === */
     .main{ max-width:1100px; margin:16px auto; padding:0 16px; }
+
+    /* ZJEMNENÝ NADPIS */
+    .page-title{
+      margin: 6px 0 10px;
+      padding: 8px 12px;
+      border-radius:12px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color:#eaf2ff;
+      font-weight:600;
+      font-size: clamp(16px, 2.8vw, 20px);
+      line-height:1.35;
+      text-align:center;
+      letter-spacing:.15px;
+    }
+    .page-title .emoji{ font-size:1.05em; opacity:.9; vertical-align:-2px; }
+
     .search{
       background:#eef6ff; border:1px solid #bcd6ff; border-radius:12px;
       padding:10px 12px; color:#0c1f4b; width:100%;
@@ -161,6 +178,9 @@
   </div>
 
   <main class="main">
+    <!-- zjemnený nadpis -->
+    <h1 class="page-title">Vyberte, rozkliknite a ohodnoťte výrobky <span class="emoji">😊</span></h1>
+
     <input id="searchInput" class="search" placeholder="🔎 Hľadať produkt...">
     <div id="productGrid"></div>
     <div id="emptyState" class="empty" style="display:none">Žiadne produkty.</div>
@@ -172,7 +192,7 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- dopočet výšky hlavičky -->
+  <!-- dopočet výšky hlavičky + späť -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const header = document.querySelector('.app-header');
@@ -184,7 +204,6 @@
       setHdrH();
       window.addEventListener('resize', setHdrH);
 
-      // Šípka späť
       const backBtn = document.getElementById('backBtn');
       const email = new URLSearchParams(window.location.search).get("email");
       backBtn.addEventListener("click", () => {
