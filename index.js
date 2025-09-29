@@ -136,6 +136,7 @@ function mountRoute(url, modPath) {
 
 /* --- API routes --- */
 mountRoute('/api/auth',           './routes/authRoutes');
+mountRoute('/api/password',       './routes/passwordRoutes');
 mountRoute('/api/admin',          './routes/adminRoutes');
 mountRoute('/api/users',          './routes/userRoutes');
 mountRoute('/api/categories',     './routes/categoryRoutes');
