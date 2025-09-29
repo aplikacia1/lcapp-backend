@@ -10,13 +10,22 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const APP_URL = (process.env.APP_URL && process.env.APP_URL.replace(/\/+$/, ''))
   || (IS_PROD ? 'https://listobook.sk' : 'http://localhost:3000');
 
-// Mailer – použijeme tvoj mailer.js, ak existuje. Inak fallback do konzoly.
-let mailer = { sendMail: async ({ to, subject }) => {
-  console.log('[MAIL FALLBACK - no mailer.js] to:', to, '| subject:', subject);
-  return { ok: true, fallback: true };
-}};
-try { mailer = require('../mailer'); } catch (e) {
-  console.warn('⚠️ mailer.js nebol nájdený – používam fallback logger.');
+// Mailer – najprv utils/mailer, potom root mailer, inak fallback logger
+let mailer;
+try {
+  mailer = require('../utils/mailer');
+} catch (e1) {
+  try {
+    mailer = require('../mailer');
+  } catch (e2) {
+    console.warn('⚠️ mailer modul nebol nájdený – používam fallback logger.');
+    mailer = {
+      sendMail: async ({ to, subject }) => {
+        console.log('[MAIL FALLBACK] to:', to, '| subject:', subject);
+        return { ok: true, fallback: true };
+      }
+    };
+  }
 }
 
 /**
@@ -57,10 +66,10 @@ router.post('/forgot', async (req, res) => {
         </div>`;
 
       await mailer.sendMail({ to: user.email, subject, text, html });
-      if (!IS_PROD) {
-  console.log('DEV reset link:', resetUrl);
-}
 
+      if (!IS_PROD) {
+        console.log('DEV reset link:', resetUrl);
+      }
     }
 
     // Vždy OK – neprezrádzame, či e-mail existuje
