@@ -11,11 +11,11 @@
     return $('#loginForm') || $('form');
   }
 
-  // Backend beží na rovnakom pôvode (napr. http://localhost:3000),
-  // preto voláme RELATÍVNE cesty (žiadne :5000).
+  // Voláme relatívne cesty (backend beží na rovnakom pôvode).
   const API_BASE = '';
 
   document.addEventListener('DOMContentLoaded', () => {
+    /* ----- LOGIN ----- */
     const form = pickForm();
     if (!form) {
       console.error('Login: nenašiel som <form> na stránke.');
@@ -59,5 +59,64 @@
         alert('Chyba pri pripojení.');
       }
     });
+
+    /* ----- FORGOT PASSWORD ----- */
+    const forgotLink = $('#forgotLink');
+    const forgotWrap = $('#forgotWrap');
+    const forgotEmail = $('#forgotEmail');
+    const forgotBtn = $('#forgotBtn');
+    const forgotMsg = $('#forgotMsg');
+
+    if (forgotLink && forgotWrap && forgotBtn) {
+      // otvor/zavri panel
+      forgotLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        // prefukni email z login inputu
+        const loginEmail = pickEmailInput()?.value || '';
+        if (loginEmail && !forgotEmail.value) forgotEmail.value = loginEmail.trim();
+
+        forgotWrap.style.display = (forgotWrap.style.display === 'none' || !forgotWrap.style.display)
+          ? 'block' : 'none';
+        forgotMsg.textContent = '';
+        forgotMsg.className = '';
+      });
+
+      // odoslanie požiadavky na reset
+      forgotBtn.addEventListener('click', async () => {
+        const email = (forgotEmail?.value || '').trim();
+        if (!email) {
+          forgotMsg.textContent = 'Zadajte, prosím, e-mail.';
+          forgotMsg.className = 'err';
+          return;
+        }
+
+        try {
+          forgotBtn.disabled = true;
+          forgotMsg.textContent = '';
+          forgotMsg.className = '';
+
+          const res = await fetch(`${API_BASE}/api/password/forgot`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+
+          // Endpoint vždy vracia 200, aby neprezrádzal existenciu účtu
+          if (res.ok) {
+            forgotMsg.textContent = 'Ak e-mail existuje, poslali sme odkaz na obnovenie (platí 1 hodinu).';
+            forgotMsg.className = 'ok';
+          } else {
+            forgotMsg.textContent = 'Skúste to o chvíľu znova.';
+            forgotMsg.className = 'err';
+          }
+        } catch (err) {
+          console.error('Forgot error', err);
+          forgotMsg.textContent = 'Chyba pripojenia.';
+          forgotMsg.className = 'err';
+        } finally {
+          forgotBtn.disabled = false;
+        }
+      });
+    }
   });
 })();

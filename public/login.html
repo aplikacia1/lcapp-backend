@@ -22,18 +22,19 @@
     }
     .brand-badge img{ height:24px; width:auto; display:block; }
 
+    /* Zabudnuté heslo panel */
+    #forgotWrap{
+      display:none; margin-top:14px; padding:12px; border:1px solid #bcd6ff; border-radius:12px;
+      background: rgba(255,255,255,.06);
+    }
+    #forgotWrap .row{display:flex; gap:8px}
+    #forgotMsg{margin-top:10px; font-size:.95rem}
+    #forgotMsg.ok{color:#2ecc71}
+    #forgotMsg.err{color:#ff6b6b}
+
     /* Animácia vynorenia */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.6s ease forwards;
-    }
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    .fade-in { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.6s ease forwards; }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0);} }
   </style>
 </head>
 <body>
@@ -45,8 +46,19 @@
       <input id="email" type="email" placeholder="E-mail" autocomplete="username" required />
       <input id="password" type="password" placeholder="Heslo" autocomplete="current-password" required />
       <button id="loginBtn" type="submit">Prihlásiť sa</button>
+
       <div class="link-row">Nemáte účet? <a href="register.html">Zaregistrovať</a></div>
+      <div class="link-row">Zabudli ste heslo? <a href="#" id="forgotLink">Obnoviť</a></div>
     </form>
+
+    <!-- Panel pre “Zabudli ste heslo?” (mimo <form>, aby sa nespúšťal submit) -->
+    <div id="forgotWrap" aria-live="polite">
+      <div class="row">
+        <input id="forgotEmail" type="email" placeholder="Váš e-mail" />
+        <button id="forgotBtn" type="button">Poslať odkaz</button>
+      </div>
+      <div id="forgotMsg"></div>
+    </div>
   </div>
 
   <a class="brand-badge" href="#" aria-label="MarSab®">
