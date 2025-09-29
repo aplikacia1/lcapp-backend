@@ -57,6 +57,10 @@ router.post('/forgot', async (req, res) => {
         </div>`;
 
       await mailer.sendMail({ to: user.email, subject, text, html });
+      if (!IS_PROD) {
+  console.log('DEV reset link:', resetUrl);
+}
+
     }
 
     // Vždy OK – neprezrádzame, či e-mail existuje
