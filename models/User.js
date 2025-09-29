@@ -19,7 +19,12 @@ const userSchema = new mongoose.Schema(
     profileWelcomeSentAt: { type: Date, default: null },
 
     // pre online stav (panel používateľov)
-    lastSeen:  { type: Date, default: Date.now }
+    lastSeen:  { type: Date, default: Date.now },
+
+    // --- Reset hesla (bezpečné doplnenie, backwards-compatible) ---
+    resetPasswordToken:   { type: String, default: null }, // jednorazový token z e-mailu
+    resetPasswordExpires: { type: Date,   default: null }, // expirácia tokenu
+    passwordChangedAt:    { type: Date,   default: null }, // nastavené pri úspešnej zmene hesla
   },
   { timestamps: true }
 );
