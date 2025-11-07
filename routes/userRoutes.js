@@ -1,6 +1,5 @@
 // routes/userRoutes.js
-// Správa používateľov. Navyše COMPAT registrácia na /api/users/register,
-// aby fungovali existujúce volania z frontendu.
+// Správa používateľov. COMPAT registrácia na /api/users/register
 // (Nový oficiálny endpoint je /api/auth/register)
 
 const express = require('express');
@@ -12,26 +11,20 @@ const router = express.Router();
 const User = require('../models/User');
 const Rating = require('../models/rating');
 const TimelinePost = require('../models/timelinePost');
-const { sendSignupEmail } = require('../utils/mailer'); // na info mail po registrácii
+const { sendSignupEmail } = require('../utils/mailer'); // info mail po registrácii
 
 /* ========= COMPAT: REGISTRÁCIA (POST /api/users/register) ========= */
-
 router.post('/register', async (req, res) => {
   try {
     let { email, password, name } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Chýba email alebo heslo' });
-    }
+    if (!email || !password) return res.status(400).json({ message: 'Chýba email alebo heslo' });
 
     email = String(email).trim();
     name = String(name || '').trim();
 
     const exists = await User.findOne({ email });
     if (exists) return res.status(409).json({ message: 'Používateľ už existuje' });
-
-    if (password.length < 6) {
-      return res.status(400).json({ message: 'Heslo musí mať aspoň 6 znakov' });
-    }
+    if (password.length < 6) return res.status(400).json({ message: 'Heslo musí mať aspoň 6 znakov' });
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -41,22 +34,13 @@ router.post('/register', async (req, res) => {
       name: name || '',
       note: '',
       role: 'user',
-      // ⬇️ doplnené: defaultne newsletter vypnutý
       newsletter: false
     };
     if (doc.name) doc.nameLower = doc.name.toLowerCase();
 
     const newUser = await User.create(doc);
 
-    // Po registrácii pošleme INFO e-mail (bez oslovenia)
-    try {
-      await sendSignupEmail(newUser.email);
-      console.log('Signup email (compat) sent to', newUser.email);
-    } catch (e) {
-      console.error('Signup email (compat) failed:', e?.message || e);
-      // mail neblokuje registráciu
-    }
-
+    try { await sendSignupEmail(newUser.email); } catch (e) { console.error('Signup email (compat) failed:', e?.message || e); }
     return res.status(201).json({ message: 'Registrácia úspešná', userId: newUser._id });
   } catch (err) {
     console.error('Compat register error:', err);
@@ -65,7 +49,6 @@ router.post('/register', async (req, res) => {
 });
 
 /* ========= CHECK NAME (dostupnosť prezývky) ========= */
-
 router.get('/check-name', async (req, res) => {
   try {
     const raw = (req.query.name || '').trim();
@@ -79,14 +62,46 @@ router.get('/check-name', async (req, res) => {
   }
 });
 
-/* ========= ADMIN: DELETE používateľa + jeho stopa ========= */
+/* ========= PUBLIC: profil podľa prezývky (len safe polia) ========= */
+// GET /api/users/public/by-name/:name
+router.get('/public/by-name/:name', async (req, res) => {
+  try {
+    const raw = String(req.params.name || '').trim();
+    if (!raw) return res.status(400).json({ message: 'Chýba meno.' });
 
+    const nameLower = raw.toLocaleLowerCase('sk');
+    const user = await User.findOne(
+      { nameLower },
+      {
+        _id: 0,
+        name: 1,
+        note: 1,      // mesto
+        bio: 1,       // voliteľné
+        company: 1,   // voliteľné
+        avatarUrl: 1
+      }
+    ).lean();
+
+    if (!user) return res.status(404).json({ message: 'Profil neexistuje.' });
+
+    return res.json({
+      name: user.name || raw,
+      city: user.note || '',
+      bio: user.bio || '',
+      company: user.company || '',
+      avatarUrl: user.avatarUrl || ''
+    });
+  } catch (e) {
+    console.error('GET /api/users/public/by-name error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
+  }
+});
+
+/* ========= ADMIN: DELETE používateľa + jeho stopa ========= */
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Neplatné ID.' });
-    }
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Neplatné ID.' });
 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
@@ -146,19 +161,12 @@ router.delete('/:id', async (req, res) => {
 });
 
 /* ========= ADMIN: poznámka k používateľovi ========= */
-
 router.put('/:id/note', async (req, res) => {
   try {
     const { id } = req.params;
     const { note = '' } = req.body || {};
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Neplatné ID.' });
-    }
-    const u = await User.findByIdAndUpdate(
-      id,
-      { note: String(note) },
-      { new: true, projection: { password: 0 } }
-    );
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Neplatné ID.' });
+    const u = await User.findByIdAndUpdate(id, { note: String(note) }, { new: true, projection: { password: 0 } });
     if (!u) return res.status(404).json({ message: 'Používateľ nenájdený.' });
     return res.json({ message: 'Poznámka uložená.', user: u });
   } catch (e) {
@@ -167,14 +175,11 @@ router.put('/:id/note', async (req, res) => {
   }
 });
 
-/* ========= STARÉ DELETE aliasy (zachované kvôli kompatibilite) ========= */
-
+/* ========= STARÉ DELETE aliasy ========= */
 router.delete('/id/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Neplatné ID.' });
-    }
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: 'Neplatné ID.' });
     const deleted = await User.findByIdAndDelete(id);
     if (!deleted) return res.status(404).json({ message: 'Používateľ nenájdený.' });
     return res.json({ message: 'Používateľ vymazaný.', id });
@@ -183,7 +188,6 @@ router.delete('/id/:id', async (req, res) => {
     return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
-
 router.delete('/by-email/:email', async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email);
@@ -197,14 +201,12 @@ router.delete('/by-email/:email', async (req, res) => {
 });
 
 /* ========= UPDATE HESLA ========= */
-
 router.put('/:email/password', async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email);
     const { oldPassword, newPassword } = req.body || {};
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({ message: 'Chýbajú údaje.' });
-    }
+    if (!oldPassword || !newPassword) return res.status(400).json({ message: 'Chýbajú údaje.' });
+
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
 
@@ -221,66 +223,79 @@ router.put('/:email/password', async (req, res) => {
   }
 });
 
-/* ========= UPDATE PROFILU (prezývka + poznámka + newsletter) ========= */
-
+/* ========= UPDATE PROFILU (BEZPEČNÝ PATCH) ========= */
 router.put('/:email', async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email);
-    const rawName = (req.body?.name ?? '').trim();
-    const note = (req.body?.note ?? '').trim();
+    const b = req.body || {};
 
-    // robustné načítanie newsletteru (berie boolean aj string)
-    let newsletter; // undefined = nezmeníme
-    if (typeof req.body?.newsletter !== 'undefined') {
-      const v = req.body.newsletter;
-      if (typeof v === 'boolean') newsletter = v;
-      else if (typeof v === 'number') newsletter = v !== 0;
-      else if (typeof v === 'string') {
-        newsletter = ['true', '1', 'on', 'yes', 'y'].includes(v.toLowerCase());
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
+
+    const TRIM = (s, n=200) => typeof s === 'string' ? s.trim().slice(0,n) : s;
+
+    const allow = [
+      'name','note','fullName','bio',
+      'companyName','companyICO','companyDIC','companyICDPH',
+      'web','instagram','avatarUrl'
+    ];
+
+    const update = {};
+    allow.forEach(k => {
+      if (Object.prototype.hasOwnProperty.call(b, k)) {
+        const lim = (k==='bio') ? 1000
+                  : (k==='companyName') ? 160
+                  : (k==='companyICDPH') ? 24
+                  : (k==='web'||k==='instagram'||k==='avatarUrl') ? 600
+                  : (k==='name') ? 60
+                  : (k==='note') ? 120 : 200;
+        update[k] = TRIM(b[k], lim);
+      }
+    });
+
+    if (Object.prototype.hasOwnProperty.call(b,'newsletter')) {
+      const v = b.newsletter;
+      update.newsletter =
+        (typeof v === 'boolean') ? v :
+        (typeof v === 'number') ? v !== 0 :
+        (typeof v === 'string') ? ['true','1','on','yes','y'].includes(v.toLowerCase()) :
+        false;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(update,'name')) {
+      const rawName = update.name || '';
+      if (rawName) {
+        const nameLower = rawName.toLocaleLowerCase('sk');
+        const clash = await User.findOne({ nameLower, email: { $ne: email } });
+        if (clash) return res.status(409).json({ message: 'Táto prezývka je už obsadená.' });
+        update.nameLower = nameLower;
       } else {
-        newsletter = false;
+        update.$unset = { ...(update.$unset||{}), nameLower: 1 };
       }
     }
 
-    const orig = await User.findOne({ email });
-    if (!orig) return res.status(404).json({ message: 'Používateľ nenájdený.' });
-
-    // jedinečnosť prezývky
-    const nameLower = rawName ? rawName.toLocaleLowerCase('sk') : null;
-    if (nameLower) {
-      const clash = await User.findOne({ nameLower, email: { $ne: email } });
-      if (clash) return res.status(409).json({ message: 'Táto prezývka je už obsadená.' });
-    }
-
-    const update = { name: rawName, note };
-    if (typeof newsletter !== 'undefined') update.newsletter = newsletter;
-
-    if (nameLower) update.nameLower = nameLower;
-    else update.$unset = { nameLower: 1 };
-
-    const user = await User.findOneAndUpdate(
+    const saved = await User.findOneAndUpdate(
       { email },
       update,
       { new: true, projection: { password: 0 } }
     );
-    if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
 
-    return res.json({ message: 'Údaje uložené', user });
+    return res.json({ message: 'Údaje uložené', user: saved });
   } catch (e) {
-    if (e?.code === 11000) {
-      return res.status(409).json({ message: 'Táto prezývka je už obsadená.' });
-    }
+    if (e?.code === 11000) return res.status(409).json({ message: 'Táto prezývka je už obsadená.' });
     console.error('PUT user error', e);
     return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
 
 /* ========= READ ========= */
-
 router.get('/:email', async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email);
-    const user = await User.findOne({ email }, { password: 0 });
+    const user = await User.findOne(
+      { email },
+      { password: 0 }
+    );
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
     return res.json(user);
   } catch (e) {

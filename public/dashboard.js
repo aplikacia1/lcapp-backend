@@ -1,65 +1,123 @@
-// dashboard.js – žiadny localStorage, iba ?email= v URL
+// dashboard.js – konečná verzia (perzistentný profil + avatar)
 
 function $(s, r=document){ return r.querySelector(s); }
-function getEmail(){
-  const p = new URLSearchParams(window.location.search);
-  return p.get('email') || '';
-}
+function getEmail(){ const p = new URLSearchParams(window.location.search); return p.get('email') || ''; }
+const DEFAULT_AVATAR =
+  'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+       <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+         <stop stop-color="#0b1b3e"/><stop offset="1" stop-color="#1d3b86"/></linearGradient></defs>
+       <rect width="100%" height="100%" fill="url(#g)"/>
+       <circle cx="64" cy="48" r="22" fill="#cfe2ff"/>
+       <rect x="28" y="78" width="72" height="34" rx="12" fill="#cfe2ff"/>
+     </svg>`
+  );
 
 document.addEventListener('DOMContentLoaded', async () => {
   const email = getEmail();
   if(!email){ window.location.href = 'index.html'; return; }
 
-  // hlavičkové tlačidlá
-  $('#goCatalogBtn')?.addEventListener('click', ()=>{
-    window.location.href = `catalog.html?email=${encodeURIComponent(email)}`;
-  });
-  $('#goTimelineBtn')?.addEventListener('click', ()=>{
+  // jediné tlačidlo: späť na Lištobook (timeline)
+  $('#goTimelineBtn')?.addEventListener('click', () => {
     window.location.href = `timeline.html?email=${encodeURIComponent(email)}`;
   });
-  // Centrum zábavy → entertainment.html (namiesto game.html)
-  $('#goGameBtn')?.addEventListener('click', ()=>{
-    window.location.href = `entertainment.html?email=${encodeURIComponent(email)}`;
-  });
-  $('#logoutBtn')?.addEventListener('click', ()=>{
-    window.location.href = 'index.html';
-  });
 
-  // načítaj používateľa
+  const avatarImg  = $('#avatarPreview');
+  const avatarFile = $('#avatarFile');
+  if (avatarImg) avatarImg.src = DEFAULT_AVATAR;
+
+  // pomocné
+  const v = (sel) => (($(sel)?.value || '').trim());
+  const set = (sel, val) => { const el=$(sel); if(el) el.value = val || ''; };
+
+  // ========== 1) Načítanie profilu ==========
   try{
     const res = await fetch(`/api/users/${encodeURIComponent(email)}`);
     if(!res.ok) throw new Error('User not found');
     const u = await res.json();
 
-    // label v hlavičke
-    const label = $('#userLabel');
-    label.textContent = `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
+    // štítok v hlavičke
+    $('#userLabel').textContent = `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
 
-    // predvyplň formulár
-    $('#name').value = u?.name || '';
-    $('#note').value = u?.note || '';
-
-    // newsletter checkbox (default: false, ak chýba)
-    const chb = $('#newsletterOptIn');
-    if (chb) chb.checked = !!u?.newsletter;
+    // vyplniť polia
+    set('#name',        u?.name);
+    set('#fullName',    u?.fullName);
+    set('#bio',         u?.bio);
+    set('#note',        u?.note);
+    set('#companyName', u?.companyName);
+    set('#companyICO',  u?.companyICO);
+    set('#companyDIC',  u?.companyDIC);
+    set('#companyICDPH',u?.companyICDPH);
+    set('#web',         u?.web);
+    set('#instagram',   u?.instagram);
+    if ($('#newsletterOptIn')) $('#newsletterOptIn').checked = !!u?.newsletter;
+    if (u?.avatarUrl) { avatarImg.src = u.avatarUrl; }
 
   }catch(e){
-    const label = $('#userLabel');
-    label.textContent = `Prihlásený: ${email}`;
+    $('#userLabel').textContent = `Prihlásený: ${email}`;
   }
 
-  // uloženie mena + mesta + newslettera
+  // ========== 2) Upload avatara (+ okamžité uloženie avatarUrl) ==========
+  avatarFile?.addEventListener('change', async (ev)=>{
+    const f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+
+    try{
+      const fd = new FormData();
+      fd.append('image', f); // backend očakáva "image"
+      const up = await fetch('/api/uploads', { method:'POST', body: fd });
+      const data = await up.json().catch(()=>null);
+
+      if (!up.ok || !data?.ok || !data?.file?.url) {
+        alert(data?.message || 'Nepodarilo sa nahrať fotku.');
+        return;
+      }
+
+      const url = data.file.url;        // napr. /uploads/12345_avatar.jpg
+      avatarImg.src = url;
+
+      // hneď zapíšeme do profilu
+      const res = await fetch(`/api/users/${encodeURIComponent(email)}`, {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ avatarUrl: url })
+      });
+      if(!res.ok){
+        const d = await res.json().catch(()=>({}));
+        console.warn('AvatarUrl save failed:', d);
+      }
+    }catch(err){
+      console.error(err);
+      alert('Chyba pri nahrávaní fotky.');
+    } finally {
+      ev.target.value = '';
+    }
+  });
+
+  // ========== 3) Uloženie profilu ==========
   $('#userForm')?.addEventListener('submit', async (e)=>{
     e.preventDefault();
-    const name = ($('#name').value || '').trim();
-    const note = ($('#note').value || '').trim();
-    const newsletter = !!$('#newsletterOptIn')?.checked;
+
+    const payload = {
+      name:        v('#name'),
+      note:        v('#note'),
+      newsletter:  !!$('#newsletterOptIn')?.checked,
+      fullName:    v('#fullName'),
+      bio:         v('#bio'),
+      companyName: v('#companyName'),
+      companyICO:  v('#companyICO'),
+      companyDIC:  v('#companyDIC'),
+      companyICDPH:v('#companyICDPH'),
+      web:         v('#web'),
+      instagram:   v('#instagram'),
+      // avatarUrl sa už ukladá pri uploade
+    };
 
     try{
       const res = await fetch(`/api/users/${encodeURIComponent(email)}`, {
         method:'PUT',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ name, note, newsletter })
+        body: JSON.stringify(payload)
       });
       const data = await res.json().catch(()=>({}));
 
@@ -68,20 +126,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      $('#userLabel').textContent = `Prihlásený: ${name || email}`;
-      alert('Údaje boli uložené.');
+      $('#userLabel').textContent = `Prihlásený: ${payload.name || email}`;
+      alert('Profil bol uložený.');
     }catch(err){
       console.error(err);
       alert('Chyba pri komunikácii so serverom.');
     }
   });
 
-  // zmena hesla
+  // ========== 4) Zmena hesla ==========
   $('#passwordForm')?.addEventListener('submit', async (e)=>{
     e.preventDefault();
-    const oldPassword = $('#oldPassword').value;
-    const newPassword = $('#newPassword').value;
-    const confirm     = $('#confirmPassword').value;
+    const oldPassword = v('#oldPassword');
+    const newPassword = v('#newPassword');
+    const confirm     = v('#confirmPassword');
     const msg = $('#passwordMessage');
 
     if(!oldPassword || !newPassword || !confirm){

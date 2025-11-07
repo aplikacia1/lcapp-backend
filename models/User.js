@@ -9,8 +9,20 @@ const userSchema = new mongoose.Schema(
     // verejné údaje profilu
     name:      { type: String, default: '' },        // prezývka (zobrazujeme)
     nameLower: { type: String, default: null },      // normalizované meno na jedinečnosť
-    note:      { type: String, default: '' },
-    role:      { type: String, default: 'user' },
+    note:      { type: String, default: '' },        // mesto
+
+    // rozšírený profil (nové polia)
+    avatarUrl:   { type: String, default: '' },
+    fullName:    { type: String, default: '' },
+    bio:         { type: String, default: '' },
+    companyName: { type: String, default: '' },
+    companyICO:  { type: String, default: '' },
+    companyDIC:  { type: String, default: '' },
+    companyICDPH:{ type: String, default: '' },
+    web:         { type: String, default: '' },
+    instagram:   { type: String, default: '' },
+
+    role: { type: String, default: 'user' },
 
     // newsletter – voliteľný súhlas používateľa
     newsletter: { type: Boolean, default: false },
@@ -21,10 +33,10 @@ const userSchema = new mongoose.Schema(
     // pre online stav (panel používateľov)
     lastSeen:  { type: Date, default: Date.now },
 
-    // --- Reset hesla (bezpečné doplnenie, backwards-compatible) ---
-    resetPasswordToken:   { type: String, default: null }, // jednorazový token z e-mailu
-    resetPasswordExpires: { type: Date,   default: null }, // expirácia tokenu
-    passwordChangedAt:    { type: Date,   default: null }, // nastavené pri úspešnej zmene hesla
+    // --- Reset hesla ---
+    resetPasswordToken:   { type: String, default: null },
+    resetPasswordExpires: { type: Date,   default: null },
+    passwordChangedAt:    { type: Date,   default: null },
   },
   { timestamps: true }
 );
@@ -35,5 +47,4 @@ userSchema.index(
   { unique: true, partialFilterExpression: { nameLower: { $type: 'string' } } }
 );
 
-// Použijeme existujúci model, ak už bol skompilovaný
 module.exports = mongoose.models.User || mongoose.model('User', userSchema);

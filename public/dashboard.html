@@ -5,234 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Lištový dashboard</title>
   <link rel="stylesheet" href="style.css" />
-
   <style>
-    :root{
-      --hdr-h: 96px;
-      --pad-x: 12px;
-      --gap: 8px;
-      --visible: 3;
-      --desk-footer-h: 36px; /* výška PC info pásika */
-    }
+    :root{ --pad-x:12px; --gap:8px; --desk-footer-h:36px; }
+    body{ margin:0; background:#0c1f4b; color:#fff; }
 
-    /* Pozadie (základ) */
-    body{ padding-top: var(--hdr-h); background:#0c1f4b; color:#fff; }
-
-    /* === HLAVIČKA === */
+    /* HLAVIČKA – sticky (neprekryje obsah) */
     .app-header{
-      position: fixed; inset: 0 0 auto 0; z-index: 1000;
-      background: #0c1f4b; border-bottom: 1px solid rgba(255,255,255,.15);
+      position: sticky; top: 0; z-index: 1000;
+      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
     }
     .app-header-inner{
-      max-width: 980px; margin: 0 auto; padding: 8px var(--pad-x);
-      display:flex; flex-direction:column; align-items:center; position: relative;
+      max-width:980px; margin:0 auto; padding:8px var(--pad-x);
+      display:flex; flex-direction:column; align-items:center;
     }
-
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    .header-badge{
-      position:absolute; right:12px; top:10px;
-      display:inline-flex; align-items:center; gap:6px;
-      padding:4px 6px; border:1px solid #ffffff33; border-radius:10px;
-      background: rgba(0,0,0,.18); backdrop-filter: blur(2px);
-      text-decoration:none; color:#fff; opacity:.95;
-    }
-    .header-badge img{ height:18px; width:auto; display:block; }
-    .header-badge .wordmark{ font-size:12px; font-weight:700; letter-spacing:.2px; }
-    @media (max-width: 480px){
-      .header-badge{ right:8px; top:8px; padding:3px 6px; }
-      .header-badge img{ height:16px; }
-      .header-badge .wordmark{ font-size:11px; }
-    }
+    .nav-scroller{ padding:0 var(--pad-x); width:100%; }
+    .nav-track{ display:flex; gap:8px; justify-content:center; }
+    .pill{ height:38px; padding:8px 14px; border-radius:16px;
+      border:1px solid rgba(255,255,255,.35); background:#fff; color:#0c1f4b; cursor:pointer; }
 
-    /* Navigácia */
-    .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
-    .nav-track{
-      display:flex; gap: var(--gap);
-      overflow-x:auto; overflow-y:hidden;
-      -webkit-overflow-scrolling:touch;
-      overscroll-behavior-x:contain;
-      scrollbar-width:none;
-      scroll-snap-type:x mandatory;
-      justify-content:center;
-    }
-    .nav-track::-webkit-scrollbar{ display:none; }
-
-    .pill{
-      flex: 0 0 calc((100% - (var(--gap) * (var(--visible) - 1))) / var(--visible));
-      height:38px; padding:8px 14px; border-radius:16px;
-      border:1px solid rgba(255,255,255,.35);
-      background:#fff; color:#0c1f4b; cursor:pointer;
-      scroll-snap-align:start; white-space:nowrap;
-    }
-    .pill-danger{ background:#000; color:#fff; border-color:#fff; }
-
-    @media (min-width: 768px){
-      .nav-track{ overflow: visible; }
-      .pill{ flex: 0 0 auto; width: auto !important; }
-    }
-
-    /* Obsah + rezerva pre banner (mobil) / info pásik (PC) */
+    /* OBSAH */
     .scrollable-body .main-content{
-      padding-bottom: calc(var(--banner-h, 0px) + 24px);
-      max-width: 500px;
-      margin: 0 auto;
-      position: relative;   /* nad neon pásmi */
-      z-index: 1;
+      padding:10px 0 24px;
+      max-width:640px; margin:0 auto; position:relative; z-index:1;
     }
-    @media (min-width: 992px){
-      .scrollable-body .main-content{
-        padding-bottom: calc(var(--desk-footer-h) + 24px);
+
+    /* VAROVANIE */
+    .warn{
+      display:none; position:sticky; top:4px; z-index:20;
+      margin:0 auto 10px; max-width:560px; background:#fffbeb; color:#7c2d12;
+      border:1px solid #f59e0b; border-radius:12px; padding:10px 12px;
+      box-shadow:0 6px 18px rgba(0,0,0,.25);
+    }
+
+    .section-title{ font-weight:800; margin:18px 0 10px; color:#e6efff; }
+    .avatar-row{ display:flex; align-items:center; gap:12px; }
+    .avatar-row img{ width:64px; height:64px; border-radius:12px; object-fit:cover; border:1px solid #ffffff33; background:#0b1b3e; }
+
+    .newsletter-row{ display:flex; align-items:flex-start; gap:10px; margin:6px 0 10px; font-size:.95rem; color:#e6efff; }
+    .newsletter-row input[type="checkbox"]{ width:18px; height:18px; margin-top:2px; cursor:pointer; }
+
+    /* PC footer info pásik */
+    #desktopFooter{ display:none; }
+    @media (min-width:992px){
+      #desktopFooter{
+        display:block; position:fixed; left:0; right:0; bottom:0; height:var(--desk-footer-h);
+        padding:0 12px; background:rgba(7,18,44,.92); border-top:1px solid rgba(255,255,255,.12);
+        color:#cfe2ff; font-size:12px; line-height:var(--desk-footer-h); text-align:center; z-index:930;
       }
     }
 
-    /* drobná animácia kontajnera */
-    .fade-in { opacity:0; transform: translateY(20px); animation: fadeInUp .6s ease forwards; }
-    @keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
-
-    /* MarSab plávajúci badge vypnutý */
-    .brand-badge{ display:none !important; }
-
-    /* Hamburger – mobil */
-    .nav-toggle{ display:none; }
-    .burger{
-      position: absolute; left:12px; top:10px;
-      width:44px; height:44px; display:none; align-items:center; justify-content:center;
-      border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; cursor:pointer;
-      background: transparent; z-index: 1001;
-    }
-    .burger svg{ width:22px; height:22px; }
-
-    @media (max-width: 767.98px){
-      .burger{ display:flex; }
-      .nav-scroller{
-        position: fixed; top: 0; right: 0; height: 100vh;
-        width: min(80vw, 320px);
-        background: #0c1f4b;
-        padding: 88px 16px 16px;
-        box-shadow: -24px 0 36px rgba(0,0,0,.35);
-        transform: translateX(100%);
-        transition: transform .25s ease;
-        z-index: 1000;
-      }
-      .nav-track{
-        flex-direction: column; gap: 10px; overflow: hidden; scroll-snap-type: none;
-        align-items: stretch; justify-content: flex-start;
-      }
-      .pill{ width:100% !important; height:44px; border-radius:14px; font-size:1rem; }
-      .nav-toggle:checked ~ .app-header .nav-scroller{ transform: translateX(0); }
-    }
-
-    /* ========== PC ONLY: neónové pulzujúce pásy pri okrajoch ========== */
+    /* ====== PC: neónové okraje ====== */
     @media (min-width: 992px){
       .neon-beams{
-        position: fixed; inset: var(--hdr-h) 0 0 0;  /* pod hlavičkou, po celej výške */
-        pointer-events: none; z-index: 0;            /* neklikateľné, úplne vzadu */
+        position: fixed; inset: 0 0 0 0; pointer-events: none; z-index: 0;
       }
       .beam{
-        position: absolute; top: 0; bottom: 0; width: 12vw; max-width: 180px;
+        position: absolute; top: 72px; bottom: var(--desk-footer-h);
+        width: 12vw; max-width: 180px;
         filter: blur(12px); opacity: .22;
         background:
           linear-gradient(180deg, rgba(33,102,214,0) 0%, rgba(33,102,214,.6) 50%, rgba(33,102,214,0) 100%),
           linear-gradient(90deg,  rgba(88,173,255,0) 0%, rgba(88,173,255,.55) 40%, rgba(88,173,255,0) 100%);
         animation: beamPulse 5.5s ease-in-out infinite, beamDrift 12s ease-in-out infinite;
-        will-change: opacity, transform;
       }
-      .beam.left{ left: 0; transform-origin: left center; }
-      .beam.right{ right: 0; transform-origin: right center; }
-
-      @keyframes beamPulse{
-        0%,100%{ opacity:.18; }
-        50%   { opacity:.32; }
-      }
-      @keyframes beamDrift{
-        0%,100%{ transform: translateY(0) scaleX(1); }
-        50%    { transform: translateY(-2%) scaleX(1.06); }
-      }
-
+      .beam.left{ left: 0; } .beam.right{ right: 0; }
+      @keyframes beamPulse{ 0%,100%{opacity:.18} 50%{opacity:.32} }
+      @keyframes beamDrift{ 0%,100%{transform:translateY(0) scaleX(1)} 50%{transform:translateY(-2%) scaleX(1.06)} }
       .glow{
         position:absolute; top:12%; width:18vw; max-width:240px; height:18vw; max-height:240px;
         background: radial-gradient(circle, rgba(88,173,255,.35) 0%, rgba(88,173,255,0) 60%);
         filter: blur(24px); opacity:.15; animation: glowPulse 7s ease-in-out infinite;
       }
-      .glow.left{ left:-6vw; }
-      .glow.right{ right:-6vw; animation-delay: 1.5s; }
-
-      @keyframes glowPulse{
-        0%,100%{ opacity:.10; transform: scale(1); }
-        50%    { opacity:.22; transform: scale(1.08); }
-      }
-    }
-
-    /* ===== Banner len na mobile; na desktope statický info pásik ===== */
-    @media (min-width: 992px){
-      #bannerSlot{ display: none !important; }
-    }
-    #desktopFooter{ display:none; }
-    @media (min-width: 992px){
-      #desktopFooter{
-        display:block;
-        position:fixed; left:0; right:0; bottom:0;
-        height:var(--desk-footer-h);
-        padding:0 12px;
-        background:rgba(7,18,44,.92);
-        backdrop-filter:blur(6px);
-        border-top:1px solid rgba(255,255,255,.12);
-        color:#cfe2ff; font-size:12px; line-height:var(--desk-footer-h);
-        text-align:center; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
-        z-index:930;
-      }
-    }
-
-    /* --- Newsletter row --- */
-    .newsletter-row{
-      display:flex; align-items:flex-start; gap:10px; margin:6px 0 10px;
-      font-size:.95rem; color:#e6efff;
-    }
-    .newsletter-row input[type="checkbox"]{
-      width:18px; height:18px; margin-top:2px; cursor:pointer;
-    }
-    .newsletter-row label{
-      cursor:pointer; line-height:1.35;
-    }
-    .newsletter-hint{
-      font-size:.82rem; color:#cfe2ffb0; margin-top:-6px; margin-bottom:8px;
+      .glow.left{ left:-6vw; } .glow.right{ right:-6vw; animation-delay:1.5s; }
+      @keyframes glowPulse{ 0%,100%{ opacity:.10; transform:scale(1) } 50%{ opacity:.22; transform:scale(1.08) } }
     }
   </style>
 </head>
 <body>
 
-  <input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
-
-  <header class="app-header" role="banner">
-    <div class="app-header-inner">
-      <a class="header-badge" href="#" aria-label="MarSab®">
-        <img src="img/marsab_logo.png" alt="">
-        <span class="wordmark">MarSab®</span>
-      </a>
-
-      <label for="menuToggle" class="burger" aria-label="Menu">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </label>
-
-      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
-      <div class="user-chip" id="userLabel">Prihlásený: …</div>
-
-      <nav class="nav-scroller" aria-label="Hlavné sekcie">
-        <div class="nav-track" id="navTrack">
-          <button class="pill" id="goCatalogBtn">Centrum hodnotenia</button>
-          <button class="pill" id="goTimelineBtn">Centrum Lištobook</button>
-          <button class="pill" id="goGameBtn">Centrum zábavy</button>
-          <button class="pill pill-danger" id="logoutBtn">Odhlásiť sa</button>
-        </div>
-      </nav>
-    </div>
-  </header>
-
-  <!-- PC ONLY: neonové pásy -->
+  <!-- PC okraje -->
   <div class="neon-beams" aria-hidden="true">
     <span class="beam left"></span>
     <span class="beam right"></span>
@@ -240,15 +94,30 @@
     <span class="glow right"></span>
   </div>
 
-  <!-- slot pre banner -->
+  <header class="app-header" role="banner">
+    <div class="app-header-inner">
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
+      <div class="user-chip" id="userLabel">Prihlásený: …</div>
+      <nav class="nav-scroller" aria-label="Hlavné sekcie">
+        <div class="nav-track">
+          <button class="pill" id="goTimelineBtn">Lištobook</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div id="nickWarning" class="warn" role="alert">
+    <strong>Najprv si zvoľ prezývku.</strong> Až potom sprístupníme ostatné sekcie.
+  </div>
+
   <div id="bannerSlot" aria-live="polite"></div>
-  <!-- PC: statický info pásik -->
+
   <div id="desktopFooter" role="contentinfo">
     Lištobook by Lištové centrum EU, s.r.o. ©, Sasinkova 13, 010 01 Žilina — 2025, verzia 1.0
   </div>
 
   <div class="scrollable-body">
-    <div class="main-content fade-in">
+    <div class="main-content">
 
       <div id="formInfo">
         Vitajte v našom Lištobooku.<br>
@@ -258,26 +127,43 @@
         prosím, aby ste nepoužívali vulgarizmy prípadne urážali ostatných. v takom prípade vás odhlásime.
       </div>
 
+      <h3 id="profileSection" class="section-title">Môj profil — rýchle nastavenia</h3>
+
+      <!-- AVATAR upload -->
+      <div class="avatar-row" style="margin:8px 0 10px;">
+        <img id="avatarPreview" alt="Avatar náhľad" />
+        <input type="file" id="avatarFile" accept="image/*" />
+      </div>
+
       <form id="userForm">
         <input type="text" id="name" placeholder="Prezývka" />
+        <input type="text" id="fullName" placeholder="Meno a priezvisko (voliteľné)" />
+        <textarea id="bio" placeholder="Krátke bio (voliteľné)" rows="3" style="resize:vertical"></textarea>
+
         <input type="text" id="note" placeholder="Mesto" />
 
-        <!-- Newsletter opt-in (voliteľný) -->
+        <input type="text" id="companyName" placeholder="Firma – názov" />
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="companyICO" placeholder="IČO" />
+          <input type="text" id="companyDIC" placeholder="DIČ" />
+          <input type="text" id="companyICDPH" placeholder="IČ DPH" />
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <input type="url" id="web" placeholder="Web (https://…)" />
+          <input type="url" id="instagram" placeholder="Instagram URL" />
+        </div>
+
         <div class="newsletter-row">
           <input type="checkbox" id="newsletterOptIn" />
-          <label for="newsletterOptIn">
-            Chcem dostávať nepravidelný newsletter e-mailom (voliteľné).
-          </label>
-        </div>
-        <div class="newsletter-hint">
-          Kedykoľvek si to môžeš vypnúť opäť tu v nastaveniach.
+          <label for="newsletterOptIn">Chcem dostávať nepravidelný newsletter e-mailom (voliteľné).</label>
         </div>
 
         <button type="submit">Uložiť údaje</button>
       </form>
 
-      <form id="passwordForm">
-        <h3>Zmena hesla</h3>
+      <form id="passwordForm" style="margin-top:18px;">
+        <h3 class="section-title" style="margin-top:0;">Zmena hesla</h3>
         <input type="password" id="oldPassword" placeholder="Staré heslo" />
         <input type="password" id="newPassword" placeholder="Nové heslo" />
         <input type="password" id="confirmPassword" placeholder="Potvrď nové heslo" />
@@ -288,72 +174,8 @@
     </div>
   </div>
 
-  <!-- Navigácia (ponechaná, len zmenený cieľ z game.html na entertainment.html) -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const email = new URLSearchParams(window.location.search).get("email");
-      const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
-      document.getElementById("goCatalogBtn")?.addEventListener("click", ()=> go("catalog.html"));
-      document.getElementById("goTimelineBtn")?.addEventListener("click", ()=> go("timeline.html"));
-      document.getElementById("goGameBtn")?.addEventListener("click", ()=> go("entertainment.html"));
-      document.getElementById("logoutBtn")?.addEventListener("click", () => { window.location.href = "index.html"; });
-    });
-  </script>
-
-  <!-- dopočet výšky hlavičky -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const header = document.querySelector('.app-header');
-      const setHdrH = () => {
-        if (!header) return;
-        const h = header.getBoundingClientRect().height;
-        document.documentElement.style.setProperty('--hdr-h', h + 'px');
-      };
-      setHdrH();
-      window.addEventListener('resize', setHdrH);
-    });
-  </script>
-
   <script src="/js/config.js"></script>
   <script src="dashboard.js"></script>
   <script src="banners.js"></script>
-
-  <!-- Banner: len na mobile -->
-  <script>
-    function mountBannerMobileOnly(slotId, options){
-      const mql  = window.matchMedia('(max-width: 991.98px)');
-      const slot = document.getElementById(slotId);
-      if (!slot) return;
-
-      function mount(){
-        if (slot.dataset.mounted || !window.mountBannerRotator) return;
-        slot.style.display = '';
-        window.mountBannerRotator(slotId, options);
-        slot.dataset.mounted = '1';
-      }
-      function unmount(){
-        slot.innerHTML = '';
-        slot.style.display = 'none';
-        delete slot.dataset.mounted;
-        document.documentElement.style.removeProperty('--banner-h');
-      }
-      function update(){ mql.matches ? mount() : unmount(); }
-
-      update();
-      if (mql.addEventListener) mql.addEventListener('change', update);
-      else mql.addListener(update);
-    }
-
-    document.addEventListener('DOMContentLoaded', ()=>{
-      mountBannerMobileOnly('bannerSlot', {
-        fixed: true,
-        position: 'bottom',
-        pushContent: true,
-        height: 160,
-        heightMobile: 120,
-        interval: 7000
-      });
-    });
-  </script>
 </body>
 </html>

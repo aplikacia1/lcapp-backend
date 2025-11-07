@@ -1,465 +1,283 @@
-// ───────────────────── Pomôcky ─────────────────────
-function getEmailFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("email") || "";
-}
-function $(sel, root = document) { return root.querySelector(sel); }
-function escapeHTML(str = "") {
-  return String(str || "").replace(/[&<>"']/g, m =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
-  );
-}
+// ────────── Pomôcky ──────────
+function getEmailFromURL(){ const p=new URLSearchParams(location.search); return p.get("email")||""; }
+function $(s,r=document){ return r.querySelector(s); }
+function esc(s=""){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 const scroller = document.scrollingElement || document.documentElement;
+const isAdmin = new URLSearchParams(location.search).get("admin")==="1";
 
-// Admin mód cez ?admin=1
-const isAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
+// fixný admin v zozname
+const FIXED_ADMIN = { email:"bratislava@listovecentrum.sk", name:"Lištové centrum", online:true };
 
-// FIXED admin položka – interne držíme email kvôli backendu, ale NEzobrazujeme ho
-const FIXED_ADMIN = {
-  email: "bratislava@listovecentrum.sk",
-  name: "Lištové centrum",
-  online: true
-};
-
-// Stav
-const userEmail = getEmailFromURL(); // len z URL, žiadny storage
+const userEmail = getEmailFromURL();
 let userData = null;
-let userScrollActive = false;
-let scrollIdleTO = null;
+if(!userEmail) location.href="index.html";
 
-if (!userEmail) { window.location.href = "index.html"; }
-
-// ───────────────── Dolný padding podľa výšky composeru ─────────────────
-function setComposerPadding() {
-  const bar = $("#composerBar");
-  const main = $(".main-content");
-  if (!bar || !main) return;
-  const h = bar.offsetHeight || 120;
-  main.style.paddingBottom = (h + 16) + "px";
+// ────────── UI helpers ──────────
+function setComposerPadding(){
+  const bar=$("#composerBar"), main=$(".main-content"); if(!bar||!main) return;
+  main.style.paddingBottom=(bar.offsetHeight||120)+16+"px";
 }
-function setPresenceBottom() {
-  const bar = $("#composerBar");
-  const panel = $("#presencePanel");
-  if (!bar || !panel) return;
-  const h = bar.offsetHeight || 120;
-  panel.style.maxHeight = `calc(100vh - var(--header-h) - ${h + 24}px)`;
+function openMessages(toName=null){
+  const to = toName?`&to=${encodeURIComponent(toName)}`:"";
+  const url=`messages.html?email=${encodeURIComponent(userEmail)}${to}${isAdmin?'&admin=1':''}`;
+  location.href=url;
 }
 
-// Navigácia
-function openMessages(){
-  const url = `messages.html?email=${encodeURIComponent(userEmail)}${isAdmin ? '&admin=1':''}`;
-  location.href = url;
-}
+// toast (super light)
+const toast = (msg)=> alert(msg);
 
-// → Otvorenie súkromného chatu podľa PREZÝVKY (nie e-mailu)
-function openPrivateChat(targetNickname){
-  if (!targetNickname) {
-    alert("Tento používateľ nemá nastavenú prezývku. Najprv ju musí pridať v nastaveniach účtu.");
-    return;
-  }
-  const url = `messages.html?email=${encodeURIComponent(userEmail)}&to=${encodeURIComponent(targetNickname)}${isAdmin ? '&admin=1':''}`;
-  window.location.href = url;
-}
-
-// 🔔 Badge – mapovanie podľa prezývky (lowercase)
-function formatBadge(n){
-  const num = Number(n||0);
-  if (num <= 0) return '';
-  return num > 9 ? '9+' : String(num);
-}
-function applyPresenceBadgesByName(mapByNameLower){
-  document.querySelectorAll('.presence-badge').forEach(el=>{
-    const key = String(el.dataset.key || '').toLowerCase(); // key = nameLower
-    const n = Number(mapByNameLower.get(key) || 0);
-    const text = formatBadge(n);
-    if (text){
-      el.textContent = text;
-      el.setAttribute('aria-label', `Neprečítané správy: ${n}`);
-      el.style.display = 'inline-flex';
-    }else{
-      el.textContent = '';
-      el.removeAttribute('aria-label');
-      el.style.display = 'none';
-    }
-  });
-}
-async function refreshPresenceCounts(){
-  if(!userEmail) return;
+// ────────── Načítanie užívateľa ──────────
+async function loadUserInfo(){
   try{
-    const res = await fetch(`/api/messages/conversations/${encodeURIComponent(userEmail)}`);
-    const rows = res.ok ? await res.json() : [];
-    // mapujeme podľa otherName (prezývka), nie podľa emailu
-    const m = new Map();
-    rows.forEach(r=>{
-      const key = String(r.otherName || '').toLocaleLowerCase('sk');
-      const v = Number(r.unread || 0);
-      if (key) m.set(key, v);
-    });
-    applyPresenceBadgesByName(m);
-  }catch{}
-}
-
-// Načítať údaje používateľa (bez zobrazovania e-mailu)
-async function loadUserInfo() {
-  try {
     const res = await fetch(`/api/users/${encodeURIComponent(userEmail)}`);
-    if (!res.ok) throw new Error("Používateľ sa nenašiel");
-    const data = await res.json();
-    userData = data;
-
-    const label = $("#loggedUser");
+    if(!res.ok) throw 0;
+    userData = await res.json();
+    const nice = (userData.name||'').trim() || "Anonym";
     const roleBadge = isAdmin ? " (admin mód)" : "";
-    const nice = (data.name && data.name.trim()) ? data.name.trim() : "Anonym";
-    if (label) label.textContent = `Prihlásený ako: ${nice}${roleBadge}`;
-
-    const logoutBtn = document.querySelector(".btn.btn--danger");
-    if (logoutBtn) logoutBtn.style.display = "inline-flex";
-  } catch (err) {
-    if (isAdmin) {
-      userData = { email: userEmail, name: "Admin" };
-      const label = $("#loggedUser");
-      if (label) label.textContent = `Prihlásený ako: Admin (admin mód)`;
-      const bar = $("#composerBar");
-      if (bar) bar.style.display = "none";
-    } else {
-      console.error("Chyba pri načítaní používateľa:", err);
-      alert("Používateľ sa nenašiel. Musíte sa znova prihlásiť.");
-      window.location.href = "index.html";
+    $("#loggedUser").textContent = `Prihlásený ako: ${nice}${roleBadge}`;
+    if(isAdmin){ $("#composerBar").style.display="none"; }
+  }catch{
+    if(isAdmin){
+      userData={ email:userEmail, name:"Admin" };
+      $("#loggedUser").textContent=`Prihlásený ako: Admin (admin mód)`;
+      $("#composerBar").style.display="none";
       return;
     }
-    const logoutBtn = document.querySelector(".btn.btn--danger");
-    if (logoutBtn) logoutBtn.style.display = "inline-flex";
+    alert("Používateľ sa nenašiel. Prihlás sa znova."); location.href="index.html";
   }
 }
 
-// Nevhodné slová
-const bannedWords = ["idiot", "debil", "hovno", "kurva", "kkt", "kokot"];
-function containsBannedWords(text) {
-  return bannedWords.some(word => String(text || '').toLowerCase().includes(word));
-}
-
-// ───────────────── Composer ─────────────────
-function initComposer() {
-  const form = $("#timelineForm");
-  if (!form) return;
-
-  const textInput = $("#postContent");
-  const fileInput = $("#postImage");
-  const attachBtn = $("#postImageBtn");
-  const submitBtn = $("#postSubmit");
-  const cnt = $("#composerCount");
-
-  const MAX = 300;
-  let selectedFile = null;
-
-  const updateUI = () => {
-    cnt.textContent = `${textInput.value.length} / ${MAX}`;
-    submitBtn.disabled = !textInput.value.trim() && !selectedFile;
-  };
-
-  attachBtn.addEventListener("click", () => fileInput.click());
-  fileInput.addEventListener("change", () => {
-    selectedFile = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
-    updateUI();
-    setComposerPadding(); setPresenceBottom();
-  });
-
-  ["input","keyup","change"].forEach(ev => {
-    textInput.addEventListener(ev, () => {
-      if (textInput.value.length > MAX) textInput.value = textInput.value.slice(0, MAX);
-      updateUI();
-    });
-  });
-
-  form.addEventListener("submit", async (e) => {
+// ────────── Composer ──────────
+function initComposer(){
+  const form=$("#timelineForm"); if(!form) return;
+  const text=$("#postContent"), file=$("#postImage"), add=$("#postImageBtn"), btn=$("#postSubmit"), cnt=$("#composerCount");
+  let selected=null; const MAX=300;
+  const up=()=>{ cnt.textContent=`${text.value.length} / ${MAX}`; btn.disabled = !text.value.trim() && !selected; };
+  add.addEventListener("click", ()=>file.click());
+  file.addEventListener("change", ()=>{ selected=file.files?.[0]||null; up(); setComposerPadding(); });
+  ["input","keyup","change"].forEach(ev=> text.addEventListener(ev, ()=>{ if(text.value.length>MAX) text.value=text.value.slice(0,MAX); up(); }));
+  form.addEventListener("submit", async (e)=>{
     e.preventDefault();
-
-    const text = (textInput.value || '').trim();
-    const image = fileInput.files[0] || null;
-
-    if (!userData || !userData.name || userData.name.trim() === "") {
-      alert("Na príspevok musíte mať vytvorenú prezývku v nastaveniach účtu.");
-      return;
-    }
-    if (!text && !image) { alert("Príspevok nemôže byť prázdny."); return; }
-    if (containsBannedWords(text)) { alert("Príspevok obsahuje nevhodné slová."); return; }
-
-    const formData = new FormData();
-    formData.append("email", userEmail);
-    formData.append("text", text);
-    if (image) formData.append("image", image);
-
-    submitBtn.disabled = true;
-    try {
-      const res = await fetch("/api/timeline/add", { method: "POST", body: formData });
-      const data = await res.json();
-      if (res.ok) {
-        textInput.value = ""; fileInput.value = ""; selectedFile = null;
-        updateUI(); loadPosts({ preserveScroll: true });
-      } else {
-        alert(data.message || "Chyba pri ukladaní príspevku.");
-      }
-    } catch (err) {
-      console.error("Chyba:", err);
-      alert("Server neodpovedá.");
-    } finally {
-      submitBtn.disabled = false;
-    }
+    const t=(text.value||"").trim(); const img=file.files?.[0]||null;
+    if(!userData?.name){ alert("Na príspevok potrebuješ prezývku."); return; }
+    if(!t && !img){ alert("Prázdny príspevok."); return; }
+    const fd=new FormData(); fd.append("email", userEmail); fd.append("text", t); if(img) fd.append("image", img);
+    btn.disabled=true;
+    try{
+      const r=await fetch("/api/timeline/add",{method:"POST",body:fd});
+      const d=await r.json(); if(r.ok){ text.value=""; file.value=""; selected=null; up(); loadPosts({preserve:true}); } else alert(d.message||"Chyba pri ukladaní.");
+    }catch{ alert("Server neodpovedá."); } finally{ btn.disabled=false; }
   });
-
-  updateUI();
+  up();
 }
 
-// ── Drafty komentárov
-function collectCommentDrafts(){
-  const drafts = {};
-  document.querySelectorAll('form.commentForm').forEach(f=>{
-    const postId = f.getAttribute('data-id');
-    const val = (f.comment?.value || '').trim();
-    if (postId && val) drafts[postId] = val;
-  });
-  return drafts;
-}
-function applyCommentDrafts(drafts = {}){
-  Object.entries(drafts).forEach(([postId, val])=>{
-    const form = document.querySelector(`form.commentForm[data-id="${postId}"]`);
-    if (form && form.comment) form.comment.value = val;
-  });
+// ────────── Posts ──────────
+function authorAvatarURL(name){
+  // server dopĺňa avatar do usera; fallback lokálny
+  return `/api/users/public/by-name/${encodeURIComponent(name)}`;
 }
 
-// ───────────────── Načítať príspevky ─────────────────
-async function loadPosts(opts = {}) {
-  const preserveScroll = !!opts.preserveScroll;
-  const postFeed = $("#postFeed");
+async function loadPosts(opts={}){
+  const preserve=!!opts.preserve; const feed=$("#postFeed");
+  const prevY = preserve ? (scroller.scrollTop||0) : 0;
 
-  const drafts = collectCommentDrafts();
-  const prevScrollY = preserveScroll ? (scroller.scrollTop || 0) : 0;
+  const drafts={}; document.querySelectorAll('form.commentForm').forEach(f=>{const id=f.dataset.id; const v=(f.comment?.value||'').trim(); if(id&&v) drafts[id]=v;});
 
-  try {
-    const res = await fetch("/api/timeline");
-    const posts = await res.json();
-    postFeed.innerHTML = "";
+  try{
+    const r=await fetch("/api/timeline"); const posts=await r.json(); feed.innerHTML="";
+    posts.forEach(p=>{
+      const author=esc(p.author||"Anonym"), text=esc(p.text||""); const comments=Array.isArray(p.comments)?p.comments:[];
+      const canDel = isAdmin || (userData?.name && userData.name===p.author);
 
-    posts.forEach(post => {
-      const author   = escapeHTML(post.author || "Anonym");
-      const text     = escapeHTML(post.text || "");
-      const comments = Array.isArray(post.comments) ? post.comments : [];
-
-      const canDeletePost = isAdmin || (userData && userData.name && userData.name === post.author);
-
-      const el = document.createElement("div");
-      el.className = "post";
-      el.dataset.id = post._id;
-
-      el.innerHTML = `
+      const el=document.createElement("div"); el.className="post"; el.dataset.id=p._id;
+      el.innerHTML=`
         <div class="post-head">
-          <strong>${author}</strong>
-          ${canDeletePost ? `<button class="link-btn post-delete" data-id="${post._id}">Zmazať</button>` : ""}
+          <div class="post-author">
+            <img class="avatar" src="/img/avatar_default.png" alt="" data-author="${esc(p.author||'Anonym')}">
+            <strong>${author}</strong>
+          </div>
+          ${canDel?`<button class="link-btn post-delete" data-id="${p._id}">Zmazať</button>`:""}
         </div>
-        ${text ? `<p>${text}</p>` : ""}
-        ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" alt="Obrázok príspevku" loading="lazy">` : ""}
+        ${text?`<p>${text}</p>`:""}
+        ${p.imageUrl?`<img src="${p.imageUrl}" class="post-image" alt="Obrázok príspevku" loading="lazy">`:""}
         <div class="comments">
           <ul>
-            ${(comments || []).map(c => {
-              const canDeleteComment = (isAdmin || (userData && userData.name && (userData.name === c.author))) && c._id;
-              return `
-                <li>
-                  <span class="comment-text"><strong>${escapeHTML(c.author || "Anonym")}</strong>: ${escapeHTML(c.text || "")}</span>
-                  <span class="comment-actions">
-                    ${canDeleteComment ? `<button class="link-btn comment-delete" data-post="${post._id}" data-id="${c._id}">Zmazať</button>` : ""}
-                  </span>
-                </li>`;
+            ${(comments||[]).map(c=>{
+              const cDel = (isAdmin || (userData?.name && userData.name===c.author)) && c._id;
+              return `<li>
+                <span class="comment-text"><strong>${esc(c.author||"Anonym")}</strong>: ${esc(c.text||"")}</span>
+                <span class="comment-actions">${cDel?`<button class="link-btn comment-delete" data-post="${p._id}" data-id="${c._id}">Zmazať</button>`:""}</span>
+              </li>`;
             }).join("")}
           </ul>
-          ${(!isAdmin && userData && userData.name) ? `
-            <form class="commentForm" data-id="${post._id}">
+          ${(!isAdmin && userData?.name)?`
+            <form class="commentForm" data-id="${p._id}">
               <input type="text" name="comment" placeholder="Komentár..." required maxlength="300">
               <button type="submit">Pridať</button>
-            </form>` : (isAdmin ? '' : `<p>Len prihlásení používatelia s prezývkou môžu komentovať.</p>`)}
-        </div>
-      `;
-      postFeed.appendChild(el);
+            </form>`:(isAdmin?"":`<p>Len prihlásení s prezývkou môžu komentovať.</p>`)}
+        </div>`;
+      feed.appendChild(el);
     });
 
+    // doplň avatary (rýchle – GET public profil len na meno)
+    document.querySelectorAll('img.avatar[data-author]').forEach(async img=>{
+      const nick = img.getAttribute('data-author');
+      if(!nick) return;
+      try{
+        const res = await fetch(`/api/users/public/by-name/${encodeURIComponent(nick)}`);
+        if(!res.ok) return;
+        const u = await res.json();
+        if(u?.avatarUrl) img.src = u.avatarUrl;
+      }catch{}
+    });
+
+    // vráť scroll
+    if(preserve){ requestAnimationFrame(()=>{ scroller.scrollTo({top:prevY,left:0,behavior:"auto"}); }); }
     setComposerPadding();
-    setPresenceBottom();
-
-    applyCommentDrafts(drafts);
-
-    if (preserveScroll) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          scroller.scrollTo({ top: prevScrollY, left: 0, behavior: "auto" });
-        });
-      });
-    }
-  } catch (err) {
-    console.error("Chyba pri načítaní príspevkov", err);
-  }
+  }catch(e){ console.error(e); }
 }
 
-// ───────────────── Komentovanie / mazanie ─────────────────
-document.addEventListener("submit", async (e) => {
-  const form = e.target;
-  if (form.classList && form.classList.contains("commentForm")) {
-    e.preventDefault();
-    const postId = form.getAttribute("data-id");
-    const commentText = (form.comment.value || "").trim();
-
-    if (containsBannedWords(commentText)) { alert("Komentár obsahuje nevhodné slová."); return; }
-
-    try {
-      const response = await fetch(`/api/timeline/comment/${postId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail, text: commentText })
-      });
-      const data = await response.json();
-
-      if (response.ok) loadPosts({ preserveScroll: true });
-      else alert(data.message || "Chyba pri ukladaní komentára.");
-    } catch (err) { alert("Server neodpovedá."); }
-  }
+// komentár submit
+document.addEventListener("submit", async (e)=>{
+  const f=e.target;
+  if(!f.classList?.contains("commentForm")) return;
+  e.preventDefault();
+  const id=f.dataset.id; const txt=(f.comment.value||"").trim(); if(!txt) return;
+  try{
+    const r=await fetch(`/api/timeline/comment/${id}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:userEmail,text:txt})});
+    const d=await r.json(); if(r.ok) loadPosts({preserve:true}); else alert(d.message||"Chyba pri ukladaní komentára.");
+  }catch{ alert("Server neodpovedá."); }
 });
 
-document.addEventListener("click", async (e) => {
-  const postBtn = e.target.closest(".post-delete");
-  if (postBtn) {
-    const id = postBtn.getAttribute("data-id");
-    if (!confirm("Zmazať tento príspevok?")) return;
-    const url = isAdmin ? `/api/admin/timeline/posts/${id}` : `/api/timeline/${id}`;
-    try {
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: { "Content-Type":"application/json" },
-        body: isAdmin ? undefined : JSON.stringify({ email: userEmail })
-      });
-      const data = await res.json().catch(()=>({}));
-      if (res.ok) loadPosts({ preserveScroll: true });
-      else alert((data && data.message) || "Mazanie príspevku zlyhalo.");
-    } catch { alert("Server neodpovedá."); }
-  }
-
-  const cBtn = e.target.closest(".comment-delete");
-  if (cBtn) {
-    const postId = cBtn.getAttribute("data-post");
-    const commentId = cBtn.getAttribute("data-id");
-    if (!confirm("Zmazať tento komentár?")) return;
-    const url = isAdmin ? `/api/admin/timeline/posts/${postId}/comments/${commentId}`
-                        : `/api/timeline/comment/${postId}/${commentId}`;
-    try {
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: { "Content-Type":"application/json" },
-        body: isAdmin ? undefined : JSON.stringify({ email: userEmail })
-      });
-      const data = await res.json().catch(()=>({}));
-      if (res.ok) loadPosts({ preserveScroll: true });
-      else alert((data && data.message) || "Mazanie komentára zlyhalo.");
-    } catch { alert("Server neodpovedá."); }
-  }
-
-  // Klik v pravom zozname → otvor chat podľa prezývky
-  const presenceItem = e.target.closest(".presence-item");
-  if (presenceItem) {
-    const targetNick = (presenceItem.dataset.name || '').trim();
-    if (!targetNick) return;
-    // klik na seba → otvoríme všeobecné správy
-    const selfNick = (userData?.name || '').trim();
-    if (selfNick && targetNick.toLocaleLowerCase('sk') === selfNick.toLocaleLowerCase('sk')) {
-      openMessages();
-    } else {
-      openPrivateChat(targetNick);
-    }
-  }
-});
-
-// ───────────────── Online presence ─────────────────
-async function startPresenceHeartbeat(){
-  const ping = async () => {
+// mazanie post/komentár + klik na používateľa (profil)
+document.addEventListener("click", async (e)=>{
+  const pBtn=e.target.closest(".post-delete");
+  if(pBtn){
+    const id=pBtn.dataset.id; if(!confirm("Zmazať tento príspevok?")) return;
+    const url = isAdmin?`/api/admin/timeline/posts/${id}`:`/api/timeline/${id}`;
     try{
-      await fetch('/api/presence/ping', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: userEmail })
-      });
-    }catch{}
-  };
-  await ping();
-  setInterval(ping, 30000);
+      const r=await fetch(url,{method:"DELETE",headers:{"Content-Type":"application/json"},body:isAdmin?undefined:JSON.stringify({email:userEmail})});
+      const d=await r.json().catch(()=>({})); if(r.ok) loadPosts({preserve:true}); else alert(d.message||"Mazanie zlyhalo.");
+    }catch{ alert("Server neodpovedá."); }
+    return;
+  }
+
+  const cBtn=e.target.closest(".comment-delete");
+  if(cBtn){
+    const postId=cBtn.dataset.post, cid=cBtn.dataset.id; if(!confirm("Zmazať tento komentár?")) return;
+    const url=isAdmin?`/api/admin/timeline/posts/${postId}/comments/${cid}`:`/api/timeline/comment/${postId}/${cid}`;
+    try{
+      const r=await fetch(url,{method:"DELETE",headers:{"Content-Type":"application/json"},body:isAdmin?undefined:JSON.stringify({email:userEmail})});
+      const d=await r.json().catch(()=>({})); if(r.ok) loadPosts({preserve:true}); else alert(d.message||"Mazanie komentára zlyhalo.");
+    }catch{ alert("Server neodpovedá."); }
+    return;
+  }
+
+  // klik na používateľa v pravej lište → PROFIL
+  const li=e.target.closest(".presence-item");
+  if(li){
+    const targetNick=(li.dataset.name||"").trim();
+    if(!targetNick) return;
+    openProfileCard(targetNick);
+  }
+});
+
+// ────────── Presence ──────────
+async function startPresenceHeartbeat(){
+  const ping=async()=>{ try{ await fetch('/api/presence/ping',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:userEmail})}); }catch{} };
+  await ping(); setInterval(ping,30000);
 }
 async function refreshPresence(){
   try{
-    const res = await fetch('/api/presence');
-    if(!res.ok) return;
-    const users = await res.json();
-    renderPresence(users);
-    // doplň badge z konverzácií (podľa prezývky)
-    refreshPresenceCounts();
-  }catch(e){}
+    const r=await fetch('/api/presence'); if(!r.ok) return;
+    const users=await r.json(); renderPresence(users);
+    // unread badge podľa mena (už máš /js/unread-badge.js pre hlavný badge)
+  }catch{}
 }
 function renderPresence(users){
-  const ul = $("#presenceList");
-  if(!ul) return;
-
-  const seen = new Set();
-  const unique = [];
-  ([FIXED_ADMIN, ...(Array.isArray(users)?users:[])]).forEach(u=>{
-    if (!u) return;
-    const key = String(u.email || u.name || Math.random()).toLowerCase();
-    if (seen.has(key)) return;
-    seen.add(key);
-    unique.push(u);
+  const ul=$("#presenceList"); if(!ul) return;
+  const seen=new Set(); const list=[FIXED_ADMIN, ...(Array.isArray(users)?users:[])];
+  const unique=[];
+  list.forEach(u=>{
+    if(!u) return;
+    const key=String(u.email||u.name||Math.random()).toLowerCase();
+    if(seen.has(key)) return; seen.add(key); unique.push(u);
   });
-
-  ul.innerHTML = unique.map(u => {
-    const rawName = String(u.name || '').trim();
-    const display = rawName || "Anonym"; // nikdy nezobraz email
-    const nameLower = display.toLocaleLowerCase('sk');
-
-    // data-key = nameLower (na párovanie badge), data-name = display (na navigáciu)
-    return `
-      <li class="presence-item"
-          data-name="${escapeHTML(display)}"
-          data-key="${escapeHTML(nameLower)}">
-        <span class="dot ${u.online ? 'online':''}"></span>
-        <span class="presence-name">${escapeHTML(display)}${(userData?.name && display === userData.name) ? ' (ty)' : ''}</span>
-        <span class="presence-badge" data-key="${escapeHTML(nameLower)}"></span>
-      </li>
-    `;
+  const selfNick=(userData?.name||"").trim();
+  ul.innerHTML = unique.map(u=>{
+    const display=(String(u.name||"").trim()) || "Anonym";
+    const nameLower=display.toLocaleLowerCase('sk');
+    return `<li class="presence-item" data-name="${esc(display)}" data-key="${esc(nameLower)}">
+      <span class="dot ${u.online?'online':''}"></span>
+      <span class="presence-name">${esc(display)}${(selfNick && display===selfNick)?' (ty)':''}</span>
+      <span class="presence-badge" data-key="${esc(nameLower)}"></span>
+    </li>`;
   }).join('');
 }
 
-// Odhlásenie
-window.logout = () => { window.location.href = "index.html"; };
+// ────────── PROFIL – modal ──────────
+function showProfileModal(){ $("#profileBackdrop").style.display="flex"; }
+function hideProfileModal(){ $("#profileBackdrop").style.display="none"; }
+$("#profileCloseBtn")?.addEventListener("click", hideProfileModal);
+$("#profileBackdrop")?.addEventListener("click", (e)=>{ if(e.target.id==="profileBackdrop") hideProfileModal(); });
 
-// Auto-refresh guardy
-function isTyping() {
-  const a = document.activeElement;
-  if (!a) return false;
-  const tag = (a.tagName || '').toLowerCase();
-  return (tag === 'input' || tag === 'textarea');
+async function openProfileCard(nick){
+  try{
+    const res=await fetch(`/api/users/public/by-name/${encodeURIComponent(nick)}`);
+    let data=null; if(res.ok) data=await res.json();
+    $("#profileName").textContent = data?.name || nick;
+    $("#profileCity").textContent = data?.city || "—";
+    $("#profileBio").textContent  = data?.bio  || "";
+    $("#profileCompany").textContent = data?.company || "";
+    $("#profileBioRow").style.display = data?.bio ? "" : "none";
+    $("#profileCompanyRow").style.display = data?.company ? "" : "none";
+    $("#profileEmptyRow").style.display = (data && (data.city||data.bio||data.company||data.avatarUrl)) ? "none" : "";
+
+    const avatar = data?.avatarUrl || "/img/avatar_default.png";
+    $("#profileAvatar").src = avatar;
+
+    // tlačidlá
+    $("#profileMsgBtn").onclick = ()=> openMessages(nick);
+    $("#profileEditBtn").style.display = (userData?.name && userData.name.toLocaleLowerCase('sk')===nick.toLocaleLowerCase('sk')) ? "" : "none";
+    $("#profileEditBtn").onclick = ()=> location.href=`dashboard.html?email=${encodeURIComponent(userEmail)}`;
+
+    showProfileModal();
+  }catch{
+    $("#profileName").textContent = nick;
+    $("#profileCity").textContent = "—";
+    $("#profileAvatar").src = "/img/avatar_default.png";
+    $("#profileBioRow").style.display = "none";
+    $("#profileCompanyRow").style.display = "none";
+    $("#profileEmptyRow").style.display = "";
+    showProfileModal();
+  }
 }
-window.addEventListener('scroll', () => {
-  userScrollActive = true;
-  clearTimeout(scrollIdleTO);
-  scrollIdleTO = setTimeout(() => { userScrollActive = false; }, 400);
-}, { passive: true });
 
-// ───────────────── Inicializácia ─────────────────
-document.addEventListener("DOMContentLoaded", async () => {
-  setComposerPadding();
-  setPresenceBottom();
-  window.addEventListener("resize", () => { setComposerPadding(); setPresenceBottom(); });
+// ────────── Navigácia + init ──────────
+document.addEventListener("DOMContentLoaded", async ()=>{
+  const setHdr=()=>{ const h=$(".app-header")?.getBoundingClientRect().height||96; document.documentElement.style.setProperty('--hdr-h',h+'px'); };
+  setHdr(); addEventListener('resize', setHdr);
+
+  const email=userEmail;
+  const go=(p)=>{ location.href = email? `${p}?email=${encodeURIComponent(email)}` : p; };
+  $("#goBackBtn")?.addEventListener("click", ()=>go('catalog.html'));
+  $("#gameBtn")?.addEventListener("click", ()=>go('entertainment.html'));
+  $("#accountBtn")?.addEventListener("click", ()=>go('dashboard.html'));
+  $("#logoutBtn")?.addEventListener("click", ()=>{ location.href='index.html'; });
+
+  // mobil toggles
+  const navChk=$("#navToggle"), pplChk=$("#peopleToggle"), burger=$("#burgerBtn"), ppl=$("#peopleBtn");
+  const anyOpen=()=>!!(navChk?.checked||pplChk?.checked); const lock=()=>document.body.classList.toggle('no-scroll', anyOpen());
+  burger?.addEventListener('click',(e)=>{ e.stopPropagation(); navChk.checked=!navChk.checked; if(navChk.checked) pplChk.checked=false; lock(); });
+  ppl?.addEventListener('click',(e)=>{ e.stopPropagation(); pplChk.checked=!pplChk.checked; if(pplChk.checked) navChk.checked=false; lock(); });
+  document.addEventListener('click',(e)=>{ const inH=e.target.closest('.app-header'); const inL=e.target.closest('.nav-scroller'); const inR=e.target.closest('.presence-panel'); if(!inH && !inL && !inR){ navChk.checked=false; pplChk.checked=false; lock(); }},{passive:true});
 
   await loadUserInfo();
-  if (!isAdmin) initComposer();
+  if(!isAdmin) initComposer();
   await loadPosts();
 
-  // Presence
   startPresenceHeartbeat();
   refreshPresence();
   setInterval(refreshPresence, 10000);
-
-  // 🔔 badge neprečítaných (globál)
-  // (globálnu pilulku/číslo necháva tvoj /js/unread-badge.js)
+  setComposerPadding();
 });
