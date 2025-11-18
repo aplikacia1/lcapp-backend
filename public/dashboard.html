@@ -23,8 +23,11 @@
 
     .nav-scroller{ padding:0 var(--pad-x); width:100%; }
     .nav-track{ display:flex; gap:8px; justify-content:center; }
-    .pill{ height:38px; padding:8px 14px; border-radius:16px;
-      border:1px solid rgba(255,255,255,.35); background:#fff; color:#0c1f4b; cursor:pointer; }
+    .pill{
+      height:38px; padding:8px 14px; border-radius:16px;
+      border:1px solid rgba(255,255,255,.35);
+      background:#fff; color:#0c1f4b; cursor:pointer;
+    }
 
     /* OBSAH */
     .scrollable-body .main-content{
@@ -98,9 +101,11 @@
     <div class="app-header-inner">
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userLabel">Prihlásený: …</div>
+
+      <!-- *** JEDNOTNÁ NAVIGÁCIA so smajlíkmi *** -->
       <nav class="nav-scroller" aria-label="Hlavné sekcie">
         <div class="nav-track">
-          <button class="pill" id="goTimelineBtn">Lištobook</button>
+          <button class="pill" id="goTimelineBtn">⬅️ Lištobook</button>
         </div>
       </nav>
     </div>
