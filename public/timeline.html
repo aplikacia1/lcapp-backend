@@ -18,14 +18,25 @@
     body.no-scroll{overflow:hidden}
 
     /* HLAVIČKA */
-    .app-header{position:fixed;inset:0 0 auto 0;z-index:1000;background:#0c1f4b;border-bottom:1px solid rgba(255,255,255,.15)}
+    .app-header{
+      position:fixed;inset:0 0 auto 0;
+      z-index:1010; /* nad backdropom */
+      background:#0c1f4b;
+      border-bottom:1px solid rgba(255,255,255,.15)
+    }
     .app-header-inner{max-width:var(--max-w);margin:0 auto;padding:8px var(--pad-x);display:flex;flex-direction:column;align-items:center;position:relative}
     .logo-small{display:block;height:48px;margin:2px auto 6px}
     .user-chip{color:#cfe2ff;font-size:.95rem;margin-bottom:8px}
 
     /* mobil toggles */
     .nav-toggle,.people-toggle{display:none}
-    .burger,.people{position:absolute;top:10px;width:44px;height:44px;display:none;align-items:center;justify-content:center;border:1px solid #ffffff33;border-radius:10px;color:#e7eefc;background:transparent;cursor:pointer;z-index:1010}
+    .burger,.people{
+      position:absolute;top:10px;width:44px;height:44px;
+      display:none;align-items:center;justify-content:center;
+      border:1px solid #ffffff33;border-radius:10px;
+      color:#e7eefc;background:transparent;
+      cursor:pointer;z-index:1011;
+    }
     .burger{left:12px}.people{right:12px}
     .burger svg,.people svg{width:22px;height:22px}
     @media (max-width:767.98px){.burger,.people{display:flex}}
@@ -306,11 +317,10 @@
     /* --- Backdrop pre off-canvas (klikom zavrie) --- */
     .oc-backdrop{
       display:none;position:fixed;inset:0;
-      z-index:1001; /* NIŽŠIE ako nav (1002) a presence panel (1005) */
+      z-index:1003; /* nad obsahom, POD hlavičkou a panelom */
       background:rgba(0,0,0,.3);
       -webkit-tap-highlight-color: transparent;
     }
-    /* viditeľný len keď je otvorené niektoré off-canvas menu */
     body.open-nav .oc-backdrop,
     body.open-people .oc-backdrop{display:block}
   </style>
@@ -318,7 +328,7 @@
   <link rel="stylesheet" href="/css/timeline.comment-fix.css?v=fixA1">
 </head>
 <body>
-  <!-- skryté checkboxy (už len ako zvyšok, JS ide cez triedy na body) -->
+  <!-- skryté checkboxy (zvyšok) -->
   <input type="checkbox" id="navToggle" class="nav-toggle" aria-hidden="true" />
   <input type="checkbox" id="peopleToggle" class="people-toggle" aria-hidden="true" />
 
