@@ -42,19 +42,31 @@
     .pill-danger{background:#ff4d4d;color:#fff;border-color:#ff4d4d}
     @media (min-width:768px){.nav-track{overflow:visible}.pill{flex:0 0 auto;width:auto!important}}
 
-    /* off-canvas (mobil) */
+    /* off-canvas (mobil – viz triedy na body) */
     @media (max-width:767.98px){
-      .app-header .nav-scroller{position:fixed;top:0;left:0;height:100vh;width:min(80vw,320px);background:#0c1f4b;padding:88px 16px 16px;box-shadow:24px 0 36px rgba(0,0,0,.35);transform:translateX(-100%);transition:transform .25s ease;z-index:1002}
+      .app-header .nav-scroller{
+        position:fixed;top:0;left:0;height:100vh;width:min(80vw,320px);
+        background:#0c1f4b;padding:88px 16px 16px;
+        box-shadow:24px 0 36px rgba(0,0,0,.35);
+        transform:translateX(-100%);
+        transition:transform .25s ease;
+        z-index:1002;
+      }
       .nav-track{flex-direction:column;gap:10px;overflow:hidden}
       .pill{width:100%!important;height:44px;font-size:1rem;border-radius:14px}
-      #navToggle:checked ~ .app-header .nav-scroller{transform:translateX(0)}
     }
 
     /* OBSAH */
     .main-content{width:100%;max-width:var(--max-w);margin:24px auto;padding:0 var(--gap);padding-bottom:200px;position:relative;z-index:1}
 
     /* pravý panel – účastníci */
-    .presence-panel{position:fixed;right:24px;top:calc(var(--hdr-h) + 16px);width:260px;max-height:calc(100vh - var(--hdr-h) - 120px);overflow:auto;background:#fff;border:1px solid #e8e8e8;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:10px;z-index:1005;color:#111}
+    .presence-panel{
+      position:fixed;right:24px;top:calc(var(--hdr-h) + 16px);
+      width:260px;max-height:calc(100vh - var(--hdr-h) - 120px);overflow:auto;
+      background:#fff;border:1px solid #e8e8e8;border-radius:12px;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);padding:10px;
+      z-index:1005;color:#111;
+    }
     .presence-title{font-weight:700;color:#0c1f4b;margin-bottom:2px}
     .presence-hint{font-size:.85rem;color:#4b5a86;margin:0 0 8px 0}
     .presence-list{list-style:none;padding:0;margin:0}
@@ -64,12 +76,21 @@
     .dot{width:10px;height:10px;border-radius:50%;background:#bbb;box-shadow:0 0 0 2px #fff inset,0 0 0 1px #ddd}
     .dot.online{background:#22c55e}
     .presence-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .presence-badge{margin-left:auto;min-width:18px;height:18px;padding:0 6px;border-radius:999px;background:#ffcc00;color:#111;font-weight:800;font-size:12px;display:none;align-items:center;justify-content:center}
+    .presence-badge{
+      margin-left:auto;min-width:18px;height:18px;padding:0 6px;border-radius:999px;
+      background:#ffcc00;color:#111;font-weight:800;font-size:12px;
+      display:none;align-items:center;justify-content:center;
+    }
     .presence-badge:empty{display:none}
     @media (max-width:1200px){.presence-panel{display:none}}
     @media (max-width:767.98px){
-      .presence-panel{display:block;right:0;top:0;height:100vh;width:min(80vw,320px);border-radius:0;padding:88px 12px 12px;transform:translateX(100%);box-shadow:-24px 0 36px rgba(0,0,0,.35);z-index:1005;transition:transform .25s ease}
-      #peopleToggle:checked ~ .presence-panel{transform:translateX(0)}
+      .presence-panel{
+        display:block;right:0;top:0;height:100vh;width:min(80vw,320px);
+        border-radius:0;padding:88px 12px 12px;
+        transform:translateX(100%);
+        box-shadow:-24px 0 36px rgba(0,0,0,.35);
+        z-index:1005;transition:transform .25s ease;
+      }
     }
 
     /* feed */
@@ -78,56 +99,202 @@
     .post-image{max-width:100%;height:auto;border-radius:10px;margin-top:8px}
     .post-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
     .post-author{display:flex;align-items:center;gap:10px}
-    .post-author .avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:0 0 28px;background:#e9eefc;border:1px solid #e5e9f8}
+    .post-author .avatar{
+      width:28px;height:28px;border-radius:50%;object-fit:cover;
+      flex:0 0 28px;background:#e9eefc;border:1px solid #e5e9f8;
+    }
 
     .comments{margin-top:8px}
     .comments ul{list-style:none;padding-left:0;margin:0 0 8px 0}
-    .comments li{padding:4px 0;border-bottom:1px dotted #eee;color:#111;display:flex;justify-content:space-between;gap:8px}
+    .comments li{
+      padding:4px 0;border-bottom:1px dotted #eee;color:#111;
+      display:flex;justify-content:space-between;gap:8px;
+    }
     .comment-text{flex:1;min-width:0}
-    .link-btn{background:transparent;border:none;color:#0c1f4b;cursor:pointer;padding:4px 8px;border-radius:8px}
+    .link-btn{
+      background:transparent;border:none;color:#0c1f4b;cursor:pointer;
+      padding:4px 8px;border-radius:8px;
+    }
     .link-btn:hover{background:rgba(12,31,75,.08)}
 
     /* spodná lišta + banner/info */
-    .composer-bar{position:fixed;left:0;right:0;bottom:0;z-index:950;background:#0c1f4b;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:center;padding:10px 12px}
-    .composer-wrap{width:100%;max-width:var(--max-w);padding:0 var(--gap);display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
+    .composer-bar{
+      position:fixed;left:0;right:0;bottom:0;z-index:950;
+      background:#0c1f4b;border-top:1px solid rgba(255,255,255,.12);
+      display:flex;justify-content:center;padding:10px 12px;
+    }
+    .composer-wrap{
+      width:100%;max-width:var(--max-w);padding:0 var(--gap);
+      display:flex;flex-direction:column;gap:10px;
+      position:relative;z-index:1;
+    }
     .composer{background:#fff;border:1px solid #eee;border-radius:14px;padding:10px}
     .composer-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
-    .input-group{display:flex;align-items:center;gap:8px;width:100%;background:var(--ui-bg);border:1px solid var(--ui-border);border-radius:12px;padding:6px 8px;box-sizing:border-box}
-    #timelineForm .composer-input{flex:1 1 auto;min-width:0;height:28px;padding:0 8px;border:none;outline:none;background:transparent;color:#111;caret-color:#111;font-weight:500}
+    .input-group{
+      display:flex;align-items:center;gap:8px;width:100%;
+      background:var(--ui-bg);border:1px solid var(--ui-border);
+      border-radius:12px;padding:6px 8px;box-sizing:border-box;
+    }
+    #timelineForm .composer-input{
+      flex:1 1 auto;min-width:0;height:28px;padding:0 8px;
+      border:none;outline:none;background:transparent;
+      color:#111;caret-color:#111;font-weight:500;
+    }
     #composerCount{margin-left:6px;font-size:12px;color:#667;white-space:nowrap}
-    .button{height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;border:1px solid var(--ui-border);border-radius:12px;background:var(--ui-bg);color:#0c1f4b;cursor:pointer;white-space:nowrap}
+    .button{
+      height:40px;display:inline-flex;align-items:center;justify-content:center;
+      padding:0 12px;border:1px solid var(--ui-border);border-radius:12px;
+      background:var(--ui-bg);color:#0c1f4b;cursor:pointer;white-space:nowrap;
+    }
     .button:hover{background:var(--ui-bg-hover)}
     .button--icon{width:48px;padding:0;font-size:18px}
 
-    .mini-banner{height:90px;border-radius:14px;overflow:hidden;box-shadow:0 8px 18px rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.18);background:#061c47}
+    .mini-banner{
+      height:90px;border-radius:14px;overflow:hidden;
+      box-shadow:0 8px 18px rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.18);background:#061c47;
+    }
     .mini-banner img{width:100%;height:100%;object-fit:cover;display:block}
     @media (min-width:992px){#miniBannerSlot{display:none!important}}
 
     .desktop-infobar{display:none}
     @media (min-width:992px){
-      .desktop-infobar{display:block;height:30px;line-height:30px;text-align:center;font-size:12px;color:#cfe2ff;background:rgba(7,18,44,.92);border:1px solid rgba(255,255,255,.12);border-radius:10px;backdrop-filter:blur(6px)}
+      .desktop-infobar{
+        display:block;height:30px;line-height:30px;text-align:center;
+        font-size:12px;color:#cfe2ff;
+        background:rgba(7,18,44,.92);
+        border:1px solid rgba(255,255,255,.12);border-radius:10px;
+        backdrop-filter:blur(6px);
+      }
+    }
+
+    /* PROFIL – MODAL */
+    .profile-backdrop{
+      position:fixed;inset:0;
+      display:none;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.45);
+      z-index:1100;
+    }
+    .profile-modal{
+      width:100%;max-width:360px;
+      background:#fff;color:#111;
+      border-radius:16px;
+      padding:16px 18px 14px;
+      box-shadow:0 18px 36px rgba(0,0,0,.45);
+      box-sizing:border-box;
+      position:relative;
+    }
+    .profile-header{
+      display:flex;align-items:center;gap:10px;
+      margin-bottom:10px;
+    }
+    .profile-avatar{
+      width:52px;height:52px;border-radius:50%;object-fit:cover;
+      background:#e9eefc;border:1px solid #d4dcf8;flex-shrink:0;
+    }
+    .profile-name{font-weight:700;color:#0c1f4b}
+    .profile-city{font-size:.9rem;color:#4b5a86}
+    .profile-row{margin-bottom:6px}
+    .profile-label{
+      font-size:.8rem;text-transform:uppercase;
+      letter-spacing:.03em;color:#6b7280;margin-bottom:2px;
+    }
+    .profile-value{
+      font-size:.9rem;color:#111827;
+      white-space:pre-wrap;word-break:break-word;
+    }
+    .profile-empty{
+      font-size:.9rem;color:#6b7280;
+      margin:6px 0 4px;
+    }
+    .profile-actions{
+      display:flex;gap:8px;margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .profile-close{
+      position:absolute;top:8px;right:10px;
+      border:none;background:transparent;
+      color:#9ca3af;font-size:22px;line-height:1;
+      cursor:pointer;
+    }
+    .profile-close:hover{color:#4b5563}
+    .button--ghost{
+      background:transparent;
+      border-color:#bcd6ff;
+      color:#0c1f4b;
+    }
+    @media (max-width:480px){
+      .profile-modal{
+        margin:0 12px;
+        padding:14px 14px 12px;
+      }
     }
 
     /* TOASTY */
-    .toast-stack{position:fixed;top:calc(var(--hdr-h) + 12px);left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:1200;width:min(92vw,520px);pointer-events:none}
-    .toast{pointer-events:auto;display:flex;align-items:flex-start;gap:10px;background:#0b1536;color:#e9f2ff;border:1px solid #2a3b8f;border-radius:12px;padding:10px 12px;box-shadow:0 10px 24px rgba(0,0,0,.35)}
-    .toast.success{border-color:#1f8f4a}.toast.info{border-color:#2a6ad8}.toast.warn{border-color:#d6a21e}.toast.error{border-color:#d44242}
-    .toast .t-ico{font-weight:800;min-width:18px}.toast .t-msg{flex:1}.toast .t-x{appearance:none;border:none;background:transparent;color:#cfe2ff;cursor:pointer;font-size:18px;line-height:1;padding:0 4px}
+    .toast-stack{
+      position:fixed;top:calc(var(--hdr-h) + 12px);left:50%;
+      transform:translateX(-50%);
+      display:grid;gap:8px;z-index:1200;
+      width:min(92vw,520px);pointer-events:none;
+    }
+    .toast{
+      pointer-events:auto;display:flex;align-items:flex-start;gap:10px;
+      background:#0b1536;color:#e9f2ff;
+      border:1px solid #2a3b8f;border-radius:12px;
+      padding:10px 12px;
+      box-shadow:0 10px 24px rgba(0,0,0,.35);
+    }
+    .toast.success{border-color:#1f8f4a}
+    .toast.info{border-color:#2a6ad8}
+    .toast.warn{border-color:#d6a21e}
+    .toast.error{border-color:#d44242}
+    .toast .t-ico{font-weight:800;min-width:18px}
+    .toast .t-msg{flex:1}
+    .toast .t-x{
+      appearance:none;border:none;background:transparent;
+      color:#cfe2ff;cursor:pointer;font-size:18px;
+      line-height:1;padding:0 4px;
+    }
 
     /* NEÓNOVÉ KRAJE (PC only) */
     @media (min-width:992px){
-      .neon-beams{position:fixed;inset:var(--hdr-h) 0 0 0;pointer-events:none;z-index:0}
-      .beam{position:absolute;top:0;bottom:0;width:12vw;max-width:180px;filter:blur(12px);opacity:.22;
-        background:linear-gradient(180deg,rgba(33,102,214,0) 0%,rgba(33,102,214,.6) 50%,rgba(33,102,214,0) 100%),
-                   linear-gradient(90deg,rgba(88,173,255,0) 0%,rgba(88,173,255,.55) 40%,rgba(88,173,255,0) 100%);
-        animation:beamPulse 5.5s ease-in-out infinite,beamDrift 12s ease-in-out infinite;will-change:opacity,transform}
+      .neon-beams{
+        position:fixed;inset:var(--hdr-h) 0 0 0;
+        pointer-events:none;z-index:0;
+      }
+      .beam{
+        position:absolute;top:0;bottom:0;width:12vw;max-width:180px;
+        filter:blur(12px);opacity:.22;
+        background:
+          linear-gradient(180deg,rgba(33,102,214,0) 0%,rgba(33,102,214,.6) 50%,rgba(33,102,214,0) 100%),
+          linear-gradient(90deg,rgba(88,173,255,0) 0%,rgba(88,173,255,.55) 40%,rgba(88,173,255,0) 100%);
+        animation:beamPulse 5.5s ease-in-out infinite,
+                   beamDrift 12s ease-in-out infinite;
+        will-change:opacity,transform;
+      }
       .beam.left{left:0;transform-origin:left center}
       .beam.right{right:0;transform-origin:right center}
-      @keyframes beamPulse{0%,100%{opacity:.18}50%{opacity:.32}}
-      @keyframes beamDrift{0%,100%{transform:translateY(0) scaleX(1)}50%{transform:translateY(-2%) scaleX(1.06)}}
-      .glow{position:absolute;top:12%;width:18vw;max-width:240px;height:18vw;max-height:240px;background:radial-gradient(circle,rgba(88,173,255,.35) 0%,rgba(88,173,255,0) 60%);filter:blur(24px);opacity:.15;animation:glowPulse 7s ease-in-out infinite}
-      .glow.left{left:-6vw}.glow.right{right:-6vw;animation-delay:1.5s}
-      @keyframes glowPulse{0%,100%{opacity:.10;transform:scale(1)}50%{opacity:.22;transform:scale(1.08)}}
+      @keyframes beamPulse{
+        0%,100%{opacity:.18}
+        50%{opacity:.32}
+      }
+      @keyframes beamDrift{
+        0%,100%{transform:translateY(0) scaleX(1)}
+        50%{transform:translateY(-2%) scaleX(1.06)}
+      }
+      .glow{
+        position:absolute;top:12%;
+        width:18vw;max-width:240px;height:18vw;max-height:240px;
+        background:radial-gradient(circle,rgba(88,173,255,.35) 0%,rgba(88,173,255,0) 60%);
+        filter:blur(24px);opacity:.15;
+        animation:glowPulse 7s ease-in-out infinite;
+      }
+      .glow.left{left:-6vw}
+      .glow.right{right:-6vw;animation-delay:1.5s}
+      @keyframes glowPulse{
+        0%,100%{opacity:.10;transform:scale(1)}
+        50%{opacity:.22;transform:scale(1.08)}
+      }
     }
 
     /* --- DOPLNOK: triedy na <body> (spoľahlivé v mobile) --- */
@@ -138,7 +305,8 @@
 
     /* --- Backdrop pre off-canvas (klikom zavrie) --- */
     .oc-backdrop{
-      display:none; position:fixed; inset:0; z-index:1003;
+      display:none;position:fixed;inset:0;
+      z-index:1001; /* NIŽŠIE ako nav (1002) a presence panel (1005) */
       background:rgba(0,0,0,.3);
       -webkit-tap-highlight-color: transparent;
     }
@@ -150,7 +318,7 @@
   <link rel="stylesheet" href="/css/timeline.comment-fix.css?v=fixA1">
 </head>
 <body>
-  <!-- skryté checkboxy pre mobilné zásuvky -->
+  <!-- skryté checkboxy (už len ako zvyšok, JS ide cez triedy na body) -->
   <input type="checkbox" id="navToggle" class="nav-toggle" aria-hidden="true" />
   <input type="checkbox" id="peopleToggle" class="people-toggle" aria-hidden="true" />
 
@@ -158,11 +326,21 @@
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <button type="button" class="burger" aria-label="Menu" id="burgerBtn">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       </button>
 
       <button type="button" class="people" aria-label="Účastníci" id="peopleBtn">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M2 20c0-3.5 3-6 7-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="10" r="2" stroke="currentColor" stroke-width="2"/><path d="M14 20c0-2.2 1.8-4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/>
+          <path d="M2 20c0-3.5 3-6 7-6"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="17" cy="10" r="2" stroke="currentColor" stroke-width="2"/>
+          <path d="M14 20c0-2.2 1.8-4 4-4"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       </button>
 
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
@@ -187,7 +365,7 @@
     <span class="glow right"></span>
   </div>
 
-  <!-- PRAVÝ PANEL -->
+  <!-- PRAVÝ PANEL – POUŽÍVATELIA -->
   <aside id="presencePanel" class="presence-panel">
     <div class="presence-title">Používatelia</div>
     <div class="presence-hint">Ťukni na meno pre <strong>profil</strong> alebo <em>správu</em>.</div>
@@ -205,7 +383,8 @@
       <form id="timelineForm" class="composer" autocomplete="off" enctype="multipart/form-data">
         <div class="composer-row">
           <div class="input-group">
-            <input id="postContent" class="composer-input" type="text" placeholder="Napíš niečo..." maxlength="300" data-preserve />
+            <input id="postContent" class="composer-input" type="text"
+                   placeholder="Napíš niečo..." maxlength="300" data-preserve />
             <span id="composerCount">0 / 300</span>
             <input id="postImage" type="file" accept="image/*" hidden />
           </div>
@@ -220,6 +399,42 @@
       <!-- PC: info pásik -->
       <div id="desktopInfo" class="desktop-infobar" role="contentinfo">
         Lištobook by Lištové centrum EU, s.r.o. ©, Sasinkova 13, 010 01 Žilina — 2025, verzia 1.0
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILOVÝ MODAL -->
+  <div id="profileBackdrop" class="profile-backdrop" aria-hidden="true">
+    <div class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileName">
+      <button type="button" id="profileCloseBtn" class="profile-close" aria-label="Zavrieť">×</button>
+
+      <div class="profile-header">
+        <img id="profileAvatar" class="profile-avatar" src="/img/avatar_default.png" alt="Avatar používateľa">
+        <div>
+          <div id="profileName" class="profile-name">Používateľ</div>
+          <div id="profileCity" class="profile-city">—</div>
+        </div>
+      </div>
+
+      <div id="profileBioRow" class="profile-row">
+        <div class="profile-label">O mne</div>
+        <div id="profileBio" class="profile-value"></div>
+      </div>
+
+      <div id="profileCompanyRow" class="profile-row">
+        <div class="profile-label">Firma</div>
+        <div id="profileCompany" class="profile-value"></div>
+      </div>
+
+      <div id="profileEmptyRow" class="profile-empty">
+        Tento používateľ zatiaľ nemá vyplnený profil.
+      </div>
+
+      <div class="profile-actions">
+        <button type="button" id="profileMsgBtn" class="button">Napísať správu</button>
+        <button type="button" id="profileEditBtn" class="button button--ghost" style="display:none;">
+          Upraviť profil
+        </button>
       </div>
     </div>
   </div>
@@ -242,10 +457,20 @@
       const mql  = window.matchMedia('(max-width: 991.98px)');
       const slot = document.getElementById(slotId);
       if (!slot) return;
-      function mount(){ if (slot.dataset.mounted || !window.mountBannerRotator) return; slot.style.display=''; window.mountBannerRotator(slotId, options); slot.dataset.mounted='1'; }
-      function unmount(){ slot.innerHTML=''; slot.style.display='none'; delete slot.dataset.mounted; }
+      function mount(){
+        if (slot.dataset.mounted || !window.mountBannerRotator) return;
+        slot.style.display='';
+        window.mountBannerRotator(slotId, options);
+        slot.dataset.mounted='1';
+      }
+      function unmount(){
+        slot.innerHTML='';
+        slot.style.display='none';
+        delete slot.dataset.mounted;
+      }
       function update(){ mql.matches ? mount() : unmount(); }
-      update(); mql.addEventListener ? mql.addEventListener('change', update) : mql.addListener(update);
+      update();
+      mql.addEventListener ? mql.addEventListener('change', update) : mql.addListener(update);
     }
   </script>
 
@@ -253,7 +478,8 @@
   <script>
     (function(){
       const stack = document.getElementById('toastStack');
-      const MAX = 3, ESC = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+      const MAX = 3;
+      const ESC = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
       const icons = { success:'✓', info:'ℹ︎', warn:'!', error:'×' };
       function push(type='info', message='', {duration=4000}={}){
         if (!stack) return;
@@ -265,30 +491,44 @@
         const killer = setTimeout(()=> el.remove(), duration);
         el.querySelector('.t-x')?.addEventListener('click', ()=>{ clearTimeout(killer); el.remove(); });
       }
-      window.toast = { show:(t,m,o)=>push(t,m,o), success:(m,o)=>push('success',m,o), info:(m,o)=>push('info',m,o), warn:(m,o)=>push('warn',m,o), error:(m,o)=>push('error',m,o) };
+      window.toast = {
+        show:(t,m,o)=>push(t,m,o),
+        success:(m,o)=>push('success',m,o),
+        info:(m,o)=>push('info',m,o),
+        warn:(m,o)=>push('warn',m,o),
+        error:(m,o)=>push('error',m,o)
+      };
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
       // dopočet výšky hlavičky → padding top
       const header = document.querySelector('.app-header');
-      const setHdrH = () => { if (!header) return; const h = header.getBoundingClientRect().height; document.documentElement.style.setProperty('--hdr-h', h + 'px'); };
-      setHdrH(); window.addEventListener('resize', setHdrH);
+      const setHdrH = () => {
+        if (!header) return;
+        const h = header.getBoundingClientRect().height;
+        document.documentElement.style.setProperty('--hdr-h', h + 'px');
+      };
+      setHdrH();
+      window.addEventListener('resize', setHdrH);
 
       // navigácia (presun medzi stránkami)
       const email = new URLSearchParams(window.location.search).get("email");
-      const go = (page) => { window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page; };
+      const go = (page) => {
+        window.location.href = email ? `${page}?email=${encodeURIComponent(email)}` : page;
+      };
       document.getElementById('accountBtn')?.addEventListener('click', ()=> go('dashboard.html'));
       document.getElementById('funBtn')?.addEventListener('click', ()=> go('entertainment.html'));
       document.getElementById('rateBtn')?.addEventListener('click', ()=> go('catalog.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', ()=> go('index.html'));
 
-      // hamburgery – offcanvas (spoľahlivé v mobile cez triedy na <body>)
+      // hamburgery – offcanvas cez triedy na <body>
       const burgerBtn  = document.getElementById('burgerBtn');
       const peopleBtn  = document.getElementById('peopleBtn');
       const ocBackdrop = document.getElementById('ocBackdrop');
 
       function anyOpen(){
-        return document.body.classList.contains('open-nav') || document.body.classList.contains('open-people');
+        return document.body.classList.contains('open-nav') ||
+               document.body.classList.contains('open-people');
       }
       function updateLock(){
         document.body.classList.toggle('no-scroll', anyOpen());
@@ -314,11 +554,14 @@
         updateLock();
       });
 
-      // backdrop – jediný „globálny“ zavierač, klikom zavrie panely
+      // backdrop – zavrie panely
       ocBackdrop?.addEventListener('click', closeAll, {passive:true});
 
       // mobil banner mount
-      mountBannerMobileOnly('miniBannerSlot', { fixed:false, interval:7000, height:80, heightMobile:90 });
+      mountBannerMobileOnly('miniBannerSlot', {
+        fixed:false, interval:7000,
+        height:80, heightMobile:90
+      });
     });
   </script>
 </body>
