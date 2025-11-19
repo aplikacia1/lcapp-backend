@@ -31,16 +31,11 @@
 
   // 🔹 uloženie categoryId pre návrat
   if (categoryId) {
-    try {
-      sessionStorage.setItem("lastCategoryId", categoryId);
-    } catch {}
+    sessionStorage.setItem("lastCategoryId", categoryId);
   }
 
   function goBack(){
-    let cat = categoryId;
-    if (!cat) {
-      try { cat = sessionStorage.getItem("lastCategoryId") || ""; } catch {}
-    }
+    const cat = categoryId || sessionStorage.getItem("lastCategoryId") || "";
     const url = cat
       ? `products.html?categoryId=${encodeURIComponent(cat)}${email ? `&email=${encodeURIComponent(email)}` : ""}`
       : (email ? `catalog.html?email=${encodeURIComponent(email)}` : "catalog.html");
@@ -137,37 +132,41 @@
         imgEl.alt = p.name || "Produkt";
       }
 
-      // 🔹 NOVÉ: Technický list + E-shop tlačidlá (len ak sú URL)
-      const techBtn  = $("#techSheetBtn");
-      const eshopBtn = $("#eshopBtn");
+      // ✅ NOVÉ: postav tlačidlá podľa dát z produktu
+      const actions = $("#productActions");
+      if (actions) {
+        const norm = (v) => (v && String(v).trim()) || "";
 
-      const techUrl  = p.techSheetUrl || p.techsheetUrl || p.tech_sheet_url || "";
-      const shopUrl  = p.eshopUrl     || p.shopUrl      || p.e_shop_url    || "";
+        // snažíme sa chytiť rôzne možné názvy polí
+        const techUrl =
+          norm(p.techSheetUrl || p.techSheet || p.technicalSheetUrl || p.technicalUrl);
+        const shopUrl =
+          norm(p.shopUrl || p.eShopUrl || p.eshopUrl || p.shopLink || p.eShopLink);
 
-      if (techBtn) {
+        const parts = [];
         if (techUrl) {
-          techBtn.style.display = "inline-flex";
-          techBtn.onclick = () => {
-            window.open(techUrl, "_blank", "noopener");
-          };
-        } else {
-          techBtn.style.display = "none";
-          techBtn.onclick = null;
+          parts.push(
+            `<a href="${techUrl}" target="_blank" rel="noopener noreferrer">
+               <span class="icon">📄</span><span>Technický list</span>
+             </a>`
+          );
         }
-      }
-
-      if (eshopBtn) {
         if (shopUrl) {
-          eshopBtn.style.display = "inline-flex";
-          eshopBtn.onclick = () => {
-            window.open(shopUrl, "_blank", "noopener");
-          };
+          parts.push(
+            `<a href="${shopUrl}" target="_blank" rel="noopener noreferrer">
+               <span class="icon">🛒</span><span>Kúpiť v e-shope</span>
+             </a>`
+          );
+        }
+
+        if (parts.length) {
+          actions.innerHTML = parts.join("");
+          actions.style.display = "";
         } else {
-          eshopBtn.style.display = "none";
-          eshopBtn.onclick = null;
+          actions.innerHTML = "";
+          actions.style.display = "none";
         }
       }
-
     }catch(e){
       console.warn("[product]", e.message);
       $("#productTitle") && ($("#productTitle").textContent = "Produkt");
@@ -175,12 +174,6 @@
       $("#productDescription") && ($("#productDescription").textContent = "Produkt sa nenašiel.");
       const imgEl = $("#productImage");
       if(imgEl){ imgEl.onerror = null; imgEl.src = IMG_PLACEHOLDER; }
-
-      // ak by sa produkt nenašiel, tlačidlá radšej skryjeme
-      const techBtn  = $("#techSheetBtn");
-      const eshopBtn = $("#eshopBtn");
-      if (techBtn)  techBtn.style.display = "none";
-      if (eshopBtn) eshopBtn.style.display = "none";
     }
   }
 
@@ -236,7 +229,7 @@
     if(!email){ alert("Musíte byť prihlásený."); return; }
     const comment = ($("#rateComment")?.value || "").trim();
     const btn=$("#rateSubmit"), msg=$("#rateMsg");
-    const lock = v => { if(btn){ btn.disabled=v; btn.textContent = v? "Odosielam…" : "Odoslať"; } };
+    const lock = v => { if(btn){ btn.disabled=v; btn.textContent = v? "Odosielam…" : "Odoslať hodnotenie"; } };
 
     try{
       lock(true);
@@ -252,16 +245,13 @@
       $("#rateComment") && ($("#rateComment").value="");
       msg && (msg.textContent="Hodnotenie bolo uložené. Ďakujeme!");
       await loadSummary(); await loadReviews();
-    }catch{
-      msg && (msg.textContent="Server neodpovedá.");
-    }
+    }catch{ msg && (msg.textContent="Server neodpovedá."); }
     finally{ lock(false); }
   }
 
   document.addEventListener("DOMContentLoaded", async ()=>{
     if(!productId){ alert("Chýba ID produktu."); return; }
 
-    // staré hooky – ak by existovali prvky s týmito ID, nič nepokazíme
     $("#backBtn")   && $("#backBtn").addEventListener("click", e=>{ e.preventDefault(); goBack(); });
     $("#logoutBtn") && $("#logoutBtn").addEventListener("click", ()=> location.href="index.html");
 

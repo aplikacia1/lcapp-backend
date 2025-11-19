@@ -83,36 +83,34 @@
     .review .who{ font-weight:700; }
     .review .when{ opacity:.75; font-size:12px; }
 
-    /* NOVÉ: tlačidlá Technický list + E-shop */
+    /* ✅ NOVÉ: tlačidlá „Technický list“ / „Kúpiť v e-shope“ */
     .product-actions{
-      margin:16px 0 22px;
-      display:flex; flex-wrap:wrap; gap:10px;
+      margin:16px 0 10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
     }
-    .action-btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      gap:8px;
-      padding:0 14px;
-      height:40px;
-      border-radius:12px;
-      border:1px solid var(--lc-border-2);
-      background:var(--lc-surface-2);
-      color:var(--lc-text);
-      cursor:pointer;
-      font-size:14px;
-      font-weight:600;
+    .product-actions a{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:9px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.65);
+      background:rgba(5,22,61,.9);
+      color:#fff;
+      font-size:.95rem;
       text-decoration:none;
+      cursor:pointer;
+      box-shadow:0 4px 10px rgba(0,0,0,.25);
       white-space:nowrap;
     }
-    .action-btn.primary{
-      background:#22c55e;
-      border-color:#16a34a;
-      color:#052e16;
+    .product-actions a:hover{
+      background:rgba(11,30,80,1);
+      border-color:#fff;
     }
-    .action-btn.primary:hover{
-      background:#16a34a;
-    }
-    .action-btn.secondary:hover{
-      background:#e3f0ff;
+    .product-actions .icon{
+      font-size:1.1rem;
     }
 
     /* fixný dolný hodnotiaci panel */
@@ -220,19 +218,12 @@
     <div id="productMeta" class="meta muted"></div>
     <p id="productDescription"></p>
 
+    <!-- ✅ tu sa budú zobrazovať tlačidlá podľa dát -->
+    <div id="productActions" class="product-actions" aria-label="Dostupné možnosti"></div>
+
     <div class="summary">
       <div id="ratingAverage" class="stars-line">Zatiaľ bez hodnotení</div>
       <div id="ratingCount" class="muted" style="font-size:13px"></div>
-    </div>
-
-    <!-- NOVÝ BLOK: tlačidlá pre technický list + e-shop -->
-    <div class="product-actions" id="productActions">
-      <button id="techSheetBtn" class="action-btn secondary" type="button" style="display:none;">
-        📄 Technický list
-      </button>
-      <button id="eshopBtn" class="action-btn primary" type="button" style="display:none;">
-        🛒 Kúpiť v e-shope
-      </button>
     </div>
 
     <section class="reviews" id="reviewsList"></section>
