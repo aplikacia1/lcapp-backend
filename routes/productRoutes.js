@@ -23,10 +23,12 @@ function deleteFileSafe(app, relUrl) {
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
     const dir = req.app.get("UPLOADS_DIR");
-    try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch {}
     cb(null, dir);
   },
-  filename: (_req, file, cb) => cb(null, safeName(file.originalname)),
+  filename: (_req, file, cb) => cb(null, safeName(file.originalname))
 });
 const upload = multer({ storage });
 
@@ -54,8 +56,12 @@ router.get("/", async (req, res) => {
     const lim = Math.min(500, Math.max(1, Number(limit) || 100));
 
     const [items, total] = await Promise.all([
-      Product.find(where).sort(sortObj).skip((pg - 1) * lim).limit(lim).lean(),
-      Product.countDocuments(where),
+      Product.find(where)
+        .sort(sortObj)
+        .skip((pg - 1) * lim)
+        .limit(lim)
+        .lean(),
+      Product.countDocuments(where)
     ]);
 
     res.json({ items, total, page: pg, limit: lim });
@@ -68,8 +74,7 @@ router.get("/", async (req, res) => {
 /* ---------- GET /api/products/category/:categoryId ---------- */
 router.get("/category/:categoryId", async (req, res) => {
   try {
-    const items = await Product
-      .find({ categoryId: req.params.categoryId })
+    const items = await Product.find({ categoryId: req.params.categoryId })
       .sort({ order: 1, createdAt: -1 })
       .lean();
     res.json(items);
@@ -92,7 +97,16 @@ router.get("/:id", async (req, res) => {
 /* ---------- POST /api/products ---------- */
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    const { name, code, price, unit, categoryId, description } = req.body;
+    const {
+      name,
+      code,
+      price,
+      unit,
+      categoryId,
+      description,
+      techSheetUrl,
+      shopUrl
+    } = req.body;
 
     if (!name || !categoryId) {
       return res.status(400).json({ message: "Chýba názov alebo kategória" });
@@ -104,7 +118,9 @@ router.post("/", upload.single("image"), async (req, res) => {
     const image = req.file ? `/uploads/${req.file.filename}` : null;
 
     const order =
-      req.body.order !== undefined && req.body.order !== null && req.body.order !== ""
+      req.body.order !== undefined &&
+      req.body.order !== null &&
+      req.body.order !== ""
         ? Number(req.body.order)
         : 9999;
 
@@ -116,7 +132,9 @@ router.post("/", upload.single("image"), async (req, res) => {
       categoryId,
       description: description || "",
       image,
-      order
+      order,
+      techSheetUrl: (techSheetUrl || "").trim(),
+      shopUrl: (shopUrl || "").trim()
     });
 
     res.status(201).json(doc);
@@ -129,7 +147,16 @@ router.post("/", upload.single("image"), async (req, res) => {
 /* ---------- PUT /api/products/:id ---------- */
 router.put("/:id", upload.single("image"), async (req, res) => {
   try {
-    const { name, code, price, unit, categoryId, description } = req.body;
+    const {
+      name,
+      code,
+      price,
+      unit,
+      categoryId,
+      description,
+      techSheetUrl,
+      shopUrl
+    } = req.body;
 
     const item = await Product.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Produkt nenájdený" });
@@ -150,6 +177,14 @@ router.put("/:id", upload.single("image"), async (req, res) => {
       if (Number.isFinite(n)) item.order = n;
     }
 
+    // 🔹 nové polia – technický list + e-shop
+    if (typeof techSheetUrl !== "undefined") {
+      item.techSheetUrl = String(techSheetUrl).trim();
+    }
+    if (typeof shopUrl !== "undefined") {
+      item.shopUrl = String(shopUrl).trim();
+    }
+
     if (typeof categoryId !== "undefined") {
       const cat = await Category.findById(categoryId);
       if (!cat) return res.status(400).json({ message: "Neplatná kategória" });
@@ -168,8 +203,13 @@ router.put("/:id", upload.single("image"), async (req, res) => {
 router.put("/:id/order", async (req, res) => {
   try {
     const n = Number(req.body?.order);
-    if (!Number.isFinite(n)) return res.status(400).json({ message: "Neplatné poradie" });
-    const item = await Product.findByIdAndUpdate(req.params.id, { order: n }, { new: true });
+    if (!Number.isFinite(n))
+      return res.status(400).json({ message: "Neplatné poradie" });
+    const item = await Product.findByIdAndUpdate(
+      req.params.id,
+      { order: n },
+      { new: true }
+    );
     if (!item) return res.status(404).json({ message: "Produkt nenájdený" });
     res.json(item);
   } catch (e) {
@@ -204,12 +244,19 @@ router.get("/stats/count-by-category/all", async (_req, res) => {
           from: "categories",
           localField: "_id",
           foreignField: "_id",
-          as: "cat",
-        },
+          as: "cat"
+        }
       },
       { $unwind: { path: "$cat", preserveNullAndEmptyArrays: true } },
-      { $project: { _id: 0, categoryId: "$_id", categoryName: "$cat.name", count: 1 } },
-      { $sort: { count: -1 } },
+      {
+        $project: {
+          _id: 0,
+          categoryId: "$_id",
+          categoryName: "$cat.name",
+          count: 1
+        }
+      },
+      { $sort: { count: -1 } }
     ]);
     res.json(rows);
   } catch (e) {

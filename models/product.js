@@ -1,24 +1,57 @@
-// models/product.js
+// backend/models/product.js
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-    categoryId:   { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true, index: true },
-    name:         { type: String, required: true, trim: true },
-    image:        { type: String, default: "" },
-    code:         { type: String, default: "" },
-    price:        { type: Number, required: true, default: 0 },
-    unit:         { type: String, default: "" },     // napr. ks, m, m2
-    description:  { type: String, default: "" },
+    name: {
+      type: String,
+      required: true
+    },
+    code: {
+      type: String,
+      default: ""
+    },
+    price: {
+      type: Number,
+      default: 0
+    },
+    unit: {
+      type: String,
+      default: ""
+    },
+    categoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true
+    },
+    description: {
+      type: String,
+      default: ""
+    },
+    image: {
+      type: String,
+      default: null
+    },
+    order: {
+      type: Number,
+      default: 9999
+    },
 
-    // nové: ručné poradie v rámci kategórie (nižšie = vyššie v zozname)
-    order:        { type: Number, default: 9999, index: true },
-
-    // ⬇️ sumár z hodnotení
-    averageRating:{ type: Number, default: 0 },
-    ratingCount:  { type: Number, default: 0 }
+    // 🔹 NOVÉ POLIA
+    // URL na technický list (napr. stránka na listovecentrum.sk)
+    techSheetUrl: {
+      type: String,
+      default: ""
+    },
+    // URL na produkt v e-shope
+    shopUrl: {
+      type: String,
+      default: ""
+    }
   },
-  { timestamps: true }
+  {
+    timestamps: true
+  }
 );
 
 module.exports = mongoose.model("Product", productSchema);
