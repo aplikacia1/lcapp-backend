@@ -212,47 +212,85 @@
       img[alt="Banner"]{display:none!important;}
     }
 
-    /* PROFIL – MODAL */
+    /* PROFIL – MODAL (vyčačkaný :) ) */
     .profile-backdrop{
       position:fixed;inset:0;
       display:none;align-items:center;justify-content:center;
-      background:rgba(0,0,0,.45);
+      background:rgba(0,0,0,.55);
       z-index:1100;
     }
     .profile-modal{
-      width:100%;max-width:360px;
-      background:#fff;color:#111;
-      border-radius:16px;
-      padding:16px 18px 14px;
-      box-shadow:0 18px 36px rgba(0,0,0,.45);
+      width:100%;max-width:380px;
+      background:
+        radial-gradient(circle at 0 0,#1d4ed8 0,rgba(15,23,42,0.96) 52%,#020617 100%);
+      color:#e5edff;
+      border-radius:18px;
+      padding:18px 18px 16px;
+      box-shadow:0 24px 60px rgba(3,7,18,.96);
       box-sizing:border-box;
       position:relative;
+      border:1px solid rgba(129,140,248,.9);
     }
     .profile-header{
-      display:flex;align-items:center;gap:10px;
-      margin-bottom:10px;
+      display:flex;align-items:center;gap:12px;
+      margin-bottom:12px;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(148,163,255,.38);
     }
     .profile-avatar{
-      width:52px;height:52px;border-radius:50%;object-fit:cover;
-      background:#e9eefc;border:1px solid #d4dcf8;flex-shrink:0;
+      width:56px;height:56px;border-radius:50%;object-fit:cover;
+      background:#020617;border:2px solid rgba(191,219,254,.9);
+      box-shadow:0 0 0 2px rgba(15,23,42,1),0 0 22px rgba(59,130,246,.75);
+      flex-shrink:0;
     }
-    .profile-name{font-weight:700;color:#0c1f4b}
-    .profile-city{font-size:.9rem;color:#4b5a86}
-    .profile-row{margin-bottom:6px}
+    .profile-name{font-weight:700;color:#f9fafb;font-size:1.05rem}
+    .profile-city{font-size:.85rem;color:#a5b4fc;margin-top:2px}
+    .profile-row{margin-bottom:8px}
     .profile-label{
-      font-size:.8rem;text-transform:uppercase;
-      letter-spacing:.03em;color:#6b7280;margin-bottom:2px;
+      font-size:.75rem;text-transform:uppercase;
+      letter-spacing:.13em;color:#9ca3af;margin-bottom:3px;
     }
     .profile-value{
-      font-size:.9rem;color:#111827;
+      font-size:.9rem;color:#e5edff;
       white-space:pre-wrap;word-break:break-word;
+      background:linear-gradient(135deg,rgba(15,23,42,.9),rgba(30,64,175,.95));
+      border-radius:10px;
+      padding:6px 9px;
+      border:1px solid rgba(148,163,255,.6);
+    }
+    .profile-row--company .profile-label::before{
+      content:"Firma · ";
+      text-transform:none;
+      letter-spacing:0;
+      font-size:.8rem;
+      font-weight:500;
+      color:#e5edff;
+      margin-right:4px;
+    }
+    .profile-row--web .profile-label::before{
+      content:"Web · ";
+      text-transform:none;
+      letter-spacing:0;
+      font-size:.8rem;
+      font-weight:500;
+      color:#e5edff;
+      margin-right:4px;
+    }
+    .profile-row--web .profile-value a{
+      color:#bfdbfe;
+      text-decoration:none;
+      font-weight:500;
+    }
+    .profile-row--web .profile-value a:hover{
+      text-decoration:underline;
     }
     .profile-empty{
-      font-size:.9rem;color:#6b7280;
+      font-size:.88rem;color:#9ca3af;
       margin:6px 0 4px;
+      font-style:italic;
     }
     .profile-actions{
-      display:flex;gap:8px;margin-top:10px;
+      display:flex;gap:8px;margin-top:12px;
       flex-wrap:wrap;
     }
     .profile-close{
@@ -261,16 +299,34 @@
       color:#9ca3af;font-size:22px;line-height:1;
       cursor:pointer;
     }
-    .profile-close:hover{color:#4b5563}
+    .profile-close:hover{color:#e5edff}
     .button--ghost{
       background:transparent;
-      border-color:#bcd6ff;
-      color:#0c1f4b;
+      border-color:rgba(148,163,255,.7);
+      color:#e5edff;
+    }
+    .profile-modal .button{
+      flex:1 1 auto;
+      height:40px;
+      border-radius:999px;
+      border:none;
+      background:linear-gradient(135deg,#60a5fa,#2563eb);
+      color:#f9fafb;
+      box-shadow:0 14px 30px rgba(37,99,235,.55);
+      font-weight:600;
+      justify-content:center;
+    }
+    .profile-modal .button:hover{
+      filter:brightness(1.05);
+    }
+    .profile-modal .button--ghost{
+      background:transparent;
+      box-shadow:none;
     }
     @media (max-width:480px){
       .profile-modal{
         margin:0 12px;
-        padding:14px 14px 12px;
+        padding:16px 14px 14px;
       }
     }
 
@@ -463,12 +519,12 @@
         </div>
       </div>
 
-      <div id="profileCompanyRow" class="profile-row">
+      <div id="profileCompanyRow" class="profile-row profile-row--company">
         <div class="profile-label">Firma</div>
         <div id="profileCompany" class="profile-value"></div>
       </div>
 
-      <div id="profileWebsiteRow" class="profile-row">
+      <div id="profileWebsiteRow" class="profile-row profile-row--web">
         <div class="profile-label">Web</div>
         <div id="profileWebsite" class="profile-value"></div>
       </div>

@@ -368,8 +368,21 @@ async function openProfileCard(nick){
     $("#profileCity").textContent = data?.city || "—";
 
     const note = data?.note || data?.bio || "";
-    const company = data?.company || "";
-    const websiteRaw = data?.website || data?.web || "";
+
+    // 🔹 Firma – skúšame viac názvov polí (company / firma / companyName / firm)
+    const company =
+      data?.company ||
+      data?.companyName ||
+      data?.firma ||
+      data?.firm ||
+      "";
+
+    // 🔹 Web – tiež viac možností (website / web / url)
+    const websiteRaw =
+      data?.website ||
+      data?.web ||
+      data?.url ||
+      "";
 
     $("#profileCompany").textContent = company;
     $("#profileBio").textContent  = note;
@@ -377,7 +390,7 @@ async function openProfileCard(nick){
     // Web – urobíme z neho klikateľný odkaz, ak existuje
     const websiteEl = $("#profileWebsite");
     if (websiteRaw) {
-      let url = websiteRaw.trim();
+      let url = String(websiteRaw).trim();
       if (!/^https?:\/\//i.test(url)) url = "https://" + url;
       websiteEl.innerHTML = `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(websiteRaw)}</a>`;
     } else {
