@@ -36,6 +36,24 @@
         <label for="order">Poradie (nižšie = vyššie):</label>
         <input type="number" id="order" name="order" step="1" min="0" placeholder="napr. 10 (predvolene 9999)">
 
+        <!-- ✳️ NOVÉ: URL technického listu (voliteľné) -->
+        <label for="techSheetUrl">URL technického listu (voliteľné):</label>
+        <input
+          type="url"
+          id="techSheetUrl"
+          name="techSheetUrl"
+          placeholder="https://www.listovecentrum.sk/technicke-listy/produkt.pdf"
+        >
+
+        <!-- ✳️ NOVÉ: URL produktu v e-shope (voliteľné) -->
+        <label for="eshopUrl">URL produktu v e-shope (voliteľné):</label>
+        <input
+          type="url"
+          id="eshopUrl"
+          name="eshopUrl"
+          placeholder="https://eshop.listovecentrum.sk/produkt/nieco"
+        >
+
         <label for="image">Obrázok:</label>
         <input type="file" id="image" name="image" accept="image/png, image/jpeg">
 

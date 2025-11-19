@@ -1,30 +1,79 @@
-document.getElementById("adminLoginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+// public/admin_login.js
+(function () {
+  const API_BASE = (window.API_BASE || "").replace(/\/+$/, "");
 
-  console.log("👉 Pokus o prihlásenie ako admin:", email); // DEBUG
+  const emailInput = document.getElementById("email");
+  const passInput  = document.getElementById("password");
+  const loginBtn   = document.getElementById("adminLoginBtn");
+  const forgotBtn  = document.getElementById("adminForgotBtn");
+  const errEl      = document.getElementById("errorMessage");
+  const infoEl     = document.getElementById("infoMessage");
 
-  try {
-    const response = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+  function setError(msg)  { if (errEl)  errEl.textContent  = msg || ""; }
+  function setInfo(msg)   { if (infoEl) infoEl.textContent = msg || ""; }
 
-    const data = await response.json();
-    console.log("📦 Odpoveď servera:", data); // DEBUG
+  async function adminLogin() {
+    const email = emailInput.value.trim();
+    const password = passInput.value;
 
-    if (response.ok) {
-      alert("✅ Prihlásenie úspešné!");
-      // ⏩ Presmerovanie na admin dashboard
-      window.location.href = "admin_dashboard.html";
-    } else {
-      document.getElementById("errorMessage").textContent = data.message || "Prihlásenie zlyhalo.";
+    setError("");
+    setInfo("");
+
+    if (!email || !password) {
+      setError("Zadajte email aj heslo.");
+      return;
     }
-  } catch (error) {
-    console.error("❗ Chyba pri prihlásení:", error);
-    document.getElementById("errorMessage").textContent = "Chyba servera.";
+
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.message || "Prihlásenie zlyhalo.");
+        return;
+      }
+
+      alert("✅ Prihlásenie úspešné!");
+      window.location.href = "admin_dashboard.html";
+    } catch (err) {
+      console.error("❗ Chyba pri prihlásení:", err);
+      setError("Chyba servera.");
+    }
   }
-});
+
+  async function adminForgot() {
+    const email = emailInput.value.trim() || "bratislava@listovecentrum.sk";
+
+    setError("");
+    setInfo("");
+
+    if (!confirm("Poslať odkaz na obnovenie admin hesla na " + email + " ?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/password/forgot`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+
+      await res.json().catch(() => ({}));
+      // vždy zobrazíme rovnakú správu
+      setInfo("Ak admin účet existuje, poslali sme odkaz na obnovenie hesla.");
+    } catch (err) {
+      console.error("❗ Chyba pri odosielaní resetu:", err);
+      setError("Chyba servera pri odosielaní resetu.");
+    }
+  }
+
+  if (loginBtn)  loginBtn.addEventListener("click", adminLogin);
+  if (passInput) passInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") adminLogin();
+  });
+  if (forgotBtn) forgotBtn.addEventListener("click", adminForgot);
+})();

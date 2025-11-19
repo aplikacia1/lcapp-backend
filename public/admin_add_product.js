@@ -128,11 +128,21 @@ document.getElementById('productForm').addEventListener('submit', async (e)=>{
   try{
     const r = await fetch(url, { method, body: fd });
     const json = await r.json().catch(()=>({}));
-    if(!r.ok){ msg.textContent = '❌ ' + (json?.message || 'Nepodarilo sa uložiť produkt.'); msg.style.color='orange'; return; }
-    msg.textContent = editingProductId ? '✅ Produkt upravený.' : '✅ Produkt pridaný.'; msg.style.color='lightgreen';
-    e.target.reset(); editingProductId = null;
+    if(!r.ok){
+      msg.textContent = '❌ ' + (json?.message || 'Nepodarilo sa uložiť produkt.');
+      msg.style.color='orange';
+      return;
+    }
+    msg.textContent = editingProductId ? '✅ Produkt upravený.' : '✅ Produkt pridaný.';
+    msg.style.color='lightgreen';
+    e.target.reset();
+    editingProductId = null;
     await loadProducts();
-  }catch(err){ console.error(err); msg.textContent='❌ Chyba pri odosielaní.'; msg.style.color='red'; }
+  }catch(err){
+    console.error(err);
+    msg.textContent='❌ Chyba pri odosielaní.';
+    msg.style.color='red';
+  }
 });
 
 // --- delete / edit ---
@@ -150,15 +160,39 @@ async function editProduct(id){
   try{
     const r = await fetch(`/api/products/${id}`);
     const p = await r.json();
-    document.getElementById('name').value = p.name || '';
-    document.getElementById('code').value = p.code || '';
-    document.getElementById('price').value = p.price ?? '';
-    document.getElementById('unit').value = p.unit || '';
+
+    document.getElementById('name').value        = p.name || '';
+    document.getElementById('code').value        = p.code || '';
+    document.getElementById('price').value       = p.price ?? '';
+    document.getElementById('unit').value        = p.unit || '';
     document.getElementById('description').value = p.description || '';
     document.getElementById('categorySelect').value = p.categoryId || document.getElementById('categorySelect').value;
+
+    // ✳️ NOVÉ: doplnenie URL technického listu a e-shopu pri úprave
+    const techSheetInput = document.getElementById('techSheetUrl');
+    const eshopInput     = document.getElementById('eshopUrl');
+
+    if (techSheetInput) {
+      techSheetInput.value =
+        p.techSheetUrl ||
+        p.techsheetUrl ||
+        p.tech_sheet_url ||
+        '';
+    }
+    if (eshopInput) {
+      eshopInput.value =
+        p.eshopUrl ||
+        p.shopUrl  ||
+        p.e_shop_url ||
+        '';
+    }
+
     editingProductId = id;
     const msg = document.getElementById('message');
-    msg.textContent = '✏️ Úprava produktu – uložte zmeny.'; msg.style.color='orange';
-  }catch(e){ console.error('❌ Načítanie produktu:', e); }
+    msg.textContent = '✏️ Úprava produktu – uložte zmeny.';
+    msg.style.color='orange';
+  }catch(e){
+    console.error('❌ Načítanie produktu:', e);
+  }
 }
 window.editProduct = editProduct;

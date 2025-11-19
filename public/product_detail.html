@@ -83,6 +83,38 @@
     .review .who{ font-weight:700; }
     .review .when{ opacity:.75; font-size:12px; }
 
+    /* NOVÉ: tlačidlá Technický list + E-shop */
+    .product-actions{
+      margin:16px 0 22px;
+      display:flex; flex-wrap:wrap; gap:10px;
+    }
+    .action-btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:8px;
+      padding:0 14px;
+      height:40px;
+      border-radius:12px;
+      border:1px solid var(--lc-border-2);
+      background:var(--lc-surface-2);
+      color:var(--lc-text);
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .action-btn.primary{
+      background:#22c55e;
+      border-color:#16a34a;
+      color:#052e16;
+    }
+    .action-btn.primary:hover{
+      background:#16a34a;
+    }
+    .action-btn.secondary:hover{
+      background:#e3f0ff;
+    }
+
     /* fixný dolný hodnotiaci panel */
     .rate-bar{
       position:fixed; left:0; right:0; bottom:0; z-index:60;
@@ -191,6 +223,16 @@
     <div class="summary">
       <div id="ratingAverage" class="stars-line">Zatiaľ bez hodnotení</div>
       <div id="ratingCount" class="muted" style="font-size:13px"></div>
+    </div>
+
+    <!-- NOVÝ BLOK: tlačidlá pre technický list + e-shop -->
+    <div class="product-actions" id="productActions">
+      <button id="techSheetBtn" class="action-btn secondary" type="button" style="display:none;">
+        📄 Technický list
+      </button>
+      <button id="eshopBtn" class="action-btn primary" type="button" style="display:none;">
+        🛒 Kúpiť v e-shope
+      </button>
     </div>
 
     <section class="reviews" id="reviewsList"></section>
