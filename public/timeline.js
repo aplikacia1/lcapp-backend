@@ -145,14 +145,6 @@ async function loadPosts(opts={}){
   const feed=$("#postFeed");
   const prevY = preserve ? (scroller.scrollTop||0) : 0;
 
-  // drafty komentárov – v prípade refreshu
-  const drafts={};
-  document.querySelectorAll('form.commentForm').forEach(f=>{
-    const id=f.dataset.id;
-    const v=(f.comment?.value||'').trim();
-    if(id&&v) drafts[id]=v;
-  });
-
   try{
     const r=await fetch("/api/timeline");
     const posts=await r.json();
@@ -374,13 +366,30 @@ async function openProfileCard(nick){
 
     $("#profileName").textContent = data?.name || nick;
     $("#profileCity").textContent = data?.city || "—";
-    $("#profileBio").textContent  = data?.bio  || "";
-    $("#profileCompany").textContent = data?.company || "";
 
-    $("#profileBioRow").style.display = data?.bio ? "" : "none";
-    $("#profileCompanyRow").style.display = data?.company ? "" : "none";
+    const note = data?.note || data?.bio || "";
+    const company = data?.company || "";
+    const websiteRaw = data?.website || data?.web || "";
+
+    $("#profileCompany").textContent = company;
+    $("#profileBio").textContent  = note;
+
+    // Web – urobíme z neho klikateľný odkaz, ak existuje
+    const websiteEl = $("#profileWebsite");
+    if (websiteRaw) {
+      let url = websiteRaw.trim();
+      if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+      websiteEl.innerHTML = `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(websiteRaw)}</a>`;
+    } else {
+      websiteEl.textContent = "";
+    }
+
+    $("#profileCompanyRow").style.display = company ? "" : "none";
+    $("#profileWebsiteRow").style.display = websiteRaw ? "" : "none";
+    $("#profileBioRow").style.display      = note ? "" : "none";
+
     $("#profileEmptyRow").style.display =
-      (data && (data.city||data.bio||data.company||data.avatarUrl))
+      (data && (data.city||note||company||websiteRaw||data.avatarUrl))
       ? "none" : "";
 
     const avatar = data?.avatarUrl || "/img/avatar_default.png";
@@ -398,8 +407,9 @@ async function openProfileCard(nick){
     $("#profileName").textContent = nick;
     $("#profileCity").textContent = "—";
     $("#profileAvatar").src = "/img/avatar_default.png";
-    $("#profileBioRow").style.display = "none";
     $("#profileCompanyRow").style.display = "none";
+    $("#profileWebsiteRow").style.display = "none";
+    $("#profileBioRow").style.display = "none";
     $("#profileEmptyRow").style.display = "";
     showProfileModal();
   }
