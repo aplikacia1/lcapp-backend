@@ -70,25 +70,50 @@ router.get('/public/by-name/:name', async (req, res) => {
     if (!raw) return res.status(400).json({ message: 'Chýba meno.' });
 
     const nameLower = raw.toLocaleLowerCase('sk');
+
+    // načítame viac polí, aby sme vedeli poskladať city, company, website
     const user = await User.findOne(
       { nameLower },
       {
         _id: 0,
         name: 1,
-        note: 1,      // mesto
-        bio: 1,       // voliteľné
-        company: 1,   // voliteľné
+        note: 1,
+        bio: 1,
+        city: 1,
+        company: 1,
+        companyName: 1,
+        web: 1,
+        website: 1,
+        url: 1,
         avatarUrl: 1
       }
     ).lean();
 
     if (!user) return res.status(404).json({ message: 'Profil neexistuje.' });
 
+    const city =
+      user.city ||
+      user.note ||
+      '';
+
+    const company =
+      user.company ||
+      user.companyName ||
+      '';
+
+    const website =
+      user.website ||
+      user.web ||
+      user.url ||
+      '';
+
     return res.json({
       name: user.name || raw,
-      city: user.note || '',
+      city,
       bio: user.bio || '',
-      company: user.company || '',
+      note: user.note || '',
+      company,
+      website,
       avatarUrl: user.avatarUrl || ''
     });
   } catch (e) {
