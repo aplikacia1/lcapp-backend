@@ -28,22 +28,6 @@
     .logo-small{ display:block; height:48px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* --- MarSab® v hlavičke --- */
-    .header-badge{
-      position:absolute; right:12px; top:10px;
-      display:inline-flex; align-items:center; gap:6px;
-      padding:4px 6px; border:1px solid #ffffff33; border-radius:10px;
-      background: rgba(0,0,0,.18); backdrop-filter: blur(2px);
-      text-decoration:none; color:#fff; opacity:.95;
-    }
-    .header-badge img{ height:18px; width:auto; display:block; }
-    .header-badge .wordmark{ font-size:12px; font-weight:700; letter-spacing:.2px; }
-    @media (max-width: 480px){
-      .header-badge{ right:8px; top:8px; padding:3px 6px; }
-      .header-badge img{ height:16px; }
-      .header-badge .wordmark{ font-size:11px; }
-    }
-
     /* Navigácia */
     .nav-scroller{ padding: 0 var(--pad-x); width:100%; }
     .nav-track{
@@ -115,7 +99,7 @@
     .card-title{ margin:0; font-size:14px; font-weight:700; line-height:1.25; }
     @media (min-width: 992px){ .card-title{ font-size:16px; } }
 
-    /* starý plávajúci badge vypneme */
+    /* starý plávajúci badge vypneme (už ho ale vôbec nepoužívame) */
     .brand-badge{ display:none !important; }
 
     /* Hamburger OFF-CANVAS (len mobil) */
@@ -220,11 +204,6 @@
   <!-- HLAVIČKA -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-      <a class="header-badge" href="#" aria-label="MarSab®">
-        <img src="img/marsab_logo.png" alt="">
-        <span class="wordmark">MarSab®</span>
-      </a>
-
       <label for="menuToggle" class="burger" aria-label="Menu">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -272,12 +251,6 @@
     <div id="categoryGrid" class="card-grid"></div>
     <p id="emptyState" class="empty" style="display:none;">Žiadne kategórie.</p>
   </div>
-
-  <!-- (Starý) MarSab® badge – pre kompatibilitu, skrytý CSS-om -->
-  <a class="brand-badge" href="#" aria-label="MarSab®">
-    <img src="img/marsab_logo.png" alt="">
-    <span class="wordmark">MarSab®</span>
-  </a>
 
   <!-- dopočet výšky hlavičky -->
   <script>
