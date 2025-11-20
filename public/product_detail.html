@@ -140,6 +140,21 @@
     }
     .rate-msg{ grid-column:1 / -1; font-size:12px; opacity:.85; margin-top:4px; }
 
+    /* panel pre návštevníka (bez prihlásenia) */
+    #rateBarGuest{ display:none; }
+    #rateBarGuest .rate-inner{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      align-items:flex-start;
+    }
+    #rateBarGuest .rate-actions{
+      display:flex;
+      gap:8px;
+      width:100%;
+      justify-content:flex-end;
+    }
+
     /* ===== PC ONLY: Neónové pulzujúce pásy pri okrajoch ===== */
     @media (min-width: 992px){
       .neon-beams{
@@ -218,7 +233,7 @@
     <div id="productMeta" class="meta muted"></div>
     <p id="productDescription"></p>
 
-    <!-- ✅ tu sa budú zobrazovať tlačidlá podľa dát -->
+    <!-- tlačidlá podľa dát -->
     <div id="productActions" class="product-actions" aria-label="Dostupné možnosti"></div>
 
     <div class="summary">
@@ -229,8 +244,8 @@
     <section class="reviews" id="reviewsList"></section>
   </main>
 
-  <!-- Fixný hodnotiaci panel -->
-  <div class="rate-bar">
+  <!-- Fixný hodnotiaci panel – len pre prihlásených -->
+  <div class="rate-bar" id="rateBar">
     <div class="rate-inner">
       <div id="rateStars" class="rate-stars" aria-label="Zvoľte počet hviezdičiek">
         <span data-star="1">★</span><span data-star="2">★</span><span data-star="3">★</span><span data-star="4">★</span><span data-star="5">★</span>
@@ -238,6 +253,19 @@
       <input id="rateComment" class="rate-text" placeholder="Napíšte svoje hodnotenie (nepovinné)..." />
       <button id="rateSubmit" class="rate-btn">Odoslať</button>
       <div id="rateMsg" class="rate-msg"></div>
+    </div>
+  </div>
+
+  <!-- Panel pre návštevníkov (bez emailu) -->
+  <div class="rate-bar" id="rateBarGuest">
+    <div class="rate-inner">
+      <div class="muted" style="font-size:13px;">
+        Na hodnotenie tohto produktu sa prosím prihláste alebo zaregistrujte.
+      </div>
+      <div class="rate-actions">
+        <button id="loginBtn" class="rate-btn">Prihlásiť</button>
+        <button id="registerBtn" class="rate-btn">Registrovať</button>
+      </div>
     </div>
   </div>
 

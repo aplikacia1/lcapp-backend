@@ -62,7 +62,13 @@ function stripHtml(s = '') {
   return String(s).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 function escapeHtml(s = '') {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[c]));
 }
 function escapeAttr(s = '') { return escapeHtml(s).replace(/"/g, '&quot;'); }
 
@@ -105,32 +111,38 @@ function signupTemplate(/* toEmail */) {
       <!-- obsah -->
       <div style="padding:16px 24px;background:#0c1f4b;color:#cfe2ff;line-height:1.55">
         <p style="margin:0 0 12px">Vitaj v <strong>Lištobooku</strong> 👋</p>
+
         <p style="margin:0 0 12px">
           Lištobook je <strong>komunitná mini-sieť</strong> pre majstrov a kutilov z Lištového centra.
-          Zdieľaj fotky práce, pýtaj sa na rady, <strong>hodnoť materiály a výrobky</strong> a píš krátke recenzie.
+          Zdieľaj fotky svojej práce, pýtaj sa na rady, <strong>hodnoť materiály a výrobky</strong> a píš krátke recenzie.
         </p>
 
-        <p style="margin:16px 0 8px;"><strong>Čo treba urobiť po prihlásení:</strong></p>
+        <p style="margin:16px 0 8px;"><strong>Po prihlásení odporúčame:</strong></p>
         <ol style="margin:0 0 16px;padding-left:18px">
-          <li>Zvoľ si <strong>prezývku</strong> (bez nej nejde pridávať príspevky a komentáre).</li>
-          <li>(Voliteľné) vyplň <strong>mesto</strong> a nastav <strong>newsletter</strong>.</li>
-          <li>Hotovo — môžeš hodnotiť a písať príspevky.</li>
+          <li>V časti <strong>Lištový dashboard</strong> si zvoľ <strong>prezývku</strong> a doplň mesto.</li>
+          <li>V hornej lište nájdeš sekcie:
+            <strong>„Lištobook“</strong> (časová os),
+            <strong>„⭐ Hodnotenie tovarov ⭐“</strong> (katalóg na recenzie)
+            a <strong>„Voľný čas“</strong> (videá a oddych).</li>
+          <li>Keď máš prezývku, môžeš pridávať príspevky, komentovať a hodnotiť tovary.</li>
         </ol>
 
         <p style="margin:16px 0 0;font-size:13px;color:#9ab6e8">
           <strong>Kontakt na Lištové centrum:</strong>
-          <a href="mailto:bratislava@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">bratislava@listovecentrum.sk</a>
-          • <a href="tel:+421947922181" style="color:#9ab6e8;text-decoration:underline">0947&nbsp;922&nbsp;181</a><br>
-          <strong>Info:</strong>
-          <a href="mailto:info@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">info@listovecentrum.sk</a>
-          • <a href="tel:+421915810350" style="color:#9ab6e8;text-decoration:underline">0915&nbsp;810&nbsp;350</a>
+          <a href="mailto:bratislava@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">
+            bratislava@listovecentrum.sk
+          </a>
+          •
+          <a href="tel:+421947922181" style="color:#9ab6e8;text-decoration:underline">
+            0947&nbsp;922&nbsp;181
+          </a>
         </p>
       </div>
 
       <!-- pätička -->
       <div style="padding:12px 16px;background:#081433;color:#8aa4d6;font-size:12px;text-align:center;border-top:1px solid #16336b">
         Odoslané z ${escapeHtml(user)} (no-reply). Neodpovedajte.<br/>
-        Lištobook.sk by LIŠTOVÉ CENTRUM EU, s.r.o., © Sasinkova 13, 010&nbsp;01 Žilina
+        Lištobook.sk by LIŠTOVÉ CENTRUM EU, s.r.o. ©
       </div>
     </div>
   </div>`;
