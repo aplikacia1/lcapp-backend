@@ -1,4 +1,3 @@
-<!-- výmena iba tejto časti vo formulári; dávam celý súbor pre istotu -->
 <!DOCTYPE html>
 <html lang="sk">
 <head>
@@ -6,7 +5,7 @@
   <title>Pridať produkt</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ... (nezmenené štýly) ... */
+    /* ... (pôvodné štýly, ponechávam bez zmien) ... */
   </style>
 </head>
 <body>
@@ -32,11 +31,18 @@
         <label for="description">Popis:</label>
         <textarea id="description" name="description" rows="4"></textarea>
 
-        <!-- ✳️ NOVÉ: poradie v rámci kategórie (nižšie číslo = vyššie v zozname) -->
+        <!-- ✳️ Poradie v rámci kategórie (nižšie číslo = vyššie v zozname) -->
         <label for="order">Poradie (nižšie = vyššie):</label>
-        <input type="number" id="order" name="order" step="1" min="0" placeholder="napr. 10 (predvolene 9999)">
+        <input
+          type="number"
+          id="order"
+          name="order"
+          step="1"
+          min="0"
+          placeholder="napr. 10 (predvolene 9999)"
+        >
 
-        <!-- ✳️ NOVÉ: URL technického listu (voliteľné) -->
+        <!-- ✳️ URL technického listu (voliteľné) -->
         <label for="techSheetUrl">URL technického listu (voliteľné):</label>
         <input
           type="url"
@@ -45,12 +51,12 @@
           placeholder="https://www.listovecentrum.sk/technicke-listy/produkt.pdf"
         >
 
-        <!-- ✳️ NOVÉ: URL produktu v e-shope (voliteľné) -->
+        <!-- ✳️ URL produktu v e-shope (voliteľné) -->
         <label for="eshopUrl">URL produktu v e-shope (voliteľné):</label>
         <input
           type="url"
           id="eshopUrl"
-          name="eshopUrl"
+          name="shopUrl"
           placeholder="https://eshop.listovecentrum.sk/produkt/nieco"
         >
 
