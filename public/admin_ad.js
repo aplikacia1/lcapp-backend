@@ -1,3 +1,4 @@
+// public/admin_ad.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("adForm");
   const imageInput = document.getElementById("adImage");
@@ -5,9 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const isActiveInput = document.getElementById("isActive");
   const statusMsg = document.getElementById("statusMsg");
 
-  // Základná adresa API – ak ju máš v config.js ako window.API_BASE_URL, použije sa tá
-  const API_BASE_URL =
-    window.API_BASE_URL || "http://localhost:5000";
+  // 🔴 PÔVODNE: window.API_BASE_URL || "http://localhost:5000"
+  // ✅ NOVÉ: fallback na aktuálnu doménu (funguje na listobook.sk aj na lokále)
+  const API_BASE_URL = (
+    window.API_BASE_URL ||
+    window.location.origin ||
+    ""
+  ).replace(/\/+$/, "");
 
   const setStatus = (msg, isError = false) => {
     if (!statusMsg) return;
@@ -40,21 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (!uploadResponse.ok) {
+        console.error("Upload error status:", uploadResponse.status);
         throw new Error("Nahrávanie obrázka zlyhalo.");
       }
 
-      const uploadResult = await uploadResponse.json();
+      const uploadResult = await uploadResponse.json().catch(() => ({}));
+      console.log("Upload result:", uploadResult);
 
-      // POZOR:
-      // Tu predpokladáme, že uploadRoutes vracia cestu v poli "filePath" alebo "imageUrl".
-      // Ak u teba vracia iný názov, stačí upraviť tento riadok:
-      const imageUrl =
-        uploadResult.imageUrl || uploadResult.filePath;
-
+      // Tu predpokladáme, že uploadRoutes vracia cestu v poli "imageUrl" alebo "filePath"
+      const imageUrl = uploadResult.imageUrl || uploadResult.filePath || uploadResult.path;
       if (!imageUrl) {
-        throw new Error(
-          "Server vrátil neplatnú cestu k obrázku (imageUrl/filePath)."
-        );
+        throw new Error("Server vrátil neplatnú cestu k obrázku (imageUrl/filePath/path).");
       }
 
       setStatus("Ukladám reklamu...");
@@ -75,16 +76,15 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify(payload),
       });
 
+      const adResult = await adResponse.json().catch(() => ({}));
+      console.log("Ad save response:", adResponse.status, adResult);
+
       if (!adResponse.ok) {
-        throw new Error("Ukladanie reklamy zlyhalo.");
+        throw new Error(adResult?.message || "Ukladanie reklamy zlyhalo.");
       }
 
-      const adResult = await adResponse.json();
-      console.log("Uložená reklama:", adResult);
-
       setStatus("Reklama bola úspešne uložená. 🎉");
-      // voliteľne: vyčistiť formulár
-      // form.reset();
+      // form.reset(); // ak chceš po uložení vyčistiť formulár, môžeš odkomentovať
     } catch (err) {
       console.error("Chyba pri ukladaní reklamy:", err);
       setStatus(
