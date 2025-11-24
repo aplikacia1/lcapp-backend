@@ -438,3 +438,168 @@ document.addEventListener("DOMContentLoaded", async () => {
   setInterval(refreshPresence, 10000);
   setComposerPadding();
 });
+
+// =======================================================
+// Reklamný popup – spoločná logika pre timeline
+// =======================================================
+(function () {
+  const AD_DISMISS_KEY = "lcAdDismissedDate";
+
+  function shouldShowByTime() {
+    const now = new Date();
+    const hour = now.getHours();
+    // zobrazovať okolo 9:00, 12:00 a 18:00
+    return hour === 9 || hour === 12 || hour === 18;
+  }
+
+  function isDismissedToday() {
+    try {
+      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      return localStorage.getItem(AD_DISMISS_KEY) === today;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function markDismissedToday() {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      localStorage.setItem(AD_DISMISS_KEY, today);
+    } catch (_) {
+      // nič, len sa nepodarilo uložiť
+    }
+  }
+
+  async function fetchCurrentAd() {
+    try {
+      const res = await fetch("/api/ads/current", {
+        credentials: "include",
+      });
+      if (!res.ok) return null;
+      const ad = await res.json();
+      if (!ad || !ad.imageUrl) return null;
+      return ad;
+    } catch (e) {
+      console.warn("Ad fetch failed:", e);
+      return null;
+    }
+  }
+
+  function createAdPopup(ad, forceTest) {
+    // overlay pozadie
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.background = "rgba(0, 0, 0, 0.55)";
+    overlay.style.zIndex = "99998";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.backdropFilter = "blur(3px)";
+
+    // okno
+    const box = document.createElement("div");
+    box.style.background = "#ffffff";
+    box.style.borderRadius = "16px";
+    box.style.boxShadow = "0 12px 40px rgba(0,0,0,.35)";
+    box.style.maxWidth = "480px";
+    box.style.width = "90vw";
+    box.style.maxHeight = "90vh";
+    box.style.display = "flex";
+    box.style.flexDirection = "column";
+    box.style.overflow = "hidden";
+    box.style.position = "relative";
+
+    // horný panel s krížikom
+    const topBar = document.createElement("div");
+    topBar.style.display = "flex";
+    topBar.style.justifyContent = "flex-end";
+    topBar.style.alignItems = "center";
+    topBar.style.padding = "6px 10px";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "✕";
+    closeBtn.setAttribute("aria-label", "Zavrieť reklamu");
+    closeBtn.style.border = "none";
+    closeBtn.style.background = "transparent";
+    closeBtn.style.fontSize = "20px";
+    closeBtn.style.cursor = "pointer";
+    closeBtn.style.color = "#333";
+
+    topBar.appendChild(closeBtn);
+
+    // obrázok reklamy
+    const link = document.createElement("a");
+    link.href = ad.targetUrl || "#";
+    if (ad.targetUrl) {
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    }
+    link.style.display = "block";
+
+    const img = document.createElement("img");
+    img.src = ad.imageUrl;
+    img.alt = "Reklama";
+    img.style.display = "block";
+    img.style.width = "100%";
+    img.style.height = "auto";
+    img.style.objectFit = "contain";
+    img.style.background = "#0b1c45";
+
+    link.appendChild(img);
+
+    // spodný text
+    const footer = document.createElement("div");
+    footer.textContent = ad.targetUrl || "Reklama Lištového centra";
+    footer.style.fontSize = "12px";
+    footer.style.padding = "6px 10px";
+    footer.style.color = "#444";
+    footer.style.background = "#f3f6ff";
+
+    box.appendChild(topBar);
+    box.appendChild(link);
+    box.appendChild(footer);
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    function closePopup() {
+      overlay.remove();
+      if (!forceTest) {
+        markDismissedToday();
+      }
+    }
+
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closePopup();
+    });
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        closePopup();
+      }
+    });
+  }
+
+  async function initAdPopup() {
+    const params = new URLSearchParams(window.location.search);
+    const forceTest = params.get("showAdTest") === "1";
+
+    if (!forceTest) {
+      // bežný režim – skúsime až po splnení podmienok
+      if (!shouldShowByTime()) return;
+      if (isDismissedToday()) return;
+    }
+
+    const ad = await fetchCurrentAd();
+    if (!ad) return;
+
+    createAdPopup(ad, forceTest);
+  }
+
+  // spusti po načítaní stránky (timeline)
+  document.addEventListener("DOMContentLoaded", () => {
+    initAdPopup();
+  });
+})();
