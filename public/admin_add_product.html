@@ -5,7 +5,7 @@
   <title>Pridať produkt</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ... (pôvodné štýly, ponechávam bez zmien) ... */
+    /* ... (pôvodné štýly nechávame bez zmien) ... */
   </style>
 </head>
 <body>
@@ -31,7 +31,7 @@
         <label for="description">Popis:</label>
         <textarea id="description" name="description" rows="4"></textarea>
 
-        <!-- ✳️ Poradie v rámci kategórie (nižšie číslo = vyššie v zozname) -->
+        <!-- Poradie v kategórii -->
         <label for="order">Poradie (nižšie = vyššie):</label>
         <input
           type="number"
@@ -42,7 +42,7 @@
           placeholder="napr. 10 (predvolene 9999)"
         >
 
-        <!-- ✳️ URL technického listu (voliteľné) -->
+        <!-- URL technického listu -->
         <label for="techSheetUrl">URL technického listu (voliteľné):</label>
         <input
           type="url"
@@ -51,11 +51,11 @@
           placeholder="https://www.listovecentrum.sk/technicke-listy/produkt.pdf"
         >
 
-        <!-- ✳️ URL produktu v e-shope (voliteľné) -->
-        <label for="eshopUrl">URL produktu v e-shope (voliteľné):</label>
+        <!-- ✅ URL produktu v e-shope – názov poľa = shopUrl -->
+        <label for="shopUrl">URL produktu v e-shope (voliteľné):</label>
         <input
           type="url"
-          id="eshopUrl"
+          id="shopUrl"
           name="shopUrl"
           placeholder="https://eshop.listovecentrum.sk/produkt/nieco"
         >
