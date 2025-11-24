@@ -105,7 +105,9 @@ router.post("/", upload.single("image"), async (req, res) => {
       categoryId,
       description,
       techSheetUrl,
-      shopUrl
+      shopUrl,
+      eshopUrl,
+      eShopUrl
     } = req.body;
 
     if (!name || !categoryId) {
@@ -124,6 +126,22 @@ router.post("/", upload.single("image"), async (req, res) => {
         ? Number(req.body.order)
         : 9999;
 
+    // aliasy pre URL polia
+    const finalTechSheetUrl = (
+      techSheetUrl ||
+      req.body.techsheetUrl ||
+      req.body.tech_sheet_url ||
+      ""
+    ).trim();
+
+    const finalShopUrl = (
+      shopUrl ||
+      eshopUrl ||
+      eShopUrl ||
+      req.body.productUrl ||
+      ""
+    ).trim();
+
     const doc = await Product.create({
       name,
       code: code || "",
@@ -133,8 +151,8 @@ router.post("/", upload.single("image"), async (req, res) => {
       description: description || "",
       image,
       order,
-      techSheetUrl: (techSheetUrl || "").trim(),
-      shopUrl: (shopUrl || "").trim()
+      techSheetUrl: finalTechSheetUrl,
+      shopUrl: finalShopUrl
     });
 
     res.status(201).json(doc);
@@ -155,7 +173,9 @@ router.put("/:id", upload.single("image"), async (req, res) => {
       categoryId,
       description,
       techSheetUrl,
-      shopUrl
+      shopUrl,
+      eshopUrl,
+      eShopUrl
     } = req.body;
 
     const item = await Product.findById(req.params.id);
@@ -177,12 +197,33 @@ router.put("/:id", upload.single("image"), async (req, res) => {
       if (Number.isFinite(n)) item.order = n;
     }
 
-    // 🔹 nové polia – technický list + e-shop
-    if (typeof techSheetUrl !== "undefined") {
-      item.techSheetUrl = String(techSheetUrl).trim();
+    // aliasy pre URL technického listu
+    const hasTechField = ["techSheetUrl", "techsheetUrl", "tech_sheet_url"].some(
+      (k) => Object.prototype.hasOwnProperty.call(req.body, k)
+    );
+    const finalTechSheetUrl = (
+      techSheetUrl ||
+      req.body.techsheetUrl ||
+      req.body.tech_sheet_url ||
+      ""
+    ).trim();
+    if (hasTechField) {
+      item.techSheetUrl = finalTechSheetUrl;
     }
-    if (typeof shopUrl !== "undefined") {
-      item.shopUrl = String(shopUrl).trim();
+
+    // aliasy pre URL e-shopu
+    const hasShopField = ["shopUrl", "eshopUrl", "eShopUrl", "productUrl"].some(
+      (k) => Object.prototype.hasOwnProperty.call(req.body, k)
+    );
+    const finalShopUrl = (
+      shopUrl ||
+      eshopUrl ||
+      eShopUrl ||
+      req.body.productUrl ||
+      ""
+    ).trim();
+    if (hasShopField) {
+      item.shopUrl = finalShopUrl;
     }
 
     if (typeof categoryId !== "undefined") {
