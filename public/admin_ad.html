@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reklama – Admin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📢 Reklama</h1>
+    <p>Tu môžete nahrať reklamnú grafiku, ktorá sa bude zobrazovať používateľom.</p>
+
+    <form id="adForm" enctype="multipart/form-data">
+      
+      <label>🖼️ Obrázok reklamy</label>
+      <input type="file" name="image" id="adImage" accept="image/*" required />
+
+      <label>🔗 Prekliková adresa (ľubovoľný text)</label>
+      <input type="text" name="targetUrl" id="targetUrl" placeholder="https://moja-stranka.sk" />
+
+      <label>
+        <input type="checkbox" id="isActive" /> Aktivná reklama
+      </label>
+
+      <button type="submit">💾 Uložiť reklamu</button>
+    </form>
+
+    <button onclick="location.href='admin_dashboard.html'" style="margin-top:20px;">
+      ⬅️ Späť
+    </button>
+
+    <p id="statusMsg"></p>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="admin_ad.js"></script>
+</body>
+</html>

@@ -83,7 +83,7 @@
     .review .who{ font-weight:700; }
     .review .when{ opacity:.75; font-size:12px; }
 
-    /* ✅ NOVÉ: tlačidlá „Technický list“ / „Kúpiť v e-shope“ */
+    /* ✅ tlačidlá „Technický list“ / „Kúpiť v e-shope“ */
     .product-actions{
       margin:16px 0 10px;
       display:flex;
@@ -111,6 +111,26 @@
     }
     .product-actions .icon{
       font-size:1.1rem;
+    }
+
+    /* 🔗 tlačidlo Zdieľať */
+    .share-btn{
+      margin-top:8px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:7px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.5);
+      background:transparent;
+      color:#ffffff;
+      font-size:.9rem;
+      cursor:pointer;
+      text-decoration:none;
+    }
+    .share-btn:hover{
+      background:rgba(255,255,255,.08);
+      border-color:#ffffff;
     }
 
     /* fixný dolný hodnotiaci panel */
@@ -236,6 +256,11 @@
     <!-- tlačidlá podľa dát -->
     <div id="productActions" class="product-actions" aria-label="Dostupné možnosti"></div>
 
+    <!-- 🔗 Zdieľanie produktu -->
+    <button id="shareProductBtn" class="share-btn">
+      🔗 Zdieľať tento tovar
+    </button>
+
     <div class="summary">
       <div id="ratingAverage" class="stars-line">Zatiaľ bez hodnotení</div>
       <div id="ratingCount" class="muted" style="font-size:13px"></div>
@@ -270,14 +295,20 @@
   </div>
 
   <script src="/js/config.js"></script>
+  <script src="/js/share-clean-link.js"></script>
   <script>
-    // nastav odkaz šípky – zachová ?email=... ak je v URL
+    // nastav odkaz šípky – zachová ?email=... ak je v URL (pre teba)
     (function(){
       const params = new URLSearchParams(location.search);
       const email = params.get('email');
       const back = document.getElementById('backToProducts');
       const q = email ? ('?email=' + encodeURIComponent(email)) : '';
       back.href = 'products.html' + q;
+
+      // nastav zdieľacie tlačidlo – link bez emailu pre cudzích ľudí
+      if (typeof setupShareButton === 'function') {
+        setupShareButton('shareProductBtn');
+      }
     })();
   </script>
   <script src="product_detail.js"></script>

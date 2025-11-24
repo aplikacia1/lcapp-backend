@@ -149,6 +149,7 @@ mountRoute('/api/banners',        './routes/bannerRoutes');
 mountRoute('/api/admin/timeline', './routes/timelineAdminRoutes');
 mountRoute('/api/messages',       './routes/messageRoutes');
 mountRoute('/api/push',           './routes/pushRoutes');
+mountRoute('/api/ads',            './routes/adRoutes');
 mountRoute('/api/uploads',        './routes/uploadRoutes'); // ping/debug
 
 /* --- Štart po DB --- */
