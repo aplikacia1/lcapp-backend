@@ -11,8 +11,8 @@
     <h1>📢 Reklama</h1>
     <p>Tu môžete nahrať reklamnú grafiku, ktorá sa bude zobrazovať používateľom.</p>
 
+    <!-- FORMULÁR NA ULOŽENIE / ZMENU REKLAMY -->
     <form id="adForm" enctype="multipart/form-data">
-      
       <label>🖼️ Obrázok reklamy</label>
       <input type="file" name="image" id="adImage" accept="image/*" required />
 
@@ -31,6 +31,19 @@
     </button>
 
     <p id="statusMsg"></p>
+
+    <hr style="margin: 30px 0;" />
+
+    <!-- 🖼 PREHĽAD ULOŽENÝCH REKLÁM -->
+    <section id="adsListSection">
+      <h2>Uložené reklamy</h2>
+      <p class="muted">
+        Tu vidíte uložené reklamy. Môžete si ich pozrieť a nepotrebné vymazať.
+      </p>
+      <div id="adsList" class="ads-list">
+        <!-- sem sa doplnia reklamy z admin_ad.js -->
+      </div>
+    </section>
   </div>
 
   <script src="/js/config.js"></script>
