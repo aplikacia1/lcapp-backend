@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LCAPP – Lištové centrum</title>
   <link rel="stylesheet" href="style.css" />
+
   <style>
     body { background:#061c47; color:#fff; margin:0; font-family:Arial, sans-serif; }
     .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 80px; }
@@ -16,6 +17,7 @@
     .btn { display:block; width:100%; max-width:420px; margin:10px auto 0; height:44px;
            border-radius:12px; border:1px solid rgba(255,255,255,.35); background:#fff; color:#0c1f4b; cursor:pointer; }
     .btn--primary { background:#e9f2ff; }
+
     .brand-badge{
       position: fixed; left: 16px; bottom: 16px; z-index: 70;
       display: inline-flex; align-items: center; gap: 8px;
@@ -25,6 +27,7 @@
     }
     .brand-badge img{ height: 24px; width:auto; display:block; }
     .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
+
     @media (max-width: 520px){
       .logo-lc { height: 150px; }
       h1 { font-size: 24px; }
@@ -42,8 +45,33 @@
         transform: translateY(0);
       }
     }
+
+    /* ===== Cookie banner (spodok) ===== */
+    #cookieBanner{
+      position:fixed; left:0; right:0; bottom:0;
+      background:rgba(6,28,71,.96);
+      color:#fff; padding:18px 14px 16px;
+      border-top:1px solid rgba(255,255,255,.2);
+      z-index:999;
+      box-shadow:0 -10px 22px rgba(0,0,0,.35);
+      backdrop-filter:blur(6px);
+    }
+    #cookieBanner h4{ margin:0 0 8px; font-size:1.05rem; }
+    #cookieBanner p{ margin:0 0 10px; font-size:.9rem; line-height:1.4; }
+    #cookieDetails{ margin:8px 0; }
+    #cookieDetails[hidden]{ display:none; }
+
+    #cookieBanner button{
+      width:100%; height:42px; margin-top:8px;
+      border-radius:12px; border:none;
+      cursor:pointer; font-size:.95rem;
+    }
+    .cb-basic{ background:#1e3a8a; color:#fff; }
+    .cb-save{ background:#3b82f6; color:#fff; }
+    .cb-all{ background:#16a34a; color:#fff; }
   </style>
 </head>
+
 <body>
   <div class="wrap fade-in">
     <div class="hero">
@@ -70,12 +98,37 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
+  <!-- ===== COOKIE BANNER ===== -->
+  <div id="cookieBanner" hidden>
+    <h4>🍪 Cookies na Lištobooku</h4>
+    <p>
+      Na tejto stránke používame nevyhnutné cookies pre správne fungovanie webu (prihlásenie, bezpečnosť).
+      Voliteľné cookies môžete povoliť pre anonymné štatistiky a prehrávanie videí.
+    </p>
+
+    <details id="cookieDetails">
+      <summary style="cursor:pointer;">🔽 Podrobné nastavenia</summary>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <input type="checkbox" id="cookieStats"> Štatistické cookies
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+        <input type="checkbox" id="cookieMedia"> Mediálne cookies (YouTube)
+      </label>
+    </details>
+
+    <button class="cb-basic" id="cookieBasic">Povoliť len nevyhnutné</button>
+    <button class="cb-save"  id="cookieSave">Uložiť výber</button>
+    <button class="cb-all"   id="cookieAll">Prijať všetko</button>
+  </div>
+
+  <script src="js/cookies.js"></script>
+
   <script>
-    // bežné tlačidlá
+    // redirect buttons
     document.getElementById('goRegister').addEventListener('click', ()=> location.href = 'register.html');
     document.getElementById('goLogin').addEventListener('click', ()=> location.href = 'login.html');
 
-    // ==== TAJNÝ VSTUP: 5× ťuk na logo (do 1.5 s) → admin_login.html ====
+    // tajný admin vstup
     (function(){
       const logo = document.querySelector('.logo-lc');
       if (!logo) return;
@@ -96,10 +149,8 @@
         }
       }
 
-      // 1 handler pre myš aj dotyk (zabráni dvojitému sčítaniu klik+touch)
       logo.addEventListener('pointerdown', onTap, { passive: true });
 
-      // skrytá klávesová skratka pre desktop: Ctrl/⌘ + Alt + L
       window.addEventListener('keydown', (e)=>{
         if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'l' || e.key === 'L')){
           location.href = 'admin_login.html';
@@ -107,5 +158,6 @@
       });
     })();
   </script>
+
 </body>
 </html>
