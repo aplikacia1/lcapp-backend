@@ -6,11 +6,36 @@
   <title>LCAPP – Lištové centrum</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    body { background:#061c47; color:#fff; margin:0; font-family:Arial, sans-serif; }
-    .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 80px; }
-    .hero { display:flex; flex-direction:column; align-items:center; gap:20px; margin-top: 24px; }
-    .logo-lc { height: 180px; max-width: 92vw; width:auto; display:block; border-radius:12px; }
-    h1 { margin: 12px 0 8px; font-size: 28px; text-align:center; }
+    body {
+      background:#061c47;
+      color:#fff;
+      margin:0;
+      font-family:Arial, sans-serif;
+    }
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+    .hero {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:20px;
+      margin-top: 24px;
+    }
+    .logo-lc {
+      height: 180px;
+      max-width: 92vw;
+      width:auto;
+      display:block;
+      border-radius:12px;
+    }
+    h1 {
+      margin: 12px 0 8px;
+      font-size: 28px;
+      text-align:center;
+    }
     .card {
       background: rgba(255,255,255,0.06);
       border:1px solid rgba(255,255,255,.12);
@@ -20,7 +45,8 @@
     }
     .btn {
       display:block;
-      width:100%; max-width:420px;
+      width:100%;
+      max-width:420px;
       margin:10px auto 0;
       height:44px;
       border-radius:12px;
@@ -29,18 +55,35 @@
       color:#0c1f4b;
       cursor:pointer;
     }
-    .btn--primary { background:#e9f2ff; }
-
-    .brand-badge{
-      position: fixed; left: 16px; bottom: 16px; z-index: 70;
-      display: inline-flex; align-items: center; gap: 8px;
-      background: #000; color:#fff; text-decoration:none;
-      border: 2px solid #fff; border-radius: 14px; padding: 8px 10px;
-      box-shadow:0 8px 18px rgba(0,0,0,.25); opacity:.96;
+    .btn--primary {
+      background:#e9f2ff;
     }
-    .brand-badge img{ height: 24px; width:auto; display:block; }
-    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
-
+    .brand-badge{
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 70;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #000;
+      color:#fff;
+      text-decoration:none;
+      border: 2px solid #fff;
+      border-radius: 14px;
+      padding: 8px 10px;
+      box-shadow:0 8px 18px rgba(0,0,0,.25);
+      opacity:.96;
+    }
+    .brand-badge img{
+      height: 24px;
+      width:auto;
+      display:block;
+    }
+    .brand-badge .wordmark{
+      font-weight:700;
+      letter-spacing:.2px;
+    }
     @media (max-width: 520px){
       .logo-lc { height: 150px; }
       h1 { font-size: 24px; }
@@ -57,6 +100,92 @@
         opacity: 1;
         transform: translateY(0);
       }
+    }
+
+    /* ====== PWA MODAL ====== */
+    #pwaPrompt {
+      position: fixed;
+      inset: 0;
+      display: none;               /* zobrazí sa cez JS */
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.55);
+      z-index: 9000;
+    }
+    .pwa-dialog {
+      width: 100%;
+      max-width: 380px;
+      margin: 0 16px;
+      background:
+        radial-gradient(circle at 0 0,#1d4ed8 0,rgba(15,23,42,0.96) 52%,#020617 100%);
+      color:#e5edff;
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 24px 60px rgba(3,7,18,.96);
+      border: 1px solid rgba(129,140,248,.9);
+      box-sizing: border-box;
+      position: relative;
+    }
+    .pwa-close {
+      position:absolute;
+      top:8px;
+      right:10px;
+      border:none;
+      background:transparent;
+      color:#9ca3af;
+      font-size:22px;
+      line-height:1;
+      cursor:pointer;
+    }
+    .pwa-close:hover{
+      color:#e5edff;
+    }
+    .pwa-icon {
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-size:26px;
+      background:rgba(15,23,42,.9);
+      border:1px solid rgba(191,219,254,.9);
+      box-shadow:0 0 22px rgba(59,130,246,.75);
+      margin-bottom:10px;
+    }
+    .pwa-dialog h2{
+      margin:4px 0 6px;
+      font-size:1.15rem;
+    }
+    .pwa-dialog p{
+      margin:0 0 10px;
+      font-size:.9rem;
+      color:#dbeafe;
+    }
+    .pwa-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    .pwa-btn{
+      flex:1 1 auto;
+      height:40px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,255,.7);
+      background:transparent;
+      color:#e5edff;
+      cursor:pointer;
+      font-size:.9rem;
+      font-weight:500;
+    }
+    .pwa-btn-primary{
+      background:linear-gradient(135deg,#60a5fa,#2563eb);
+      border:none;
+      color:#f9fafb;
+      box-shadow:0 14px 30px rgba(37,99,235,.55);
+    }
+    .pwa-btn-primary:hover{
+      filter:brightness(1.05);
     }
   </style>
 </head>
@@ -86,8 +215,26 @@
     <span class="wordmark">MarSab®</span>
   </a>
 
-  <!-- JEDNOTNÁ cookie logika pre celý web -->
-  <script src="/js/cookies.js"></script>
+  <!-- PWA inštalačné okno -->
+  <div id="pwaPrompt" aria-hidden="true">
+    <div class="pwa-dialog" role="dialog" aria-modal="true" aria-labelledby="pwaTitle">
+      <button type="button" class="pwa-close" data-pwa-close aria-label="Zavrieť">×</button>
+      <div class="pwa-icon" aria-hidden="true">📲</div>
+      <h2 id="pwaTitle">Nainštalovať aplikáciu LCAPP?</h2>
+      <p>
+        LCAPP si môžete pridať ako aplikáciu do svojho zariadenia.
+        Spustíte ju potom priamo z domovskej obrazovky – bez prehliadača.
+      </p>
+      <div class="pwa-actions">
+        <button type="button" class="pwa-btn pwa-btn-primary" data-pwa-install>
+          Nainštalovať
+        </button>
+        <button type="button" class="pwa-btn" data-pwa-later>
+          Neskôr
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // bežné tlačidlá
@@ -105,10 +252,7 @@
 
       function reset(){
         taps = 0;
-        if (timer){
-          clearTimeout(timer);
-          timer = null;
-        }
+        if (timer){ clearTimeout(timer); timer = null; }
       }
 
       function onTap(){
@@ -121,6 +265,7 @@
         }
       }
 
+      // 1 handler pre myš aj dotyk
       logo.addEventListener('pointerdown', onTap, { passive: true });
 
       // skrytá klávesová skratka pre desktop: Ctrl/⌘ + Alt + L
@@ -131,5 +276,10 @@
       });
     })();
   </script>
+
+  <!-- Cookies (len info/súhlas, nič s prihlásením) -->
+  <script src="/js/cookies.js"></script>
+  <!-- PWA prompt -->
+  <script src="/js/pwa-prompt.js"></script>
 </body>
 </html>

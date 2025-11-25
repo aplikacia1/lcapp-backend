@@ -50,7 +50,7 @@
     btn.addEventListener("click", function () {
       const shareUrl = buildCleanUrl();
       const shareTitle = "Produkt z Lištobooku";
-      const shareText = "Pozrite si tento produkt z katalógu Lištového centra:";
+      const shareText = "Pozrite si tento produkt z katalógu listobook:";
 
       // 📱 natívne zdieľanie (mobil, moderné prehliadače)
       if (navigator.share) {

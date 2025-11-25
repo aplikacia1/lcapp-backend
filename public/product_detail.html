@@ -6,7 +6,6 @@
   <title>Detail produktu</title>
 
   <!-- 🔗 Open Graph pre pekné náhľady pri zdieľaní -->
-  <!-- POZNÁMKA: uprav doménu a cestu k obrázku podľa reality (napr. https://listobook.sk/img/share-product-default.jpg) -->
   <meta property="og:title" content="Lištobook – produkt z katalógu">
   <meta property="og:description" content="Pozrite si tento produkt z katalógu Lištového centra.">
   <meta property="og:image" content="https://listobook.sk/img/share-product-default.jpg">
@@ -196,8 +195,8 @@
     /* ===== PC ONLY: Neónové pulzujúce pásy pri okrajoch ===== */
     @media (min-width: 992px){
       .neon-beams{
-        position: fixed; inset: var(--hdr-h) 0 0 0;   /* pod hlavičkou, cez celú výšku */
-        pointer-events: none; z-index: 0;             /* neklikateľné, úplne vzadu */
+        position: fixed; inset: var(--hdr-h) 0 0 0;
+        pointer-events: none; z-index: 0;
       }
       .beam{
         position: absolute; top: 0; bottom: 0; width: 12vw; max-width: 180px;
@@ -229,6 +228,92 @@
         0%,100%{ opacity:.10; transform: scale(1); }
         50%    { opacity:.22; transform: scale(1.08); }
       }
+    }
+
+    /* ====== PWA MODAL (rovnaký ako na indexe) ====== */
+    #pwaPrompt {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.55);
+      z-index: 9000;
+    }
+    .pwa-dialog {
+      width: 100%;
+      max-width: 380px;
+      margin: 0 16px;
+      background:
+        radial-gradient(circle at 0 0,#1d4ed8 0,rgba(15,23,42,0.96) 52%,#020617 100%);
+      color:#e5edff;
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 24px 60px rgba(3,7,18,.96);
+      border: 1px solid rgba(129,140,248,.9);
+      box-sizing: border-box;
+      position: relative;
+    }
+    .pwa-close {
+      position:absolute;
+      top:8px;
+      right:10px;
+      border:none;
+      background:transparent;
+      color:#9ca3af;
+      font-size:22px;
+      line-height:1;
+      cursor:pointer;
+    }
+    .pwa-close:hover{
+      color:#e5edff;
+    }
+    .pwa-icon {
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-size:26px;
+      background:rgba(15,23,42,.9);
+      border:1px solid rgba(191,219,254,.9);
+      box-shadow:0 0 22px rgba(59,130,246,.75);
+      margin-bottom:10px;
+    }
+    .pwa-dialog h2{
+      margin:4px 0 6px;
+      font-size:1.15rem;
+    }
+    .pwa-dialog p{
+      margin:0 0 10px;
+      font-size:.9rem;
+      color:#dbeafe;
+    }
+    .pwa-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    .pwa-btn{
+      flex:1 1 auto;
+      height:40px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,255,.7);
+      background:transparent;
+      color:#e5edff;
+      cursor:pointer;
+      font-size:.9rem;
+      font-weight:500;
+    }
+    .pwa-btn-primary{
+      background:linear-gradient(135deg,#60a5fa,#2563eb);
+      border:none;
+      color:#f9fafb;
+      box-shadow:0 14px 30px rgba(37,99,235,.55);
+    }
+    .pwa-btn-primary:hover{
+      filter:brightness(1.05);
     }
   </style>
 </head>
@@ -312,8 +397,34 @@
     </div>
   </div>
 
+  <!-- PWA inštalačné okno (rovnaké ako na indexe) -->
+  <div id="pwaPrompt" aria-hidden="true">
+    <div class="pwa-dialog" role="dialog" aria-modal="true" aria-labelledby="pwaTitle">
+      <button type="button" class="pwa-close" data-pwa-close aria-label="Zavrieť">×</button>
+      <div class="pwa-icon" aria-hidden="true">📲</div>
+      <h2 id="pwaTitle">Nainštalovať aplikáciu LCAPP?</h2>
+      <p>
+        LCAPP si môžete pridať ako aplikáciu do svojho zariadenia.
+        Spustíte ju potom priamo z domovskej obrazovky – bez prehliadača.
+      </p>
+      <div class="pwa-actions">
+        <button type="button" class="pwa-btn pwa-btn-primary" data-pwa-install>
+          Nainštalovať
+        </button>
+        <button type="button" class="pwa-btn" data-pwa-later>
+          Neskôr
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="/js/config.js"></script>
   <script src="/js/share-clean-link.js"></script>
+  <!-- cookies banner (rovnaké správanie ako na ostatných stránkach) -->
+  <script src="/js/cookies.js"></script>
+  <!-- PWA prompt – používa rovnakú logiku / limit 3x denne -->
+  <script src="/js/pwa-prompt.js"></script>
+
   <script>
     // nastav odkaz šípky – zachová ?email=... ak je v URL (pre teba)
     (function(){
