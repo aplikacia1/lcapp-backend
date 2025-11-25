@@ -1,67 +1,25 @@
 // public/js/cookies.js
-// Jednoduchý správca cookies pre Lištobook (iba na súhlas, nie na prihlásenie)
+// Jednoduchý INFO banner o cookies – bez vypínania kategórií.
+// Používame len technické/nezbytné cookies pre fungovanie aplikácie.
 
 (function () {
-  const STORAGE_KEY = "lc_cookie_prefs_v1";
+  const STORAGE_KEY = "lc_cookie_info_seen_v1";
 
-  const DEFAULT_PREFS = {
-    necessary: true,  // vždy zapnuté, nedá sa vypnúť
-    analytics: false, // štatistika návštevnosti (ak bude)
-    media: false      // YouTube, vložené videá a iný externý obsah
-  };
-
-  function loadPrefs() {
+  function hasSeenBanner() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return null;
-      return {
-        necessary: true,
-        analytics: !!parsed.analytics,
-        media: !!parsed.media
-      };
+      return localStorage.getItem(STORAGE_KEY) === "1";
     } catch (e) {
-      console.warn("[cookies] Nepodarilo sa načítať prefs:", e);
-      return null;
+      return false;
     }
   }
 
-  function savePrefs(prefs) {
-    const toSave = {
-      analytics: !!prefs.analytics,
-      media: !!prefs.media
-    };
+  function rememberSeen() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      localStorage.setItem(STORAGE_KEY, "1");
     } catch (e) {
-      console.warn("[cookies] Nepodarilo sa uložiť prefs:", e);
+      // ignorujeme
     }
-    applyPrefs({
-      necessary: true,
-      analytics: !!prefs.analytics,
-      media: !!prefs.media
-    });
   }
-
-  function applyPrefs(prefs) {
-    document.dispatchEvent(
-      new CustomEvent("lc-cookie-update", { detail: prefs })
-    );
-  }
-
-  function ensurePrefs() {
-    let prefs = loadPrefs();
-    if (!prefs) {
-      // ešte nemáme nič uložené → žiadny súhlas → zobrazíme banner
-      applyPrefs({ ...DEFAULT_PREFS });
-      return null;
-    }
-    applyPrefs(prefs);
-    return prefs;
-  }
-
-  // ---------- Banner UI ----------
 
   function createBanner() {
     if (document.getElementById("lcCookieBanner")) return;
@@ -86,41 +44,14 @@
           <strong>🍪 Cookies na Lištobooku</strong>
         </div>
         <div style="line-height:1.4;">
-          Na tejto stránke používame nevyhnutné cookies na správne fungovanie webu
-          (prihlásenie, bezpečnosť). Voliteľne môžeme používať aj cookies pre
-          štatistiky návštevnosti a prehrávanie vloženého obsahu (napr. YouTube).
-          Svoj výber môžete kedykoľvek zmeniť vo svojom účte.
+          V Lištobooku používame len nevyhnutné technické cookies potrebné
+          na prihlásenie, zabezpečenie a chod aplikácie. Nepoužívame žiadne
+          marketingové cookies tretích strán.
         </div>
-        <details id="lcCookieMore" style="background:rgba(0,0,0,.15); border-radius:8px; padding:6px 8px;">
-          <summary style="cursor:pointer; outline:none;">Podrobné nastavenia</summary>
-          <div style="margin-top:6px; display:flex; flex-direction:column; gap:4px;">
-            <label style="display:flex; align-items:center; gap:8px;">
-              <input type="checkbox" checked disabled />
-              <span><strong>Nezbytné cookies</strong> – potrebné na prihlásenie a základné fungovanie.</span>
-            </label>
-            <label style="display:flex; align-items:flex-start; gap:8px;">
-              <input type="checkbox" id="lcPrefAnalytics" />
-              <span><strong>Štatistické cookies</strong> – anonymné meranie návštevnosti (ak ich zavediete).</span>
-            </label>
-            <label style="display:flex; align-items:flex-start; gap:8px;">
-              <input type="checkbox" id="lcPrefMedia" />
-              <span><strong>Mediálne cookies</strong> – prehrávanie vložených videí (YouTube a pod.).
-                Bez tohto povolenia zobrazíme len zástupný obrázok.</span>
-            </label>
-          </div>
-        </details>
         <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end;">
-          <button id="lcBtnReject" type="button"
-            style="border-radius:999px; padding:6px 14px; border:1px solid #ffffff55; background:transparent; color:#ffffff; cursor:pointer;">
-            Povoliť len nevyhnutné
-          </button>
-          <button id="lcBtnAcceptSel" type="button"
-            style="border-radius:999px; padding:6px 14px; border:1px solid #7cc4ff; background:#0b63c5; color:#ffffff; cursor:pointer;">
-            Uložiť výber
-          </button>
-          <button id="lcBtnAcceptAll" type="button"
-            style="border-radius:999px; padding:6px 14px; border:1px solid #7cffb3; background:#12a15a; color:#ffffff; cursor:pointer;">
-            Prijať všetko
+          <button id="lcBtnOk" type="button"
+            style="border-radius:999px; padding:6px 18px; border:1px solid #7cffb3; background:#12a15a; color:#ffffff; cursor:pointer;">
+            Rozumiem
           </button>
         </div>
       </div>
@@ -128,30 +59,13 @@
 
     document.body.appendChild(banner);
 
-    const chkAnalytics = document.getElementById("lcPrefAnalytics");
-    const chkMedia = document.getElementById("lcPrefMedia");
-    const btnReject = document.getElementById("lcBtnReject");
-    const btnAcceptSel = document.getElementById("lcBtnAcceptSel");
-    const btnAcceptAll = document.getElementById("lcBtnAcceptAll");
-
-    btnReject.addEventListener("click", () => {
-      savePrefs({ necessary: true, analytics: false, media: false });
-      hideBanner();
-    });
-
-    btnAcceptAll.addEventListener("click", () => {
-      savePrefs({ necessary: true, analytics: true, media: true });
-      hideBanner();
-    });
-
-    btnAcceptSel.addEventListener("click", () => {
-      savePrefs({
-        necessary: true,
-        analytics: !!chkAnalytics.checked,
-        media: !!chkMedia.checked,
+    const btnOk = document.getElementById("lcBtnOk");
+    if (btnOk) {
+      btnOk.addEventListener("click", () => {
+        rememberSeen();
+        hideBanner();
       });
-      hideBanner();
-    });
+    }
   }
 
   function hideBanner() {
@@ -161,53 +75,26 @@
     }
   }
 
-  // ---------- Verejné API pre iné časti webu ----------
-
+  // Jednoduché „dummy“ API – nech sa nič nepokazí, ak ho niekde voláme
   const api = {
-    getPrefs: () => loadPrefs() || { ...DEFAULT_PREFS },
-
-    setPrefs: (prefs) => {
-      savePrefs(prefs || DEFAULT_PREFS);
+    getPrefs: () => ({
+      necessary: true,
+      analytics: false,
+      media: false,
+    }),
+    setPrefs: () => {
+      // už nič neukladáme – všetko sú len nevyhnutné cookies
     },
-
-    isCategoryAllowed: (cat) => {
-      const prefs = loadPrefs();
-      if (!prefs) return false;
-      if (cat === "analytics") return !!prefs.analytics;
-      if (cat === "media") return !!prefs.media;
-      return false;
-    },
-
-    // Pre dashboard – naviaže formulár s checkboxmi na aktuálne nastavenia
-    bindSettingsForm: (formSelector) => {
-      const form = document.querySelector(formSelector);
-      if (!form) return;
-
-      const chkAnalytics = form.querySelector("[name='cookies_analytics']");
-      const chkMedia = form.querySelector("[name='cookies_media']");
-
-      const prefs = api.getPrefs();
-      if (chkAnalytics) chkAnalytics.checked = !!prefs.analytics;
-      if (chkMedia) chkMedia.checked = !!prefs.media;
-
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        api.setPrefs({
-          necessary: true,
-          analytics: chkAnalytics ? !!chkAnalytics.checked : false,
-          media: chkMedia ? !!chkMedia.checked : false,
-        });
-        alert("Nastavenia cookies boli uložené.");
-      });
+    isCategoryAllowed: () => true,
+    bindSettingsForm: () => {
+      // na dashboarde už nemáme formulár s cookies
     },
   };
 
   window.LC_Cookies = api;
 
   document.addEventListener("DOMContentLoaded", () => {
-    const prefs = ensurePrefs();
-    if (!prefs) {
-      // nemáme žiadny uložený súhlas → zobraz banner
+    if (!hasSeenBanner()) {
       createBanner();
     }
   });

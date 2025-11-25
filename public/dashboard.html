@@ -167,23 +167,13 @@
         <button type="submit">Uložiť údaje</button>
       </form>
 
-      <!-- Nastavenie cookies priamo v účte -->
-      <h3 class="section-title">Nastavenie cookies</h3>
-      <form id="cookieSettingsForm" style="margin-bottom:18px;">
-        <p style="font-size:.9rem; color:#e6efff;">
-          Tu si môžete nastaviť, ktoré voliteľné cookies na Lištobooku povoľujete.
-          Nevyhnutné cookies používame vždy – bez nich by sa nedalo prihlásiť ani ukladať nastavenia účtu.
-        </p>
-        <label class="newsletter-row" style="margin-top:6px;">
-          <input type="checkbox" name="cookies_analytics" />
-          <span>Štatistické cookies – anonymné meranie návštevnosti (ak ich zavediete).</span>
-        </label>
-        <label class="newsletter-row" style="margin-top:6px;">
-          <input type="checkbox" name="cookies_media" />
-          <span>Mediálne cookies – prehrávanie vložených videí (YouTube a pod.).</span>
-        </label>
-        <button type="submit">Uložiť nastavenia cookies</button>
-      </form>
+      <!-- Informácia o cookies (už bez nastavení) -->
+      <h3 class="section-title" style="margin-top:18px;">Informácia o cookies</h3>
+      <p style="font-size:.9rem; color:#cfe2ff; margin:4px 0 0;">
+        V Lištobooku používame len nevyhnutné technické cookies potrebné na prihlásenie,
+        bezpečnosť a uloženie základných nastavení účtu. Žiadne marketingové cookies
+        tretích strán ani externé štatistické nástroje nepoužívame.
+      </p>
 
       <form id="passwordForm" style="margin-top:18px;">
         <h3 class="section-title" style="margin-top:0;">Zmena hesla</h3>
@@ -198,15 +188,8 @@
   </div>
 
   <script src="/js/config.js"></script>
-  <script src="/js/cookies.js"></script>
   <script src="dashboard.js"></script>
   <script src="banners.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      if (window.LC_Cookies) {
-        LC_Cookies.bindSettingsForm("#cookieSettingsForm");
-      }
-    });
-  </script>
+  <script src="/js/cookies.js"></script>
 </body>
 </html>
