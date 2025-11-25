@@ -77,6 +77,55 @@ router.post("/", upload.single("image"), async (req, res) => {
 });
 
 /**
+ * GET /api/ads
+ * Zoznam všetkých reklám (pre admina)
+ */
+router.get("/", async (req, res) => {
+  try {
+    const ads = await Ad.find().sort({ createdAt: -1 }).lean();
+    return res.json(ads);
+  } catch (err) {
+    console.error("Get ads list error:", err);
+    return res
+      .status(500)
+      .json({ message: "Nepodarilo sa načítať zoznam reklám." });
+  }
+});
+
+/**
+ * DELETE /api/ads/:id
+ * Vymazanie reklamy + pokus o zmazanie obrázka z disku
+ */
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ad = await Ad.findById(id);
+    if (!ad) {
+      return res.status(404).json({ message: "Reklama neexistuje." });
+    }
+
+    // pokúsime sa zmazať súbor obrázka (ak je v /uploads/)
+    if (ad.imageUrl && ad.imageUrl.startsWith("/uploads/")) {
+      const filename = path.basename(ad.imageUrl);
+      const fullPath = path.join(uploadsDir, filename);
+      fs.unlink(fullPath, (err) => {
+        if (err && err.code !== "ENOENT") {
+          console.warn("Nepodarilo sa zmazať súbor reklamy:", fullPath, err);
+        }
+      });
+    }
+
+    await Ad.deleteOne({ _id: id });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Delete ad error:", err);
+    return res
+      .status(500)
+      .json({ message: "Nepodarilo sa vymazať reklamu." });
+  }
+});
+
+/**
  * GET /api/ads/current
  * Vráti poslednú aktívnu reklamu alebo null.
  */

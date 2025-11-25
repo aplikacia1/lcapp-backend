@@ -64,7 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       setStatus("Reklama bola úspešne uložená. 🎉");
-      // form.reset(); // ak chceš, môžeš odkomentovať
 
       // po úspechu obnovíme zoznam reklám
       await loadAdsList();
@@ -116,14 +115,25 @@ document.addEventListener("DOMContentLoaded", () => {
       adsListBox.innerHTML = list
         .map((ad) => {
           const id = ad._id || ad.id || "";
-          const imageUrl =
-            ad.imageUrl || ad.image || ad.imagePath || ad.url || "";
+          const rawImage = ad.imageUrl || ad.image || ad.imagePath || ad.url || "";
           const targetUrl = ad.targetUrl || ad.link || "";
           const isActive = !!ad.isActive;
           const created = ad.createdAt || ad.updatedAt || "";
           const createdText = created
             ? new Date(created).toLocaleString("sk-SK")
             : "";
+
+          // zostavenie URL k obrázku
+          let imgSrc = "";
+          if (rawImage) {
+            if (rawImage.startsWith("http")) {
+              imgSrc = rawImage;
+            } else if (rawImage.startsWith("/")) {
+              imgSrc = rawImage;
+            } else {
+              imgSrc = "/uploads/" + rawImage.replace(/^\/+/, "");
+            }
+          }
 
           return `
             <article class="ad-item" data-id="${escapeHTML(id)}"
@@ -140,11 +150,9 @@ document.addEventListener("DOMContentLoaded", () => {
             >
               <div class="ad-thumb" style="flex:0 0 140px;">
                 ${
-                  imageUrl
+                  imgSrc
                     ? `<img src="${escapeHTML(
-                        imageUrl.startsWith("http")
-                          ? imageUrl
-                          : "/uploads/" + imageUrl.replace(/^\\/+/, "")
+                        imgSrc
                       )}" alt="Reklama" style="max-width:140px; max-height:90px; border-radius:8px; object-fit:contain; background:#001133;" />`
                     : "<div style='width:140px;height:90px;border-radius:8px;background:#001133;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:.7;'>Bez obrázka</div>"
                 }
