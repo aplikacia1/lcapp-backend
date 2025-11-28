@@ -14,6 +14,8 @@
     button{background:#fff;color:#0c1f4b;border:1px solid rgba(255,255,255,.3);cursor:pointer}
     button:disabled{opacity:.6;cursor:not-allowed}
     .link-row{margin-top:4px;font-size:.95rem}
+
+    /* MarSab™ badge vľavo dole */
     .brand-badge{
       position: fixed; left: 16px; bottom: 16px; z-index: 70;
       display: inline-flex; align-items: center; gap: 8px;
@@ -21,10 +23,12 @@
       border: 2px solid #fff; border-radius: 14px; padding: 8px 10px; opacity:.96;
     }
     .brand-badge img{ height:24px; width:auto; display:block; }
+    .brand-badge .wordmark{ font-weight:700; letter-spacing:.2px; }
 
     /* Zabudnuté heslo panel */
     #forgotWrap{
-      display:none; margin-top:14px; padding:12px; border:1px solid #bcd6ff; border-radius:12px;
+      display:none; margin-top:14px; padding:12px;
+      border:1px solid #bcd6ff; border-radius:12px;
       background: rgba(255,255,255,.06);
     }
     #forgotWrap .row{display:flex; gap:8px}
@@ -61,8 +65,10 @@
     </div>
   </div>
 
-  <a class="brand-badge" href="#" aria-label="MarSab®">
-    <img src="img/marsab_logo.png" alt=""> <span>MarSab®</span>
+  <!-- MarSab™ badge -->
+  <a class="brand-badge" href="#" aria-label="MarSab™">
+    <img src="img/marsab_logo.png" alt="MarSab™ logo">
+    <span class="wordmark">MarSab™</span>
   </a>
 
   <script src="login.js" defer></script>
