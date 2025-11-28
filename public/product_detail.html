@@ -59,7 +59,7 @@
     .logo-small{ display:block; height:40px; object-fit:contain; margin:2px auto 6px; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; text-align:center; margin-bottom:8px; }
 
-    /* MarSab® v hlavičke (vpravo hore) */
+    /* MarSab™ v hlavičke (vpravo hore) */
     .header-badge{
       position:absolute; right:12px; top:10px;
       display:inline-flex; align-items:center; gap:6px;
@@ -177,7 +177,7 @@
     }
     .rate-msg{ grid-column:1 / -1; font-size:12px; opacity:.85; margin-top:4px; }
 
-    /* panel pre návštevníka (bez prihlásenia) */
+    /* panel pre návštevníka (bez emailu) – zatiaľ len text + tlačidlá dole */
     #rateBarGuest{ display:none; }
     #rateBarGuest .rate-inner{
       display:flex;
@@ -315,6 +315,80 @@
     .pwa-btn-primary:hover{
       filter:brightness(1.05);
     }
+
+    /* ====== MODÁL – PRIHLÁSENIE NA HODNOTENIE ====== */
+    #authPrompt{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.55);
+      z-index:9500;
+    }
+    .auth-dialog{
+      width:100%;
+      max-width:360px;
+      margin:0 16px;
+      background:
+        radial-gradient(circle at 0 0,#1d4ed8 0,rgba(15,23,42,0.96) 52%,#020617 100%);
+      color:#e5edff;
+      border-radius:18px;
+      padding:18px 18px 16px;
+      box-shadow:0 20px 50px rgba(3,7,18,.9);
+      border:1px solid rgba(129,140,248,.9);
+      box-sizing:border-box;
+      position:relative;
+    }
+    .auth-close{
+      position:absolute;
+      top:8px;
+      right:10px;
+      border:none;
+      background:transparent;
+      color:#9ca3af;
+      font-size:22px;
+      line-height:1;
+      cursor:pointer;
+    }
+    .auth-close:hover{ color:#e5edff; }
+    .auth-title{
+      margin:4px 0 6px;
+      font-size:1.05rem;
+      font-weight:600;
+    }
+    .auth-text{
+      margin:0 0 10px;
+      font-size:.9rem;
+      color:#dbeafe;
+    }
+    .auth-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .auth-btn{
+      height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,255,.7);
+      background:transparent;
+      color:#e5edff;
+      cursor:pointer;
+      font-size:.9rem;
+      font-weight:500;
+    }
+    .auth-btn-primary{
+      background:linear-gradient(135deg,#60a5fa,#2563eb);
+      border:none;
+      color:#f9fafb;
+      box-shadow:0 10px 26px rgba(37,99,235,.55);
+    }
+    .auth-btn-primary:hover{
+      filter:brightness(1.05);
+    }
   </style>
 </head>
 <body>
@@ -330,9 +404,9 @@
       </a>
 
       <!-- Badge vpravo -->
-      <a class="header-badge" href="#" aria-label="MarSab®">
+      <a class="header-badge" href="#" aria-label="MarSab™">
         <img src="img/marsab_logo.png" alt="">
-        <span class="wordmark">MarSab®</span>
+        <span class="wordmark">MarSab™</span>
       </a>
 
       <!-- Logo a info o používateľovi -->
@@ -372,7 +446,7 @@
     <section class="reviews" id="reviewsList"></section>
   </main>
 
-  <!-- Fixný hodnotiaci panel – len pre prihlásených -->
+  <!-- Fixný hodnotiaci panel – default pre všetkých (logika rieši prístup) -->
   <div class="rate-bar" id="rateBar">
     <div class="rate-inner">
       <div id="rateStars" class="rate-stars" aria-label="Zvoľte počet hviezdičiek">
@@ -384,7 +458,7 @@
     </div>
   </div>
 
-  <!-- Panel pre návštevníkov (bez emailu) -->
+  <!-- Panel pre návštevníkov (bez emailu) – môžeš použiť neskôr, zatiaľ len na kliknutie Prihlásiť/Registrovať -->
   <div class="rate-bar" id="rateBarGuest">
     <div class="rate-inner">
       <div class="muted" style="font-size:13px;">
@@ -393,6 +467,21 @@
       <div class="rate-actions">
         <button id="loginBtn" class="rate-btn">Prihlásiť</button>
         <button id="registerBtn" class="rate-btn">Registrovať</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODÁL – prihlásenie na hodnotenie -->
+  <div id="authPrompt" aria-hidden="true">
+    <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <button type="button" class="auth-close" data-auth-close aria-label="Zavrieť">×</button>
+      <h2 id="authTitle" class="auth-title">Hodnotiť môžu len prihlásení používatelia</h2>
+      <p class="auth-text">
+        Ak chcete pridať svoje hodnotenie, prosím prihláste sa alebo sa rýchlo zaregistrujte.
+      </p>
+      <div class="auth-actions">
+        <button type="button" class="auth-btn" data-auth-login>Prihlásiť</button>
+        <button type="button" class="auth-btn auth-btn-primary" data-auth-register>Registrovať</button>
       </div>
     </div>
   </div>

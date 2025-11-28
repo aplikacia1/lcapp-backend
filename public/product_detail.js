@@ -260,10 +260,13 @@
   }
 
   async function sendRating() {
+    // 🔔 ak nie je email, ukáž pekné vyskakovacie okno namiesto alertu
     if (!email) {
-      alert("Na hodnotenie sa najprv prihlás.");
+      const modal = $("#authPrompt");
+      if (modal) modal.style.display = "flex";
       return;
     }
+
     const comment = ($("#rateComment")?.value || "").trim();
     const btn = $("#rateSubmit"), msg = $("#rateMsg");
     const lock = v => {
@@ -304,7 +307,7 @@
     }
   }
 
-  // ✅ NOVÉ: načítanie používateľa do hlavičky
+  // ✅ načítanie používateľa do hlavičky
   async function loadUserLabel() {
     const el = $("#userGreeting");
     if (!el) return;
@@ -338,14 +341,53 @@
       return;
     }
 
-    // späť šípka funguje cez goBack() len ak ju HTML volá, tu už netreba nič
-    // hviezdičky + odoslanie hodnotenia
+    // ⭐ hviezdičky + odoslanie hodnotenia
     bindStars();
     $("#rateSubmit") &&
       $("#rateSubmit").addEventListener("click", e => {
         e.preventDefault();
         sendRating();
       });
+
+    // 🔗 tlačidlá v spodnom guest bare (ak ho niekedy zobrazíme)
+    const loginBtn = $("#loginBtn");
+    const registerBtn = $("#registerBtn");
+    if (loginBtn) {
+      loginBtn.addEventListener("click", () => {
+        location.href = "login.html";
+      });
+    }
+    if (registerBtn) {
+      registerBtn.addEventListener("click", () => {
+        location.href = "register.html";
+      });
+    }
+
+    // 🔔 nastavenie modálu na prihlásenie pri hodnotení
+    const authModal = $("#authPrompt");
+    if (authModal) {
+      const closeBtn = authModal.querySelector("[data-auth-close]");
+      const login = authModal.querySelector("[data-auth-login]");
+      const register = authModal.querySelector("[data-auth-register]");
+
+      const hide = () => {
+        authModal.style.display = "none";
+      };
+
+      // zavrieť krížikom
+      closeBtn && closeBtn.addEventListener("click", hide);
+      // zavrieť klikom mimo dialogu
+      authModal.addEventListener("click", (e) => {
+        if (e.target === authModal) hide();
+      });
+      // preklik na login / register
+      login && login.addEventListener("click", () => {
+        location.href = "login.html";
+      });
+      register && register.addEventListener("click", () => {
+        location.href = "register.html";
+      });
+    }
 
     await loadUserLabel();
     await loadProduct();
