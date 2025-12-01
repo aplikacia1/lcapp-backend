@@ -3,83 +3,123 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kalkulačka líšt – Lištové centrum</title>
-
+  <title>Kalkulačka líšt</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     :root {
+      --max-w: 1120px;
+      --gap: 16px;
+      --hdr-h: 96px;
+      --panel-border: rgba(255, 255, 255, 0.12);
+      --desk-footer-h: 36px;
+
       --primary: #005dbe;
       --primary-soft: #e3f0ff;
-      --bg: #f5f7fb;
       --card-bg: #ffffff;
       --text-main: #1f2933;
       --muted: #6b7280;
-      --radius-lg: 18px;
-      --radius-xl: 24px;
     }
 
-    * {
-      box-sizing: border-box;
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
     }
 
     body {
-      margin: 0;
+      background: radial-gradient(circle at top, #1b2b68 0, #050c22 55%, #020617 100%);
+      color: #ffffff;
+      padding-top: var(--hdr-h);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
         sans-serif;
-      background: radial-gradient(circle at top, #e3f0ff 0, #f5f7fb 45%, #eef2f7 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
     }
 
-    .page {
-      width: 100%;
-      max-width: 480px;
+    /* HEADER – rovnaký štýl ako entertainment */
+    .app-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 1000;
+      background: #0c1f4b;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .app-header-inner {
+      max-width: var(--max-w);
       margin: 0 auto;
-      padding: 16px;
+      padding: 8px var(--gap);
       display: flex;
       flex-direction: column;
-      gap: 16px;
-    }
-
-    header {
-      display: flex;
       align-items: center;
-      gap: 12px;
-      margin-top: 4px;
+      position: relative;
     }
 
-    .logo-circle {
-      width: 40px;
-      height: 40px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #005dbe, #00a0ff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      font-size: 18px;
-      box-shadow: 0 8px 18px rgba(0, 93, 190, 0.35);
+    .logo-small {
+      height: 48px;
+      margin: 2px auto 6px;
+      display: block;
     }
 
-    header h1 {
-      font-size: 18px;
-      margin: 0;
+    .user-chip {
+      color: #cfe2ff;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      text-align: center;
     }
 
-    header p {
-      margin: 0;
-      font-size: 13px;
-      color: var(--muted);
+    .icon-btn {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-content: center;
+      border: 1px solid #ffffff33;
+      border-radius: 10px;
+      color: #e7eefc;
+      background: transparent;
+      cursor: pointer;
     }
 
-    .card {
+    .icon-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* LAYOUT */
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 18px 16px 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      margin: 6px 0 4px;
+      font-size: 1.35rem;
+    }
+
+    .subtitle {
+      margin: 0 0 14px;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+    }
+
+    /* CARD – samotná kalkulačka */
+    .calc-card {
       background: var(--card-bg);
-      border-radius: var(--radius-xl);
-      padding: 16px 16px 18px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      color: var(--text-main);
+      border-radius: 20px;
+      padding: 18px 16px 20px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.55);
+    }
+
+    @media (min-width: 640px) {
+      .calc-card {
+        padding: 22px 22px 22px;
+      }
     }
 
     .steps-indicator {
@@ -214,6 +254,12 @@
       font-weight: 600;
     }
 
+    .summary-hint {
+      font-size: 11px;
+      color: #4b5563;
+      margin-top: 6px;
+    }
+
     .actions {
       display: flex;
       gap: 10px;
@@ -259,10 +305,9 @@
 
     footer {
       font-size: 11px;
-      color: var(--muted);
+      color: #cbd5f5;
       text-align: center;
-      margin-bottom: 8px;
-      padding: 0 12px 4px;
+      margin-top: 10px;
     }
 
     footer strong {
@@ -272,6 +317,7 @@
     .legal {
       font-size: 10px;
       margin-top: 4px;
+      opacity: 0.9;
     }
 
     .step {
@@ -282,153 +328,652 @@
       display: block;
     }
 
-    @media (min-width: 640px) {
-      .page {
-        padding: 24px 16px 24px;
+    /* GRAFICKÁ IZBA – výber tvaru + rozmery na stenách */
+
+    .shape-switch {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .shape-btn {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid #d4d4d8;
+      background: #f3f4f6;
+      padding: 6px 10px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease,
+        color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .shape-btn span {
+      font-size: 16px;
+    }
+
+    .shape-btn.active {
+      background: #e0f2fe;
+      border-color: #0284c7;
+      color: #075985;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+    }
+
+    .room-figure {
+      margin-top: 14px;
+      border-radius: 18px;
+      background: radial-gradient(circle at top, #e0f2fe 0, #f9fafb 55%);
+      padding: 16px 14px 14px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #dbeafe;
+    }
+
+    .room-box {
+      margin: 16px auto 10px;
+      width: min(260px, 100%);
+      aspect-ratio: 4 / 3;
+      border-radius: 14px;
+      border: 2px dashed #93c5fd;
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+      box-shadow: inset 0 0 0 1px #bfdbfe;
+      position: relative;
+    }
+
+    .dim-input {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #1f2937;
+    }
+
+    .dim-input label {
+      margin: 0;
+      font-size: 11px;
+      color: #4b5563;
+    }
+
+    .dim-input input {
+      width: 80px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .dim-top {
+      top: -4px;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .dim-right {
+      right: -6px;
+      top: 50%;
+      transform: translate(50%, -50%);
+    }
+
+    .doors-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #4b5563;
+    }
+
+    /* PROFIL – výber typu lišty */
+
+    .profiles-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .profile-tile {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid #d4d4d8;
+      background: #f9fafb;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease,
+        box-shadow 0.15s ease, transform 0.1s ease;
+    }
+
+    .profile-tile:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+    }
+
+    .profile-tile.active {
+      border-color: #2563eb;
+      background: #e0f2fe;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+    }
+
+    .profile-thumb {
+      width: 52px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #94a3b8, #e2e8f0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #0f172a;
+    }
+
+    .profile-thumb img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      border-radius: 10px;
+    }
+
+    .profile-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .profile-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .profile-meta {
+      font-size: 11px;
+      color: #4b5563;
+    }
+
+    /* PC ONLY: party-beams – rovnaké ako entertainment */
+    @media (min-width: 992px) {
+      .party-beams {
+        position: fixed;
+        inset: var(--hdr-h) 0 0 0;
+        pointer-events: none;
+        z-index: 0;
       }
-      header h1 {
-        font-size: 20px;
+
+      .beam {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 10vw;
+        max-width: 160px;
+        filter: blur(12px);
+        opacity: 0.22;
+        will-change: opacity, transform;
+        animation: beamPulse 5.5s ease-in-out infinite,
+          beamDrift 12s ease-in-out infinite;
       }
-      .card {
-        padding: 18px 18px 20px;
+
+      .beam.green {
+        background: linear-gradient(
+            180deg,
+            rgba(34, 197, 94, 0) 0%,
+            rgba(34, 197, 94, 0.65) 50%,
+            rgba(34, 197, 94, 0) 100%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(16, 185, 129, 0) 0%,
+            rgba(16, 185, 129, 0.55) 40%,
+            rgba(16, 185, 129, 0) 100%
+          );
+      }
+
+      .beam.red {
+        background: linear-gradient(
+            180deg,
+            rgba(239, 68, 68, 0) 0%,
+            rgba(239, 68, 68, 0.65) 50%,
+            rgba(239, 68, 68, 0) 100%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(220, 38, 38, 0) 0%,
+            rgba(220, 38, 38, 0.55) 40%,
+            rgba(220, 38, 38, 0) 100%
+          );
+      }
+
+      .beam.gold {
+        background: linear-gradient(
+            180deg,
+            rgba(245, 197, 24, 0) 0%,
+            rgba(245, 197, 24, 0.65) 50%,
+            rgba(245, 197, 24, 0) 100%
+          ),
+          linear-gradient(
+            90deg,
+            rgba(245, 158, 11, 0) 0%,
+            rgba(245, 158, 11, 0.55) 40%,
+            rgba(245, 158, 11, 0) 100%
+          );
+      }
+
+      .beam.left {
+        left: 0;
+        transform-origin: left center;
+      }
+
+      .beam.right {
+        right: 0;
+        transform-origin: right center;
+      }
+
+      .beam.pos1 {
+        --tx: -4%;
+      }
+
+      .beam.pos2 {
+        --tx: 0%;
+        animation-delay: 0.8s;
+      }
+
+      .beam.pos3 {
+        --tx: 4%;
+        animation-delay: 1.6s;
+      }
+
+      @keyframes beamPulse {
+        0%,
+        100% {
+          opacity: 0.18;
+        }
+        50% {
+          opacity: 0.32;
+        }
+      }
+
+      @keyframes beamDrift {
+        0%,
+        100% {
+          transform: translateX(var(--tx, 0)) translateY(0) scaleX(1);
+        }
+        50% {
+          transform: translateX(var(--tx, 0)) translateY(-2%) scaleX(1.06);
+        }
       }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <header>
-      <div class="logo-circle">LC</div>
-      <div>
-        <h1>Kalkulačka líšt</h1>
-        <p>Rýchly orientačný prepočet pre zákazníkov Lištového centra.</p>
-      </div>
-    </header>
+  <!-- HEADER -->
+  <header class="app-header" role="banner">
+    <div class="app-header-inner">
+      <button class="icon-btn" id="backBtn" aria-label="Späť do Centra zábavy">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M15 18l-6-6 6-6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+        </svg>
+      </button>
+      <img
+        src="logo_lc.jpg"
+        alt="Lištové centrum"
+        class="logo-small"
+      />
+      <div class="user-chip" id="userChip">Prihlásený:</div>
+    </div>
+  </header>
 
-    <section class="card">
+  <!-- PC ONLY: party beams -->
+  <div class="party-beams" aria-hidden="true">
+    <span class="beam left green pos1"></span>
+    <span class="beam left gold pos2"></span>
+    <span class="beam left red pos3"></span>
+    <span class="beam right red pos1"></span>
+    <span class="beam right gold pos2"></span>
+    <span class="beam right green pos3"></span>
+  </div>
+
+  <!-- MAIN -->
+  <main class="wrap">
+    <h1>🧮 Kalkulačka líšt</h1>
+    <p class="subtitle">
+      Detsky jednoduchý orientačný prepočet pre zákazníkov Lištového centra.
+    </p>
+
+    <section class="calc-card">
+      <!-- Indikátor krokov -->
       <div class="steps-indicator">
         <div class="step-dot active"></div>
         <div class="step-dot"></div>
         <div class="step-dot"></div>
       </div>
 
-      <!-- KROK 1 -->
+      <!-- KROK 1: Typ lišty + kontaktné údaje -->
       <div class="step step-active" id="step-1">
         <div class="step-header">
-          <div class="step-title">1. Kontaktné údaje</div>
-          <div class="step-subtitle">aby sme vedeli, komu pošleme ponuku</div>
+          <div class="step-title">1. Typ lišty a kontaktné údaje</div>
+          <div class="step-subtitle">
+            najprv si vyberieme profil, potom komu pošleme ponuku
+          </div>
         </div>
 
         <div class="field-group">
+          <!-- Výber profilu -->
+          <div>
+            <label>Typ lišty</label>
+            <div class="profiles-list">
+              <button
+                type="button"
+                class="profile-tile active"
+                data-profile-id="metal-line-90"
+              >
+                <div class="profile-thumb">
+                  <!-- Sem môžeš neskôr dať reálny obrázok:
+                       <img src="img/metal-line-90.png" alt="Metal Line 90"> -->
+                  ML 90
+                </div>
+                <div class="profile-info">
+                  <div class="profile-name">Metal Line 90</div>
+                  <div class="profile-meta">
+                    soklová lišta · výška 6&nbsp;cm · dĺžka profilu 2&nbsp;m
+                  </div>
+                </div>
+              </button>
+            </div>
+            <div class="hint">
+              Neskôr doplníme ďalšie typy. Výpočet sa vždy prispôsobí dĺžke vybraného profilu.
+            </div>
+          </div>
+
+          <!-- Kontaktné údaje -->
           <div>
             <label for="customerName">Meno / názov firmy</label>
-            <input type="text" id="customerName" placeholder="napr. Ján Novák" />
+            <input
+              type="text"
+              id="customerName"
+              name="customerName"
+              placeholder="napr. Ján Novák alebo Stavmont s.r.o."
+            />
           </div>
 
           <div>
             <label for="customerEmail">E-mail</label>
-            <input type="email" id="customerEmail" placeholder="napr. jan@example.com" />
-            <div class="hint">V Lištobooku vieme e-mail predvyplniť automaticky.</div>
+            <input
+              type="email"
+              id="customerEmail"
+              name="customerEmail"
+              placeholder="napr. jan.novak@example.com"
+            />
+            <div class="hint">
+              V Lištobooku vieme e-mail predvyplniť automaticky z registrácie.
+            </div>
           </div>
 
           <div>
-            <label for="projectName">Názov projektu (nepovinné)</label>
-            <input type="text" id="projectName" placeholder="napr. Byt – Ružinov" />
+            <label for="projectName">Názov projektu / objektu (nepovinné)</label>
+            <input
+              type="text"
+              id="projectName"
+              name="projectName"
+              placeholder="napr. Byt – Ružinov, podlažie 3"
+            />
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn btn-primary" type="button">Pokračovať ›</button>
+          <button class="btn btn-primary" type="button">
+            Pokračovať <span>›</span>
+          </button>
         </div>
       </div>
 
-      <!-- KROK 2 -->
+      <!-- KROK 2: Grafická izba a dĺžky -->
       <div class="step" id="step-2">
         <div class="step-header">
-          <div class="step-title">2. Miestnosť a dĺžky</div>
-          <div class="step-subtitle">základné rozmery pre výpočet líšt</div>
+          <div class="step-title">2. Izba a dĺžky</div>
+          <div class="step-subtitle">nakreslíme si ju a dopíšeme rozmery</div>
         </div>
 
         <div class="field-group">
           <div>
-            <label for="roomName">Miestnosť</label>
-            <input type="text" id="roomName" placeholder="napr. Obývačka" />
+            <label for="roomName">Názov miestnosti</label>
+            <input
+              type="text"
+              id="roomName"
+              name="roomName"
+              placeholder="napr. Obývačka"
+            />
           </div>
 
           <div>
-            <label for="perimeter">Obvod miestnosti (m)</label>
-            <input type="number" id="perimeter" step="0.1" placeholder="napr. 18,5" />
+            <label>Aký tvar má miestnosť?</label>
+            <div class="shape-switch">
+              <button
+                type="button"
+                class="shape-btn active"
+                data-shape="rectangle"
+              >
+                <span>⬛</span> Obdĺžnik
+              </button>
+              <button
+                type="button"
+                class="shape-btn"
+                data-shape="square"
+              >
+                <span>◼</span> Štvorec
+              </button>
+            </div>
+          </div>
+
+          <div class="room-figure">
+            <div class="room-box">
+              <div class="dim-input dim-top">
+                <label for="roomWidth">Stena A (m)</label>
+                <input
+                  type="number"
+                  id="roomWidth"
+                  name="roomWidth"
+                  inputmode="decimal"
+                  step="0.1"
+                  min="0"
+                  placeholder="napr. 4,2"
+                />
+              </div>
+              <div class="dim-input dim-right">
+                <label for="roomLength">Stena B (m)</label>
+                <input
+                  type="number"
+                  id="roomLength"
+                  name="roomLength"
+                  inputmode="decimal"
+                  step="0.1"
+                  min="0"
+                  placeholder="napr. 3,8"
+                />
+              </div>
+            </div>
+            <div class="doors-note">
+              Ak je izba štvorec, stačí vyplniť stenu A – stena B bude rovnaká.
+            </div>
+          </div>
+
+          <!-- Dvere – jednoduchý model s jedným otvorom -->
+          <div>
+            <label>Dvere v miestnosti</label>
+            <div class="hint">
+              V tejto jednoduchej verzii počítame s jednými dverami.
+              Stačí doplniť, na ktorej stene sú a aké sú rozmery.
+            </div>
+
+            <div class="row" style="margin-top:6px;">
+              <div>
+                <label for="doorSide">Na ktorej stene sú dvere?</label>
+                <select id="doorSide" name="doorSide">
+                  <option value="">– vyber stenu –</option>
+                  <option value="A">Stena A</option>
+                  <option value="B">Stena B</option>
+                </select>
+              </div>
+              <div>
+                <label for="doorWidth">Šírka dverí (m)</label>
+                <input
+                  type="number"
+                  id="doorWidth"
+                  name="doorWidth"
+                  min="0"
+                  step="0.1"
+                  placeholder="napr. 0,9"
+                />
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:6px;">
+              <div>
+                <label for="doorBefore">Dĺžka steny pred dverami (m)</label>
+                <input
+                  type="number"
+                  id="doorBefore"
+                  name="doorBefore"
+                  min="0"
+                  step="0.1"
+                  placeholder="napr. 1,0"
+                />
+                <div class="hint">
+                  Zvyšok steny za dverami vypočítame automaticky, aby sedel s celkovou dĺžkou steny.
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="row">
             <div>
-              <label for="doorsCount">Počet dverí</label>
-              <input type="number" id="doorsCount" placeholder="1" />
-            </div>
-            <div>
-              <label for="doorWidth">Šírka dverí (m)</label>
-              <input type="number" id="doorWidth" step="0.1" placeholder="0,9" />
-            </div>
-          </div>
-
-          <div class="row">
-            <div>
-              <label for="profileLength">Dĺžka lišty (m)</label>
-              <input type="number" id="profileLength" step="0.1" value="2.5" />
-              <div class="hint">Bežná dĺžka podľa výrobcu.</div>
+              <label for="profileLength">Dĺžka jednej lišty (m)</label>
+              <input
+                type="number"
+                id="profileLength"
+                name="profileLength"
+                value="2.0"
+                readonly
+              />
+              <div class="hint">
+                Hodnota sa nastaví automaticky podľa vybraného typu lišty.
+              </div>
             </div>
             <div>
               <label for="wastePercent">Rezerva / odpad (%)</label>
-              <input type="number" id="wastePercent" value="10" />
+              <input
+                type="number"
+                id="wastePercent"
+                name="wastePercent"
+                min="0"
+                max="30"
+                step="1"
+                value="10"
+              />
             </div>
           </div>
 
-          <div class="pill"><span>ℹ️</span> Počet líšt vypočítame automaticky.</div>
+          <div class="pill">
+            <span>ℹ️</span>
+            Obvod miestnosti vypočítame za vás z dĺžok stien (a odrátame dvere).
+          </div>
         </div>
 
         <div class="actions">
-          <button class="btn btn-secondary" type="button">‹ Späť</button>
-          <button class="btn btn-primary" type="button">Pokračovať ›</button>
+          <button class="btn btn-secondary" type="button">
+            ‹ Späť
+          </button>
+          <button class="btn btn-primary" type="button">
+            Pokračovať <span>›</span>
+          </button>
         </div>
       </div>
 
-      <!-- KROK 3 -->
+      <!-- KROK 3: Zhrnutie (preview PDF) -->
       <div class="step" id="step-3">
         <div class="step-header">
           <div class="step-title">3. Zhrnutie pre PDF</div>
-          <div class="step-subtitle">orientačný prepočet – údaje zákazníka</div>
+          <div class="step-subtitle">
+            orientačný prepočet – údaje od zákazníka
+          </div>
         </div>
 
         <div class="summary-box">
+          <div class="summary-row">
+            <div class="summary-label">Typ lišty</div>
+            <div class="summary-value" id="summaryProfile">–</div>
+          </div>
           <div class="summary-row">
             <div class="summary-label">Miestnosť</div>
             <div class="summary-value" id="summaryRoom">–</div>
           </div>
           <div class="summary-row">
-            <div class="summary-label">Čistá dĺžka</div>
+            <div class="summary-label">Čistá dĺžka na lišty</div>
             <div class="summary-value" id="summaryMeters">– m</div>
           </div>
           <div class="summary-row">
-            <div class="summary-label">Počet líšt</div>
+            <div class="summary-label">Odhadovaný počet líšt</div>
             <div class="summary-value" id="summaryPieces">– ks</div>
+          </div>
+          <div class="summary-row" id="doorSplitRow" style="display:none;">
+            <div class="summary-label">Stena s dverami</div>
+            <div class="summary-value" id="summaryDoorSplit">–</div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-label">Komponenty (spolu, orientačne)</div>
+            <div class="summary-value" id="summaryComponents">– ks</div>
+          </div>
+          <div class="summary-hint" id="summaryComponentsDetail">
+            <!-- JS doplní rozpis -->
           </div>
         </div>
 
         <div class="field-group">
           <div>
-            <label for="productCode">Číslo profilu / produkt</label>
-            <input type="text" id="productCode" placeholder="napr. LC-1234" />
+            <label for="productCode">
+              Číslo profilu / produkt (doplníme z katalógu)
+            </label>
+            <input
+              type="text"
+              id="productCode"
+              name="productCode"
+              placeholder="napr. LC-1234 biela soklová lišta"
+            />
+            <div class="hint">
+              Neskôr ho prepojíme priamo s databázou produktov v Lištobooku.
+            </div>
           </div>
 
           <div>
             <label for="notesPdf">Poznámka do PDF (nepovinné)</label>
-            <input type="text" id="notesPdf" placeholder="napr. montáž po položení vinylu" />
+            <input
+              type="text"
+              id="notesPdf"
+              name="notesPdf"
+              placeholder="napr. lišty montovať až po položení vinylu"
+            />
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn btn-secondary" type="button">‹ Späť</button>
-          <button class="btn btn-primary" type="button">Vytvoriť PDF</button>
+          <button class="btn btn-secondary" type="button">
+            ‹ Späť
+          </button>
+          <button class="btn btn-primary" type="button">
+            Vytvoriť PDF
+          </button>
         </div>
       </div>
     </section>
@@ -444,7 +989,11 @@
     </footer>
   </main>
 
-  <!-- JS pre kalkulačku líšt -->
+  <!-- Globálne skripty (cookies, config) -->
+  <script src="/js/cookies.js"></script>
+  <script src="/js/config.js"></script>
+
+  <!-- Logika kalkulačky -->
   <script src="calculator.js"></script>
 </body>
 </html>

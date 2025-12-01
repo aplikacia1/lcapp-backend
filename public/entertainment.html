@@ -17,45 +17,34 @@
     body{ background:#0c1f4b; color:#fff; padding-top:var(--hdr-h); }
 
     /* HEADER */
-    .app-header{
-      position:fixed; inset:0 0 auto 0; z-index:1000;
-      background:#0c1f4b; border-bottom:1px solid var(--panel-border);
-    }
-    .app-header-inner{
-      max-width:var(--max-w); margin:0 auto; padding:8px var(--gap);
-      display:flex; flex-direction:column; align-items:center; position:relative;
-    }
+    .app-header{ position:fixed; inset:0 0 auto 0; z-index:1000; background:#0c1f4b; border-bottom:1px solid var(--panel-border); }
+    .app-header-inner{ max-width:var(--max-w); margin:0 auto; padding:8px var(--gap); display:flex; flex-direction:column; align-items:center; position:relative; }
     .logo-small{ height:48px; margin:2px auto 6px; display:block; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
     .icon-btn{
-      position:absolute; top:10px; left:12px; width:44px; height:44px;
-      display:grid; place-content:center;
-      border:1px solid #ffffff33; border-radius:10px;
-      color:#e7eefc; background:transparent; cursor:pointer;
+      position:absolute; top:10px; left:12px; width:44px; height:44px; display:grid; place-content:center;
+      border:1px solid #ffffff33; border-radius:10px; color:#e7eefc; background:transparent; cursor:pointer;
     }
     .icon-btn svg{ width:22px; height:22px; }
 
     /* LAYOUT */
     .wrap{
       max-width:var(--max-w); margin:0 auto; padding:16px;
+      /* mobil: rezerva pod fixným bannerom */
       padding-bottom: calc(var(--banner-h, 0px) + 16px);
-      position: relative; z-index: 1;
+      position: relative; z-index: 1; /* nad neon pásmi */
     }
+    /* PC: banner vypneme, dáme rezervu pre info pásik */
     @media (min-width: 992px){
       .wrap{ padding-bottom: calc(var(--desk-footer-h) + 16px); }
     }
 
     /* Dlaždice (výber) */
-    .tiles{
-      display:grid; grid-template-columns: 1fr 1fr; gap:16px;
-    }
-    @media (max-width: 900px){
-      .tiles{ grid-template-columns: 1fr; }
-      /* na mobile nech je kalkulačka prvá v poradí */
-      .tile--calculator{ order:-1; }
-    }
+    .tiles{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    @media (max-width: 900px){ .tiles{ grid-template-columns: 1fr; } }
 
     .tile{
+      position: relative;
       display:flex; align-items:center; gap:14px;
       padding:20px; border-radius:16px;
       background:rgba(255,255,255,.06);
@@ -63,45 +52,39 @@
       cursor:pointer;
       transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    .tile:hover{
-      transform: translateY(-2px);
-      background:rgba(255,255,255,.10);
-      border-color:#ffffff33;
-    }
-    .tile-icon{
-      width:42px; height:42px;
-      display:grid; place-items:center;
-      background:#ffffff15; border-radius:12px;
-    }
+    .tile:hover{ transform: translateY(-2px); background:rgba(255,255,255,.10); border-color:#ffffff33; }
+    .tile-icon{ width:42px; height:42px; display:grid; place-items:center; background:#ffffff15; border-radius:12px; }
     .tile h2{ margin:0; font-size:1.15rem; }
 
+    /* červená pečiatka „Pripravujeme“ */
+    .tile-badge{
+      position:absolute;
+      top:10px;
+      right:12px;
+      padding:2px 9px;
+      border-radius:999px;
+      background:#b91c1c;
+      color:#fee2e2;
+      font-size:10px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      box-shadow:0 0 0 1px rgba(0,0,0,.25);
+    }
+
     /* YouTube view */
-    .card{
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--panel-border);
-      border-radius:14px; overflow:hidden;
-    }
-    .card .head{
-      padding:12px 14px; font-weight:700;
-      border-bottom:1px solid var(--panel-border);
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
+    .card{ background:rgba(255,255,255,.05); border:1px solid var(--panel-border); border-radius:14px; overflow:hidden; }
+    .card .head{ padding:12px 14px; font-weight:700; border-bottom:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; gap:10px; }
     .card .body{ padding:14px; }
-    .btn{
-      height:40px; padding:0 14px;
-      border-radius:12px; border:1px solid #bcd6ff;
-      background:#eef6ff; color:#0c1f4b; cursor:pointer;
-    }
+    .btn{ height:40px; padding:0 14px; border-radius:12px; border:1px solid #bcd6ff; background:#eef6ff; color:#0c1f4b; cursor:pointer; }
     .btn:hover{ background:#e3f0ff; }
 
-    .yt-player{
-      aspect-ratio: 16/9; width:100%;
-      border:0; border-radius:12px; background:#000;
-    }
+    .yt-player{ aspect-ratio: 16/9; width:100%; border:0; border-radius:12px; background:#000; }
 
+    /* zobrazenia */
     [hidden]{ display:none !important; }
 
-    /* ========= PC ONLY: neónové pásy ========= */
+    /* ========= PC ONLY: neónové pásy (zelená, červená, zlatá) ========= */
     @media (min-width: 992px){
       .party-beams{
         position: fixed; inset: var(--hdr-h) 0 0 0;
@@ -163,7 +146,7 @@
       }
     }
 
-    /* Banner / footer */
+    /* ===== Banner len na mobile; na desktope statický pásik ===== */
     @media (min-width: 992px){
       #bannerSlot{ display: none !important; }
     }
@@ -218,7 +201,6 @@
 
     <!-- VIEW: výber dlaždíc -->
     <section id="tilesView" class="tiles">
-      <!-- HRA -->
       <article class="tile" id="tileGame" role="button" tabindex="0" aria-label="Zahraj si hru">
         <div class="tile-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
@@ -233,7 +215,6 @@
         </div>
       </article>
 
-      <!-- YOUTUBE -->
       <article class="tile" id="tileYoutube" role="button" tabindex="0" aria-label="Zabav sa s hudbou od Lištového centra">
         <div class="tile-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
@@ -246,22 +227,23 @@
         </div>
       </article>
 
-      <!-- KALKULAČKA LÍŠT -->
-      <article class="tile tile--calculator" id="tileCalculator" role="button" tabindex="0" aria-label="Kalkulačka líšt">
+      <article class="tile" id="tileCalculator" role="button" tabindex="0" aria-label="Kalkulačka líšt">
         <div class="tile-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
-            <path d="M7 8h10M7 12h3M11 16h3M16 12h1M16 16h1" stroke-linecap="round" stroke-linejoin="round"></path>
+            <rect x="5" y="3" width="14" height="18" rx="2" ry="2"></rect>
+            <rect x="8" y="6" width="8" height="3" rx="1.5"></rect>
+            <path d="M8 12h1m3 0h1m3 0h1M8 15h1m3 0h1m3 0h1" stroke-linecap="round"></path>
           </svg>
         </div>
         <div>
           <h2>Kalkulačka líšt</h2>
           <div style="opacity:.85;">Prepočítaj si orientačný počet líšt pre svoj projekt.</div>
         </div>
+        <span class="tile-badge">Pripravujeme</span>
       </article>
     </section>
 
-    <!-- VIEW: YouTube prehrávač -->
+    <!-- VIEW: YouTube prehrávač (len náš kanál) -->
     <section id="youtubeView" class="card" hidden aria-labelledby="ytHead">
       <div class="head" id="ytHead">
         <span>🎵 Videá — Lištové centrum (YouTube)</span>
@@ -287,6 +269,7 @@
 
   <!-- cookies (globálna lišta + funkcie) -->
   <script src="/js/cookies.js"></script>
+
   <script src="/js/config.js"></script>
   <script src="entertainment.js"></script>
   <script src="banners.js"></script>
@@ -319,6 +302,7 @@
   </script>
 
   <script>
+    /* dopočet výšky hlavičky → padding-top */
     (function(){
       const header = document.querySelector('.app-header');
       function setHdrH(){
@@ -329,6 +313,7 @@
       setHdrH(); addEventListener('resize', setHdrH);
     })();
 
+    /* Banner: len na mobile */
     document.addEventListener('DOMContentLoaded', () => {
       mountBannerMobileOnly('bannerSlot', {
         fixed: true,
