@@ -1,27 +1,34 @@
 // public/entertainment.js
-const $ = (s, r=document) => r.querySelector(s);
+const $ = (s, r = document) => r.querySelector(s);
 const params = new URLSearchParams(location.search);
 const userEmail = params.get('email') || '';
 
 /** YouTube Channel ID – môžeš nastaviť v /js/config.js ako window.__YT_CHANNEL_ID__ */
-const YT_CHANNEL_ID = (window.__YT_CHANNEL_ID__ || "UCRsTMCPkTHHTLTYBeLbMUtw").trim(); // váš kanál
-function uploadsPlaylistId(channelId){
-  if (!/^UC[0-9A-Za-z_-]{20,}$/.test(channelId)) return "";
-  return "UU" + channelId.slice(2);
+const YT_CHANNEL_ID = (window.__YT_CHANNEL_ID__ || 'UCRsTMCPkTHHTLTYBeLbMUtw').trim(); // váš kanál
+function uploadsPlaylistId(channelId) {
+  if (!/^UC[0-9A-Za-z_-]{20,}$/.test(channelId)) return '';
+  return 'UU' + channelId.slice(2);
 }
-function playlistEmbedUrl(uploadsId){
-  const qp = new URLSearchParams({ listType:'playlist', list: uploadsId, rel:'0', modestbranding:'1' });
+function playlistEmbedUrl(uploadsId) {
+  const qp = new URLSearchParams({
+    listType: 'playlist',
+    list: uploadsId,
+    rel: '0',
+    modestbranding: '1',
+  });
   return `https://www.youtube-nocookie.com/embed/?${qp.toString()}`;
 }
 
 /* prepína medzi dlaždicami a prehrávačom */
-function showView(which){
+function showView(which) {
   const tiles = $('#tilesView');
-  const yt    = $('#youtubeView');
-  if (which === 'yt'){
-    tiles.hidden = true; yt.hidden = false;
+  const yt = $('#youtubeView');
+  if (which === 'yt') {
+    tiles.hidden = true;
+    yt.hidden = false;
   } else {
-    yt.hidden = true; tiles.hidden = false;
+    yt.hidden = true;
+    tiles.hidden = false;
   }
 }
 
@@ -32,8 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (chip) chip.textContent = `Prihlásený: ${userEmail || '—'}`;
 
   // späť v hlavičke → timeline (zachovaj email)
-  $('#backBtn')?.addEventListener('click', ()=>{
-    const url = userEmail ? `timeline.html?email=${encodeURIComponent(userEmail)}` : 'timeline.html';
+  $('#backBtn')?.addEventListener('click', () => {
+    const url = userEmail
+      ? `timeline.html?email=${encodeURIComponent(userEmail)}`
+      : 'timeline.html';
     location.href = url;
   });
 
@@ -45,7 +54,27 @@ document.addEventListener('DOMContentLoaded', () => {
     location.href = url;
   };
   $('#tileGame')?.addEventListener('click', goGame);
-  $('#tileGame')?.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); goGame(); } });
+  $('#tileGame')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      goGame();
+    }
+  });
+
+  // dlaždica KALKULAČKA → prejsť do calculator.html (zachovať email)
+  const goCalculator = () => {
+    const url = userEmail
+      ? `calculator.html?email=${encodeURIComponent(userEmail)}`
+      : 'calculator.html';
+    location.href = url;
+  };
+  $('#tileCalculator')?.addEventListener('click', goCalculator);
+  $('#tileCalculator')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      goCalculator();
+    }
+  });
 
   // dlaždica YT → prepnúť na prehrávač a nastaviť embed len pre náš kanál
   const openYT = () => {
@@ -55,11 +84,16 @@ document.addEventListener('DOMContentLoaded', () => {
     showView('yt');
   };
   $('#tileYoutube')?.addEventListener('click', openYT);
-  $('#tileYoutube')?.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); openYT(); } });
+  $('#tileYoutube')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openYT();
+    }
+  });
 
   // späť z prehrávača na dlaždice
-  $('#backToTiles')?.addEventListener('click', ()=> showView('tiles'));
+  $('#backToTiles')?.addEventListener('click', () => showView('tiles'));
 
-  // štart: zobraz dve dlaždice
+  // štart: zobraz dve (teraz tri) dlaždice
   showView('tiles');
 });
