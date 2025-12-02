@@ -464,19 +464,19 @@
       width: 52px;
       height: 40px;
       border-radius: 10px;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
-      color: #0f172a;
       background: linear-gradient(135deg, #94a3b8, #e2e8f0);
+      cursor: zoom-in;
     }
 
     .profile-thumb img {
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
-      border-radius: 10px;
     }
 
     .profile-info {
@@ -497,32 +497,101 @@
       color: #4b5563;
     }
 
-    /* farebné „badge“ podľa povrchov */
-    .profile-thumb.badge-alu {
-      background: linear-gradient(135deg, #94a3b8, #e2e8f0);
+    /* náhľad farby */
+    .color-preview {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 11px;
+      color: #4b5563;
     }
 
-    .profile-thumb.badge-white {
-      background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+    .color-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid #9ca3af;
+      background: #e5e7eb;
+      flex-shrink: 0;
     }
 
-    .profile-thumb.badge-anthracite {
-      background: linear-gradient(135deg, #020617, #4b5563);
+    .color-preview-label {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    /* fullscreen náhľad lišty */
+    .profile-preview-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: none;
+    }
+
+    .profile-preview-overlay.is-open {
+      display: block;
+    }
+
+    .preview-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(3px);
+    }
+
+    .preview-dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: min(640px, 92vw);
+      max-height: 90vh;
+      padding: 18px 18px 16px;
+      border-radius: 20px;
+      background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       color: #e5e7eb;
     }
 
-    .profile-thumb.badge-gold {
-      background: linear-gradient(135deg, #fbbf24, #facc15);
+    .preview-dialog img {
+      width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #020617;
     }
 
-    .profile-thumb.badge-steel {
-      background: linear-gradient(135deg, #9ca3af, #6b7280);
-      color: #f9fafb;
+    .preview-title {
+      font-size: 1rem;
+      margin: 0 0 2px;
     }
 
-    .profile-thumb.badge-titan {
-      background: linear-gradient(135deg, #64748b, #0f172a);
+    .preview-note {
+      font-size: 0.75rem;
+      margin: 2px 0 0;
+      color: #9ca3af;
+    }
+
+    .preview-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
       color: #e5e7eb;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      font-size: 18px;
+      line-height: 1;
     }
 
     /* PC ONLY: party-beams – rovnaké ako entertainment */
@@ -705,41 +774,48 @@
               <button
                 type="button"
                 class="profile-tile active"
-                id="profileTileMain"
+                data-profile-id="metal-line-90"
               >
-                <div class="profile-thumb" id="profileThumb">
-                  ML 90
+                <div class="profile-thumb" id="profileThumb" title="Kliknite pre náhľad lišty">
+                  <img src="img/ml90-profile.jpg" alt="Soklová lišta Metal Line 90" />
                 </div>
                 <div class="profile-info">
-                  <div class="profile-name" id="profileName">
-                    Metal Line 90
-                  </div>
-                  <div class="profile-meta" id="profileMeta">
-                    soklová lišta · dĺžka profilu 2&nbsp;m
+                  <div class="profile-name">Metal Line 90</div>
+                  <div class="profile-meta" id="profileMetaText">
+                    soklová lišta · dĺžka profilu 2 m
                   </div>
                 </div>
               </button>
             </div>
-
-            <div class="row" style="margin-top:8px;">
-              <div>
-                <label for="profileHeight">Výška lišty</label>
-                <select id="profileHeight" name="profileHeight">
-                  <option value="">– načítavam možnosti –</option>
-                </select>
-              </div>
-              <div>
-                <label for="profileColor">Farba</label>
-                <select id="profileColor" name="profileColor" disabled>
-                  <option value="">– najprv zvoľ výšku –</option>
-                </select>
-              </div>
-            </div>
-
             <div class="hint">
-              Údaje berieme z technického listu Metal Line 90. Najprv zvoľ výšku, potom farbu, ktorá je pre túto výšku dostupná.
+              Neskôr doplníme ďalšie typy. Výpočet sa vždy prispôsobí dĺžke vybraného profilu.
             </div>
-            <div class="hint" id="profileNote"></div>
+          </div>
+
+          <!-- Výška + farba -->
+          <div class="row">
+            <div>
+              <label for="profileHeight">Výška lišty</label>
+              <select id="profileHeight" name="profileHeight">
+                <option value="">– vyber výšku lišty –</option>
+              </select>
+              <div class="hint">
+                Údaje berieme z technického listu Metal Line 90. Najprv zvoľ výšku, potom farbu.
+              </div>
+            </div>
+            <div>
+              <label for="profileColor">Farba</label>
+              <select id="profileColor" name="profileColor" disabled>
+                <option value="">– najprv zvoľ výšku lišty –</option>
+              </select>
+              <div class="hint">
+                Zobrazíme len farby, ktoré sú pre túto výšku dostupné.
+              </div>
+              <div class="color-preview" id="colorPreview">
+                <span class="color-swatch" id="colorSwatch"></span>
+                <span class="color-preview-label" id="colorPreviewLabel"></span>
+              </div>
+            </div>
           </div>
 
           <!-- Kontaktné údaje -->
@@ -778,7 +854,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn btn-primary" type="button">
+          <button class="btn btn-primary" type="button" id="step1Next">
             Pokračovať <span>›</span>
           </button>
         </div>
@@ -913,7 +989,7 @@
                 readonly
               />
               <div class="hint">
-                Hodnota sa nastaví automaticky podľa vybraného variantu Metal Line 90.
+                Hodnota sa nastaví automaticky podľa vybraného typu lišty.
               </div>
             </div>
             <div>
@@ -937,10 +1013,10 @@
         </div>
 
         <div class="actions">
-          <button class="btn btn-secondary" type="button">
+          <button class="btn btn-secondary" type="button" id="step2Back">
             ‹ Späť
           </button>
-          <button class="btn btn-primary" type="button">
+          <button class="btn btn-primary" type="button" id="step2Next">
             Pokračovať <span>›</span>
           </button>
         </div>
@@ -997,7 +1073,7 @@
               placeholder="napr. LC-1234 biela soklová lišta"
             />
             <div class="hint">
-              Pri Metal Line 90 ti vieme kód doplniť automaticky podľa zvolenej výšky a farby.
+              Neskôr ho prepojíme priamo s databázou produktov v Lištobooku.
             </div>
           </div>
 
@@ -1013,10 +1089,10 @@
         </div>
 
         <div class="actions">
-          <button class="btn btn-secondary" type="button">
+          <button class="btn btn-secondary" type="button" id="step3Back">
             ‹ Späť
           </button>
-          <button class="btn btn-primary" type="button">
+          <button class="btn btn-primary" type="button" id="createPdfBtn">
             Vytvoriť PDF
           </button>
         </div>
@@ -1034,13 +1110,43 @@
     </footer>
   </main>
 
+  <!-- NÁHĽAD LIŠTY NA CELOM DISPLEJI -->
+  <div
+    class="profile-preview-overlay"
+    id="profilePreviewOverlay"
+    aria-hidden="true"
+  >
+    <div class="preview-backdrop" id="profilePreviewBackdrop"></div>
+    <div class="preview-dialog" role="dialog" aria-modal="true">
+      <button
+        type="button"
+        class="preview-close"
+        id="profilePreviewClose"
+        aria-label="Zavrieť náhľad"
+      >
+        ×
+      </button>
+      <h2 class="preview-title" id="profilePreviewTitle">
+        Metal Line 90 – náhľad soklovej lišty
+      </h2>
+      <img
+        id="profilePreviewImg"
+        src="img/ml90-profile.jpg"
+        alt="Náhľad soklovej lišty Metal Line 90"
+      />
+      <p class="preview-note" id="profilePreviewNote">
+        Orientačný náhľad povrchu. Skutočný odtieň sa môže mierne líšiť podľa
+        monitora a svetelných podmienok.
+      </p>
+    </div>
+  </div>
+
   <!-- Globálne skripty (cookies, config) -->
   <script src="/js/cookies.js"></script>
   <script src="/js/config.js"></script>
 
-  <!-- Knižnica profilov Metal Line 90 -->
+  <!-- Knižnica profilov ML90 (výšky + farby) -->
   <script src="calculator-profiles.js"></script>
-
   <!-- Logika kalkulačky -->
   <script src="calculator.js"></script>
 </body>

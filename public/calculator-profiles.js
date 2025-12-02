@@ -1,5 +1,6 @@
 // public/calculator-profiles.js
-// Údaje sú pre Metal Line 90 podľa technického listu / Excelu
+// Údaje podľa Excelu „Metal Line 90 - chat.xlsx“
+// Metal Line 90 / 790 / 92 / 93 – dĺžka 2 m
 
 const PROFILES = [
   {
@@ -16,6 +17,7 @@ const PROFILES = [
     endCapCode: "78633",
     badgeKey: "alu",
   },
+
   {
     id: "metal-line-90-78084",
     familyId: "metal-line-90",
@@ -30,6 +32,7 @@ const PROFILES = [
     endCapCode: "78643",
     badgeKey: "alu",
   },
+
   {
     id: "metal-line-90-78100",
     familyId: "metal-line-90",
@@ -44,6 +47,7 @@ const PROFILES = [
     endCapCode: "78653",
     badgeKey: "alu",
   },
+
   {
     id: "metal-line-90-78138",
     familyId: "metal-line-90",
@@ -58,6 +62,7 @@ const PROFILES = [
     endCapCode: "78663",
     badgeKey: "alu",
   },
+
   {
     id: "metal-line-90-78130",
     familyId: "metal-line-90",
@@ -72,6 +77,7 @@ const PROFILES = [
     endCapCode: "78673",
     badgeKey: "alu",
   },
+
   {
     id: "metal-line-90-78137",
     familyId: "metal-line-90",
@@ -87,7 +93,6 @@ const PROFILES = [
     badgeKey: "alu",
   },
 
-  // biele RAL / biely stone / antibakteriál
   {
     id: "metal-line-90-78112",
     familyId: "metal-line-90",
@@ -102,6 +107,7 @@ const PROFILES = [
     endCapCode: "78667",
     badgeKey: "white",
   },
+
   {
     id: "metal-line-90-78110",
     familyId: "metal-line-90",
@@ -117,7 +123,6 @@ const PROFILES = [
     badgeKey: "white",
   },
 
-  // titán / antracit / antik
   {
     id: "metal-line-90-78103",
     familyId: "metal-line-90",
@@ -132,6 +137,7 @@ const PROFILES = [
     endCapCode: "78657",
     badgeKey: "titan",
   },
+
   {
     id: "metal-line-90-78118",
     familyId: "metal-line-90",
@@ -146,6 +152,7 @@ const PROFILES = [
     endCapCode: "78687",
     badgeKey: "anthracite",
   },
+
   {
     id: "metal-line-90-78119",
     familyId: "metal-line-90",
@@ -161,7 +168,6 @@ const PROFILES = [
     badgeKey: "anthracite",
   },
 
-  // eloxované striebro – samolepiace varianty
   {
     id: "metal-line-90-78106",
     familyId: "metal-line-90",
@@ -177,6 +183,7 @@ const PROFILES = [
     badgeKey: "alu",
     note: "samolepiace",
   },
+
   {
     id: "metal-line-90-78136",
     familyId: "metal-line-90",
@@ -193,7 +200,6 @@ const PROFILES = [
     note: "samolepiace",
   },
 
-  // lesklý titán (leštený)
   {
     id: "metal-line-90-78142",
     familyId: "metal-line-90",
@@ -208,6 +214,7 @@ const PROFILES = [
     endCapCode: "78701",
     badgeKey: "titan",
   },
+
   {
     id: "metal-line-90-78149",
     familyId: "metal-line-90",
@@ -223,7 +230,6 @@ const PROFILES = [
     badgeKey: "titan",
   },
 
-  // lesklé striebro (brúsené)
   {
     id: "metal-line-90-78082",
     familyId: "metal-line-90",
@@ -238,13 +244,14 @@ const PROFILES = [
     endCapCode: "78748",
     badgeKey: "alu",
   },
+
   {
     id: "metal-line-90-78105",
     familyId: "metal-line-90",
     familyName: "Metal Line 90",
     heightCm: 6,
     lengthM: 2,
-    colorName: "lekslé striebro (brúsené)",
+    colorName: "lesklé striebro (brúsené)",
     profileCode: "78105",
     innerCornerCode: "78720",
     outerCornerCode: "78730",
@@ -252,6 +259,7 @@ const PROFILES = [
     endCapCode: "78750",
     badgeKey: "alu",
   },
+
   {
     id: "metal-line-90-78133",
     familyId: "metal-line-90",
@@ -267,7 +275,6 @@ const PROFILES = [
     badgeKey: "alu",
   },
 
-  // lesklé zlato (brúsené)
   {
     id: "metal-line-90-78107",
     familyId: "metal-line-90",
@@ -282,6 +289,7 @@ const PROFILES = [
     endCapCode: "78727",
     badgeKey: "gold",
   },
+
   {
     id: "metal-line-90-78135",
     familyId: "metal-line-90",
@@ -297,7 +305,6 @@ const PROFILES = [
     badgeKey: "gold",
   },
 
-  // lesklý titán (brúsený)
   {
     id: "metal-line-90-78088",
     familyId: "metal-line-90",
@@ -312,6 +319,7 @@ const PROFILES = [
     endCapCode: "78717",
     badgeKey: "titan",
   },
+
   {
     id: "metal-line-90-78102",
     familyId: "metal-line-90",
@@ -326,6 +334,7 @@ const PROFILES = [
     endCapCode: "78737",
     badgeKey: "titan",
   },
+
   {
     id: "metal-line-90-78134",
     familyId: "metal-line-90",
@@ -341,14 +350,13 @@ const PROFILES = [
     badgeKey: "titan",
   },
 
-  // biely / čierny stone + antibakteriál
   {
     id: "metal-line-90-78094",
     familyId: "metal-line-90",
     familyName: "Metal Line 90",
     heightCm: 6,
     lengthM: 2,
-    colorName: "biely (stone)",
+    colorName: "biely (stone) ",
     profileCode: "78094",
     innerCornerCode: "78172",
     outerCornerCode: "78174",
@@ -357,6 +365,7 @@ const PROFILES = [
     badgeKey: "white",
     note: "drsný povrch",
   },
+
   {
     id: "metal-line-90-78099",
     familyId: "metal-line-90",
@@ -371,6 +380,7 @@ const PROFILES = [
     endCapCode: "78199",
     badgeKey: "anthracite",
   },
+
   {
     id: "metal-line-90-78104",
     familyId: "metal-line-90",
@@ -387,7 +397,8 @@ const PROFILES = [
     note: "určené do ambulancii",
   },
 
-  // nerez leštená
+  // Metal Line 790 – nerez, ale v rámci jednej rodiny Metal Line 90
+
   {
     id: "metal-line-90-78120",
     familyId: "metal-line-90",
@@ -402,6 +413,7 @@ const PROFILES = [
     endCapCode: "78775",
     badgeKey: "steel",
   },
+
   {
     id: "metal-line-90-78108",
     familyId: "metal-line-90",
@@ -416,6 +428,7 @@ const PROFILES = [
     endCapCode: "78776",
     badgeKey: "steel",
   },
+
   {
     id: "metal-line-90-78129",
     familyId: "metal-line-90",
@@ -430,6 +443,7 @@ const PROFILES = [
     endCapCode: "78777",
     badgeKey: "steel",
   },
+
   {
     id: "metal-line-90-78132",
     familyId: "metal-line-90",
@@ -444,6 +458,7 @@ const PROFILES = [
     endCapCode: "78778",
     badgeKey: "steel",
   },
+
   {
     id: "metal-line-90-78139",
     familyId: "metal-line-90",
@@ -459,7 +474,6 @@ const PROFILES = [
     badgeKey: "steel",
   },
 
-  // nerez brúsená
   {
     id: "metal-line-90-78128",
     familyId: "metal-line-90",
@@ -474,6 +488,7 @@ const PROFILES = [
     endCapCode: "78795",
     badgeKey: "steel",
   },
+
   {
     id: "metal-line-90-78109",
     familyId: "metal-line-90",
@@ -488,6 +503,7 @@ const PROFILES = [
     endCapCode: "78796",
     badgeKey: "steel",
   },
+
   {
     id: "metal-line-90-78126",
     familyId: "metal-line-90",
@@ -502,6 +518,7 @@ const PROFILES = [
     endCapCode: "78797",
     badgeKey: "steel",
   },
+
   {
     id: "metal-line-90-78127",
     familyId: "metal-line-90",
@@ -516,6 +533,7 @@ const PROFILES = [
     endCapCode: "78798",
     badgeKey: "steel",
   },
+
   {
     id: "metal-line-90-78140",
     familyId: "metal-line-90",
@@ -529,5 +547,63 @@ const PROFILES = [
     connectorCode: "78794",
     endCapCode: "78799",
     badgeKey: "steel",
+  },
+
+  // Metal Line 92 – klipový systém (1 lišta = 3 klipy)
+
+  {
+    id: "metal-line-92-78490",
+    familyId: "metal-line-92",
+    familyName: "Metal Line 92",
+    heightCm: 7,
+    lengthM: 2,
+    colorName: "eloxované striebro",
+    profileCode: "78490",
+    innerCornerCode: null,
+    outerCornerCode: null,
+    connectorCode: null,
+    endCapCode: null,
+    badgeKey: "alu",
+    note: "1x lišta=3 klipy",
+    system: "clips",
+    clipsPerBar: 3,
+  },
+
+  // Metal Line 93 – klipový systém (1 lišta = 5 klipov)
+
+  {
+    id: "metal-line-93-78495",
+    familyId: "metal-line-93",
+    familyName: "Metal Line 93",
+    heightCm: 7,
+    lengthM: 2,
+    colorName: "eloxované striebro",
+    profileCode: "78495",
+    innerCornerCode: null,
+    outerCornerCode: null,
+    connectorCode: null,
+    endCapCode: null,
+    badgeKey: "alu",
+    note: "1x lišta=5 klipov",
+    system: "clips",
+    clipsPerBar: 5,
+  },
+
+  {
+    id: "metal-line-93-78496",
+    familyId: "metal-line-93",
+    familyName: "Metal Line 93",
+    heightCm: 9,
+    lengthM: 2,
+    colorName: "eloxované striebro",
+    profileCode: "78496",
+    innerCornerCode: null,
+    outerCornerCode: null,
+    connectorCode: null,
+    endCapCode: null,
+    badgeKey: "alu",
+    note: "1x lišta=5 klipov",
+    system: "clips",
+    clipsPerBar: 5,
   },
 ];
