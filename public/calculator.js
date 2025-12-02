@@ -6,24 +6,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const shapeButtons = Array.from(
     document.querySelectorAll(".shape-btn[data-shape]")
   );
-  const profileTiles = Array.from(
-    document.querySelectorAll(".profile-tile[data-profile-id]")
-  );
-
-  // Zatiaľ jeden typ – Metal Line 90, 2 m, výška 6 cm
-  const profiles = [
-    {
-      id: "metal-line-90",
-      name: "Metal Line 90",
-      lengthM: 2.0,
-      heightCm: 6,
-    },
-  ];
 
   let currentStep = 1;
   let currentShape = "rectangle";
   let userEmail = "";
-  let selectedProfile = profiles[0];
+  let selectedProfile = null;
+  let familyProfiles = [];
 
   // --- Pomocné funkcie ---
 
@@ -55,26 +43,55 @@ document.addEventListener("DOMContentLoaded", () => {
     return isNaN(n) ? 0 : n;
   }
 
-  function selectProfileById(profileId) {
-    const found =
-      profiles.find((p) => p.id === profileId) || profiles[0] || null;
-    if (!found) return;
+  function applyBadgeToThumb(key) {
+    const thumb = document.getElementById("profileThumb");
+    if (!thumb) return;
+    const keys = ["alu", "white", "anthracite", "gold", "steel", "titan"];
+    keys.forEach((k) => thumb.classList.remove("badge-" + k));
+    if (key && keys.includes(key)) {
+      thumb.classList.add("badge-" + key);
+    }
+  }
 
-    selectedProfile = found;
+  function setSelectedProfile(profile) {
+    selectedProfile = profile || null;
 
-    // vizuálne zvýraznenie
-    profileTiles.forEach((btn) => {
-      btn.classList.toggle(
-        "active",
-        btn.getAttribute("data-profile-id") === selectedProfile.id
-      );
-    });
-
-    // nastav dĺžku profilu do readonly inputu
     const plInput = document.getElementById("profileLength");
+    const profileNameEl = document.getElementById("profileName");
+    const profileMetaEl = document.getElementById("profileMeta");
+    const profileNoteEl = document.getElementById("profileNote");
+
+    if (!selectedProfile) {
+      if (plInput) plInput.value = "";
+      if (profileNameEl) profileNameEl.textContent = "Metal Line 90";
+      if (profileMetaEl)
+        profileMetaEl.textContent = "vyber výšku a farbu profilu";
+      if (profileNoteEl) profileNoteEl.textContent = "";
+      applyBadgeToThumb(null);
+      return;
+    }
+
     if (plInput) {
       plInput.value = String(selectedProfile.lengthM).replace(".", ",");
     }
+
+    if (profileNameEl) {
+      profileNameEl.textContent = `${selectedProfile.familyName} – ${selectedProfile.heightCm} cm`;
+    }
+
+    if (profileMetaEl) {
+      profileMetaEl.textContent = `${selectedProfile.colorName} · dĺžka profilu ${String(
+        selectedProfile.lengthM
+      ).replace(".", ",")} m · kód ${selectedProfile.profileCode}`;
+    }
+
+    if (profileNoteEl) {
+      profileNoteEl.textContent = selectedProfile.note
+        ? `Špecifikácia: ${selectedProfile.note}`
+        : "";
+    }
+
+    applyBadgeToThumb(selectedProfile.badgeKey || null);
   }
 
   function calculateAndFillSummary() {
@@ -100,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const wastePercent = toNumber(wastePercentInput?.value || "");
 
     const profileLength =
-      (selectedProfile && selectedProfile.lengthM) || 1.0; // Metal Line 90 = 2.0 m
+      (selectedProfile && selectedProfile.lengthM) || 1.0;
 
     // Ak je tvar štvorec a dĺžka nie je zadaná, berieme ju ako rovnakú ako šírku
     if (currentShape === "square") {
@@ -142,15 +159,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const pieces = Math.ceil(piecesExact || 0);
 
     // --- komponenty (orientačne) ---
-    // rohy – klasická izba, 4 vnútorné rohy, ak má zmysel
     const internalCorners = perimeter > 0 ? 4 : 0;
-
-    // koncovky pri dverách – pri jednom otvore 2 ks
     const endCaps = doorExists ? 2 : 0;
 
-    // spoje medzi lištami
     const totalJoins = pieces > 0 ? Math.max(pieces - 1, 0) : 0;
-    // každý spoj je buď roh, koncovka alebo spojka
     let connectors = totalJoins - internalCorners - endCaps;
     if (connectors < 0) connectors = 0;
 
@@ -171,9 +183,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const metersText = metersWithWaste.toFixed(2).replace(".", ",");
 
     if (summaryProfile && selectedProfile) {
-      summaryProfile.textContent = `${selectedProfile.name} · výška ${selectedProfile.heightCm} cm · dĺžka profilu ${String(
+      summaryProfile.textContent = `${selectedProfile.familyName} · ${selectedProfile.heightCm} cm · ${selectedProfile.colorName} · dĺžka profilu ${String(
         selectedProfile.lengthM
-      ).replace(".", ",")} m`;
+      ).replace(".", ",")} m · kód ${selectedProfile.profileCode}`;
+    } else if (summaryProfile) {
+      summaryProfile.textContent = "Metal Line 90";
     }
 
     if (summaryRoom) summaryRoom.textContent = roomName;
@@ -206,6 +220,12 @@ document.addEventListener("DOMContentLoaded", () => {
         summaryComponentsDetail.textContent =
           "Po zadaní rozmerov izby a dverí doplníme aj odhad komponentov.";
       }
+    }
+
+    // predvyplnenie kódu profilu do textového poľa (ak je prázdne)
+    const productCodeInput = document.getElementById("productCode");
+    if (productCodeInput && !productCodeInput.value && selectedProfile) {
+      productCodeInput.value = `${selectedProfile.profileCode} – ${selectedProfile.colorName}`;
     }
   }
 
@@ -267,16 +287,107 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initProfiles() {
-    if (!profiles.length) return;
-    // predvolene vyberieme prvý profil
-    selectProfileById(profiles[0].id);
+    const heightSelect = document.getElementById("profileHeight");
+    const colorSelect = document.getElementById("profileColor");
 
-    profileTiles.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-profile-id");
-        if (id) selectProfileById(id);
-      });
+    if (!heightSelect || !colorSelect) return;
+
+    if (!Array.isArray(window.PROFILES)) {
+      console.warn("PROFILES nie je načítané.");
+      heightSelect.innerHTML =
+        '<option value="">– profily sa nepodarilo načítať –</option>';
+      colorSelect.innerHTML =
+        '<option value="">– profily sa nepodarilo načítať –</option>';
+      colorSelect.disabled = true;
+      return;
+    }
+
+    familyProfiles = PROFILES.filter(
+      (p) => p.familyId === "metal-line-90"
+    );
+    if (!familyProfiles.length) {
+      heightSelect.innerHTML =
+        '<option value="">– profily Metal Line 90 nie sú k dispozícii –</option>';
+      colorSelect.innerHTML =
+        '<option value="">– bez farieb –</option>';
+      colorSelect.disabled = true;
+      return;
+    }
+
+    const heights = Array.from(
+      new Set(
+        familyProfiles
+          .map((p) => p.heightCm)
+          .filter((h) => typeof h === "number" && !Number.isNaN(h))
+      )
+    ).sort((a, b) => a - b);
+
+    heightSelect.innerHTML =
+      '<option value="">– vyber výšku –</option>' +
+      heights
+        .map((h) => `<option value="${h}">${h} cm</option>`)
+        .join("");
+
+    function fillColorsForHeight(height) {
+      const candidates = familyProfiles.filter(
+        (p) => p.heightCm === height
+      );
+      if (!candidates.length) {
+        colorSelect.innerHTML =
+          '<option value="">– žiadne farby pre túto výšku –</option>';
+        colorSelect.disabled = true;
+        setSelectedProfile(null);
+        return [];
+      }
+
+      colorSelect.disabled = false;
+      colorSelect.innerHTML =
+        '<option value="">– vyber farbu –</option>' +
+        candidates
+          .map(
+            (p) =>
+              `<option value="${p.profileCode}">${p.colorName}</option>`
+          )
+          .join("");
+
+      return candidates;
+    }
+
+    heightSelect.addEventListener("change", () => {
+      const h = parseInt(heightSelect.value, 10);
+      if (!h) {
+        colorSelect.innerHTML =
+          '<option value="">– najprv zvoľ výšku –</option>';
+        colorSelect.disabled = true;
+        setSelectedProfile(null);
+        return;
+      }
+      const candidates = fillColorsForHeight(h);
+      if (candidates.length === 1) {
+        colorSelect.value = candidates[0].profileCode;
+        setSelectedProfile(candidates[0]);
+      } else {
+        setSelectedProfile(null);
+      }
     });
+
+    colorSelect.addEventListener("change", () => {
+      const code = colorSelect.value;
+      const profile = familyProfiles.find(
+        (p) => p.profileCode === code
+      );
+      setSelectedProfile(profile || null);
+    });
+
+    // Predvolená voľba – najnižšia výška, prvá farba
+    if (heights.length) {
+      heightSelect.value = String(heights[0]);
+      const candidates = fillColorsForHeight(heights[0]);
+      if (candidates.length) {
+        colorSelect.value = candidates[0].profileCode;
+        setSelectedProfile(candidates[0]);
+      }
+    }
   }
 
   // --- Handlery pre tlačidlá krokov ---
@@ -320,9 +431,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (createPdfBtn) {
       createPdfBtn.addEventListener("click", () => {
-        // TU neskôr napojíme reálne generovanie PDF
+        // TU neskôr napojíme reálne generovanie PDF a mailer
         alert(
-          "PDF výpočet pripravujeme. V ďalšom kroku ho prepojíme s Lištobookom."
+          "PDF výpočet pripravujeme. V ďalšom kroku ho prepojíme s Lištobookom a mailerom."
         );
       });
     }
