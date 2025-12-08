@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulačka terasy Schlüter – Krok 1 a 2</title>
+    <style>
+        :root {
+            --max-w: 1120px;
+            --gap: 16px;
+            --hdr-h: 96px;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #1f3b63 0, #050b17 50%, #02040a 100%);
+            color: #f5f7fb;
+            padding-top: var(--hdr-h);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        /* HEADER – podľa entertainment */
+        .app-header {
+            position: fixed;
+            inset: 0 0 auto 0;
+            z-index: 1000;
+            background: #0c1f4b;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+        }
+
+        .app-header-inner {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 8px var(--gap);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .logo-small {
+            height: 48px;
+            margin: 2px auto 6px;
+            display: block;
+        }
+
+        .user-chip {
+            color: #cfe2ff;
+            font-size: .95rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .icon-btn {
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-content: center;
+            border: 1px solid #ffffff33;
+            border-radius: 10px;
+            color: #e7eefc;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .icon-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* LAYOUT – hlavný obsah */
+        .wrap {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 16px;
+            position: relative;
+            z-index: 1; /* nad neónovými pásmi */
+        }
+
+        /* ========= PC ONLY: bezpečnostné neónové pásy (žlto-čierne) ========= */
+        @media (min-width: 992px) {
+            .safety-beams {
+                position: fixed;
+                inset: var(--hdr-h) 0 0 0;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .beam {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                width: 10vw;
+                max-width: 160px;
+                filter: blur(10px);
+                opacity: .25;
+                will-change: opacity, transform;
+                background-size: 22px 22px;
+                background-image:
+                    linear-gradient(135deg,
+                        rgba(15, 23, 42, 0.95) 25%,
+                        #facc15 25%,
+                        #facc15 50%,
+                        rgba(15, 23, 42, 0.95) 50%,
+                        rgba(15, 23, 42, 0.95) 75%,
+                        #facc15 75%,
+                        #facc15 100%);
+                animation: beamPulse 5.2s ease-in-out infinite,
+                           beamDrift 12s ease-in-out infinite;
+                box-shadow: 0 0 16px rgba(250, 204, 21, 0.55);
+            }
+
+            .beam.left {
+                left: 0;
+                transform-origin: left center;
+            }
+
+            .beam.right {
+                right: 0;
+                transform-origin: right center;
+            }
+
+            .beam.pos1 { --tx: -4%; }
+            .beam.pos2 { --tx: 0%;  animation-delay: .8s; }
+            .beam.pos3 { --tx: 4%;  animation-delay: 1.6s; }
+
+            @keyframes beamPulse {
+                0%, 100% { opacity: .18; }
+                50%      { opacity: .33; }
+            }
+
+            @keyframes beamDrift {
+                0%, 100% { transform: translateX(var(--tx, 0)) translateY(0) scaleX(1); }
+                50%      { transform: translateX(var(--tx, 0)) translateY(-1.5%) scaleX(1.05); }
+            }
+
+            .glow {
+                position: absolute;
+                width: 18vw;
+                max-width: 240px;
+                height: 18vw;
+                max-height: 240px;
+                filter: blur(28px);
+                opacity: .17;
+                background: radial-gradient(circle,
+                    rgba(250, 204, 21, .50) 0%,
+                    rgba(250, 204, 21, 0) 60%);
+                animation: glowPulse 7s ease-in-out infinite;
+            }
+
+            .glow.left { left: -6vw; }
+            .glow.right { right: -6vw; }
+            .glow.top1 { top: 14%; }
+            .glow.top2 { top: 48%; }
+
+            .glow.d1 { animation-delay: .4s; }
+            .glow.d2 { animation-delay: 1.1s; }
+            .glow.d3 { animation-delay: 1.8s; }
+
+            @keyframes glowPulse {
+                0%, 100% { opacity: .10; transform: scale(1); }
+                50%      { opacity: .23; transform: scale(1.08); }
+            }
+        }
+
+        /* ====== TERASA – karta ====== */
+
+        .terasa-card {
+            background: rgba(2, 9, 24, 0.94);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 184, 0, 0.4);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .terasa-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .terasa-app-name {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #a8b7ff;
+        }
+
+        .terasa-title-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .terasa-title {
+            font-size: 22px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terasa-title span.logo-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffb347 0, #ff6a00 55%, #ff3b00 100%);
+            box-shadow: 0 0 10px rgba(255, 122, 0, 0.8);
+        }
+
+        .terasa-subtitle {
+            font-size: 13px;
+            opacity: 0.85;
+            color: #e0e4ff;
+        }
+
+        .stepper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .stepper-label {
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-size: 11px;
+            color: #ffb347;
+        }
+
+        .stepper-bar {
+            flex: 1;
+            height: 4px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #ff7a18 0%, #ffb347 40%, rgba(255, 255, 255, 0.08) 40%, rgba(255, 255, 255, 0.03) 100%);
+        }
+
+        /* KROK 1 – výber tvaru podľa obrázka */
+
+        .terasa-content {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .terasa-content {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .shape-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .shape-section-subtitle {
+            font-size: 13px;
+            color: #c8d0ff;
+            margin-bottom: 14px;
+        }
+
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+        }
+
+        .shape-card {
+            position: relative;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 140, 0, 0.35);
+            background: radial-gradient(circle at top left, rgba(255, 140, 0, 0.18), rgba(3, 8, 25, 0.9));
+            padding: 10px 10px 12px;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition:
+                transform 0.12s ease-out,
+                box-shadow 0.12s ease-out,
+                border-color 0.12s ease-out,
+                background 0.12s ease-out;
+        }
+
+        .shape-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.35);
+        }
+
+        .shape-card.selected {
+            border-color: #ffb347;
+            box-shadow: 0 0 25px rgba(255, 140, 0, 0.5);
+            background: radial-gradient(circle at top, rgba(255, 180, 71, 0.28), rgba(2, 10, 30, 0.98));
+        }
+
+        .shape-label {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .shape-mini-diagram {
+            margin-top: 4px;
+            height: 86px;
+            border-radius: 10px;
+            border: 1px dashed rgba(255, 255, 255, 0.35);
+            background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.95));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shape-mini-diagram svg {
+            width: 78%;
+            height: 78%;
+        }
+
+        .shape-description {
+            font-size: 11px;
+            color: #d7ddff;
+            opacity: 0.92;
+        }
+
+        /* SVG outlines */
+        .shape-square path,
+        .shape-rect path,
+        .shape-l path,
+        .shape-irregular path {
+            fill: rgba(255, 184, 0, 0.12);
+            stroke: #ffb347;
+            stroke-width: 2;
+        }
+
+        /* INFO PANEL – krok 1 */
+        .info-panel {
+            border-radius: 14px;
+            border: 1px solid rgba(151, 178, 255, 0.4);
+            background: radial-gradient(circle at top right, rgba(129, 199, 255, 0.18), rgba(4, 16, 43, 0.96));
+            padding: 12px 13px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .info-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .info-chip {
+            font-size: 11px;
+            padding: 3px 7px;
+            border-radius: 999px;
+            border: 1px solid rgba(151, 178, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: #e4ebff;
+            opacity: 0.9;
+        }
+
+        .info-heading {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: #d8e0ff;
+        }
+
+        .info-highlight {
+            font-size: 12px;
+            border-radius: 10px;
+            padding: 8px 9px;
+            background: rgba(6, 38, 90, 0.9);
+            border: 1px dashed rgba(179, 200, 255, 0.6);
+        }
+
+        .info-selection {
+            margin-top: 4px;
+            font-size: 13px;
+        }
+
+        .info-selection span.value {
+            font-weight: 600;
+            color: #ffddaa;
+        }
+
+        /* KROK 2 – rozmery strán */
+
+        .step2-wrapper {
+            display: none;
+        }
+
+        .step2-wrapper.active {
+            display: block;
+        }
+
+        .step2-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.4fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .step2-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        .dim-note-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .dim-note-subtitle {
+            font-size: 13px;
+            color: #c8d0ff;
+            margin-bottom: 10px;
+        }
+
+        .dim-diagram-box {
+            border-radius: 12px;
+            border: 1px dashed rgba(148, 163, 255, 0.85);
+            background: radial-gradient(circle at top, rgba(30, 64, 175, 0.35), rgba(15, 23, 42, 1));
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .dim-diagram-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: #e0e7ff;
+        }
+
+        .dim-diagram {
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dim-diagram svg {
+            width: 82%;
+            height: 82%;
+        }
+
+        .dim-diagram path {
+            fill: rgba(15, 23, 42, 0.5);
+            stroke: #f97316;
+            stroke-width: 2;
+        }
+
+        .dim-hint {
+            font-size: 12px;
+            color: #cbd5ff;
+        }
+
+        .dim-form {
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 255, 0.85);
+            background: radial-gradient(circle at top right, rgba(55, 65, 194, 0.45), rgba(15, 23, 42, 1));
+            padding: 12px 13px 14px;
+        }
+
+        .dim-form-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .dim-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+        }
+
+        .dim-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 12px;
+        }
+
+        .dim-field label {
+            color: #e5edff;
+        }
+
+        .dim-field input {
+            border-radius: 999px;
+            border: 1px solid rgba(191, 219, 254, 0.9);
+            padding: 6px 10px;
+            font-size: 13px;
+            background: rgba(15, 23, 42, 0.9);
+            color: #f9fafb;
+            outline: none;
+        }
+
+        .dim-field input:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.6);
+        }
+
+        .dim-unit {
+            font-size: 11px;
+            opacity: 0.85;
+        }
+
+        .shape-dim-form {
+            display: none;
+        }
+
+        .shape-dim-form.active {
+            display: block;
+        }
+
+        /* SPODNÁ LIŠTA */
+        .bottom-bar {
+            margin-top: 18px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(140, 164, 230, 0.5);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bottom-note {
+            font-size: 12px;
+            color: #cfd7ff;
+            opacity: 0.95;
+        }
+
+        .bottom-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 999px;
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(166, 185, 255, 0.7);
+            color: #e0e7ff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, #ff7a18, #ffc837);
+            color: #2b1700;
+            box-shadow: 0 0 14px rgba(255, 140, 0, 0.7);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-icon {
+            font-size: 14px;
+        }
+
+        /* ===== MOBILNÉ ÚPRAVY ===== */
+        @media (max-width: 600px) {
+            .app-header-inner{
+                padding: 6px 10px 8px;
+            }
+
+            .wrap{
+                padding: 12px;
+            }
+
+            .terasa-card{
+                padding: 14px 12px 16px;
+                border-radius: 16px;
+                box-shadow: 0 0 26px rgba(0,0,0,0.9);
+            }
+
+            .terasa-header{
+                gap: 6px;
+                margin-bottom: 14px;
+            }
+
+            .terasa-title{
+                font-size: 18px;
+            }
+
+            .terasa-subtitle{
+                font-size: 12px;
+            }
+
+            .shape-grid{
+                grid-template-columns: minmax(0,1fr);
+            }
+
+            .shape-card{
+                padding: 10px 10px 12px;
+            }
+
+            .shape-mini-diagram{
+                height: 72px;
+            }
+
+            .info-panel{
+                margin-top: 10px;
+            }
+
+            .step2-layout{
+                grid-template-columns: minmax(0,1fr);
+            }
+
+            .bottom-bar{
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .bottom-controls{
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .btn{
+                width: 100%;
+                justify-content: center;
+            }
+
+            .bottom-note{
+                order: 2;
+            }
+
+            #btnBackStep{
+                order: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header" role="banner">
+    <div class="app-header-inner">
+        <button class="icon-btn" id="backBtn" aria-label="Späť">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      fill="none"/>
+            </svg>
+        </button>
+        <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
+        <div class="user-chip" id="userChip">Kalkulačka terasy · pracovný mód</div>
+    </div>
+</header>
+
+<!-- PC ONLY: bezpečnostné pásy -->
+<div class="safety-beams" aria-hidden="true">
+    <span class="beam left  pos1"></span>
+    <span class="beam left  pos2"></span>
+    <span class="beam left  pos3"></span>
+    <span class="beam right pos1"></span>
+    <span class="beam right pos2"></span>
+    <span class="beam right pos3"></span>
+
+    <span class="glow left  top1 d1"></span>
+    <span class="glow left  top2 d2"></span>
+    <span class="glow right top1 d3"></span>
+    <span class="glow right top2 d2"></span>
+</div>
+
+<!-- HLAVNÝ OBSAH -->
+<main class="wrap">
+    <div class="terasa-card">
+        <!-- HLAVIČKA -->
+        <header class="terasa-header">
+            <div class="terasa-app-name">
+                Lištobook · Technická kalkulačka
+            </div>
+
+            <div class="terasa-title-row">
+                <div class="terasa-title">
+                    <span class="logo-dot"></span>
+                    Schlüter® terasa – kalkulačka
+                </div>
+                <div class="terasa-subtitle" id="stepSubtitle">
+                    Krok 1 z 3 – výber tvaru terasy podľa pôdorysu
+                </div>
+            </div>
+
+            <div class="stepper">
+                <span class="stepper-label" id="stepLabel">KROK 1 · TVAR TERASY</span>
+                <div class="stepper-bar"></div>
+            </div>
+        </header>
+
+        <!-- KROK 1 – výber tvaru podľa obrázka -->
+        <section class="terasa-content" id="step1">
+            <section>
+                <div class="shape-section-title">
+                    Zvoľte pôdorys terasy podľa obrázka
+                </div>
+                <div class="shape-section-subtitle">
+                    Stačí sa pozrieť na pôdorys zhora – ako na papieri. Kliknite na obrázok, ktorý sa najviac podobá vašej terase.
+                </div>
+
+                <div class="shape-grid" id="shapeGrid">
+                    <!-- ŠTVOREC -->
+                    <button type="button" class="shape-card" data-shape="stvorec">
+                        <div class="shape-label">Štvorec / takmer štvorec</div>
+                        <div class="shape-mini-diagram">
+                            <svg viewBox="0 0 100 60" class="shape-square">
+                                <path d="M20 10 H80 V50 H20 Z"></path>
+                            </svg>
+                        </div>
+                        <div class="shape-description">
+                            Pôdorys s podobnou dĺžkou a šírkou. Môže byť aj mierne „roztiahnutý“ – avantgardné riešenia sú vítané.
+                        </div>
+                    </button>
+
+                    <!-- OBDĹŽNIK / KOSOŠTVOREC -->
+                    <button type="button" class="shape-card" data-shape="obdlznik">
+                        <div class="shape-label">Obdĺžnik / kosoštvorec</div>
+                        <div class="shape-mini-diagram">
+                            <svg viewBox="0 0 100 60" class="shape-rect">
+                                <path d="M15 15 H85 L75 45 H5 Z"></path>
+                            </svg>
+                        </div>
+                        <div class="shape-description">
+                            Terasa natiahnutá do dĺžky – môže mať pravé uhly aj šikmé strany. V ďalšom kroku zadáme všetky štyri strany.
+                        </div>
+                    </button>
+
+                    <!-- TVAR L -->
+                    <button type="button" class="shape-card" data-shape="tvar_l">
+                        <div class="shape-label">Tvar L</div>
+                        <div class="shape-mini-diagram">
+                            <svg viewBox="0 0 100 60" class="shape-l">
+                                <path d="M15 5 H85 V25 H55 V55 H15 Z"></path>
+                            </svg>
+                        </div>
+                        <div class="shape-description">
+                            Terasa „okolo rohu“, podobná tvojmu ručne kreslenému tvaru L. V ďalšom kroku zadáme dĺžky všetkých úsekov.
+                        </div>
+                    </button>
+
+                    <!-- INÝ / INDIVIDUÁLNY TVAR -->
+                    <button type="button" class="shape-card" data-shape="iny">
+                        <div class="shape-label">Iný / individuálny tvar</div>
+                        <div class="shape-mini-diagram">
+                            <svg viewBox="0 0 100 60" class="shape-irregular">
+                                <path d="M10 30 L35 10 L80 18 L92 45 L65 70 L18 62 Z"></path>
+                            </svg>
+                        </div>
+                        <div class="shape-description">
+                            Pôdorys s viacerými zalomeniami, oblúkmi alebo nepravidelným tvarom. V ďalšom kroku napíšete poznámku a rozpis strán.
+                        </div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- INFO panel krok 1 -->
+            <aside class="info-panel">
+                <div class="info-chip-row">
+                    <div class="info-chip">Schlüter® systém</div>
+                    <div class="info-chip">Terasa / balkón</div>
+                </div>
+
+                <div class="info-heading">
+                    Ako funguje výber podľa obrázka?
+                </div>
+
+                <p class="info-text">
+                    Predstavte si, že sa pozeráte na terasu zhora – ako na náčrt na papieri. V tomto kroku
+                    nás zaujíma iba <strong>tvar obrysu</strong>, nie rozmery. V ďalšom kroku zadáme dĺžky jednotlivých strán.
+                </p>
+
+                <div class="info-highlight">
+                    Ak máte šikmé steny, kosoštvorec alebo kreatívnu architektúru, vôbec to nevadí.
+                    Dôležité je, aby sa pôdorys približne podobal na <strong>štvorec, obdĺžnik, tvar L</strong> alebo
+                    <strong>individuálny tvar</strong>.
+                </div>
+
+                <div class="info-selection" id="selectedShapeInfo">
+                    Aktuálne zvolený tvar: <span class="value">žiadny</span>
+                </div>
+            </aside>
+        </section>
+
+        <!-- KROK 2 – rozmery strán (zobrazuje sa po kliknutí na obrázok) -->
+        <section class="step2-wrapper" id="step2">
+            <div class="step2-layout">
+                <!-- ľavá časť: diagram + text -->
+                <section>
+                    <div class="dim-note-title" id="dimTitle">
+                        Rozmery strán – štvorec / takmer štvorec
+                    </div>
+                    <div class="dim-note-subtitle" id="dimSubtitle">
+                        Zadajte dĺžku každej strany pôdorysu v metroch. Ak sú niektoré strany rovnaké, pokojne použite rovnaké hodnoty.
+                    </div>
+
+                    <div class="dim-diagram-box">
+                        <div class="dim-diagram-label" id="dimDiagramLabel">
+                            Schematický pôdorys
+                        </div>
+                        <div class="dim-diagram" id="dimDiagram">
+                            <!-- dynamický SVG podľa tvaru -->
+                        </div>
+                        <div class="dim-hint" id="dimHint">
+                            Strany sú označené písmenami A, B, C, D v smere hodinových ručičiek.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- pravá časť: formulár -->
+                <section class="dim-form">
+                    <div class="dim-form-title" id="dimFormTitle">
+                        Zadajte dĺžky strán
+                    </div>
+
+                    <!-- Štvorcový / skoro štvorec -->
+                    <div class="shape-dim-form" data-shape="stvorec">
+                        <div class="dim-form-grid">
+                            <div class="dim-field">
+                                <label for="sqrA">Strana A (horná) <span class="dim-unit">[m]</span></label>
+                                <input id="sqrA" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="sqrB">Strana B (pravá) <span class="dim-unit">[m]</span></label>
+                                <input id="sqrB" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="sqrC">Strana C (spodná) <span class="dim-unit">[m]</span></label>
+                                <input id="sqrC" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="sqrD">Strana D (ľavá) <span class="dim-unit">[m]</span></label>
+                                <input id="sqrD" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Obdĺžnik / kosoštvorec -->
+                    <div class="shape-dim-form" data-shape="obdlznik">
+                        <div class="dim-form-grid">
+                            <div class="dim-field">
+                                <label for="rectA">Strana A (horná) <span class="dim-unit">[m]</span></label>
+                                <input id="rectA" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="rectB">Strana B (pravá) <span class="dim-unit">[m]</span></label>
+                                <input id="rectB" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="rectC">Strana C (spodná) <span class="dim-unit">[m]</span></label>
+                                <input id="rectC" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="rectD">Strana D (ľavá) <span class="dim-unit">[m]</span></label>
+                                <input id="rectD" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tvar L – 6 úsekov podľa náčrtu -->
+                    <div class="shape-dim-form" data-shape="tvar_l">
+                        <p class="dim-hint" style="margin-top:0;margin-bottom:8px;">
+                            Tvar L berieme ako dva spojené obdĺžniky. Strany A–F idú postupne po obvode (ako na tvojom náčrte).
+                        </p>
+                        <div class="dim-form-grid">
+                            <div class="dim-field">
+                                <label for="lA">A – horná dlhá <span class="dim-unit">[m]</span></label>
+                                <input id="lA" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="lB">B – pravá krátka <span class="dim-unit">[m]</span></label>
+                                <input id="lB" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="lC">C – vnútorná vodorovná <span class="dim-unit">[m]</span></label>
+                                <input id="lC" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="lD">D – vnútorná zvislá <span class="dim-unit">[m]</span></label>
+                                <input id="lD" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="lE">E – dolná vodorovná <span class="dim-unit">[m]</span></label>
+                                <input id="lE" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                            <div class="dim-field">
+                                <label for="lF">F – ľavá zvislá <span class="dim-unit">[m]</span></label>
+                                <input id="lF" type="number" min="0" step="0.01" inputmode="decimal">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Individuálny tvar -->
+                    <div class="shape-dim-form" data-shape="iny">
+                        <p class="dim-hint" style="margin-top:0;margin-bottom:8px;">
+                            Pri individuálnom tvare nám pomôže čo najpresnejší slovný popis a dĺžky jednotlivých úsekov.
+                        </p>
+                        <div class="dim-field" style="margin-bottom:10px;">
+                            <label for="indivNote">Stručný popis tvaru</label>
+                            <textarea id="indivNote" rows="3"
+                                      style="border-radius:10px;border:1px solid rgba(191,219,254,0.9);padding:8px 10px;font-size:13px;background:rgba(15,23,42,0.9);color:#f9fafb;resize:vertical;"></textarea>
+                        </div>
+                        <div class="dim-field">
+                            <label for="indivSides">Rozpis strán (napr. A=3,2 m; B=1,8 m; ...)</label>
+                            <textarea id="indivSides" rows="3"
+                                      style="border-radius:10px;border:1px solid rgba(191,219,254,0.9);padding:8px 10px;font-size:13px;background:rgba(15,23,42,0.9);color:#f9fafb;resize:vertical;"></textarea>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <!-- SPODNÁ LIŠTA -->
+        <footer class="bottom-bar">
+            <div class="bottom-note" id="bottomNote">
+                Tento krok ešte nič nepočíta – len si vyberáme tvar terasy podľa pôdorysu.
+            </div>
+
+            <div class="bottom-controls">
+                <button type="button" class="btn btn-outline" id="btnBackStep" style="display:none;">
+                    <span class="btn-icon">←</span>
+                    Späť na výber tvaru
+                </button>
+                <button type="button" class="btn btn-outline" id="btnReset">
+                    <span class="btn-icon">↺</span>
+                    Vymazať výber
+                </button>
+                <button type="button" class="btn btn-primary" id="btnNext" disabled>
+                    Pokračovať na Krok 2
+                    <span class="btn-icon">➜</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+</main>
+
+<script>
+    // Dynamická výška hlavičky (ako v entertainment)
+    (function () {
+        const header = document.querySelector('.app-header');
+        function setHdrH() {
+            if (header) {
+                document.documentElement.style.setProperty('--hdr-h', header.getBoundingClientRect().height + 'px');
+            }
+        }
+        setHdrH();
+        window.addEventListener('resize', setHdrH);
+    })();
+
+    // Späť tlačidlo v hlavičke
+    (function () {
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = '/dashboard.html';
+                }
+            });
+        }
+    })();
+
+    // Kalkulačka – kroky
+    (function () {
+        const shapeCards = document.querySelectorAll(".shape-card");
+        const infoElement = document.querySelector("#selectedShapeInfo .value");
+        const btnNext = document.getElementById("btnNext");
+        const btnReset = document.getElementById("btnReset");
+        const btnBackStep = document.getElementById("btnBackStep");
+
+        const step1 = document.getElementById("step1");
+        const step2 = document.getElementById("step2");
+
+        const stepSubtitle = document.getElementById("stepSubtitle");
+        const stepLabel = document.getElementById("stepLabel");
+        const bottomNote = document.getElementById("bottomNote");
+
+        const dimTitle = document.getElementById("dimTitle");
+        const dimSubtitle = document.getElementById("dimSubtitle");
+        const dimHint = document.getElementById("dimHint");
+        const dimDiagram = document.getElementById("dimDiagram");
+        const dimFormTitle = document.getElementById("dimFormTitle");
+
+        const dimForms = document.querySelectorAll(".shape-dim-form");
+
+        let selectedShape = null;
+        let currentStep = 1;
+
+        function updateSelection(shapeKey, labelText) {
+            selectedShape = shapeKey;
+            infoElement.textContent = labelText;
+            btnNext.disabled = !shapeKey;
+        }
+
+        function setStep(step) {
+            currentStep = step;
+            if (step === 1) {
+                step1.style.display = "";
+                step2.classList.remove("active");
+                stepSubtitle.textContent = "Krok 1 z 3 – výber tvaru terasy podľa pôdorysu";
+                stepLabel.textContent = "KROK 1 · TVAR TERASY";
+                bottomNote.textContent = "Tento krok ešte nič nepočíta – len si vyberáme tvar terasy podľa pôdorysu.";
+                btnBackStep.style.display = "none";
+                btnNext.textContent = "Pokračovať na Krok 2";
+                btnNext.disabled = !selectedShape;
+            } else if (step === 2) {
+                step1.style.display = "none";
+                step2.classList.add("active");
+                stepSubtitle.textContent = "Krok 2 z 3 – rozmery jednotlivých strán";
+                stepLabel.textContent = "KROK 2 · ROZMERY STRÁN";
+                bottomNote.textContent = "Teraz zadáme dĺžky všetkých strán pôdorysu. Výpočty Schlüter® prvkov doplníme v Kroku 3.";
+                btnBackStep.style.display = "inline-flex";
+                btnNext.textContent = "Krok 3 – výpočet (pripravujeme)";
+                btnNext.disabled = true;
+            }
+        }
+
+        function renderDiagramForShape(shapeKey) {
+            let svg = "";
+            if (shapeKey === "stvorec") {
+                svg = '<svg viewBox="0 0 100 80"><path d="M20 15 H80 V65 H20 Z"></path></svg>';
+                dimTitle.textContent = "Rozmery strán – štvorec / takmer štvorec";
+                dimSubtitle.textContent = "Zadajte dĺžku každej strany A–D v metroch. Ak je to čistý štvorec, všetky strany môžu mať rovnakú hodnotu.";
+                dimHint.textContent = "Strany A, B, C, D idú v smere hodinových ručičiek – A hore, potom B, C, D.";
+                dimFormTitle.textContent = "Štvorec / takmer štvorec – dĺžky strán";
+            } else if (shapeKey === "obdlznik") {
+                svg = '<svg viewBox="0 0 100 80"><path d="M10 25 L88 15 L90 55 L12 65 Z"></path></svg>';
+                dimTitle.textContent = "Rozmery strán – obdĺžnik alebo kosoštvorec";
+                dimSubtitle.textContent = "Obdĺžnik môže mať pravé uhly aj šikmé strany. Dôležitá je dĺžka strán A–D.";
+                dimHint.textContent = "Začíname stranou A hore a pokračujeme dookola B, C, D.";
+                dimFormTitle.textContent = "Obdĺžnik / kosoštvorec – dĺžky strán";
+            } else if (shapeKey === "tvar_l") {
+                svg = '<svg viewBox="0 0 100 80"><path d="M15 10 H85 V30 H55 V70 H15 Z"></path></svg>';
+                dimTitle.textContent = "Rozmery strán – tvar L";
+                dimSubtitle.textContent = "Tvar L rozdelíme na šesť úsekov A–F podľa obvodu. Môžu byť aj šikmé, dôležité sú dĺžky.";
+                dimHint.textContent = "Predstavte si obvod v smere hodinových ručičiek: A hore, potom krátka B, vnútorné C a D, dolná E a ľavá F.";
+                dimFormTitle.textContent = "Tvar L – dĺžky strán A–F";
+            } else if (shapeKey === "iny") {
+                svg = '<svg viewBox="0 0 100 80"><path d="M10 30 L35 10 L80 18 L92 45 L65 70 L18 62 Z"></path></svg>';
+                dimTitle.textContent = "Individuálny tvar – popis a strany";
+                dimSubtitle.textContent = "Pri zložitejších tvaroch stačí slovný popis a rozpis dĺžok strán. Neskôr k tomu pripojíme náčrt alebo PDF.";
+                dimHint.textContent = "Strany môžete pomenovať písmenami (A, B, C...) a do poľa nižšie napísať ich dĺžky.";
+                dimFormTitle.textContent = "Individuálny tvar – popis a strany";
+            }
+            dimDiagram.innerHTML = svg;
+
+            // prepnutie formulárov
+            dimForms.forEach(form => {
+                if (form.getAttribute("data-shape") === shapeKey) {
+                    form.classList.add("active");
+                } else {
+                    form.classList.remove("active");
+                }
+            });
+        }
+
+        // klik na kartu – výber + hneď krok 2
+        shapeCards.forEach(function (card) {
+            card.addEventListener("click", function () {
+                shapeCards.forEach(function (c) {
+                    c.classList.remove("selected");
+                });
+                card.classList.add("selected");
+
+                const shapeKey = card.getAttribute("data-shape");
+                const label = card.querySelector(".shape-label")?.textContent?.trim() || "neznámy tvar";
+                updateSelection(shapeKey, label);
+
+                renderDiagramForShape(shapeKey);
+                setStep(2); // hneď prepneme na Krok 2
+            });
+        });
+
+        // tlačidlo „Vymazať výber“ – vráti sa na Krok 1 + zruší výber
+        btnReset.addEventListener("click", function () {
+            shapeCards.forEach(function (c) {
+                c.classList.remove("selected");
+            });
+            updateSelection(null, "žiadny");
+            setStep(1);
+        });
+
+        // tlačidlo „Späť na výber tvaru“ (len v kroku 2)
+        btnBackStep.addEventListener("click", function () {
+            setStep(1);
+        });
+
+        // zatiaľ len info alert pri stlačení „Krok 3 – výpočet“
+        btnNext.addEventListener("click", function () {
+            if (currentStep === 1) {
+                if (!selectedShape) return;
+                renderDiagramForShape(selectedShape);
+                setStep(2);
+            } else if (currentStep === 2) {
+                alert("Krok 3 – výpočet a výber vrstiev Schlüter® systému pripravíme v ďalšej fáze. Teraz už máme tvar aj rozmery strán.");
+            }
+        });
+
+        // inicializácia
+        setStep(1);
+    })();
+</script>
+</body>
+</html>
