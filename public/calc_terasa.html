@@ -10,23 +10,37 @@
       --max-w: 1120px;
       --gap: 16px;
       --hdr-h: 96px;
-      --panel-border: rgba(255, 255, 255, 0.18);
-      --primary: #f59e0b;
-      --primary-dark: #ea580c;
-      --bg-main: radial-gradient(circle at top, #111827 0, #020617 55%, #000 100%);
+      --panel-border: rgba(255, 255, 255, 0.16);
+      --desk-footer-h: 36px;
+      --brand-bg: #050c22;
+      --brand-bg2: #0b1636;
+      --accent-yellow: #fbbf24;
+      --accent-yellow-soft: rgba(251, 191, 36, 0.09);
+      --accent-border: rgba(251, 191, 36, 0.5);
     }
 
-    html, body {
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
     }
 
     body {
-      background: var(--bg-main);
-      color: #e5e7eb;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1b2b68 0, #050c22 55%, #020617 100%);
+      color: #ffffff;
       padding-top: var(--hdr-h);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
     /* HEADER – rovnaký štýl ako entertainment */
@@ -34,8 +48,8 @@
       position: fixed;
       inset: 0 0 auto 0;
       z-index: 1000;
-      background: #020617;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+      background: #0c1f4b;
+      border-bottom: 1px solid var(--panel-border);
     }
 
     .app-header-inner {
@@ -49,14 +63,14 @@
     }
 
     .logo-small {
-      height: 46px;
+      height: 48px;
       margin: 2px auto 6px;
       display: block;
     }
 
     .user-chip {
-      color: #cbd5f5;
-      font-size: 0.9rem;
+      color: #cfe2ff;
+      font-size: 0.95rem;
       margin-bottom: 8px;
       text-align: center;
     }
@@ -69,9 +83,9 @@
       height: 44px;
       display: grid;
       place-content: center;
+      border: 1px solid #ffffff33;
       border-radius: 10px;
-      border: 1px solid rgba(248, 250, 252, 0.18);
-      color: #e5e7eb;
+      color: #e7eefc;
       background: transparent;
       cursor: pointer;
     }
@@ -81,34 +95,7 @@
       height: 22px;
     }
 
-    /* BOČNÉ ŽLTO-ČIERNE PÁSY – PC only */
-    .side-stripe {
-      display: none;
-    }
-
-    @media (min-width: 992px) {
-      .side-stripe {
-        display: block;
-        position: fixed;
-        top: var(--hdr-h);
-        bottom: 0;
-        width: 120px;
-        background-image: repeating-linear-gradient(
-          -45deg,
-          #facc15 0,
-          #facc15 10px,
-          #020617 10px,
-          #020617 20px
-        );
-        opacity: 0.45;
-        z-index: 0;
-      }
-
-      .side-stripe.left { left: 0; }
-      .side-stripe.right { right: 0; }
-    }
-
-    /* HLAVNÝ OBSAH */
+    /* LAYOUT */
     .wrap {
       max-width: var(--max-w);
       margin: 0 auto;
@@ -118,416 +105,579 @@
     }
 
     .page-title {
-      margin: 4px 0 2px;
-      font-size: 1rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #9ca3af;
-    }
-
-    h1 {
-      margin: 0 0 6px;
-      font-size: 1.5rem;
-      font-weight: 650;
+      margin: 6px 0 4px;
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
     }
 
     .page-subtitle {
-      margin: 0 0 16px;
-      font-size: 0.85rem;
-      color: #cbd5f5;
+      margin: 0 0 18px;
+      font-size: 0.88rem;
+      color: #e5e7eb;
     }
 
-    .calc-shell {
-      border-radius: 22px;
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), #020617);
-      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.9);
-      padding: 18px 16px 18px;
+    /* Žlto-čierne okraje – „bezpečnostný“ efekt */
+    .safety-stripes {
+      position: fixed;
+      inset: var(--hdr-h) 0 0 0;
+      pointer-events: none;
+      z-index: 0;
+      display: none;
     }
 
     @media (min-width: 992px) {
-      .calc-shell {
-        padding: 22px 22px 20px;
+      .safety-stripes {
+        display: block;
+      }
+
+      .safety-stripes::before,
+      .safety-stripes::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 11vw;
+        max-width: 170px;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          #000000 0,
+          #000000 12px,
+          #facc15 12px,
+          #facc15 24px
+        );
+        opacity: 0.2;
+        filter: blur(1px);
+      }
+
+      .safety-stripes::before {
+        left: 0;
+      }
+
+      .safety-stripes::after {
+        right: 0;
       }
     }
 
-    .calc-header-line {
+    /* HLAVNÝ PANEL KROKU 1 + 2 */
+    .card-shell {
+      background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 18px 16px 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+    }
+
+    @media (min-width: 960px) {
+      .card-shell {
+        padding: 22px 22px 24px;
+      }
+    }
+
+    .step-header-row {
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
       align-items: baseline;
+      justify-content: space-between;
       gap: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
-    .calc-header-left {
-      font-size: 0.8rem;
-      letter-spacing: 0.16em;
+    .step-title-main {
+      font-size: 0.9rem;
       text-transform: uppercase;
+      letter-spacing: 0.08em;
       color: #9ca3af;
     }
 
-    .calc-header-right {
-      font-size: 0.75rem;
-      color: #9ca3af;
-    }
-
-    .step-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 10px;
+    .step-title-main span {
+      display: inline-block;
+      padding: 3px 8px;
       border-radius: 999px;
-      background: rgba(248, 250, 252, 0.06);
+      background: rgba(15, 23, 42, 0.9);
       border: 1px solid rgba(148, 163, 184, 0.6);
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      margin-right: 6px;
     }
 
-    .step-pill span {
-      color: #facc15;
-      font-weight: 600;
+    .step-caption {
+      font-size: 0.8rem;
+      color: #9ca3af;
     }
 
-    .calc-main {
-      display: flex;
-      flex-direction: column;
+    .layout-krok1 {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
       gap: 18px;
     }
 
-    @media (min-width: 992px) {
-      .calc-main {
-        flex-direction: row;
-        align-items: stretch;
-      }
-
-      .calc-col-left {
-        flex: 3;
-      }
-      .calc-col-right {
-        flex: 2;
+    @media (max-width: 900px) {
+      .layout-krok1 {
+        grid-template-columns: minmax(0, 1fr);
       }
     }
 
-    .calc-col-left-title {
-      font-size: 0.88rem;
-      margin-bottom: 10px;
-    }
-
+    /* KARTY TYP KONŠTRUKCIE */
     .type-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 680px) {
       .type-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
       }
     }
 
-    .type-tile {
+    .type-card {
       position: relative;
       border-radius: 18px;
-      padding: 10px 10px 12px;
-      background: radial-gradient(circle at top, rgba(29, 78, 216, 0.22), rgba(15, 23, 42, 0.96));
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      color: #e5e7eb;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      cursor: pointer;
       display: flex;
       flex-direction: column;
-      cursor: pointer;
-      text-align: left;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+      min-height: 176px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease,
+        border-color 0.12s ease, background 0.12s ease;
     }
 
-    .type-tile:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.8);
-      border-color: #fde68a;
+    .type-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 35px rgba(15, 23, 42, 0.85);
+      border-color: rgba(251, 191, 36, 0.6);
     }
 
-    .type-tile-selected {
-      border-color: #facc15;
-      box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.7), 0 18px 34px rgba(15, 23, 42, 0.9);
-      background: radial-gradient(circle at top, rgba(250, 204, 21, 0.25), rgba(15, 23, 42, 0.98));
+    .type-card.selected {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5),
+        0 18px 40px rgba(0, 0, 0, 0.9);
+      background: radial-gradient(circle at top,
+          rgba(250, 204, 21, 0.09) 0,
+          rgba(15, 23, 42, 0.97) 52%);
     }
 
-    .type-thumb {
-      border-radius: 13px;
-      background: #020617;
+    .type-card-img {
+      height: 112px;
       overflow: hidden;
-      height: 90px;
-      margin-bottom: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
     }
 
-    .type-thumb img {
+    .type-card-img img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+      transform: scale(1.04);
     }
 
-    .type-label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #9ca3af;
-      margin-bottom: 2px;
+    .type-card-body {
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 0.8rem;
     }
 
-    .type-title {
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .type-note {
-      font-size: 0.78rem;
-      color: #cbd5f5;
-      line-height: 1.45;
-    }
-
-    .system-chip {
-      margin-top: 6px;
+    .type-chip {
       display: inline-flex;
-      padding: 3px 8px;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
       border-radius: 999px;
-      border: 1px solid rgba(250, 204, 21, 0.5);
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid rgba(148, 163, 184, 0.8);
       font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      color: #fbbf24;
-      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
     }
 
-    /* PRAVÝ INFO PANEL (desktop + tablet) */
-    .info-card {
+    .type-chip span {
+      font-size: 0.7rem;
+    }
+
+    .type-title {
+      font-size: 0.86rem;
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    .type-text {
+      font-size: 0.77rem;
+      color: #d1d5db;
+    }
+
+    /* INFO PANEL VPRAVO */
+    .info-panel {
       border-radius: 18px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), #020617);
-      padding: 12px 12px 12px;
-      font-size: 0.82rem;
-    }
-
-    @media (min-width: 992px) {
-      .info-card {
-        padding: 14px 16px 14px;
-      }
+      padding: 12px 13px 13px;
+      background: radial-gradient(circle at top,
+          rgba(15, 23, 42, 0.9) 0,
+          rgba(15, 23, 42, 0.96) 60%,
+          rgba(3, 7, 18, 0.98) 100%);
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      font-size: 0.8rem;
     }
 
     .info-tabs {
       display: flex;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
     }
 
     .info-tab {
       border-radius: 999px;
-      padding: 3px 9px;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      font-size: 0.7rem;
+      padding: 3px 10px 4px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: #9ca3af;
-      background: rgba(15, 23, 42, 0.9);
+      letter-spacing: 0.12em;
     }
 
     .info-title {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 600;
       margin-bottom: 4px;
     }
 
-    .info-body {
+    .info-text {
       color: #e5e7eb;
-      line-height: 1.4;
-    }
-
-    .info-body p {
-      margin: 4px 0;
+      margin-bottom: 8px;
     }
 
     .info-tip {
-      margin-top: 8px;
-      font-size: 0.76rem;
+      margin-top: 6px;
+      padding: 6px 7px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px dashed rgba(148, 163, 184, 0.7);
       color: #e5e7eb;
-      padding: 7px 8px;
-      border-radius: 10px;
-      background: rgba(15, 23, 42, 0.92);
-      border: 1px dashed rgba(250, 204, 21, 0.6);
     }
 
     .info-current {
-      margin-top: 10px;
+      margin-top: 8px;
       font-size: 0.78rem;
-      color: #9ca3af;
+      color: #facc15;
     }
 
     .info-current span {
-      color: #facc15;
-      font-weight: 600;
-    }
-
-    /* SPODNÉ TLAČIDLÁ */
-    .bottom-actions {
-      margin-top: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    @media (min-width: 640px) {
-      .bottom-actions {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
-
-    .btn-line,
-    .btn-primary {
-      border-radius: 999px;
-      padding: 10px 16px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1px solid transparent;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-
-    .btn-line {
-      background: #020617;
-      border-color: rgba(148, 163, 184, 0.9);
       color: #e5e7eb;
     }
 
-    .btn-line:hover {
-      background: #0b1120;
-    }
-
-    .btn-primary {
-      flex: 1;
-      background: linear-gradient(90deg, #f59e0b, #facc15);
-      color: #111827;
-      box-shadow: 0 10px 20px rgba(180, 83, 9, 0.55);
-      justify-content: center;
-    }
-
-    .btn-primary:hover {
-      filter: brightness(1.03);
-    }
-
-    .btn-primary span {
-      font-size: 1.1rem;
-    }
-
-    .small-print {
-      font-size: 0.7rem;
-      color: #9ca3af;
-      margin-top: 10px;
-    }
-
-    /* ===== MOBILE POPUP S POPISOM VÝBERU ===== */
-    .mobile-info-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.92);
-      display: none;
-      z-index: 1500;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .mobile-info-modal.is-open {
+    /* ACTIONS – spodný rad v kroku 1 */
+    .actions-row {
+      margin-top: 16px;
       display: flex;
-    }
-
-    .mobile-info-panel {
-      width: 100%;
-      max-width: 480px;
-      background: radial-gradient(circle at top, #0b1120, #020617);
-      border-radius: 18px 18px 0 0;
-      border-top: 1px solid rgba(148, 163, 184, 0.6);
-      border-inline: 1px solid rgba(148, 163, 184, 0.4);
-      padding: 14px 14px 12px;
-      box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.9);
-    }
-
-    .mobile-info-handle {
-      width: 40px;
-      height: 4px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.7);
-      margin: 0 auto 8px;
-    }
-
-    .mobile-info-header {
-      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
+      border-top: 1px solid rgba(148, 163, 184, 0.35);
+      padding-top: 10px;
     }
 
-    .mobile-info-name {
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    .mobile-info-system {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: #facc15;
-    }
-
-    .mobile-info-text {
-      font-size: 0.8rem;
-      color: #e5e7eb;
-      margin: 6px 0 10px;
-      line-height: 1.45;
-    }
-
-    .mobile-info-close {
+    .btn-inline {
       border-radius: 999px;
-      width: 30px;
-      height: 30px;
-      border: 1px solid rgba(148, 163, 184, 0.9);
-      background: transparent;
+      padding: 7px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.96);
       color: #e5e7eb;
-      display: grid;
-      place-content: center;
+      font-size: 0.78rem;
       cursor: pointer;
-      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .mobile-info-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 8px;
+    .btn-inline span {
+      font-size: 0.85rem;
     }
 
-    @media (min-width: 480px) {
-      .mobile-info-actions {
-        flex-direction: row;
+    .btn-primary {
+      border-radius: 999px;
+      padding: 9px 18px;
+      border: none;
+      background: linear-gradient(90deg, #f59e0b, #facc15);
+      color: #111827;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 22px rgba(251, 191, 36, 0.45);
+      min-width: 210px;
+      justify-content: center;
+      transition: transform 0.1s ease, box-shadow 0.1s ease,
+        filter 0.1s ease;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: default;
+      box-shadow: none;
+      filter: grayscale(0.4);
+    }
+
+    .btn-primary:not(:disabled):active {
+      transform: translateY(1px);
+      box-shadow: 0 5px 16px rgba(251, 191, 36, 0.4);
+    }
+
+    /* === KROK 2 – tvar a rozmery === */
+    .step2-shell {
+      margin-top: 26px;
+      background: radial-gradient(circle at top,
+          rgba(15, 23, 42, 0.96) 0,
+          rgba(3, 7, 18, 0.98) 55%);
+      border-radius: 22px;
+      padding: 18px 16px 20px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+    }
+
+    @media (min-width: 960px) {
+      .step2-shell {
+        padding: 22px 22px 24px;
       }
     }
 
-    .mobile-info-actions .btn-primary {
+    .step2-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.3fr) minmax(0, 2.2fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .step2-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .shape-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 640px) {
+      .shape-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .shape-card {
+      position: relative;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 10px 10px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease,
+        border-color 0.1s ease, background 0.1s ease;
+    }
+
+    .shape-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.7);
+    }
+
+    .shape-card.selected {
+      border-color: rgba(251, 191, 36, 0.7);
+      background: radial-gradient(circle at top,
+          rgba(250, 204, 21, 0.12) 0,
+          rgba(15, 23, 42, 0.97) 60%);
+      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
+    }
+
+    .shape-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .shape-note {
+      font-size: 0.75rem;
+      color: #d1d5db;
+    }
+
+    .shape-figure {
+      margin-top: 4px;
+      border-radius: 12px;
+      background: radial-gradient(circle at top, #111827 0, #020617 60%);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      padding: 10px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shape-rect {
+      width: 80%;
+      max-width: 190px;
+      aspect-ratio: 4/3;
+      border-radius: 8px;
+      border: 2px solid rgba(251, 191, 36, 0.9);
+      position: relative;
+    }
+
+    .side-label {
+      position: absolute;
+      font-size: 0.7rem;
+      padding: 2px 5px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(251, 191, 36, 0.7);
+      color: #facc15;
+    }
+
+    .side-label.top {
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .side-label.right {
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .side-label.bottom {
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .side-label.left {
+      left: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* FORMULÁR ROZMEROV */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      font-size: 0.8rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      color: #e5e7eb;
+    }
+
+    .field small {
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
+
+    .field input {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      padding: 7px 10px;
+      font-size: 0.84rem;
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: rgba(251, 191, 36, 0.9);
+      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
+    }
+
+    .dim-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dim-row .field {
       flex: 1;
     }
 
-    /* modal sa zobrazuje len na mobile / menšie tablety */
-    @media (min-width: 992px) {
-      .mobile-info-modal {
-        display: none !important;
+    .pill-info {
+      margin-top: 6px;
+      font-size: 0.73rem;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      color: #e5e7eb;
+    }
+
+    .summary-box {
+      margin-top: 10px;
+      padding: 9px 10px;
+      border-radius: 14px;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: 0.8rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .summary-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .summary-label {
+      color: #9ca3af;
+    }
+
+    .summary-value {
+      font-weight: 600;
+      color: #fbbf24;
+    }
+
+    .step2-actions {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* FOOTER INFO */
+    footer {
+      font-size: 0.72rem;
+      color: #cbd5f5;
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    footer .legal {
+      font-size: 0.67rem;
+      margin-top: 3px;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 600px) {
+      .page-title {
+        font-size: 1.15rem;
+      }
+
+      .page-subtitle {
+        font-size: 0.82rem;
       }
     }
   </style>
@@ -538,359 +688,297 @@
     <div class="app-header-inner">
       <button class="icon-btn" id="backBtn" aria-label="Späť">
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path
+            d="M15 18l-6-6 6-6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
         </svg>
       </button>
-      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small" />
+      <img
+        src="logo_lc.jpg"
+        alt="Lištové centrum"
+        class="logo-small"
+      />
       <div class="user-chip" id="userChip">Prihlásený:</div>
     </div>
   </header>
 
-  <!-- BOČNÉ ŽLTO-ČIERNE PÁSY (PC) -->
-  <div class="side-stripe left" aria-hidden="true"></div>
-  <div class="side-stripe right" aria-hidden="true"></div>
+  <!-- Bezpečnostné žlto-čierne pásy po bokoch (PC) -->
+  <div class="safety-stripes" aria-hidden="true"></div>
 
   <!-- MAIN -->
   <main class="wrap">
-    <div class="page-title">Lištobook · technická kalkulačka</div>
-    <h1>Schlüter® terasa – kalkulačka</h1>
+    <h1 class="page-title">Schlüter® terasa – kalkulačka</h1>
     <p class="page-subtitle">
-      Krok 1 z 3 – vyberte typ balkóna alebo terasy. Potom zvolíme tvar a doplníme rozmery strán.
+      Krok 1 a 2 z 3 – vyberte typ balkóna alebo terasy, potom zvoľte tvar a doplňte rozmery strán.
     </p>
 
-    <section class="calc-shell">
-      <div class="calc-header-line">
-        <div class="calc-header-left">
-          <span class="step-pill"><span>Krok 1</span> · výber typu konštrukcie</span>
+    <!-- KROK 1 – výber typu konštrukcie -->
+    <section class="card-shell" id="step1">
+      <div class="step-header-row">
+        <div class="step-title-main">
+          <span>Krok 1</span> Výber typu konštrukcie
         </div>
-        <div class="calc-header-right">
-          <strong>Intuitívny výber</strong> – stačí kliknúť na obrázok, ktorý sa najviac podobá vašej situácii.
+        <div class="step-caption">
+          Intuitívny výber – stačí kliknúť na obrázok, ktorý sa najviac podobá vašej situácii.
         </div>
       </div>
 
-      <div class="calc-main">
-        <!-- ĽAVÁ STRANA – výber typu -->
-        <div class="calc-col-left">
-          <div class="calc-col-left-title">
-            Vyberte typ balkóna alebo terasy.<br/>
-            Stačí sa pozrieť na dom z boku – ako na fotke.
-          </div>
-
-          <div class="type-grid" id="typeGrid">
-            <!-- 1: Prekrytá terasa / zimná záhrada -->
-            <button type="button"
-              class="type-tile"
-              data-type-id="zimna"
+      <div class="layout-krok1">
+        <!-- ĽAVO – 4 typy -->
+        <div>
+          <p style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
+            Vyberte typ balkóna alebo terasy. Stačí sa pozrieť na dom z boku – ako na fotke.
+          </p>
+          <div class="type-grid" id="constructionGrid">
+            <!-- 1. prekrytá terasa / zimná záhrada -->
+            <article
+              class="type-card"
+              data-type="covered-terrace"
+              data-label="Prekrytá terasa / zimná záhrada"
             >
-              <div class="type-thumb">
+              <div class="type-card-img">
                 <img src="img/terasa-zimna-zahrada.jpg" alt="Prekrytá terasa / zimná záhrada" />
               </div>
-              <div class="type-label">Systém terasa / balkón</div>
-              <div class="type-title">Prekrytá terasa / zimná záhrada</div>
-              <div class="type-note">
-                Konštrukcia nad priestorom alebo pivnicou. Zasklená alebo pevne zastrešená terasa.
+              <div class="type-card-body">
+                <div class="type-chip">
+                  <span>Schlüter® systém</span> terasa / balkón
+                </div>
+                <div class="type-title">Prekrytá terasa / zimná záhrada</div>
+                <div class="type-text">
+                  Konštrukcia nad priestorom alebo pivnicou. Zasklená alebo pevne zastrešená terasa.
+                </div>
               </div>
-              <div class="system-chip">strešná terasa</div>
-            </button>
+            </article>
 
-            <!-- 2: Terasa na poschodí -->
-            <button type="button"
-              class="type-tile"
-              data-type-id="poschodie"
+            <!-- 2. terasa na poschodí nad obytnou miestnosťou -->
+            <article
+              class="type-card"
+              data-type="terrace-over-room"
+              data-label="Terasa na poschodí"
             >
-              <div class="type-thumb">
+              <div class="type-card-img">
                 <img src="img/terasa-poschodie.jpg" alt="Terasa na poschodí" />
               </div>
-              <div class="type-label">Systém terasa / balkón</div>
-              <div class="type-title">Terasa na poschodí</div>
-              <div class="type-note">
-                Otvorená terasa nad obytnou miestnosťou – citlivá strešná konštrukcia.
+              <div class="type-card-body">
+                <div class="type-chip">
+                  <span>Schlüter® systém</span> strešná terasa
+                </div>
+                <div class="type-title">Terasa na poschodí</div>
+                <div class="type-text">
+                  Otvorená terasa nad obytnou miestnosťou – citlivá strešná konštrukcia.
+                </div>
               </div>
-              <div class="system-chip">strešná terasa</div>
-            </button>
+            </article>
 
-            <!-- 3: Terasa pri dome na teréne -->
-            <button type="button"
-              class="type-tile"
-              data-type-id="teren"
+            <!-- 3. terasa pri dome na teréne -->
+            <article
+              class="type-card"
+              data-type="ground-terrace"
+              data-label="Terasa pri dome na teréne"
             >
-              <div class="type-thumb">
+              <div class="type-card-img">
                 <img src="img/terasa-pri-dome.jpg" alt="Terasa pri dome na teréne" />
               </div>
-              <div class="type-label">Terasa na teréne</div>
-              <div class="type-title">Terasa pri dome na teréne</div>
-              <div class="type-note">
-                Terasa na zemi, bez priestoru pod ňou. Ideálne napríklad pri rodinnom dome.
+              <div class="type-card-body">
+                <div class="type-chip">
+                  <span>Terasa na teréne</span>
+                </div>
+                <div class="type-title">Terasa pri dome na teréne</div>
+                <div class="type-text">
+                  Terasa na zemi, bez priestoru pod ňou. Ideálne napríklad pri rodinnom dome.
+                </div>
               </div>
-              <div class="system-chip">terasa na teréne</div>
-            </button>
+            </article>
 
-            <!-- 4: Vysunutý balkón -->
-            <button type="button"
-              class="type-tile"
-              data-type-id="balkon"
+            <!-- 4. vysunutý balkón -->
+            <article
+              class="type-card"
+              data-type="balcony-cantilever"
+              data-label="Vysunutý balkón"
             >
-              <div class="type-thumb">
+              <div class="type-card-img">
                 <img src="img/balkon-vysunuty.jpg" alt="Vysunutý balkón" />
               </div>
-              <div class="type-label">Balkón</div>
-              <div class="type-title">Vysunutý balkón (konzola)</div>
-              <div class="type-note">
-                Balkón odvetraný zospodu – typická konzolová doska. Priame vystavenie dažďu a mrazu.
+              <div class="type-card-body">
+                <div class="type-chip">
+                  <span>Balkón</span>
+                </div>
+                <div class="type-title">Vysunutý balkón (konzola)</div>
+                <div class="type-text">
+                  Balkón odvetraný zospodu – typická konzolová doska. Priame vystavenie dažďu a mrazu.
+                </div>
               </div>
-              <div class="system-chip">balkón</div>
-            </button>
+            </article>
           </div>
         </div>
 
-        <!-- PRAVÁ STRANA – vysvetlenie (PC / tablet) -->
-        <aside class="calc-col-right">
-          <div class="info-card" id="infoCard">
-            <div class="info-tabs">
-              <span class="info-tab">Schlüter® systém</span>
-              <span class="info-tab">Terasa / balkón</span>
-            </div>
-            <div class="info-title" id="infoTitle">
-              Čo práve nastavujeme?
-            </div>
-            <div class="info-body" id="infoText">
-              <p>
-                V prvom kroku si len vyberieme typ konštrukcie – či ide o terasu na
-                poschodí, strešnú terasu alebo vysunutý balkón.
-              </p>
-              <p>
-                Podľa výberu potom kalkulačka navrhne vhodnú skladbu systému Schlüter®.
-              </p>
-            </div>
-            <div class="info-tip" id="infoTip">
-              <strong>Tip:</strong> Ak si nie ste istí, kliknite na možnosť, ktorá sa
-              najviac podobá vašej stavbe. Zvyšok upresníme v ďalších krokoch priamo
-              v Lištovom centre individuálne.
-            </div>
-            <div class="info-current">
-              Aktuálne zvolený typ: <span id="currentTypeLabel">žiadny</span>
-            </div>
+        <!-- PRAVO – info panel -->
+        <aside class="info-panel" aria-label="Informácie k výberu">
+          <div class="info-tabs">
+            <div class="info-tab">Schlüter® systém</div>
+            <div class="info-tab">Terasa / balkón</div>
+          </div>
+          <div class="info-title">Čo práve nastavujeme?</div>
+          <p class="info-text">
+            V prvom kroku len vyberieme typ konštrukcie – teda to, či ide o terasu na poschodí, strešnú terasu
+            alebo vysunutý balkón. Podľa výberu potom kalkulačka navrhne vhodnú skladbu systému Schlüter®.
+          </p>
+          <div class="info-tip">
+            Tip: Ak si nie ste istí, zvoľte možnosť, ktorá sa najviac podobá vašej stavbe.
+            Zvyšok upresníme v ďalších krokoch priamo v Lištovom centre.
+          </div>
+          <div class="info-current">
+            Aktuálne zvolený typ: <span id="currentTypeLabel">žiadny</span>
           </div>
         </aside>
       </div>
 
-      <!-- spodné tlačidlá -->
-      <div class="bottom-actions">
-        <button type="button" class="btn-line" id="clearSelectionBtn">
-          ✕ Vymazať výber
+      <div class="actions-row">
+        <button type="button" class="btn-inline" id="clearSelectionBtn">
+          <span>✕</span> Vymazať výber
         </button>
-        <button type="button" class="btn-primary" id="nextStepBtn">
-          Pokračovať na krok 2 <span>›</span>
+        <button type="button" class="btn-primary" id="goToStep2Btn" disabled>
+          Pokračovať na krok 2 ›
         </button>
-      </div>
-
-      <div class="small-print">
-        Prepočet pripravuje Lištové centrum (listobook.sk). Krok 2 a 3 budú pracovať
-        s tvarom a rozmermi terasy – túto logiku doplníme v ďalšom kroku.
       </div>
     </section>
+
+    <!-- KROK 2 – tvar terasy a rozmery -->
+    <section class="step2-shell" id="step2">
+      <div class="step-header-row">
+        <div class="step-title-main">
+          <span>Krok 2</span> Tvar terasy a rozmery
+        </div>
+        <div class="step-caption">
+          Vyberte tvar pôdorysu a doplňte dĺžky strán. Výsledok použijeme na výpočet m² a bežných metrov.
+        </div>
+      </div>
+
+      <div class="step2-layout">
+        <!-- ĽAVÁ strana – výber tvaru -->
+        <div>
+          <p style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
+            Stačí si predstaviť terasu zhora – ako na náčrte. Kliknite na tvar, ktorý sa najviac podobá vašej terase.
+          </p>
+
+          <div class="shape-grid" id="shapeGrid">
+            <!-- ŠTVOREC -->
+            <article class="shape-card selected" data-shape="square">
+              <div class="shape-title">Štvorec</div>
+              <div class="shape-note">
+                Približne rovnaká dĺžka aj šírka. Stačí jedna dĺžka – strana A.
+              </div>
+              <div class="shape-figure">
+                <div class="shape-rect" aria-hidden="true">
+                  <span class="side-label top">A</span>
+                  <span class="side-label right">A</span>
+                  <span class="side-label bottom">A</span>
+                  <span class="side-label left">A</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- OBDĹŽNIK -->
+            <article class="shape-card" data-shape="rectangle">
+              <div class="shape-title">Obdĺžnik / „kosoštvorec“</div>
+              <div class="shape-note">
+                Terasa natiahnutá do dĺžky – dve rôzne strany A a B. Aj mierne „šikmý“ pôdorys sa ráta.
+              </div>
+              <div class="shape-figure">
+                <div class="shape-rect" aria-hidden="true">
+                  <span class="side-label top">A</span>
+                  <span class="side-label right">B</span>
+                  <span class="side-label bottom">A</span>
+                  <span class="side-label left">B</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- PRAVÁ strana – rozmery + výpočet -->
+        <div>
+          <div class="field-group">
+            <div class="field">
+              <label for="dimShapeInfo">Aktuálny tvar</label>
+              <small id="dimShapeInfo">Štvorec – všetky strany A sú rovnaké.</small>
+            </div>
+
+            <div class="dim-row">
+              <div class="field">
+                <label for="sideA">Strana A (m)</label>
+                <input
+                  type="number"
+                  id="sideA"
+                  inputmode="decimal"
+                  step="0.1"
+                  min="0"
+                  placeholder="napr. 4,0"
+                />
+                <small>Zapíšte čistú dĺžku bez presahu. Desatinnú čiarku môžete písať bodkou.</small>
+              </div>
+              <div class="field" id="fieldSideB">
+                <label for="sideB">Strana B (m)</label>
+                <input
+                  type="number"
+                  id="sideB"
+                  inputmode="decimal"
+                  step="0.1"
+                  min="0"
+                  placeholder="napr. 5,2"
+                />
+                <small>Pri štvorci ju môžete nechať prázdnu – použijeme A.</small>
+              </div>
+            </div>
+
+            <div class="pill-info">
+              Obvod terasy aj plochu vypočítame za vás. Hodnoty zaokrúhlime na jedno desatinné miesto.
+            </div>
+          </div>
+
+          <div class="summary-box" id="dimensionsSummary">
+            <div class="summary-row">
+              <div class="summary-label">Plocha terasy</div>
+              <div class="summary-value"><span id="summaryArea">–</span> m²</div>
+            </div>
+            <div class="summary-row">
+              <div class="summary-label">Obvod (pre ukončovacie lišty)</div>
+              <div class="summary-value"><span id="summaryPerimeter">–</span> bm</div>
+            </div>
+          </div>
+
+          <div class="step2-actions">
+            <!-- späť na krok 1 v rámci jednej stránky -->
+            <button type="button" class="btn-inline" id="backToStep1Btn">
+              ‹ Späť na krok 1
+            </button>
+            <button type="button" class="btn-primary" id="goToStep3Btn">
+              Pokračovať na krok 3 (skladba) ›
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>Prepočet pripravuje <strong>Lištové centrum</strong> (listobook.sk).</div>
+      <div class="legal">
+        Výpočet je orientačný a vychádza z údajov zadaných užívateľom. Presnú skladbu a cenovú ponuku
+        potvrdíme po konzultácii s technikom Lištového centra.
+      </div>
+    </footer>
   </main>
 
-  <!-- MOBILE POPUP S POPISOM VÝBERU -->
-  <div class="mobile-info-modal" id="mobileInfoModal" aria-hidden="true">
-    <div class="mobile-info-panel">
-      <div class="mobile-info-handle"></div>
-      <div class="mobile-info-header">
-        <div>
-          <div class="mobile-info-system" id="mobileInfoSystem"></div>
-          <div class="mobile-info-name" id="mobileInfoName"></div>
-        </div>
-        <button type="button" class="mobile-info-close" id="mobileInfoClose" aria-label="Zavrieť">
-          ×
-        </button>
-      </div>
-      <div class="mobile-info-text" id="mobileInfoText">
-        <!-- doplní JS -->
-      </div>
-      <div class="mobile-info-actions">
-        <button type="button" class="btn-line" id="mobileClearBtn">
-          ✕ Vymazať výber
-        </button>
-        <button type="button" class="btn-primary" id="mobileNextBtn">
-          Pokračovať na krok 2 <span>›</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Globálne skripty -->
+  <!-- Globálne skripty (cookies, config) -->
   <script src="/js/cookies.js"></script>
   <script src="/js/config.js"></script>
 
-  <script>
-    // jednoduchá logika výberu typu + popisy
-    const TYPE_DATA = {
-      zimna: {
-        name: "Prekrytá terasa / zimná záhrada",
-        system: "Systém terasa / balkón · strešná terasa",
-        infoTitle: "Prekrytá terasa / zimná záhrada",
-        text: [
-          "Konštrukcia nad obytným priestorom alebo pivnicou, väčšinou úplne prestrešená alebo zasklená.",
-          "Potrebujeme bezpečnú kombináciu hydroizolácie, drenáže a dilatácií."
-        ],
-        tip: "Pri tomto riešení budeme v ďalších krokoch pracovať so skladbou pre strešné terasy. Finálnu skladbu vždy potvrdí technik Lištového centra."
-      },
-      poschodie: {
-        name: "Terasa na poschodí",
-        system: "Systém terasa / balkón · strešná terasa",
-        infoTitle: "Terasa na poschodí nad obytnou miestnosťou",
-        text: [
-          "Otvorená terasa nad interiérom – dôležitá je správna hydroizolácia a odvádzanie vody.",
-          "Systém Schlüter® chráni konštrukciu pred zatekaním a mrazom."
-        ],
-        tip: "Výberom tejto možnosti nastavíme skladbu pre strešnú terasu. Rozmery a detaily doplníme v ďalších krokoch."
-      },
-      teren: {
-        name: "Terasa pri dome na teréne",
-        system: "Terasa na teréne",
-        infoTitle: "Terasa pri dome na zemi",
-        text: [
-          "Terasa leží priamo na podklade – pod ňou nie je obytná miestnosť.",
-          "Použijeme jednoduchšiu, ale bezpečnú skladbu s drenážou a oddelením od fasády."
-        ],
-        tip: "Tento variant je ideálny pre klasické záhradné terasy pri rodinných domoch."
-      },
-      balkon: {
-        name: "Vysunutý balkón (konzola)",
-        system: "Balkón · konzolová doska",
-        infoTitle: "Vysunutý balkón – konzolová doska",
-        text: [
-          "Balkón vysunutý pred fasádu, „vo vzduchu“. Zospodu je priamo vystavený dažďu a mrazu.",
-          "Systém Schlüter® sa stará o spoľahlivé odvodnenie a ochranu hrán."
-        ],
-        tip: "Pri tomto type budeme voliť najodolnejšiu skladbu, keďže balkón je najviac namáhaný poveternostnými vplyvmi."
-      }
-    };
-
-    const typeButtons = Array.from(document.querySelectorAll(".type-tile"));
-    const infoTitleEl = document.getElementById("infoTitle");
-    const infoTextEl = document.getElementById("infoText");
-    const infoTipEl = document.getElementById("infoTip");
-    const currentTypeLabelEl = document.getElementById("currentTypeLabel");
-
-    const clearBtn = document.getElementById("clearSelectionBtn");
-    const nextStepBtn = document.getElementById("nextStepBtn");
-
-    const mobileModal = document.getElementById("mobileInfoModal");
-    const mobileInfoName = document.getElementById("mobileInfoName");
-    const mobileInfoSystem = document.getElementById("mobileInfoSystem");
-    const mobileInfoText = document.getElementById("mobileInfoText");
-    const mobileCloseBtn = document.getElementById("mobileInfoClose");
-    const mobileClearBtn = document.getElementById("mobileClearBtn");
-    const mobileNextBtn = document.getElementById("mobileNextBtn");
-
-    let selectedTypeId = null;
-
-    function setSelectedType(id) {
-      selectedTypeId = id;
-
-      typeButtons.forEach(btn => {
-        btn.classList.toggle("type-tile-selected", btn.dataset.typeId === id);
-      });
-
-      if (!id || !TYPE_DATA[id]) {
-        infoTitleEl.textContent = "Čo práve nastavujeme?";
-        infoTextEl.innerHTML =
-          "<p>V prvom kroku si len vyberieme typ konštrukcie – či ide o terasu na poschodí, strešnú terasu alebo vysunutý balkón.</p>" +
-          "<p>Podľa výberu potom kalkulačka navrhne vhodnú skladbu systému Schlüter®.</p>";
-        infoTipEl.textContent =
-          "Tip: Ak si nie ste istí, kliknite na možnosť, ktorá sa najviac podobá vašej stavbe. Zvyšok upresníme v ďalších krokoch priamo v Lištovom centre individuálne.";
-        currentTypeLabelEl.textContent = "žiadny";
-        return;
-      }
-
-      const data = TYPE_DATA[id];
-      infoTitleEl.textContent = data.infoTitle;
-      infoTextEl.innerHTML = data.text.map(p => `<p>${p}</p>`).join("");
-      infoTipEl.textContent = data.tip;
-      currentTypeLabelEl.textContent = data.name;
-    }
-
-    function openMobileModal(id) {
-      if (!id || !TYPE_DATA[id]) return;
-      const data = TYPE_DATA[id];
-      mobileInfoName.textContent = data.name;
-      mobileInfoSystem.textContent = data.system;
-      mobileInfoText.innerHTML = data.text.map(p => `<p>${p}</p>`).join("");
-      mobileModal.classList.add("is-open");
-      mobileModal.setAttribute("aria-hidden", "false");
-    }
-
-    function closeMobileModal() {
-      mobileModal.classList.remove("is-open");
-      mobileModal.setAttribute("aria-hidden", "true");
-    }
-
-    // výber typu
-    typeButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.dataset.typeId;
-        setSelectedType(id);
-
-        // na mobile zobrazíme vyskakovacie okno s popisom
-        if (window.matchMedia("(max-width: 991.98px)").matches) {
-          openMobileModal(id);
-        }
-      });
-    });
-
-    // vymazanie výberu
-    clearBtn.addEventListener("click", () => {
-      setSelectedType(null);
-    });
-
-    // mobilné ovládanie – čierne tlačidlo „Vymazať výber“
-    mobileClearBtn.addEventListener("click", () => {
-      clearBtn.click();      // použijeme rovnakú logiku ako na desktope
-      closeMobileModal();
-    });
-
-    // mobilné ovládanie – žlté tlačidlo „Pokračovať na krok 2“
-    mobileNextBtn.addEventListener("click", () => {
-      closeMobileModal();
-      if (nextStepBtn) {
-        nextStepBtn.click(); // prepojenie na existujúcu logiku kroku 2
-      }
-    });
-
-    mobileCloseBtn.addEventListener("click", closeMobileModal);
-
-    // zatvorenie modalu klikom mimo panelu
-    mobileModal.addEventListener("click", (e) => {
-      if (e.target === mobileModal) {
-        closeMobileModal();
-      }
-    });
-
-    // ESC zavrie modal
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeMobileModal();
-      }
-    });
-
-    // zatiaľ len placeholder – skutočný krok 2 doplníme neskôr
-    nextStepBtn.addEventListener("click", () => {
-      if (!selectedTypeId) {
-        alert("Najprv prosím vyberte typ balkóna alebo terasy.");
-        return;
-      }
-      // sem neskôr doplníme prechod na krok 2
-      console.log("Prechod na krok 2 – vybraný typ:", selectedTypeId);
-    });
-
-    // späť tlačidlo – návrat na entertainment alebo inú stránku
-    document.getElementById("backBtn")?.addEventListener("click", () => {
-      history.back();
-    });
-
-    // po načítaní nastavíme default text
-    setSelectedType(null);
-  </script>
+  <!-- Logika kalkulačky (presunutá von) -->
+  <script src="calc_terasa.js"></script>
 </body>
 </html>
