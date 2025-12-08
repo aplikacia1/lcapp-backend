@@ -657,6 +657,173 @@
       justify-content: flex-end;
     }
 
+    /* === KROK 3 – skladba systému === */
+    .step3-shell {
+      margin-top: 26px;
+      background: radial-gradient(circle at top,
+          rgba(15, 23, 42, 0.96) 0,
+          rgba(3, 7, 18, 0.98) 55%);
+      border-radius: 22px;
+      padding: 18px 16px 20px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+    }
+
+    @media (min-width: 960px) {
+      .step3-shell {
+        padding: 22px 22px 24px;
+      }
+    }
+
+    .step3-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 2.4fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .step3-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .note-prep {
+      font-size: 0.74rem;
+      color: #facc15;
+      background: rgba(250, 204, 21, 0.06);
+      border-radius: 10px;
+      border: 1px dashed rgba(250, 204, 21, 0.5);
+      padding: 6px 8px;
+      margin-bottom: 8px;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin-top: 6px;
+    }
+
+    .summary-table th,
+    .summary-table td {
+      padding: 5px 6px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .summary-table th {
+      text-align: left;
+      color: #9ca3af;
+      font-weight: 500;
+      width: 40%;
+    }
+
+    .summary-table td {
+      text-align: right;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .question-block {
+      font-size: 0.8rem;
+      border-radius: 16px;
+      padding: 10px 10px 12px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      margin-bottom: 10px;
+    }
+
+    .question-title {
+      font-size: 0.84rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .question-text {
+      font-size: 0.78rem;
+      color: #d1d5db;
+      margin-bottom: 8px;
+    }
+
+    .drain-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 680px) {
+      .drain-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .drain-option {
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 7px 8px;
+      background: rgba(15, 23, 42, 0.96);
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease,
+        border-color 0.08s ease, background 0.08s ease;
+      font-size: 0.78rem;
+    }
+
+    .drain-option:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.7);
+    }
+
+    .drain-option.selected {
+      border-color: rgba(251, 191, 36, 0.9);
+      background: radial-gradient(circle at top,
+          rgba(250, 204, 21, 0.12) 0,
+          rgba(15, 23, 42, 0.97) 60%);
+      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5);
+    }
+
+    .drain-label {
+      font-weight: 600;
+      color: #fbbf24;
+    }
+
+    .drain-note {
+      color: #d1d5db;
+      font-size: 0.76rem;
+    }
+
+    .recommended-box {
+      border-radius: 16px;
+      padding: 9px 10px;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+
+    .recommended-name {
+      font-weight: 600;
+      color: #fbbf24;
+      margin-bottom: 4px;
+    }
+
+    .recommended-note {
+      font-size: 0.76rem;
+      color: #d1d5db;
+    }
+
+    .other-note {
+      font-size: 0.78rem;
+      color: #e5e7eb;
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 14px;
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      padding: 8px 9px;
+      margin-bottom: 8px;
+    }
+
     /* FOOTER INFO */
     footer {
       font-size: 0.72rem;
@@ -965,6 +1132,100 @@
       </div>
     </section>
 
+    <!-- KROK 3 – skladba systému Schlüter® -->
+    <section class="step3-shell" id="step3">
+      <div class="step-header-row">
+        <div class="step-title-main">
+          <span>Krok 3</span> Skladba systému Schlüter®
+        </div>
+        <div class="step-caption">
+          Tu z niekoľkých jednoduchých otázok vyberieme základnú „zlatú strednú cestu“
+          pre váš balkón alebo terasu.
+        </div>
+      </div>
+
+      <div class="step3-layout">
+        <!-- ĽAVO – prehľad z krokov 1 a 2 -->
+        <div>
+          <p class="note-prep">
+            Poznámka: Táto sekcia je zatiaľ prvá verzia. Začíname vysunutým balkónom – ostatné typy doplníme postupne.
+          </p>
+          <table class="summary-table">
+            <tbody>
+              <tr>
+                <th>Typ konštrukcie</th>
+                <td id="k3Type">–</td>
+              </tr>
+              <tr>
+                <th>Tvar</th>
+                <td id="k3Shape">–</td>
+              </tr>
+              <tr>
+                <th>Plocha</th>
+                <td><span id="k3Area">–</span> m²</td>
+              </tr>
+              <tr>
+                <th>Obvod</th>
+                <td><span id="k3Perimeter">–</span> bm</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PRAVO – otázka + odporúčaná skladba -->
+        <div>
+          <!-- Otázka pre vysunutý balkón -->
+          <div class="question-block" id="balconyQuestion">
+            <div class="question-title">Otázka 1 – ako odteká voda z balkóna?</div>
+            <div class="question-text">
+              Vyberte možnosť, ktorá sa najviac podobá vašej situácii. Podľa toho zvolíme vhodnú skladbu Schlüter®
+              pre vysunutý balkón.
+            </div>
+
+            <div class="drain-grid">
+              <button type="button" class="drain-option" data-drain-option="edge-free">
+                <div class="drain-label">Voda steká cez voľnú hranu</div>
+                <div class="drain-note">
+                  Pod balkónom je voľný priestor / záhrada, voda voľne odkvapkáva na zem.
+                </div>
+              </button>
+
+              <button type="button" class="drain-option" data-drain-option="edge-gutter">
+                <div class="drain-label">Voda ide do žľabu pri hrane</div>
+                <div class="drain-note">
+                  Na hrane balkóna je oplechovanie a žľab, ktorý odvádza dažďovú vodu preč.
+                </div>
+              </button>
+
+              <button type="button" class="drain-option" data-drain-option="internal-drain">
+                <div class="drain-label">Voda odteká do vpustu v podlahe</div>
+                <div class="drain-note">
+                  V podlahe balkóna je vpust (gulička / kanálik), do ktorého sa zbieha voda.
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Text pre ostatné typy – zatiaľ bez otázok -->
+          <div class="other-note" id="otherConstructionNote">
+            Pre terasy a prekryté konštrukcie pripravujeme vlastné otázky a odporúčané skladby.
+            Zatiaľ tu vidíte len základný prehľad z krokov 1 a 2. Na základe týchto údajov vám
+            technik Lištového centra odporučí vhodnú skladbu individuálne.
+          </div>
+
+          <!-- Odporúčaná skladba -->
+          <div class="recommended-box">
+            <div class="summary-label">Navrhovaná skladba (pracovný názov)</div>
+            <div class="recommended-name" id="recommendedName">Zatiaľ nevybraná – zvoľte odtok vody.</div>
+            <div class="recommended-note" id="recommendedNote">
+              Po výbere odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón.
+              Podrobný technický popis a prierezy dostanete v PDF priamo v Lištobooku.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <footer>
       <div>Prepočet pripravuje <strong>Lištové centrum</strong> (listobook.sk).</div>
       <div class="legal">
@@ -978,7 +1239,7 @@
   <script src="/js/cookies.js"></script>
   <script src="/js/config.js"></script>
 
-  <!-- Logika kalkulačky (presunutá von) -->
+  <!-- Logika kalkulačky -->
   <script src="calc_terasa.js"></script>
 </body>
 </html>

@@ -46,12 +46,27 @@
     .nav-track{display:flex;gap:var(--nav-gap);overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;justify-content:center}
     .nav-track::-webkit-scrollbar{display:none}
     .pill{
+      position:relative;
       flex:0 0 calc((100% - (var(--nav-gap) * (var(--visible) - 1))) / var(--visible));
       height:38px;padding:8px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.35);
       background:#fff;color:#0c1f4b;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:8px
     }
     .pill-danger{background:#ff4d4d;color:#fff;border-color:#ff4d4d}
     @media (min-width:768px){.nav-track{overflow:visible}.pill{flex:0 0 auto;width:auto!important}}
+
+    /* malý žltý badge na pilulkách (napr. Správy) */
+    .pill-badge{
+      margin-left:4px;
+      min-width:18px;height:18px;padding:0 6px;
+      border-radius:999px;
+      background:#ffcc00;
+      color:#111;
+      font-weight:800;
+      font-size:12px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+    }
 
     /* off-canvas (mobil – viz triedy na body) */
     @media (max-width:767.98px){
@@ -450,6 +465,13 @@
           <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
           <button class="pill" id="funBtn">🎲 Voľný čas</button>
           <button class="pill" id="rateBtn">⭐ Hodnotenie tovarov</button>
+          <!-- NOVÉ: kalkulačky -->
+          <button class="pill" id="calcBtn">📐 Kalkulačky</button>
+          <!-- Správy + žltý badge -->
+          <button class="pill" id="messagesBtn">
+            💬 Správy
+            <span id="messagesBadge" class="pill-badge"></span>
+          </button>
           <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť sa</button>
         </div>
       </nav>
@@ -614,7 +636,7 @@
     }
   </script>
 
-  <!-- init: výška hlavičky, navigácia, hamburgery, bannery -->
+  <!-- init: výška hlavičky, navigácia, hamburgery, bannery + badge Správy -->
   <script>
     (function(){
       const stack = document.getElementById('toastStack');
@@ -659,7 +681,41 @@
       document.getElementById('accountBtn')?.addEventListener('click', ()=> go('dashboard.html'));
       document.getElementById('funBtn')?.addEventListener('click', ()=> go('entertainment.html'));
       document.getElementById('rateBtn')?.addEventListener('click', ()=> go('catalog.html'));
+      document.getElementById('calcBtn')?.addEventListener('click', ()=> go('calc_terasa.html'));
+      document.getElementById('messagesBtn')?.addEventListener('click', ()=> go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', ()=> go('index.html'));
+
+      // žltý badge pre Správy – načítanie neprečítaných
+      const badgeEl = document.getElementById('messagesBadge');
+      async function refreshMessagesUnread(){
+        if (!email || !badgeEl) return;
+        try{
+          const r = await fetch(`/api/messages/conversations/${encodeURIComponent(email)}`);
+          if (!r.ok) return;
+          const list = await r.json();
+          let total = 0;
+          (list || []).forEach(item => { total += item.unread || 0; });
+          if (total > 0){
+            badgeEl.textContent = total > 9 ? '9+' : String(total);
+            badgeEl.style.display = 'inline-flex';
+            badgeEl.setAttribute(
+              'aria-label',
+              total === 1 ? '1 neprečítaná správa' : `${total} neprečítaných správ`
+            );
+          } else {
+            badgeEl.textContent = '';
+            badgeEl.style.display = 'none';
+            badgeEl.removeAttribute('aria-label');
+          }
+        }catch{}
+      }
+      refreshMessagesUnread();
+      setInterval(() => {
+        if (!document.hidden) refreshMessagesUnread();
+      }, 5000);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshMessagesUnread();
+      });
 
       // hamburgery – offcanvas cez triedy na <body>
       const burgerBtn  = document.getElementById('burgerBtn');
