@@ -25,12 +25,104 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- PARAMETRE MATERIÁLOV (orientačné) ---
-  const MATERIAL_PARAMS = {
-    membraneCoveragePerRoll: 10, // m² na 1 rolu drenážnej/separačnej rohože
-    adhesiveCoveragePerBag: 5,   // m² na 1 vrece lepidla (Sopro/Mapei)
-    profileLength: 2.5           // bm na 1 kus ukončovacieho profilu
+  // ---------------------------------------------------------------------------
+  // PARAMETRE MATERIÁLOV – podľa technických listov (zlaté stredné cesty)
+  // ---------------------------------------------------------------------------
+  // Namiesto jedného MATERIAL_PARAMS máme malú databázu + balíčky pre balkóny.
+
+  const MATERIAL_DB = {
+    DITRA: {
+      key: "DITRA",
+      label: "Schlüter®-DITRA",
+      // bežná rola cca 30 m² (1,0 × 30 m)
+      rollAreaM2: 30
+    },
+    DITRA_DRAIN_4: {
+      key: "DITRA_DRAIN_4",
+      label: "Schlüter®-DITRA-DRAIN 4",
+      // podľa TL: 1,0 × 12,5 m ≈ 12,5 m²
+      rollAreaM2: 12.5
+    },
+    BARA_RT: {
+      key: "BARA_RT",
+      label: "Schlüter®-BARA-RT",
+      pieceLengthBm: 2.5
+    },
+    BARA_RTKE: {
+      key: "BARA_RTKE",
+      label: "Schlüter®-BARA-RTKE",
+      pieceLengthBm: 2.5
+    },
+    BARIN: {
+      key: "BARIN",
+      label: "Schlüter®-BARIN (žľab)",
+      // orientačne 2,0 m segmenty žľabu
+      pieceLengthBm: 2.0
+    },
+    ADHESIVE: {
+      key: "ADHESIVE",
+      label: "Lepidlo (Sopro / Mapei)",
+      // orientačne 1 vrece ≈ 5 m² (izolácia + lepenie dlažby)
+      coverageM2PerBag: 5
+    }
   };
+
+  // „Balíčky“ – zlaté stredné cesty pre vysunutý balkón
+  const BALCONY_SYSTEMS = {
+    // 1) voda cez voľnú hranu
+    "edge-free": {
+      key: "edge-free",
+      membraneKey: "DITRA_DRAIN_4",
+      profileKey: "BARA_RT",
+      gutterKey: null,
+      drainKey: null
+    },
+    // 2) voda do žľabu pri hrane
+    "edge-gutter": {
+      key: "edge-gutter",
+      membraneKey: "DITRA_DRAIN_4",
+      profileKey: "BARA_RTKE",
+      gutterKey: "BARIN",
+      drainKey: null
+    },
+    // 3) voda do vnútorného vpustu
+    "internal-drain": {
+      key: "internal-drain",
+      // tu môžeme voliť DITRA alebo DITRA-DRAIN; berieme DITRA ako základ
+      membraneKey: "DITRA",
+      profileKey: "BARA_RT",
+      gutterKey: null,
+      drainKey: "KERDI_DRAIN" // zatiaľ len informačne
+    }
+  };
+
+  function getMaterial(key) {
+    return key ? MATERIAL_DB[key] || null : null;
+  }
+
+  function computeRollCount(materialKey, neededAreaM2) {
+    const mat = getMaterial(materialKey);
+    if (!mat || !mat.rollAreaM2 || !neededAreaM2 || neededAreaM2 <= 0) {
+      return null;
+    }
+    return Math.max(1, Math.ceil(neededAreaM2 / mat.rollAreaM2));
+  }
+
+  function computePiecesByLength(materialKey, neededBm) {
+    const mat = getMaterial(materialKey);
+    if (!mat || !mat.pieceLengthBm || !neededBm || neededBm <= 0) {
+      return null;
+    }
+    return Math.max(1, Math.ceil(neededBm / mat.pieceLengthBm));
+  }
+
+  function computeAdhesiveBags(neededAreaM2) {
+    const mat = MATERIAL_DB.ADHESIVE;
+    if (!mat || !mat.coverageM2PerBag || !neededAreaM2 || neededAreaM2 <= 0) {
+      return null;
+    }
+    return Math.max(1, Math.ceil(neededAreaM2 / mat.coverageM2PerBag));
+  }
 
   // --- Spoločný stav ---
   const state = {
@@ -300,40 +392,50 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // výpočet – orientačné hodnoty
-    const memArea = area;
-    const memRolls = Math.max(
-      1,
-      Math.ceil(memArea / MATERIAL_PARAMS.membraneCoveragePerRoll)
-    );
-    const profilesBm = per;
-    const profilesCount = Math.max(
-      1,
-      Math.ceil(profilesBm / MATERIAL_PARAMS.profileLength)
-    );
-    const adhesiveBags = Math.max(
-      1,
-      Math.ceil(area / MATERIAL_PARAMS.adhesiveCoveragePerBag)
-    );
+    const system = BALCONY_SYSTEMS[state.drainOption];
+    if (!system) {
+      resetBom();
+      return;
+    }
+
+    // výpočet – už podľa konkrétneho systému
+    const memRolls = computeRollCount(system.membraneKey, area);
+    const profileCount = computePiecesByLength(system.profileKey, per);
+    const adhesiveBags = computeAdhesiveBags(area);
 
     bomAreaEl.textContent = area.toFixed(1).replace(".", ",");
-    bomMembraneAreaEl.textContent =
-      memArea.toFixed(1).replace(".", ",");
-    bomMembraneRollsEl.textContent = String(memRolls);
-    bomPerimeterEl.textContent =
-      profilesBm.toFixed(1).replace(".", ",");
-    bomProfilesCountEl.textContent = String(profilesCount);
-    bomAdhesiveBagsEl.textContent = String(adhesiveBags);
 
+    if (memRolls != null) {
+      bomMembraneAreaEl.textContent =
+        area.toFixed(1).replace(".", ",");
+      bomMembraneRollsEl.textContent = String(memRolls);
+    } else {
+      bomMembraneAreaEl.textContent = "–";
+      bomMembraneRollsEl.textContent = "–";
+    }
+
+    if (profileCount != null) {
+      bomPerimeterEl.textContent =
+        per.toFixed(1).replace(".", ",");
+      bomProfilesCountEl.textContent = String(profileCount);
+    } else {
+      bomPerimeterEl.textContent = "–";
+      bomProfilesCountEl.textContent = "–";
+    }
+
+    bomAdhesiveBagsEl.textContent =
+      adhesiveBags != null ? String(adhesiveBags) : "–";
+
+    // Text – jemné vysvetlenie podľa variantu
     if (state.drainOption === "edge-free") {
       bomNoteEl.textContent =
-        "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany. Drenážna rohož pokrýva celú plochu, ukončovacie profily rátame po obvode bez styku so stenou. Lepidlo je uvedené orientačne, značku (Sopro / Mapei) si zvolíte pri ponuke.";
+        "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany. Drenážna rohož Schlüter®-DITRA-DRAIN pokrýva celú plochu, ukončovacie profily BARA-RT rátame po obvode bez styku so stenou. Lepidlo (Sopro / Mapei) je uvedené orientačne.";
     } else if (state.drainOption === "edge-gutter") {
       bomNoteEl.textContent =
-        "Výpočet je prispôsobený balkónu s oplechovaním a žľabom. Profily budú nadväzovať na oplechovanie, plochu drenážnej rohože rátame v celej ploche, lepilo je orientačné (Sopro / Mapei).";
+        "Výpočet je prispôsobený balkónu s oplechovaním a žľabom. Profily BARA-RTKE nadväzujú na oplechovanie a nesú žľab Schlüter®-BARIN. Drenážna rohož DITRA-DRAIN pokrýva celú plochu, lepidlo je uvedené orientačne (Sopro / Mapei).";
     } else if (state.drainOption === "internal-drain") {
       bomNoteEl.textContent =
-        "Pre balkón s vnútorným vpustom rátame plochu pre drenážnu rohož a orientačné množstvo lepidla. Detaily spádovania k vpustu a napojenia na odtokové prvky doplníme v PDF podklade.";
+        "Pre balkón s vnútorným vpustom rátame plochu pre kontaktnú izoláciu a oddeľovaciu rohož Schlüter®-DITRA a orientačné množstvo lepidla. Detaily spádovania k vpustu a napojenia na prvky KERDI-DRAIN doplníme v PDF podklade.";
     } else {
       bomNoteEl.textContent =
         "Hodnoty sú orientačné. Presný výpočet a konkrétne skladby doplníme v PDF podklade po konzultácii s technikom Lištového centra.";
@@ -361,7 +463,8 @@ document.addEventListener("DOMContentLoaded", () => {
     state.perimeter = res.perimeter;
 
     const isLShape = state.shapeKey === "l-shape";
-    const lComplete = isLShape &&
+    const lComplete =
+      isLShape &&
       ["A", "B", "C", "D", "E", "F"].every((k) => dims[k] != null);
 
     if (summaryAreaEl) {
@@ -538,17 +641,17 @@ document.addEventListener("DOMContentLoaded", () => {
             recommendedName.textContent =
               "Vysunutý balkón s voľnou hranou – systém Schlüter®-BARRA + drenážny koberec.";
             recommendedNote.textContent =
-              "Základná skladba pre balkóny, kde voda voľne odkvapkáva z hrany. Odporúčame kombináciu ukončovacích profilov BARRA, drenážnej rohože DITRA-DRAIN a bezpečného spádu smerom od steny.";
+              "Základná skladba pre balkóny, kde voda voľne odkvapkáva z hrany. Odporúčame kombináciu ukončovacích profilov BARRA / BARA-RT, drenážnej rohože DITRA-DRAIN a bezpečného spádu smerom od steny.";
           } else if (opt === "edge-gutter") {
             recommendedName.textContent =
               "Balkón s oplechovaním a odkvapovým žľabom – systém Schlüter®-BARIN.";
             recommendedNote.textContent =
-              "Skladba vhodná pre balkóny, kde je voda odvádzaná do žľabu pri hrane. Profily BARIN umožnia napojenie na oplechovanie, doplnené o drenážne vrstvy a spoľahlivé hydroizolácie.";
+              "Skladba vhodná pre balkóny, kde je voda odvádzaná do žľabu pri hrane. Profily BARA-RTKE vytvárajú okapovú hranu a nesú žľab BARIN, pod ktorým je drenážna rohož DITRA-DRAIN.";
           } else if (opt === "internal-drain") {
             recommendedName.textContent =
               "Balkón s vnútorným vpustom – kombinácia Schlüter®-KERDI a bodového odtoku.";
             recommendedNote.textContent =
-              "Pre balkóny s odtokom do vpustu v podlahe volíme skladbu so spádovaním smerom k vpustu a tesným napojením na odtokové prvky. Detail vám pripravíme v PDF výstupe.";
+              "Pre balkóny s odtokom do vpustu v podlahe volíme skladbu so spádovaním smerom k vpustu, kontaktnou izoláciou KERDI, oddeľovacou rohožou DITRA / DITRA-DRAIN a prvkami KERDI-DRAIN. Detail vám pripravíme v PDF výstupe.";
           } else {
             recommendedName.textContent =
               "Zatiaľ nevybraná – zvoľte odtok vody.";
