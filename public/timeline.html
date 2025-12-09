@@ -467,8 +467,8 @@
           <button class="pill" id="rateBtn">⭐ Hodnotenie tovarov</button>
           <!-- NOVÉ: kalkulačky -->
           <button class="pill" id="calcBtn">📐 Kalkulačky</button>
-          <!-- Správy + žltý badge -->
-          <button class="pill" id="messagesBtn">
+          <!-- Správy + žltý badge (štart skryté) -->
+          <button class="pill" id="messagesBtn" style="display:none;">
             💬 Správy
             <span id="messagesBadge" class="pill-badge"></span>
           </button>
@@ -681,12 +681,14 @@
       document.getElementById('accountBtn')?.addEventListener('click', ()=> go('dashboard.html'));
       document.getElementById('funBtn')?.addEventListener('click', ()=> go('entertainment.html'));
       document.getElementById('rateBtn')?.addEventListener('click', ()=> go('catalog.html'));
-      document.getElementById('calcBtn')?.addEventListener('click', ()=> go('calc_terasa.html'));
+      document.getElementById('calcBtn')?.addEventListener('click', ()=> go('calc_index.html'));
       document.getElementById('messagesBtn')?.addEventListener('click', ()=> go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', ()=> go('index.html'));
 
       // žltý badge pre Správy – načítanie neprečítaných
       const badgeEl = document.getElementById('messagesBadge');
+      const messagesBtn = document.getElementById('messagesBtn');
+
       async function refreshMessagesUnread(){
         if (!email || !badgeEl) return;
         try{
@@ -696,6 +698,8 @@
           let total = 0;
           (list || []).forEach(item => { total += item.unread || 0; });
           if (total > 0){
+            // zobraz tlačidlo Správy
+            if (messagesBtn) messagesBtn.style.display = 'inline-flex';
             badgeEl.textContent = total > 9 ? '9+' : String(total);
             badgeEl.style.display = 'inline-flex';
             badgeEl.setAttribute(
@@ -703,12 +707,15 @@
               total === 1 ? '1 neprečítaná správa' : `${total} neprečítaných správ`
             );
           } else {
+            // skry tlačidlo Správy
+            if (messagesBtn) messagesBtn.style.display = 'none';
             badgeEl.textContent = '';
             badgeEl.style.display = 'none';
             badgeEl.removeAttribute('aria-label');
           }
         }catch{}
       }
+
       refreshMessagesUnread();
       setInterval(() => {
         if (!document.hidden) refreshMessagesUnread();

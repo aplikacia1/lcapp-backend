@@ -350,8 +350,12 @@ document.addEventListener("DOMContentLoaded", () => {
       '<option value="">– vyber farbu –</option>';
 
     variants.forEach((p) => {
+      const key = `${p.familyId || "ml"}-${p.id || p.profileCode || p.colorName}-${p.heightCm}`;
+      p._key = key;
+      profileByKey[key] = p;
+
       const opt = document.createElement("option");
-      opt.value = p._key;
+      opt.value = key;
       opt.textContent = p.colorName;
       profileColorSelect.appendChild(opt);
     });
@@ -653,8 +657,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (backBtn) {
       backBtn.addEventListener("click", () => {
         const url = userEmail
-          ? `entertainment.html?email=${encodeURIComponent(userEmail)}`
-          : "entertainment.html";
+          ? `calc_index.html?email=${encodeURIComponent(userEmail)}`
+          : "calc_index.html";
         window.location.href = url;
       });
     }

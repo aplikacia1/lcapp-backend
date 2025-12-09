@@ -1,263 +1,453 @@
-// Jednoduchý stav kalkulačky – aby sme vedeli preniesť dáta do ďalších krokov
-const TERASA_STATE = {
-  constructionType: null,
-  constructionLabel: null,
-  shape: "square",
-  sideA: null,
-  sideB: null,
-  areaM2: null,
-  perimeterM: null,
-  drainType: null, // len pre vysunutý balkón
-  recommendedSystemKey: null,
-};
+// calc_terasa.js
+(function () {
+  // Pomocné – zisti, či sme na mobile (šírka do 768px)
+  function isMobile() {
+    return window.matchMedia("(max-width: 768px)").matches;
+  }
 
-// Pomoc: formátovanie na 1 desatinné miesto (ak máme číslo)
-function fmt1(value) {
-  if (typeof value !== "number" || !isFinite(value)) return "–";
-  return value.toFixed(1).replace(".", ",");
-}
+  // ===== EMAIL + HLAVIČKA ===================================================
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get("email") || "";
 
-// ==== KROK 1 – výber typu ==========================================
-const cards = Array.from(document.querySelectorAll(".type-card"));
-const currentTypeLabelEl = document.getElementById("currentTypeLabel");
-const clearSelectionBtn = document.getElementById("clearSelectionBtn");
-const goToStep2Btn = document.getElementById("goToStep2Btn");
+  const userChip = document.getElementById("userChip");
+  if (userChip) {
+    userChip.textContent = email
+      ? `Prihlásený: ${email}`
+      : "Prihlásený: hosť";
+  }
 
-cards.forEach((card) => {
-  card.addEventListener("click", () => {
-    cards.forEach((c) => c.classList.remove("selected"));
-    card.classList.add("selected");
-    TERASA_STATE.constructionType = card.dataset.type || null;
-    TERASA_STATE.constructionLabel = card.dataset.label || null;
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      // späť na prehľad kalkulačiek
+      const target = "calc_index.html";
+      if (email) {
+        window.location.href = `${target}?email=${encodeURIComponent(email)}`;
+      } else {
+        window.location.href = target;
+      }
+    });
+  }
+
+  // ===== KROKY – prepínanie sekcií ==========================================
+  const stepSections = Array.from(document.querySelectorAll(".step-section"));
+
+  function showStep(stepId) {
+    stepSections.forEach((sec) => {
+      sec.classList.toggle("active", sec.id === stepId);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // štartujeme na kroku 1
+  showStep("step1");
+
+  // ===== MOBILNÉ POTVRDZOVACIE OKNO (po výbere typu) ========================
+  let mobileModalCreated = false;
+  let mobileModalEl = null;
+  let mobileModalTitle = null;
+  let mobileModalText = null;
+  let mobileModalBackBtn = null;
+  let mobileModalConfirmBtn = null;
+
+  function ensureMobileModal() {
+    if (mobileModalCreated) return;
+
+    // vložíme CSS pre mobilný modal
+    const styleEl = document.createElement("style");
+    styleEl.textContent = `
+      @media (max-width: 768px) {
+        .mobile-step-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.75);
+          display: none;
+          align-items: flex-end;
+          justify-content: center;
+          z-index: 1500;
+        }
+        .mobile-step-modal-overlay.is-open {
+          display: flex;
+        }
+        .mobile-step-modal {
+          width: 100%;
+          max-width: 480px;
+          background: #020617;
+          border-radius: 18px 18px 0 0;
+          border-top: 1px solid rgba(148,163,184,0.7);
+          box-shadow: 0 -14px 30px rgba(0,0,0,0.8);
+          padding: 14px 14px 10px;
+        }
+        .mobile-step-modal-title {
+          font-size: 0.95rem;
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
+        .mobile-step-modal-text {
+          font-size: 0.8rem;
+          color: #e5e7eb;
+          margin: 0 0 10px;
+        }
+        .mobile-step-modal-actions {
+          margin-top: 6px;
+          padding-top: 8px;
+          border-top: 1px solid rgba(31,41,55,0.9);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .mobile-step-modal-actions .btn-inline {
+          width: 100%;
+          justify-content: center;
+          background: #020617;
+        }
+        .mobile-step-modal-actions .btn-primary {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    `;
+    document.head.appendChild(styleEl);
+
+    // vytvoríme samotný modal
+    const overlay = document.createElement("div");
+    overlay.className = "mobile-step-modal-overlay";
+    overlay.setAttribute("aria-hidden", "true");
+
+    const box = document.createElement("div");
+    box.className = "mobile-step-modal";
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "mobile-step-modal-title";
+
+    const textEl = document.createElement("p");
+    textEl.className = "mobile-step-modal-text";
+
+    const actions = document.createElement("div");
+    actions.className = "mobile-step-modal-actions";
+
+    const backButton = document.createElement("button");
+    backButton.type = "button";
+    backButton.className = "btn-inline";
+    backButton.textContent = "Zmeniť výber";
+
+    const confirmButton = document.createElement("button");
+    confirmButton.type = "button";
+    confirmButton.className = "btn-primary";
+    confirmButton.textContent = "Pokračovať na krok 2 ›";
+
+    actions.appendChild(backButton);
+    actions.appendChild(confirmButton);
+    box.appendChild(titleEl);
+    box.appendChild(textEl);
+    box.appendChild(actions);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    mobileModalCreated = true;
+    mobileModalEl = overlay;
+    mobileModalTitle = titleEl;
+    mobileModalText = textEl;
+    mobileModalBackBtn = backButton;
+    mobileModalConfirmBtn = confirmButton;
+
+    // správanie tlačidiel
+    mobileModalBackBtn.addEventListener("click", () => {
+      closeMobileModal();
+    });
+
+    mobileModalConfirmBtn.addEventListener("click", () => {
+      closeMobileModal();
+      showStep("step2");
+    });
+
+    // klik mimo box zatvára okno
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        closeMobileModal();
+      }
+    });
+  }
+
+  function openMobileModal(selectedLabel) {
+    if (!isMobile() || !selectedLabel) return;
+    ensureMobileModal();
+
+    mobileModalTitle.textContent = "Vybrali ste typ konštrukcie";
+    mobileModalText.textContent =
+      `Zvolený typ: ${selectedLabel}. ` +
+      "Ak to sedí, pokračujte na krok 2. Ak nie, môžete výber zmeniť.";
+
+    mobileModalEl.classList.add("is-open");
+    mobileModalEl.setAttribute("aria-hidden", "false");
+  }
+
+  function closeMobileModal() {
+    if (!mobileModalEl) return;
+    mobileModalEl.classList.remove("is-open");
+    mobileModalEl.setAttribute("aria-hidden", "true");
+  }
+
+  // ===== KROK 1 – VÝBER TYPU KONŠTRUKCIE ====================================
+  const constructionGrid = document.getElementById("constructionGrid");
+  const currentTypeLabelEl = document.getElementById("currentTypeLabel");
+  const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+  const goToStep2Btn = document.getElementById("goToStep2Btn");
+
+  let selectedConstruction = null;
+
+  function updateCurrentTypeLabel() {
+    if (!currentTypeLabelEl) return;
     currentTypeLabelEl.textContent =
-      TERASA_STATE.constructionLabel || "žiadny";
-    goToStep2Btn.disabled = !TERASA_STATE.constructionType;
-    console.log("Krok 1 – stav:", TERASA_STATE);
-  });
-});
-
-clearSelectionBtn.addEventListener("click", () => {
-  cards.forEach((c) => c.classList.remove("selected"));
-  TERASA_STATE.constructionType = null;
-  TERASA_STATE.constructionLabel = null;
-  currentTypeLabelEl.textContent = "žiadny";
-  goToStep2Btn.disabled = true;
-  console.log("Krok 1 – vymazané:", TERASA_STATE);
-  // Plynulý scroll späť hore
-  document.getElementById("step1").scrollIntoView({ behavior: "smooth" });
-});
-
-goToStep2Btn.addEventListener("click", () => {
-  document.getElementById("step2").scrollIntoView({ behavior: "smooth" });
-});
-
-document.getElementById("backToStep1Btn").addEventListener("click", () => {
-  document.getElementById("step1").scrollIntoView({ behavior: "smooth" });
-});
-
-// ==== KROK 2 – tvar a rozmery =======================================
-const shapeCards = Array.from(document.querySelectorAll(".shape-card"));
-const dimShapeInfo = document.getElementById("dimShapeInfo");
-const sideAInput = document.getElementById("sideA");
-const sideBInput = document.getElementById("sideB");
-const fieldSideB = document.getElementById("fieldSideB");
-const summaryAreaEl = document.getElementById("summaryArea");
-const summaryPerimeterEl = document.getElementById("summaryPerimeter");
-
-function updateShapeDescription() {
-  if (TERASA_STATE.shape === "square") {
-    dimShapeInfo.textContent = "Štvorec – všetky strany A sú rovnaké.";
-    fieldSideB.style.opacity = "0.7";
-  } else {
-    dimShapeInfo.textContent =
-      "Obdĺžnik – strana A a strana B môžu mať rôznu dĺžku.";
-    fieldSideB.style.opacity = "1";
+      selectedConstruction && selectedConstruction.label
+        ? selectedConstruction.label
+        : "žiadny";
   }
-}
 
-function recalcDimensions() {
-  const rawA = sideAInput.value.replace(",", ".");
-  const rawB = sideBInput.value.replace(",", ".");
-  const a = parseFloat(rawA);
-  let b = parseFloat(rawB);
+  function resetConstructionSelection() {
+    selectedConstruction = null;
+    document
+      .querySelectorAll(".type-card")
+      .forEach((c) => c.classList.remove("selected"));
+    updateCurrentTypeLabel();
+    if (goToStep2Btn) goToStep2Btn.disabled = true;
+  }
 
-  if (TERASA_STATE.shape === "square") {
-    if (!isNaN(a) && (isNaN(b) || b <= 0)) {
-      b = a;
+  if (constructionGrid) {
+    constructionGrid.addEventListener("click", (e) => {
+      const card = e.target.closest(".type-card");
+      if (!card) return;
+
+      document
+        .querySelectorAll(".type-card")
+        .forEach((c) => c.classList.remove("selected"));
+      card.classList.add("selected");
+
+      selectedConstruction = {
+        type: card.dataset.type || "",
+        label: card.dataset.label || "",
+      };
+
+      updateCurrentTypeLabel();
+      if (goToStep2Btn) goToStep2Btn.disabled = false;
+
+      // na mobile po výbere rovno zobrazíme potvrdenie
+      if (isMobile()) {
+        openMobileModal(selectedConstruction.label);
+      }
+    });
+  }
+
+  if (clearSelectionBtn) {
+    clearSelectionBtn.addEventListener("click", () => {
+      resetConstructionSelection();
+    });
+  }
+
+  if (goToStep2Btn) {
+    goToStep2Btn.addEventListener("click", () => {
+      if (!selectedConstruction) return;
+      // na mobile ešte raz potvrdíme (ak nebolo potvrdené po kliknutí)
+      if (isMobile()) {
+        openMobileModal(selectedConstruction.label);
+      } else {
+        showStep("step2");
+      }
+    });
+  }
+
+  // ===== KROK 2 – TVAR + ROZMERY ============================================
+  const shapeGrid = document.getElementById("shapeGrid");
+  const dimShapeInfo = document.getElementById("dimShapeInfo");
+  const fieldSideBWrapper = document.getElementById("fieldSideB");
+  const sideAInput = document.getElementById("sideA");
+  const sideBInput = document.getElementById("sideB");
+  const summaryAreaEl = document.getElementById("summaryArea");
+  const summaryPerimeterEl = document.getElementById("summaryPerimeter");
+  const backToStep1Btn = document.getElementById("backToStep1Btn");
+  const goToStep3Btn = document.getElementById("goToStep3Btn");
+
+  let selectedShape = "square";
+  let areaValue = null;
+  let perimeterValue = null;
+
+  function parseInputNumber(inputEl) {
+    if (!inputEl) return null;
+    const raw = (inputEl.value || "").replace(",", ".");
+    const val = parseFloat(raw);
+    return Number.isFinite(val) && val > 0 ? val : null;
+  }
+
+  function updateDimensionsSummary() {
+    const a = parseInputNumber(sideAInput);
+    let b = parseInputNumber(sideBInput);
+
+    if (!a) {
+      areaValue = null;
+      perimeterValue = null;
+    } else {
+      if (selectedShape === "square") {
+        if (!b) b = a;
+      }
+      if (!b) {
+        areaValue = null;
+        perimeterValue = null;
+      } else {
+        const area = a * b;
+        const perim = 2 * (a + b);
+        areaValue = Math.round(area * 10) / 10;
+        perimeterValue = Math.round(perim * 10) / 10;
+      }
+    }
+
+    if (summaryAreaEl) {
+      summaryAreaEl.textContent =
+        areaValue != null ? areaValue.toString().replace(".", ",") : "–";
+    }
+    if (summaryPerimeterEl) {
+      summaryPerimeterEl.textContent =
+        perimeterValue != null ? perimeterValue.toString().replace(".", ",") : "–";
     }
   }
 
-  if (isNaN(a) || a <= 0 || isNaN(b) || b <= 0) {
-    TERASA_STATE.sideA = null;
-    TERASA_STATE.sideB = null;
-    TERASA_STATE.areaM2 = null;
-    TERASA_STATE.perimeterM = null;
-    summaryAreaEl.textContent = "–";
-    summaryPerimeterEl.textContent = "–";
-    return;
+  if (shapeGrid) {
+    shapeGrid.addEventListener("click", (e) => {
+      const card = e.target.closest(".shape-card");
+      if (!card) return;
+
+      document
+        .querySelectorAll(".shape-card")
+        .forEach((c) => c.classList.remove("selected"));
+      card.classList.add("selected");
+
+      selectedShape = card.dataset.shape || "square";
+
+      if (dimShapeInfo) {
+        if (selectedShape === "square") {
+          dimShapeInfo.textContent = "Štvorec – všetky strany A sú rovnaké.";
+        } else {
+          dimShapeInfo.textContent =
+            "Obdĺžnik – dve rôzne strany A a B. Aj mierny „šikmý“ pôdorys je v poriadku.";
+        }
+      }
+
+      if (fieldSideBWrapper) {
+        fieldSideBWrapper.style.opacity =
+          selectedShape === "square" ? "0.7" : "1";
+      }
+
+      updateDimensionsSummary();
+    });
   }
 
-  TERASA_STATE.sideA = a;
-  TERASA_STATE.sideB = b;
-  TERASA_STATE.areaM2 = a * b;
-  TERASA_STATE.perimeterM = 2 * (a + b);
-
-  summaryAreaEl.textContent = fmt1(TERASA_STATE.areaM2);
-  summaryPerimeterEl.textContent = fmt1(TERASA_STATE.perimeterM);
-
-  console.log("Krok 2 – rozmery:", TERASA_STATE);
-}
-
-shapeCards.forEach((card) => {
-  card.addEventListener("click", () => {
-    shapeCards.forEach((c) => c.classList.remove("selected"));
-    card.classList.add("selected");
-    TERASA_STATE.shape = card.dataset.shape || "square";
-    updateShapeDescription();
-    recalcDimensions();
-  });
-});
-
-sideAInput.addEventListener("input", recalcDimensions);
-sideBInput.addEventListener("input", recalcDimensions);
-
-updateShapeDescription();
-
-// ==== KROK 3 – skladba systému Schlüter® ============================
-
-// Elementy pre prehľad (ľavý stĺpec)
-const step3Section = document.getElementById("step3");
-const k3TypeEl = document.getElementById("k3Type");
-const k3ShapeEl = document.getElementById("k3Shape");
-const k3AreaEl = document.getElementById("k3Area");
-const k3PerimeterEl = document.getElementById("k3Perimeter");
-
-// Otázka + výstup (pravý stĺpec)
-const balconyQuestionBlock = document.getElementById("balconyQuestion");
-const otherConstructionNote = document.getElementById("otherConstructionNote");
-const drainButtons = Array.from(
-  document.querySelectorAll("[data-drain-option]")
-);
-const recommendedNameEl = document.getElementById("recommendedName");
-const recommendedNoteEl = document.getElementById("recommendedNote");
-
-// Jednoduchá „mapa“ systémov pre vysunutý balkón – pracovné názvy
-const BALCONY_SYSTEMS = {
-  "edge-free": {
-    key: "A2",
-    name: "A2 – vysunutý balkón s voľnou odkvapovou hranou",
-    note:
-      "Univerzálna skladba pre konzolový balkón, kde voda voľne odteká cez hranu. " +
-      "Počítame s kompletnou hydroizoláciou Schlüter® a odkvapovým profilom na hrane.",
-  },
-  "edge-gutter": {
-    key: "A3",
-    name: "A3 – vysunutý balkón s oplechovanou hranou a žľabom",
-    note:
-      "„Zlatá stredná cesta“ – skladba pre balkón s oplechovaním a žľabom pri hrane. " +
-      "Hydroizolácia Schlüter® je napojená na oplechovanie tak, aby voda bezpečne odtiekla do žľabu.",
-  },
-  "internal-drain": {
-    key: "A5",
-    name: "A5 – vysunutý balkón s vpustom v podlahe",
-    note:
-      "Skladba s vnútorným vpustom (gulička alebo líniový žľab) v ploche balkóna. " +
-      "Vhodné pri väčších plochách alebo tam, kde nechcete, aby voda odkvapkávala cez hranu.",
-  },
-};
-
-function updateStep3Summary() {
-  k3TypeEl.textContent = TERASA_STATE.constructionLabel || "nezadané";
-
-  const shapeLabel =
-    TERASA_STATE.shape === "square" ? "Štvorec" : "Obdĺžnik / kosoštvorec";
-  k3ShapeEl.textContent = shapeLabel;
-
-  k3AreaEl.textContent = fmt1(TERASA_STATE.areaM2);
-  k3PerimeterEl.textContent = fmt1(TERASA_STATE.perimeterM);
-}
-
-function updateRecommendedSystem() {
-  const isBalcony =
-    TERASA_STATE.constructionType === "balcony-cantilever";
-
-  if (!isBalcony) {
-    TERASA_STATE.drainType = null;
-    TERASA_STATE.recommendedSystemKey = null;
-    recommendedNameEl.textContent =
-      "Zatiaľ nevybraná – pre tento typ pripravujeme vlastné skladby.";
-    recommendedNoteEl.textContent =
-      "Na základe údajov z krokov 1 a 2 vám technik Lištového centra odporučí konkrétnu skladbu individuálne.";
-    return;
+  if (sideAInput) {
+    sideAInput.addEventListener("input", updateDimensionsSummary);
+  }
+  if (sideBInput) {
+    sideBInput.addEventListener("input", updateDimensionsSummary);
   }
 
-  // Ak ešte nie je zvolený spôsob odtoku, berieme „zlatú strednú cestu“ – žľab
-  const drainKey =
-    TERASA_STATE.drainType || "edge-gutter";
-  TERASA_STATE.drainType = drainKey;
-
-  const system = BALCONY_SYSTEMS[drainKey];
-  if (!system) {
-    recommendedNameEl.textContent =
-      "Zatiaľ nevybraná – zvoľte odtok vody.";
-    recommendedNoteEl.textContent =
-      "Po kliknutí na jednu z možností odtoku vody navrhneme vhodnú skladbu Schlüter® pre váš balkón.";
-    return;
+  if (backToStep1Btn) {
+    backToStep1Btn.addEventListener("click", () => {
+      showStep("step1");
+    });
   }
 
-  TERASA_STATE.recommendedSystemKey = system.key;
-  recommendedNameEl.textContent = system.name;
-  recommendedNoteEl.textContent = system.note;
-}
+  if (goToStep3Btn) {
+    goToStep3Btn.addEventListener("click", () => {
+      // doplníme súhrn a otázky
+      fillStep3Summary();
+      showStep("step3");
+    });
+  }
 
-// Kliknutie na možnosti odtoku
-drainButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const value = btn.dataset.drainOption;
-    TERASA_STATE.drainType = value;
+  // ===== KROK 3 – SKLADBA SYSTÉMU ===========================================
+  const k3TypeEl = document.getElementById("k3Type");
+  const k3ShapeEl = document.getElementById("k3Shape");
+  const k3AreaEl = document.getElementById("k3Area");
+  const k3PerimeterEl = document.getElementById("k3Perimeter");
+  const balconyQuestionBox = document.getElementById("balconyQuestion");
+  const otherConstructionNote = document.getElementById("otherConstructionNote");
+  const recommendedNameEl = document.getElementById("recommendedName");
+  const recommendedNoteEl = document.getElementById("recommendedNote");
 
-    drainButtons.forEach((b) => b.classList.remove("selected"));
-    btn.classList.add("selected");
+  function niceShapeName(shape) {
+    if (shape === "rectangle") return "Obdĺžnik / kosoštvorec";
+    return "Štvorec";
+  }
 
-    updateRecommendedSystem();
-    console.log("Krok 3 – odtok vody / systém:", TERASA_STATE);
-  });
-});
+  function fillStep3Summary() {
+    if (k3TypeEl) {
+      k3TypeEl.textContent =
+        selectedConstruction && selectedConstruction.label
+          ? selectedConstruction.label
+          : "–";
+    }
+    if (k3ShapeEl) {
+      k3ShapeEl.textContent = niceShapeName(selectedShape);
+    }
+    if (k3AreaEl) {
+      k3AreaEl.textContent =
+        areaValue != null ? areaValue.toString().replace(".", ",") : "–";
+    }
+    if (k3PerimeterEl) {
+      k3PerimeterEl.textContent =
+        perimeterValue != null ? perimeterValue.toString().replace(".", ",") : "–";
+    }
 
-// Prechod z kroku 2 na krok 3
-const goToStep3Btn = document.getElementById("goToStep3Btn");
-goToStep3Btn.addEventListener("click", () => {
-  updateStep3Summary();
+    const isBalcony =
+      selectedConstruction && selectedConstruction.type === "balcony-cantilever";
 
-  const isBalcony =
-    TERASA_STATE.constructionType === "balcony-cantilever";
+    if (balconyQuestionBox) {
+      balconyQuestionBox.style.display = isBalcony ? "block" : "none";
+    }
+    if (otherConstructionNote) {
+      otherConstructionNote.style.display = isBalcony ? "none" : "block";
+    }
 
-  // Zobrazenie správneho bloku
-  balconyQuestionBlock.style.display = isBalcony ? "block" : "none";
-  otherConstructionNote.style.display = isBalcony ? "none" : "block";
-
-  // Reset výberu odtoku pri každom vstupe do kroku 3 (aby to bolo jasné)
-  drainButtons.forEach((b) => b.classList.remove("selected"));
-
-  if (isBalcony) {
-    // Predvolená „stredná“ možnosť – žľab pri hrane
-    TERASA_STATE.drainType = "edge-gutter";
-    const defaultBtn = drainButtons.find(
-      (b) => b.dataset.drainOption === "edge-gutter"
-    );
-    if (defaultBtn) {
-      defaultBtn.classList.add("selected");
+    if (!isBalcony && recommendedNameEl && recommendedNoteEl) {
+      recommendedNameEl.textContent =
+        "Zatiaľ nevybraná – doplníme podľa typu terasy.";
+      recommendedNoteEl.textContent =
+        "Pre terasy a prekryté konštrukcie pripravujeme detailné skladby. Technik Lištového centra vám ich odporučí individuálne podľa zadaných údajov.";
     }
   }
 
-  updateRecommendedSystem();
+  // Voľba odtoku vody na balkóne
+  const drainOptions = document.querySelectorAll(".drain-option");
 
-  step3Section.scrollIntoView({ behavior: "smooth" });
+  drainOptions.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      drainOptions.forEach((b) => b.classList.remove("selected"));
+      btn.classList.add("selected");
 
-  console.log("Krok 3 – otvorený, stav:", TERASA_STATE);
-});
+      const opt = btn.getAttribute("data-drain-option");
+      if (!recommendedNameEl || !recommendedNoteEl) return;
 
-// tlačidlo späť v hlavičke – návrat na dashboard / späť v histórii
-document.getElementById("backBtn").addEventListener("click", () => {
-  if (history.length > 1) history.back();
-});
+      if (opt === "edge-free") {
+        recommendedNameEl.textContent =
+          "Schlüter®-TROBA + ukončovacie profily s voľnou hranou";
+        recommendedNoteEl.textContent =
+          "Odporúčame systém s drenážnou rohožou Schlüter®-TROBA a ukončovacími profilmi, cez ktoré voda voľne steká z hrany balkóna.";
+      } else if (opt === "edge-gutter") {
+        recommendedNameEl.textContent =
+          "Schlüter®-BARA s napojením na žľab + drenážna rohož";
+        recommendedNoteEl.textContent =
+          "Zvoľte systém s ukončovacími profilmi Schlüter®-BARA a napojením na žľab. Drenážna rohož pomáha odviesť vodu do žľabu bez zadržiavania.";
+      } else if (opt === "internal-drain") {
+        recommendedNameEl.textContent =
+          "Schlüter®-DITRA + odvodnenie k podlahovému vpustu";
+        recommendedNoteEl.textContent =
+          "Pre balkóny s vnútorným vpustom odporúčame tesniacu a odvodňovaciu rohož Schlüter®-DITRA s napojením na vpust v podlahe.";
+      } else {
+        recommendedNameEl.textContent =
+          "Zatiaľ nevybraná – zvoľte odtok vody.";
+        recommendedNoteEl.textContent =
+          "Vyberte spôsob odtoku vody z balkóna, aby sme vedeli odporučiť konkrétnu skladbu systému Schlüter®.";
+      }
+    });
+  });
+
+  // bezpečne dopočítať po načítaní
+  updateDimensionsSummary();
+})();

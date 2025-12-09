@@ -116,6 +116,15 @@
       color: #e5e7eb;
     }
 
+    /* >>> NOVÉ – spoločná trieda pre kroky (skryté, kým nie sú aktívne) <<< */
+    .step-section {
+      display: none;
+    }
+
+    .step-section.active {
+      display: block;
+    }
+
     /* Žlto-čierne okraje – „bezpečnostný“ efekt */
     .safety-stripes {
       position: fixed;
@@ -885,7 +894,7 @@
     </p>
 
     <!-- KROK 1 – výber typu konštrukcie -->
-    <section class="card-shell" id="step1">
+    <section class="card-shell step-section" id="step1">
       <div class="step-header-row">
         <div class="step-title-main">
           <span>Krok 1</span> Výber typu konštrukcie
@@ -1016,7 +1025,7 @@
     </section>
 
     <!-- KROK 2 – tvar terasy a rozmery -->
-    <section class="step2-shell" id="step2">
+    <section class="step2-shell step-section" id="step2">
       <div class="step-header-row">
         <div class="step-title-main">
           <span>Krok 2</span> Tvar terasy a rozmery
@@ -1133,7 +1142,7 @@
     </section>
 
     <!-- KROK 3 – skladba systému Schlüter® -->
-    <section class="step3-shell" id="step3">
+    <section class="step3-shell step-section" id="step3">
       <div class="step-header-row">
         <div class="step-title-main">
           <span>Krok 3</span> Skladba systému Schlüter®

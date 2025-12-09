@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalkulačky – Lištobook</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --max-w: 1120px;
+      --gap: 16px;
+      --hdr-h: 96px;
+      --panel-border: rgba(255, 255, 255, 0.16);
+      --desk-footer-h: 36px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1b2b68 0, #050c22 55%, #020617 100%);
+      color: #ffffff;
+      padding-top: var(--hdr-h);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* HEADER – rovnaký štýl ako entertainment / calc_terasa */
+    .app-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 1000;
+      background: #0c1f4b;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .app-header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 8px var(--gap);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .logo-small {
+      height: 48px;
+      margin: 2px auto 6px;
+      display: block;
+    }
+
+    .user-chip {
+      color: #cfe2ff;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .icon-btn {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-content: center;
+      border: 1px solid #ffffff33;
+      border-radius: 10px;
+      color: #e7eefc;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .icon-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* LAYOUT */
+    .wrap {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 18px 16px 72px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-title {
+      margin: 6px 0 4px;
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+    }
+
+    .page-subtitle {
+      margin: 0 0 18px;
+      font-size: 0.88rem;
+      color: #e5e7eb;
+    }
+
+    /* Žlto-čierne „bezpečnostné“ pásy – len na PC */
+    .safety-stripes {
+      position: fixed;
+      inset: var(--hdr-h) 0 0 0;
+      pointer-events: none;
+      z-index: 0;
+      display: none;
+    }
+
+    @media (min-width: 992px) {
+      .safety-stripes {
+        display: block;
+      }
+
+      .safety-stripes::before,
+      .safety-stripes::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 11vw;
+        max-width: 170px;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          #000000 0,
+          #000000 12px,
+          #facc15 12px,
+          #facc15 24px
+        );
+        opacity: 0.2;
+        filter: blur(1px);
+      }
+
+      .safety-stripes::before {
+        left: 0;
+      }
+
+      .safety-stripes::after {
+        right: 0;
+      }
+    }
+
+    /* Karta s kalkulačkami */
+    .card-shell {
+      background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 18px 16px 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 960px) {
+      .card-shell {
+        padding: 22px 22px 24px;
+      }
+    }
+
+    .card-header-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .card-title-main {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title-main span.icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: 1rem;
+    }
+
+    .card-caption {
+      font-size: 0.78rem;
+      color: #e5e7eb;
+      max-width: 360px;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .calc-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .calc-card {
+      position: relative;
+      border-radius: 18px;
+      padding: 14px 14px 14px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .calc-title {
+      font-size: 1.0rem;
+      font-weight: 600;
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .calc-text {
+      font-size: 0.86rem;
+      color: #dbe4ff;
+      margin: 0;
+    }
+
+    .badge-prep {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .card-footer {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-main {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(90deg, #60a5fa, #2563eb);
+      color: #f9fafb;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.6);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+      min-width: 120px;
+    }
+
+    .btn-main span {
+      margin-right: 6px;
+    }
+
+    .btn-main:hover {
+      filter: brightness(1.05);
+    }
+
+    .btn-main:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.55);
+    }
+
+    footer {
+      font-size: 0.72rem;
+      color: #cbd5f5;
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    footer .legal {
+      font-size: 0.67rem;
+      margin-top: 3px;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 600px) {
+      .page-title {
+        font-size: 1.15rem;
+      }
+      .page-subtitle {
+        font-size: 0.82rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="app-header" role="banner">
+    <div class="app-header-inner">
+      <button class="icon-btn" id="backBtn" aria-label="Späť na timeline">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M15 18l-6-6 6-6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+        </svg>
+      </button>
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small" />
+      <div class="user-chip" id="userChip">Prihlásený:</div>
+    </div>
+  </header>
+
+  <!-- Bezpečnostné pásy po bokoch (len PC) -->
+  <div class="safety-stripes" aria-hidden="true"></div>
+
+  <!-- MAIN -->
+  <main class="wrap">
+    <h1 class="page-title">Kalkulačky</h1>
+    <p class="page-subtitle">
+      Pracovné kalkulačky Lištového centra – pomôžu pripraviť podklady pre váš projekt. Funkcionalitu priebežne dopĺňame.
+    </p>
+
+    <section class="card-shell" aria-label="Pracovné kalkulačky">
+      <div class="card-header-row">
+        <div class="card-title-main">
+          <span class="icon">🔧</span>
+          Pracovné kalkulačky
+        </div>
+        <div class="card-caption">
+          Vyberte si, ktorú kalkulačku chcete otvoriť. Oba nástroje sú zatiaľ v testovacej fáze – budeme ich ďalej rozširovať.
+        </div>
+      </div>
+
+      <div class="calc-grid">
+        <!-- Kalkulačka líšt -->
+        <article class="calc-card">
+          <div class="badge-prep">PRIPRAVUJEME</div>
+          <h2 class="calc-title">📐 Kalkulačka líšt</h2>
+          <p class="calc-text">
+            Orientačný prepočet soklových, prechodových a ukončovacích líšt pre váš projekt. Výsledok pošleme v PDF.
+          </p>
+          <div class="card-footer">
+            <button id="btnListy" class="btn-main" type="button">
+              <span>Otvoriť</span> →
+            </button>
+          </div>
+        </article>
+
+        <!-- Kalkulačka terás -->
+        <article class="calc-card">
+          <div class="badge-prep">PRIPRAVUJEME</div>
+          <h2 class="calc-title">🏡 Kalkulačka terás Schlüter®</h2>
+          <p class="calc-text">
+            Pomôže pripraviť podklady pre balkón alebo terasu v systéme Schlüter® – typ konštrukcie, tvar a základnú skladbu.
+          </p>
+          <div class="card-footer">
+            <button id="btnTerasa" class="btn-main" type="button">
+              <span>Otvoriť</span> →
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      <div>Prepočet pripravuje <strong>Lištové centrum</strong> (listobook.sk).</div>
+      <div class="legal">
+        Kalkulačky sú určené na orientačný prepočet. Presnú skladbu a cenovú ponuku potvrdíme po konzultácii s technikom Lištového centra.
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // preberieme e-mail z URL
+    const params = new URLSearchParams(window.location.search);
+    const userEmail = params.get("email") || "";
+
+    // user chip v hlavičke
+    const chip = document.getElementById("userChip");
+    if (chip) {
+      chip.textContent = userEmail ? `Prihlásený: ${userEmail}` : "Prihlásený:";
+    }
+
+    // krok späť → timeline.html (mobil aj desktop), s emailom ak je
+    const backBtn = document.getElementById("backBtn");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        const url = userEmail
+          ? `timeline.html?email=${encodeURIComponent(userEmail)}`
+          : "timeline.html";
+        window.location.href = url;
+      });
+    }
+
+    function go(page) {
+      if (userEmail) {
+        window.location.href = `${page}?email=${encodeURIComponent(userEmail)}`;
+      } else {
+        window.location.href = page;
+      }
+    }
+
+    document.getElementById("btnListy")?.addEventListener("click", () => {
+      go("calculator.html");
+    });
+
+    document.getElementById("btnTerasa")?.addEventListener("click", () => {
+      go("calc_terasa.html");
+    });
+  </script>
+</body>
+</html>

@@ -61,21 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // dlaždica KALKULAČKA → prejsť do calculator.html (zachovať email)
-  const goCalculator = () => {
-    const url = userEmail
-      ? `calculator.html?email=${encodeURIComponent(userEmail)}`
-      : 'calculator.html';
-    location.href = url;
-  };
-  $('#tileCalculator')?.addEventListener('click', goCalculator);
-  $('#tileCalculator')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      goCalculator();
-    }
-  });
-
   // dlaždica YT → prepnúť na prehrávač a nastaviť embed len pre náš kanál
   const openYT = () => {
     const uploads = uploadsPlaylistId(YT_CHANNEL_ID);
@@ -94,6 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // späť z prehrávača na dlaždice
   $('#backToTiles')?.addEventListener('click', () => showView('tiles'));
 
-  // štart: zobraz dve (teraz tri) dlaždice
+  // štart: zobraz dve dlaždice
   showView('tiles');
 });
