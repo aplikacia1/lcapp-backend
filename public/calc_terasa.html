@@ -43,6 +43,24 @@
       text-decoration: none;
     }
 
+    /* spoločné helper triedy pre text */
+    .desktop-only {
+      display: block;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      .desktop-only {
+        display: none;
+      }
+      .mobile-only {
+        display: block;
+      }
+    }
+
     /* HEADER – rovnaký štýl ako entertainment */
     .app-header {
       position: fixed;
@@ -922,7 +940,12 @@
   <main class="wrap">
     <h1 class="page-title">Schlüter® terasa – kalkulačka</h1>
     <p class="page-subtitle">
-      Krok 1 a 2 z 3 – vyberte typ balkóna alebo terasy, potom zvoľte tvar a doplňte rozmery strán.
+      <span class="desktop-only">
+        Krok 1 a 2 z 3 – vyberte typ balkóna alebo terasy, potom zvoľte tvar a doplňte rozmery strán.
+      </span>
+      <span class="mobile-only">
+        3 rýchle kroky: 1) čo riešite, 2) ako to vyzerá a koľko meria, 3) výsledok a materiál.
+      </span>
     </p>
 
     <!-- KROK 1 – výber typu konštrukcie -->
@@ -932,14 +955,19 @@
           <span>Krok 1</span> Výber typu konštrukcie
         </div>
         <div class="step-caption">
-          Intuitívny výber – stačí kliknúť na obrázok, ktorý sa najviac podobá vašej situácii.
+          <span class="desktop-only">
+            Intuitívny výber – stačí kliknúť na obrázok, ktorý sa najviac podobá vašej situácii.
+          </span>
+          <span class="mobile-only">
+            KROK 1 – čo chcete riešiť? Ťuknite na obrázok balkóna alebo terasy.
+          </span>
         </div>
       </div>
 
       <div class="layout-krok1">
         <!-- ĽAVO – 4 typy -->
         <div>
-          <p style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
+          <p class="desktop-only" style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
             Vyberte typ balkóna alebo terasy. Stačí sa pozrieť na dom z boku – ako na fotke.
           </p>
           <div class="type-grid" id="constructionGrid">
@@ -1031,12 +1059,12 @@
             <div class="info-tab">Schlüter® systém</div>
             <div class="info-tab">Terasa / balkón</div>
           </div>
-          <div class="info-title">Čo práve nastavujeme?</div>
-          <p class="info-text">
+          <div class="info-title desktop-only">Čo práve nastavujeme?</div>
+          <p class="info-text desktop-only">
             V prvom kroku len vyberieme typ konštrukcie – teda to, či ide o terasu na poschodí, strešnú terasu
             alebo vysunutý balkón. Podľa výberu potom kalkulačka navrhne vhodnú skladbu systému Schlüter®.
           </p>
-          <div class="info-tip">
+          <div class="info-tip desktop-only">
             Tip: Ak si nie ste istí, zvoľte možnosť, ktorá sa najviac podobá vašej stavbe.
             Zvyšok upresníme v ďalších krokoch priamo v Lištovom centre.
           </div>
@@ -1063,14 +1091,19 @@
           <span>Krok 2</span> Tvar terasy a rozmery
         </div>
         <div class="step-caption">
-          Vyberte tvar pôdorysu a doplňte dĺžky strán. Výsledok použijeme na výpočet m² a bežných metrov.
+          <span class="desktop-only">
+            Vyberte tvar pôdorysu a doplňte dĺžky strán. Výsledok použijeme na výpočet m² a bežných metrov.
+          </span>
+          <span class="mobile-only">
+            KROK 2 – ako to vyzerá a koľko to meria? Zvoľte tvar a zadajte dĺžky strán.
+          </span>
         </div>
       </div>
 
       <div class="step2-layout">
         <!-- ĽAVÁ strana – výber tvaru -->
         <div>
-          <p style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
+          <p class="desktop-only" style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
             Stačí si predstaviť terasu zhora – ako na náčrte. Kliknite na tvar, ktorý sa najviac podobá vašej terase.
           </p>
 
@@ -1248,15 +1281,21 @@
           <span>Krok 3</span> Skladba systému Schlüter®
         </div>
         <div class="step-caption">
-          Tu z niekoľkých jednoduchých otázok vyberieme základnú „zlatú strednú cestu“
-          pre váš balkón alebo terasu.
+          <span class="desktop-only">
+            Tu z niekoľkých jednoduchých otázok vyberieme základnú „zlatú strednú cestu“
+            pre váš balkón alebo terasu.
+          </span>
+          <span class="mobile-only">
+            KROK 3 – výsledok a materiál. Tu uvidíte prehľad plochy a orientačné množstvá. Pre presný podklad
+            si nechajte pripraviť PDF z Lištobooku.
+          </span>
         </div>
       </div>
 
       <div class="step3-layout">
         <!-- ĽAVO – prehľad z krokov 1 a 2 -->
         <div>
-          <p class="note-prep">
+          <p class="note-prep desktop-only">
             Poznámka: Táto sekcia je zatiaľ prvá verzia. Začíname vysunutým balkónom – ostatné typy doplníme postupne.
           </p>
           <table class="summary-table">
@@ -1286,9 +1325,12 @@
           <!-- Otázka pre vysunutý balkón -->
           <div class="question-block" id="balconyQuestion">
             <div class="question-title">Otázka 1 – ako odteká voda z balkóna?</div>
-            <div class="question-text">
+            <div class="question-text desktop-only">
               Vyberte možnosť, ktorá sa najviac podobá vašej situácii. Podľa toho zvolíme vhodnú skladbu Schlüter®
               pre vysunutý balkón.
+            </div>
+            <div class="question-text mobile-only">
+              Vyberte, kadiaľ odteká voda. Podľa toho zvolíme skladbu balkóna.
             </div>
 
             <div class="drain-grid">
@@ -1369,6 +1411,10 @@
               po konzultácii s technikom Lištového centra.
             </div>
           </div>
+
+          <p class="mobile-only" style="font-size:0.78rem;color:#e5e7eb;margin-top:8px;">
+            Pre úplný technický výklad a detaily skladby vám technik pripraví PDF podklad v Lištobooku.
+          </p>
         </div>
       </div>
     </section>
