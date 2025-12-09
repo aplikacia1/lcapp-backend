@@ -116,7 +116,7 @@
       color: #e5e7eb;
     }
 
-    /* >>> NOVÉ – spoločná trieda pre kroky (skryté, kým nie sú aktívne) <<< */
+    /* >>> spoločná trieda pre kroky (skryté, kým nie sú aktívne) <<< */
     .step-section {
       display: none;
     }
@@ -538,6 +538,15 @@
       position: relative;
     }
 
+    .shape-rect.l-shape {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+    }
+
     .side-label {
       position: absolute;
       font-size: 0.7rem;
@@ -584,6 +593,10 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+    }
+
+    .field.hidden {
+      display: none;
     }
 
     .field label {
@@ -894,7 +907,7 @@
     </p>
 
     <!-- KROK 1 – výber typu konštrukcie -->
-    <section class="card-shell step-section" id="step1">
+    <section class="card-shell step-section active" id="step1">
       <div class="step-header-row">
         <div class="step-title-main">
           <span>Krok 1</span> Výber typu konštrukcie
@@ -1074,6 +1087,19 @@
                 </div>
               </div>
             </article>
+
+            <!-- L-TVAR -->
+            <article class="shape-card" data-shape="l-shape">
+              <div class="shape-title">Balkón v tvare L</div>
+              <div class="shape-note">
+                Balkón, ktorý lemuje dve steny domu. Budeme zadávať 6 strán A–F podľa náčrtu.
+              </div>
+              <div class="shape-figure">
+                <div class="shape-rect l-shape" aria-hidden="true">
+                  L
+                </div>
+              </div>
+            </article>
           </div>
         </div>
 
@@ -1086,7 +1112,7 @@
             </div>
 
             <div class="dim-row">
-              <div class="field">
+              <div class="field" id="fieldSideA">
                 <label for="sideA">Strana A (m)</label>
                 <input
                   type="number"
@@ -1098,6 +1124,7 @@
                 />
                 <small>Zapíšte čistú dĺžku bez presahu. Desatinnú čiarku môžete písať bodkou.</small>
               </div>
+
               <div class="field" id="fieldSideB">
                 <label for="sideB">Strana B (m)</label>
                 <input
@@ -1109,6 +1136,60 @@
                   placeholder="napr. 5,2"
                 />
                 <small>Pri štvorci ju môžete nechať prázdnu – použijeme A.</small>
+              </div>
+
+              <div class="field hidden" id="fieldSideC">
+                <label for="sideC">Strana C (m)</label>
+                <input
+                  type="number"
+                  id="sideC"
+                  inputmode="decimal"
+                  step="0.1"
+                  min="0"
+                  placeholder="napr. 2,5"
+                />
+                <small>Pri L-tvare pokračujeme stranou C podľa náčrtu.</small>
+              </div>
+            </div>
+
+            <div class="dim-row">
+              <div class="field hidden" id="fieldSideD">
+                <label for="sideD">Strana D (m)</label>
+                <input
+                  type="number"
+                  id="sideD"
+                  inputmode="decimal"
+                  step="0.1"
+                  min="0"
+                  placeholder="napr. 3,0"
+                />
+                <small>Pri L-tvare zadáte aj D, E a F – všetko v metroch.</small>
+              </div>
+
+              <div class="field hidden" id="fieldSideE">
+                <label for="sideE">Strana E (m)</label>
+                <input
+                  type="number"
+                  id="sideE"
+                  inputmode="decimal"
+                  step="0.1"
+                  min="0"
+                  placeholder="napr. 1,8"
+                />
+                <small>Pokračujeme po obvode balkóna v smere hodinových ručičiek.</small>
+              </div>
+
+              <div class="field hidden" id="fieldSideF">
+                <label for="sideF">Strana F (m)</label>
+                <input
+                  type="number"
+                  id="sideF"
+                  inputmode="decimal"
+                  step="0.1"
+                  min="0"
+                  placeholder="napr. 6,0"
+                />
+                <small>Posledná strana by mala doviesť obvod späť na začiatok.</small>
               </div>
             </div>
 
