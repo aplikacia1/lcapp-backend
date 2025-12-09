@@ -24,6 +24,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- PARAMETRE MATERIÁLOV (orientačné, doladíme podľa technických listov) ---
+  const MATERIAL_PARAMS = {
+    membraneCoveragePerRoll: 10, // m² na 1 rolu drenážnej/separačnej rohože
+    adhesiveCoveragePerBag: 5,   // m² na 1 vrece lepidla (Sopro/Mapei)
+    profileLength: 2.5           // bm na 1 kus ukončovacieho profilu
+  };
+
   // --- Spoločný stav --
   const state = {
     currentStep: 1,
@@ -97,6 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       updateBalconyQuestionVisibility();
       updateStep3Summary();
+      updateBom();
     });
   }
 
@@ -112,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       updateBalconyQuestionVisibility();
       updateStep3Summary();
+      updateBom();
     });
   }
 
@@ -214,17 +223,25 @@ document.addEventListener("DOMContentLoaded", () => {
     return num;
   }
 
-  function polygonArea(points) {
-    if (!points || points.length < 3) return null;
-    let sum = 0;
-    for (let i = 0; i < points.length; i++) {
-      const p1 = points[i];
-      const p2 = points[(i + 1) % points.length];
-      sum += p1.x * p2.y - p2.x * p1.y;
+  // pomocná funkcia – rozhodne, či môže ísť používateľ na krok 3
+  function canGoToStep3() {
+    const d = state.dims;
+
+    if (state.shapeKey === "square") {
+      return d.A != null;
+    } else if (state.shapeKey === "rectangle") {
+      return d.A != null && d.B != null;
+    } else if (state.shapeKey === "l-shape") {
+      return ["A", "B", "C", "D", "E", "F"].every(
+        (key) => d[key] != null
+      );
     }
-    const result = Math.abs(sum) / 2;
-    if (!Number.isFinite(result) || result <= 0) return null;
-    return result;
+    return false;
+  }
+
+  function updateStep2ContinueButton() {
+    if (!goToStep3Btn) return;
+    goToStep3Btn.disabled = !canGoToStep3();
   }
 
   function computeAreaPerimeter(shapeKey, d) {
@@ -245,31 +262,10 @@ document.addEventListener("DOMContentLoaded", () => {
         per = 2 * (A + B);
       }
     } else if (shapeKey === "l-shape") {
+      // L-tvar – presný výpočet doplníme neskôr.
       const sides = ["A", "B", "C", "D", "E", "F"].map((k) => d[k]);
       if (sides.every((v) => v != null)) {
-        per = sides.reduce((sum, val) => sum + val, 0);
-
-        // Konštruktívne vytvoríme L-pôdorys (pravé uhly)
-        const [A, B, C, D, E, F] = sides;
-        const pts = [];
-        let x = 0;
-        let y = 0;
-
-        pts.push({ x, y }); // štart
-        x += A; // A – doprava
-        pts.push({ x, y });
-        y += B; // B – dole
-        pts.push({ x, y });
-        x -= C; // C – doľava
-        pts.push({ x, y });
-        y += D; // D – dole
-        pts.push({ x, y });
-        x -= E; // E – doľava
-        pts.push({ x, y });
-        y -= F; // F – hore (ideálne späť na y = 0)
-        pts.push({ x, y });
-
-        area = polygonArea(pts);
+        // TODO: presný výpočet plochy a obvodu pre L-tvar.
       }
     }
 
@@ -283,7 +279,6 @@ document.addEventListener("DOMContentLoaded", () => {
         dims[side] = null;
         continue;
       }
-      // ak je príslušné pole skryté, ignorujeme ho
       const field = fieldElems[side];
       if (field && field.classList.contains("hidden")) {
         dims[side] = null;
@@ -310,12 +305,17 @@ document.addEventListener("DOMContentLoaded", () => {
           : "–";
     }
 
+    updateStep2ContinueButton();
     updateStep3Summary();
+    updateBom();
   }
 
+  // >>> DÔLEŽITÁ ÚPRAVA: rátame pri input, change aj blur <<<
   Object.values(dimInputs).forEach((input) => {
     if (!input) return;
-    input.addEventListener("input", recomputeFromInputs);
+    ["input", "change", "blur"].forEach((ev) => {
+      input.addEventListener(ev, recomputeFromInputs);
+    });
   });
 
   if (backToStep1Btn) {
@@ -326,8 +326,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (goToStep3Btn) {
     goToStep3Btn.addEventListener("click", () => {
+      // pre istotu ešte raz prepočítame z aktuálnych polí
+      recomputeFromInputs();
+      if (!canGoToStep3()) {
+        // Toto by sa nemalo stať (tlačidlo by malo byť disabled),
+        // ale ak áno, radšej neprepneme krok.
+        return;
+      }
       showStep(3);
       updateStep3Summary();
+      updateBom();
     });
   }
 
@@ -342,6 +350,15 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   const recommendedName = document.getElementById("recommendedName");
   const recommendedNote = document.getElementById("recommendedNote");
+
+  // BOM prvky
+  const bomAreaEl = document.getElementById("bomArea");
+  const bomMembraneAreaEl = document.getElementById("bomMembraneArea");
+  const bomMembraneRollsEl = document.getElementById("bomMembraneRolls");
+  const bomPerimeterEl = document.getElementById("bomPerimeter");
+  const bomProfilesCountEl = document.getElementById("bomProfilesCount");
+  const bomAdhesiveBagsEl = document.getElementById("bomAdhesiveBags");
+  const bomNoteEl = document.getElementById("bomNote");
 
   function updateStep3Summary() {
     if (k3TypeEl) {
@@ -365,8 +382,106 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // výpočet orientačných množstiev materiálu
+  function updateBom() {
+    if (
+      !bomAreaEl ||
+      !bomMembraneAreaEl ||
+      !bomMembraneRollsEl ||
+      !bomPerimeterEl ||
+      !bomProfilesCountEl ||
+      !bomAdhesiveBagsEl ||
+      !bomNoteEl
+    ) {
+      return;
+    }
+
+    const isBalcony =
+      state.constructionTypeKey === "balcony-cantilever";
+    const hasDrain = !!state.drainOption;
+    const area = state.area;
+    const per = state.perimeter;
+
+    // základná reset hodnota
+    function resetBom(placeNote) {
+      bomAreaEl.textContent = "–";
+      bomMembraneAreaEl.textContent = "–";
+      bomMembraneRollsEl.textContent = "–";
+      bomPerimeterEl.textContent = "–";
+      bomProfilesCountEl.textContent = "–";
+      bomAdhesiveBagsEl.textContent = "–";
+      bomNoteEl.textContent =
+        placeNote ||
+        "Hodnoty sú orientačné. Presný výpočet doplníme po konzultácii s technikom Lištového centra.";
+    }
+
+    // ak nie je balkón, alebo nemáme plochu/obvod, nerátame nič
+    if (!isBalcony) {
+      resetBom(
+        "Pre terasy a iné typy konštrukcií pripravujeme samostatný výpočet materiálu. Zatiaľ slúži tento krok len ako prehľad."
+      );
+      return;
+    }
+
+    if (!hasDrain) {
+      resetBom(
+        "Najprv vyberte spôsob odtoku vody z balkóna. Podľa toho pripravíme orientačný prepočet materiálu."
+      );
+      return;
+    }
+
+    if (area == null || per == null) {
+      resetBom(
+        "Na výpočet materiálu potrebujeme mať doplnené rozmery tak, aby sme vedeli plochu aj obvod balkóna."
+      );
+      return;
+    }
+
+    // výpočet – orientačné hodnoty
+    const memArea = area;
+    const memRolls = Math.max(
+      1,
+      Math.ceil(memArea / MATERIAL_PARAMS.membraneCoveragePerRoll)
+    );
+    const profilesBm = per;
+    const profilesCount = Math.max(
+      1,
+      Math.ceil(profilesBm / MATERIAL_PARAMS.profileLength)
+    );
+    const adhesiveBags = Math.max(
+      1,
+      Math.ceil(area / MATERIAL_PARAMS.adhesiveCoveragePerBag)
+    );
+
+    bomAreaEl.textContent = area.toFixed(1).replace(".", ",");
+    bomMembraneAreaEl.textContent =
+      memArea.toFixed(1).replace(".", ",");
+    bomMembraneRollsEl.textContent = String(memRolls);
+    bomPerimeterEl.textContent =
+      profilesBm.toFixed(1).replace(".", ",");
+    bomProfilesCountEl.textContent = String(profilesCount);
+    bomAdhesiveBagsEl.textContent = String(adhesiveBags);
+
+    // jemný text podľa typu odtoku
+    if (state.drainOption === "edge-free") {
+      bomNoteEl.textContent =
+        "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany. Drenážna rohož pokrýva celú plochu, ukončovacie profily rátame po obvode bez styku so stenou. Lepidlo je uvedené orientačne, značku (Sopro / Mapei) si zvolíte pri ponuke.";
+    } else if (state.drainOption === "edge-gutter") {
+      bomNoteEl.textContent =
+        "Výpočet je prispôsobený balkónu s oplechovaním a žľabom. Profily budú nadväzovať na oplechovanie, plochu drenážnej rohože rátame v celej ploche, lepilo je orientačné (Sopro / Mapei).";
+    } else if (state.drainOption === "internal-drain") {
+      bomNoteEl.textContent =
+        "Pre balkón s vnútorným vpustom rátame plochu pre drenážnu rohož a orientačné množstvo lepidla. Detaily spádovania k vpustu a napojenia na odtokové prvky doplníme v PDF podklade.";
+    } else {
+      bomNoteEl.textContent =
+        "Hodnoty sú orientačné. Presný výpočet a konkrétne skladby doplníme v PDF podklade po konzultácii s technikom Lištového centra.";
+    }
+  }
+
   updateBalconyQuestionVisibility();
   updateStep3Summary();
+  updateStep2ContinueButton();
+  updateBom();
 
   if (drainOptions.length) {
     drainOptions.forEach((btn) => {
@@ -378,7 +493,10 @@ document.addEventListener("DOMContentLoaded", () => {
           other.classList.toggle("selected", other === btn);
         });
 
-        if (!recommendedName || !recommendedNote) return;
+        if (!recommendedName || !recommendedNote) {
+          updateBom();
+          return;
+        }
 
         if (opt === "edge-free") {
           recommendedName.textContent =
@@ -401,6 +519,8 @@ document.addEventListener("DOMContentLoaded", () => {
           recommendedNote.textContent =
             "Po výbere odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón. Podrobný technický popis a prierezy dostanete v PDF priamo v Lištobooku.";
         }
+
+        updateBom();
       });
     });
   }

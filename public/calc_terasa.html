@@ -869,6 +869,25 @@
         font-size: 0.82rem;
       }
     }
+
+    /* === MOBILNÉ ÚPRAVY KROKU 2 – aby nič neprečnievalo === */
+    @media (max-width: 640px) {
+      .step2-shell {
+        padding: 16px 12px 18px;
+      }
+
+      .dim-row {
+        flex-direction: column;
+      }
+
+      .dim-row .field {
+        width: 100%;
+      }
+
+      .step2-layout {
+        gap: 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1214,7 +1233,7 @@
             <button type="button" class="btn-inline" id="backToStep1Btn">
               ‹ Späť na krok 1
             </button>
-            <button type="button" class="btn-primary" id="goToStep3Btn">
+            <button type="button" class="btn-primary" id="goToStep3Btn" disabled>
               Pokračovať na krok 3 (skladba) ›
             </button>
           </div>
@@ -1310,6 +1329,44 @@
             <div class="recommended-note" id="recommendedNote">
               Po výbere odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón.
               Podrobný technický popis a prierezy dostanete v PDF priamo v Lištobooku.
+            </div>
+          </div>
+
+          <!-- Orientačné množstvá materiálu -->
+          <div class="recommended-box" id="bomBox">
+            <div class="summary-label">Orientačné množstvá materiálu</div>
+            <table class="summary-table">
+              <tbody>
+                <tr>
+                  <th>Plocha pre výpočet</th>
+                  <td><span id="bomArea">–</span> m²</td>
+                </tr>
+                <tr>
+                  <th>Drenážna / separačná rohož</th>
+                  <td>
+                    <span id="bomMembraneArea">–</span> m² /
+                    cca <span id="bomMembraneRolls">–</span> rol.
+                  </td>
+                </tr>
+                <tr>
+                  <th>Ukončovacie profily</th>
+                  <td>
+                    <span id="bomPerimeter">–</span> bm /
+                    cca <span id="bomProfilesCount">–</span> ks
+                  </td>
+                </tr>
+                <tr>
+                  <th>Lepidlo (Sopro / Mapei)</th>
+                  <td>
+                    cca <span id="bomAdhesiveBags">–</span> vriec –
+                    značku si vyberiete podľa preferencie.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="recommended-note" id="bomNote">
+              Hodnoty sú orientačné. Presný výpočet a konkrétne skladby doplníme v PDF podklade
+              po konzultácii s technikom Lištového centra.
             </div>
           </div>
         </div>
