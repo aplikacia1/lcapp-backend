@@ -441,14 +441,12 @@ document.addEventListener("DOMContentLoaded", () => {
       updateStep3Summary();
       updateBom();
 
-      // MOBILNÉ POTVRDENIE
-      if (window.innerWidth <= 768) {
-        const msg = label
-          ? `Vybrali ste: ${label}.\n\nPrejsť na krok 2 – tvar a rozmery?`
-          : "Prejsť na krok 2 – tvar a rozmery?";
-        if (window.confirm(msg)) {
-          showStep(2);
-        }
+      // MOBIL: po výbere typu poscrolluj k tlačidlu "Pokračovať na krok 2"
+      if (window.innerWidth <= 768 && goToStep2Btn) {
+        goToStep2Btn.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
       }
     });
   }
@@ -486,6 +484,20 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!card) return;
       const shapeKey = card.dataset.shape;
       setShape(shapeKey);
+
+      // MOBIL: po výbere tvaru poscrolluj k poliam s rozmermi a zaostri na A
+      if (window.innerWidth <= 768) {
+        const sideAInput = dimInputs.A;
+        if (sideAInput) {
+          sideAInput.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+          setTimeout(() => {
+            sideAInput.focus();
+          }, 350);
+        }
+      }
     });
   }
 
