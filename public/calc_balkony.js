@@ -1,9 +1,10 @@
 // public/calc_balkony.js
 document.addEventListener("DOMContentLoaded", () => {
-  // --- PARAMETRE Z URL (email + label z kroku 1) ---
+  // ---------------------------------------------------------------------------
+  // EMAIL v hlavičke + späť
+  // ---------------------------------------------------------------------------
   const params = new URLSearchParams(window.location.search);
   const email = params.get("email");
-  const typeLabelFromUrl = params.get("typeLabel");
 
   const userChip = document.getElementById("userChip");
   if (userChip) {
@@ -12,17 +13,14 @@ document.addEventListener("DOMContentLoaded", () => {
       : "Prihlásený: –";
   }
 
-  const typeLabelText = document.getElementById("typeLabelText");
-  if (typeLabelText && typeLabelFromUrl) {
-    typeLabelText.textContent = typeLabelFromUrl;
-  }
-
   const backBtn = document.getElementById("backBtn");
   if (backBtn) {
     backBtn.addEventListener("click", () => {
       const target = "calc_terasa_base.html";
       if (email) {
-        window.location.href = `${target}?email=${encodeURIComponent(email)}`;
+        window.location.href = `${target}?email=${encodeURIComponent(
+          email
+        )}`;
       } else {
         window.location.href = target;
       }
@@ -32,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
   // PARAMETRE MATERIÁLOV
   // ---------------------------------------------------------------------------
+
   const MATERIAL_DB = {
     DITRA: {
       key: "DITRA",
@@ -65,30 +64,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Balíčky pre vysunutý balkón
-  const BALCONY_SYSTEMS = {
-    "edge-free": {
-      key: "edge-free",
-      membraneKey: "DITRA_DRAIN_4",
-      profileKey: "BARA_RT",
-      gutterKey: null,
-      drainKey: null
-    },
-    "edge-gutter": {
-      key: "edge-gutter",
-      membraneKey: "DITRA_DRAIN_4",
-      profileKey: "BARA_RTKE",
-      gutterKey: "BARIN",
-      drainKey: null
-    },
-    "internal-drain": {
-      key: "internal-drain",
-      membraneKey: "DITRA",
-      profileKey: "BARA_RT",
-      gutterKey: null,
-      drainKey: "KERDI_DRAIN"
-    }
-  };
+  // ---------------------------------------------------------------------------
+  // SYSTÉMY BALKÓNOV – z config_balkony.js alebo fallback na základné 3
+  // ---------------------------------------------------------------------------
+  const BALCONY_SYSTEMS =
+    window.BALCONY_SYSTEMS || {
+      "edge-free": {
+        key: "edge-free",
+        membraneKey: "DITRA_DRAIN_4",
+        profileKey: "BARA_RT",
+        gutterKey: null,
+        drainKey: null
+      },
+      "edge-gutter": {
+        key: "edge-gutter",
+        membraneKey: "DITRA_DRAIN_4",
+        profileKey: "BARA_RTKE",
+        gutterKey: "BARIN",
+        drainKey: null
+      },
+      "internal-drain": {
+        key: "internal-drain",
+        membraneKey: "DITRA",
+        profileKey: "BARA_RT",
+        gutterKey: null,
+        drainKey: "KERDI_DRAIN"
+      }
+    };
+
+  console.log("Konfigurácia balkónov:", BALCONY_SYSTEMS);
 
   function getMaterial(key) {
     return key ? MATERIAL_DB[key] || null : null;
@@ -110,7 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(1, Math.ceil(neededAreaM2 / mat.coverageM2PerBag));
   }
 
-  // --- Náhľadové obrázky pre balkón (technický rez) ---
   const PREVIEW_IMAGES = {
     "edge-free": {
       src: "img/systems/balkon-edge-free.png",
@@ -129,16 +132,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // --- Spoločný stav ---
+  // ---------------------------------------------------------------------------
+  // SPOLOČNÝ STAV
+  // ---------------------------------------------------------------------------
   const state = {
     currentStep: 2,
-    constructionTypeKey: "balcony-cantilever",
-    constructionLabel: typeLabelFromUrl || "Vysunutý balkón (konzola)",
+    fromStep1TypeKey: params.get("type") || "balcony-cantilever",
+    fromStep1TypeLabel: params.get("label") || "Vysunutý balkón (konzola)",
     shapeKey: "square",
     dims: {},
     area: null,
-    totalPerimeter: null, // geometrický obvod (všetky strany)
-    perimeter: null,      // obvod pre profily = bez stien
+    perimeter: null, // obvod pre lišty (po odrátaní stien)
+    drainOption: null,
     wallSides: {
       A: false,
       B: false,
@@ -146,26 +151,26 @@ document.addEventListener("DOMContentLoaded", () => {
       D: false,
       E: false,
       F: false
-    },
-    drainOption: null
+    }
   };
 
-  // --- Prepínanie krokov ---
-  const stepSections = Array.from(document.querySelectorAll(".step-section"));
+  // ---------------------------------------------------------------------------
+  // ELEMENTY – kroky
+  // ---------------------------------------------------------------------------
 
+  const stepSections = Array.from(document.querySelectorAll(".step-section"));
   function showStep(stepNo) {
     state.currentStep = stepNo;
     stepSections.forEach((sec) => {
       sec.classList.toggle("active", sec.id === `step${stepNo}`);
     });
-
     const stepEl = document.getElementById(`step${stepNo}`);
     if (stepEl) {
       stepEl.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 
-  // --- KROK 2 – tvary a rozmery ---
+  // --- KROK 2 ---
   const shapeGrid = document.getElementById("shapeGrid");
   const dimShapeInfo = document.getElementById("dimShapeInfo");
 
@@ -193,11 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const backToStep1Btn = document.getElementById("backToStep1Btn");
   const goToStep3Btn = document.getElementById("goToStep3Btn");
 
-  const wallCheckboxes = Array.from(
-    document.querySelectorAll(".wall-side-checkbox")
-  );
-
-  // --- KROK 3 – sumarizácia + odtok vody ---
+  // --- KROK 3 ---
   const k3TypeEl = document.getElementById("k3Type");
   const k3ShapeEl = document.getElementById("k3Shape");
   const k3AreaEl = document.getElementById("k3Area");
@@ -207,7 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const recommendedName = document.getElementById("recommendedName");
   const recommendedNote = document.getElementById("recommendedNote");
 
-  // BOM prvky
   const bomAreaEl = document.getElementById("bomArea");
   const bomMembraneAreaEl = document.getElementById("bomMembraneArea");
   const bomPerimeterEl = document.getElementById("bomPerimeter");
@@ -215,14 +215,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const bomAdhesiveBagsEl = document.getElementById("bomAdhesiveBags");
   const bomNoteEl = document.getElementById("bomNote");
 
-  // Náhľad – prvky
   const previewBtn = document.getElementById("previewBtn");
   const previewModal = document.getElementById("previewModal");
   const previewImage = document.getElementById("previewImage");
   const previewCaption = document.getElementById("previewCaption");
   const previewCloseBtn = document.getElementById("previewCloseBtn");
 
-  // --- KONFIGURÁCIA TVAROV ---
+  // ---------------------------------------------------------------------------
+  // TVARY
+  // ---------------------------------------------------------------------------
+
   const shapeConfigs = {
     square: {
       label: "Štvorec",
@@ -239,11 +241,14 @@ document.addEventListener("DOMContentLoaded", () => {
       label: "Balkón v tvare L",
       sides: ["A", "B", "C", "D", "E", "F"],
       info:
-        "Balkón v tvare L – doplňte postupne všetkých 6 strán A–F v smere hodinových ručičiek okolo balkóna."
+        "Balkón v tvare L – doplňte všetkých 6 strán A–F v smere hodinových ručičiek."
     }
   };
 
-  // --- Pomocné funkcie ---
+  // ---------------------------------------------------------------------------
+  // POMOCNÉ FUNKCIE
+  // ---------------------------------------------------------------------------
+
   function parseVal(v) {
     if (v === null || v === undefined || v === "") return null;
     const num = parseFloat(String(v).replace(",", "."));
@@ -253,7 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function canGoToStep3() {
     const d = state.dims;
-
     if (state.shapeKey === "square") {
       return d.A != null;
     } else if (state.shapeKey === "rectangle") {
@@ -269,6 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     goToStep3Btn.disabled = !canGoToStep3();
   }
 
+  // geometrický obvod
   function computeAreaPerimeter(shapeKey, d) {
     let area = null;
     let per = null;
@@ -290,41 +295,42 @@ document.addEventListener("DOMContentLoaded", () => {
       const sides = ["A", "B", "C", "D", "E", "F"].map((k) => d[k]);
       if (sides.every((v) => v != null)) {
         per = sides.reduce((sum, v) => sum + v, 0);
-        // plocha L-tvaru – nechávame na konzultáciu
+        // plochu L nechávame na konzultáciu
       }
     }
 
     return { area, perimeter: per };
   }
 
-  function computeProfilePerimeter(totalPerimeter, dims, wallSides) {
-    if (totalPerimeter == null) return null;
-    let subtract = 0;
-    for (const side of ["A", "B", "C", "D", "E", "F"]) {
-      if (wallSides[side] && dims[side] != null) {
-        subtract += dims[side];
+  function getWallDeduction(dims) {
+    let deduction = 0;
+    for (const [side, isWall] of Object.entries(state.wallSides)) {
+      if (!isWall) continue;
+      const len = dims[side];
+      if (len != null) {
+        deduction += len;
       }
     }
-    const result = totalPerimeter - subtract;
-    return result > 0 ? result : 0;
+    return deduction;
   }
 
   function updateStep3Summary() {
     if (k3TypeEl) {
-      k3TypeEl.textContent = state.constructionLabel || "Vysunutý balkón (konzola)";
+      k3TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
     }
     if (k3ShapeEl) {
       const cfg = shapeConfigs[state.shapeKey];
       k3ShapeEl.textContent = cfg ? cfg.label : "–";
     }
 
+    const d = state.dims;
+    const isLShape = state.shapeKey === "l-shape";
+    const allL = ["A", "B", "C", "D", "E", "F"].every((k) => d[k] != null);
+
     if (k3AreaEl) {
       if (state.area != null) {
         k3AreaEl.textContent = state.area.toFixed(1).replace(".", ",");
-      } else if (
-        state.shapeKey === "l-shape" &&
-        ["A", "B", "C", "D", "E", "F"].every((k) => state.dims[k] != null)
-      ) {
+      } else if (isLShape && allL) {
         k3AreaEl.textContent = "dopočítame pri konzultácii";
       } else {
         k3AreaEl.textContent = "–";
@@ -351,22 +357,21 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const hasDrain = !!state.drainOption;
     const area = state.area;
-    const perProfiles = state.perimeter;
+    const per = state.perimeter;
 
-    function resetBom(placeNote) {
+    function resetBom(note) {
       bomAreaEl.textContent = "–";
       bomMembraneAreaEl.textContent = "–";
       bomPerimeterEl.textContent = "–";
       bomProfilesCountEl.textContent = "–";
       bomAdhesiveBagsEl.textContent = "–";
       bomNoteEl.textContent =
-        placeNote ||
+        note ||
         "Hodnoty sú orientačné. Presný výpočet doplníme po konzultácii s technikom Lištového centra.";
     }
 
-    if (!hasDrain) {
+    if (!state.drainOption) {
       resetBom(
         "Najprv vyberte spôsob odtoku vody z balkóna. Podľa toho pripravíme orientačný prepočet materiálu."
       );
@@ -374,15 +379,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (state.shapeKey === "l-shape") {
-      resetBom(
-        "Pri balkóne v tvare L zatiaľ zobrazujeme len obvod. Plochu a orientačné množstvá materiálu doplníme po konzultácii v Lištovom centre."
-      );
+      if (per != null) {
+        bomAreaEl.textContent = "–";
+        bomMembraneAreaEl.textContent = "–";
+        bomPerimeterEl.textContent = per.toFixed(1).replace(".", ",");
+        bomProfilesCountEl.textContent = "cca –";
+        bomAdhesiveBagsEl.textContent = "–";
+        bomNoteEl.textContent =
+          "Pri balkóne v tvare L zatiaľ zobrazujeme len obvod. Plochu a orientačné množstvá materiálu doplníme po individuálnom návrhu v Lištobooku.";
+      } else {
+        resetBom();
+      }
       return;
     }
 
-    if (area == null || perProfiles == null) {
+    if (area == null || per == null) {
       resetBom(
-        "Na výpočet materiálu potrebujeme mať doplnené rozmery tak, aby sme vedeli plochu aj obvod balkóna bez strán pri stene."
+        "Na výpočet materiálu potrebujeme mať doplnené rozmery tak, aby sme vedeli plochu aj obvod balkóna."
       );
       return;
     }
@@ -393,14 +406,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const profileCount = computePiecesByLength(system.profileKey, perProfiles);
+    const profileCount = computePiecesByLength(system.profileKey, per);
     const adhesiveBags = computeAdhesiveBags(area);
 
     bomAreaEl.textContent = area.toFixed(1).replace(".", ",");
     bomMembraneAreaEl.textContent = area.toFixed(1).replace(".", ",");
 
     if (profileCount != null) {
-      bomPerimeterEl.textContent = perProfiles.toFixed(1).replace(".", ",");
+      bomPerimeterEl.textContent = per.toFixed(1).replace(".", ",");
       bomProfilesCountEl.textContent = String(profileCount);
     } else {
       bomPerimeterEl.textContent = "–";
@@ -412,10 +425,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (state.drainOption === "edge-free") {
       bomNoteEl.textContent =
-        "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany bez strán pri stene. Drenážna rohož Schlüter®-DITRA-DRAIN pokrýva celú plochu, ukončovacie profily BARA-RT rátame po voľných hranách. Lepidlo (Sopro / Mapei) je uvedené orientačne.";
+        "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany (bez stien). Drenážna rohož Schlüter®-DITRA-DRAIN pokrýva celú plochu, ukončovacie profily BARA-RT rátame len po voľných hranách. Lepidlo (Sopro / Mapei) je uvedené orientačne.";
     } else if (state.drainOption === "edge-gutter") {
       bomNoteEl.textContent =
-        "Výpočet je prispôsobený balkónu s oplechovaním a žľabom. Profily BARA-RTKE nadväzujú na oplechovanie a nesú žľab Schlüter®-BARIN. Drenážna rohož DITRA-DRAIN pokrýva celú plochu, ukončovacie profily rátame bez strán pri stene. Lepidlo (Sopro / Mapei) je orientačné.";
+        "Výpočet je prispôsobený balkónu s oplechovaním a žľabom. Profily BARA-RTKE nadväzujú na oplechovanie a nesú žľab Schlüter®-BARIN. Drenážna rohož DITRA-DRAIN pokrýva celú plochu, lepidlo je uvedené orientačne (Sopro / Mapei).";
     } else if (state.drainOption === "internal-drain") {
       bomNoteEl.textContent =
         "Pre balkón s vnútorným vpustom rátame plochu pre kontaktnú izoláciu a oddeľovaciu rohož Schlüter®-DITRA a orientačné množstvo lepidla. Detaily spádovania k vpustu a napojenia na prvky KERDI-DRAIN doplníme v PDF podklade.";
@@ -441,24 +454,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     state.dims = dims;
-    const res = computeAreaPerimeter(state.shapeKey, dims);
-    state.area = res.area;
-    state.totalPerimeter = res.perimeter;
 
-    const profilePerimeter = computeProfilePerimeter(
-      res.perimeter,
-      dims,
-      state.wallSides
-    );
-    state.perimeter = profilePerimeter;
+    const base = computeAreaPerimeter(state.shapeKey, dims);
+    state.area = base.area;
+
+    let per = base.perimeter;
+    if (per != null) {
+      const deduction = getWallDeduction(dims);
+      per = Math.max(0, per - deduction);
+    }
+    state.perimeter = per;
 
     const isLShape = state.shapeKey === "l-shape";
     const lComplete =
       isLShape && ["A", "B", "C", "D", "E", "F"].every((k) => dims[k] != null);
 
     if (summaryAreaEl) {
-      if (res.area != null) {
-        summaryAreaEl.textContent = res.area.toFixed(1).replace(".", ",");
+      if (state.area != null) {
+        summaryAreaEl.textContent = state.area.toFixed(1).replace(".", ",");
       } else if (lComplete) {
         summaryAreaEl.textContent = "dopočítame pri konzultácii";
       } else {
@@ -468,8 +481,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (summaryPerimeterEl) {
       summaryPerimeterEl.textContent =
-        profilePerimeter != null
-          ? profilePerimeter.toFixed(1).replace(".", ",")
+        state.perimeter != null
+          ? state.perimeter.toFixed(1).replace(".", ",")
           : "–";
     }
 
@@ -498,17 +511,9 @@ document.addEventListener("DOMContentLoaded", () => {
       field.classList.toggle("hidden", !activeSides.has(side));
     });
 
-    // schovať/ukázať checkboxy pre strany pri stene
-    ["A", "B", "C", "D", "E", "F"].forEach((side) => {
-      const labelEl = document.querySelector(`.wall-side-${side}`);
-      if (!labelEl) return;
-      labelEl.classList.toggle("hidden", !activeSides.has(side));
-    });
-
     recomputeFromInputs();
   }
 
-  // --- Náhľad – tlačidlo enable/disable ---
   function updatePreviewButton() {
     if (!previewBtn) return;
     const opt = state.drainOption;
@@ -520,7 +525,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function openPreviewModal() {
-    if (!previewModal || !previewImage || !previewCaption || !previewBtn) return;
+    if (!previewModal || !previewImage || !previewCaption || !previewBtn)
+      return;
     const key = previewBtn.dataset.previewKey;
     if (!key) return;
     const cfg = PREVIEW_IMAGES[key];
@@ -537,7 +543,10 @@ document.addEventListener("DOMContentLoaded", () => {
     previewModal.classList.remove("visible");
   }
 
-  // --- LISTENERY KROKU 2 ---
+  // ---------------------------------------------------------------------------
+  // LISTENERY – KROK 2
+  // ---------------------------------------------------------------------------
+
   if (shapeGrid) {
     shapeGrid.addEventListener("click", (e) => {
       const card = e.target.closest(".shape-card");
@@ -564,21 +573,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // strany pri stene
-  wallCheckboxes.forEach((chk) => {
-    chk.addEventListener("change", () => {
-      const side = chk.dataset.side;
+  // ✅ checkboxy pre strany pri stene
+  const wallCheckboxNodeList = Array.from(
+    document.querySelectorAll('input[type="checkbox"][data-side]')
+  );
+  const wallCheckboxes = {};
+
+  if (wallCheckboxNodeList.length > 0) {
+    wallCheckboxNodeList.forEach((cb) => {
+      const side = (cb.dataset.side || "").toUpperCase();
       if (!side) return;
-      state.wallSides[side] = chk.checked;
+      wallCheckboxes[side] = cb;
+    });
+  } else {
+    // fallback na ID
+    ["A", "B", "C", "D", "E", "F"].forEach((side) => {
+      const cb = document.getElementById(`wall${side}`);
+      if (cb) wallCheckboxes[side] = cb;
+    });
+  }
+
+  for (const [side, checkbox] of Object.entries(wallCheckboxes)) {
+    checkbox.addEventListener("change", () => {
+      state.wallSides[side] = checkbox.checked;
       recomputeFromInputs();
     });
-  });
+  }
 
   if (backToStep1Btn) {
     backToStep1Btn.addEventListener("click", () => {
       const target = "calc_terasa_base.html";
       if (email) {
-        window.location.href = `${target}?email=${encodeURIComponent(email)}`;
+        window.location.href = `${target}?email=${encodeURIComponent(
+          email
+        )}`;
       } else {
         window.location.href = target;
       }
@@ -593,7 +621,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- LISTENERY KROKU 3 – odtok vody + náhľad ---
+  // ---------------------------------------------------------------------------
+  // LISTENERY – KROK 3
+  // ---------------------------------------------------------------------------
+
   if (drainOptions.length) {
     drainOptions.forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -607,24 +638,24 @@ document.addEventListener("DOMContentLoaded", () => {
         if (recommendedName && recommendedNote) {
           if (opt === "edge-free") {
             recommendedName.textContent =
-              "Vysunutý balkón s voľnou hranou – systém Schlüter®-BARRA / BARA-RT + drenážny koberec.";
+              "Voda steká cez voľnú hranu – základná skladba balkóna.";
             recommendedNote.textContent =
-              "Základná skladba pre balkóny, kde voda voľne odkvapkáva z hrany. Odporúčame kombináciu ukončovacích profilov BARRA / BARA-RT, drenážnej rohože DITRA-DRAIN a bezpečného spádu smerom od steny.";
+              "Základná skladba pre balkóny, kde voda voľne odkvapkáva z hrany. Odporúčame kombináciu ukončovacích profilov BARA-RT, drenážnej rohože DITRA-DRAIN a bezpečného spádu smerom od steny.";
           } else if (opt === "edge-gutter") {
             recommendedName.textContent =
-              "Balkón s oplechovaním a odkvapovým žľabom – systém Schlüter®-BARIN.";
+              "Voda ide do žľabu pri hrane – systém Schlüter®-BARIN.";
             recommendedNote.textContent =
-              "Skladba vhodná pre balkóny, kde je voda odvádzaná do žľabu pri hrane. Profily BARA-RTKE vytvárajú okapovú hranu a nesú žľab BARIN, pod ktorým je drenážna rohož DITRA-DRAIN.";
+              "Skladba vhodná pre balkóny s oplechovaním a žľabom pri hrane. Profily BARA-RTKE vytvárajú okapovú hranu a nesú žľab BARIN, pod ktorým je drenážna rohož DITRA-DRAIN.";
           } else if (opt === "internal-drain") {
             recommendedName.textContent =
-              "Balkón s vnútorným vpustom – kombinácia Schlüter®-KERDI a bodového odtoku.";
+              "Voda odteká do vpustu v podlahe – kombinácia Schlüter®-KERDI a oddeľovacej rohože.";
             recommendedNote.textContent =
-              "Pre balkóny s odtokom do vpustu v podlahe volíme skladbu so spádovaním smerom k vpustu, kontaktnou izoláciou KERDI, oddeľovacou rohožou DITRA / DITRA-DRAIN a prvkami KERDI-DRAIN. Detail vám pripravíme v PDF výstupe.";
+              "Pre balkóny s odtokom do vpustu v podlahe volíme skladbu so spádom k vpustu, kontaktnou izoláciou KERDI, oddeľovacou rohožou DITRA / DITRA-DRAIN a prvkami KERDI-DRAIN. Detail riešime v PDF výstupe.";
           } else {
             recommendedName.textContent =
               "Zatiaľ nevybraná – zvoľte odtok vody.";
             recommendedNote.textContent =
-              "Po výbere odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón. Podrobný technický popis a prierezy dostanete v PDF priamo v Lištobooku.";
+              "Po výbere odtoku vody vám zobrazíme vhodnú skladbu pre vysunutý balkón. Podrobný technický popis a prierezy dostanete v PDF priamo v Lištobooku.";
           }
         }
 
@@ -653,7 +684,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- INITIALIZÁCIA ---
+  // ---------------------------------------------------------------------------
+  // INITIALIZÁCIA
+  // ---------------------------------------------------------------------------
+
+  if (k3TypeEl) {
+    k3TypeEl.textContent = state.fromStep1TypeLabel;
+  }
+
   showStep(2);
   setShape("square");
   updateStep2ContinueButton();

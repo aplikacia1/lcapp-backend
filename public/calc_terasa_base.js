@@ -1,6 +1,8 @@
-// public/calc_terasa.js
+// public/calc_terasa_base.js
 document.addEventListener("DOMContentLoaded", () => {
-  // --- EMAIL v hlavičke ---
+  // ---------------------------------------------------------------------------
+  // EMAIL v hlavičke + tlačidlo späť
+  // ---------------------------------------------------------------------------
   const params = new URLSearchParams(window.location.search);
   const email = params.get("email");
 
@@ -23,26 +25,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Stav kroku 1 ---
+  // ---------------------------------------------------------------------------
+  // KROK 1 – výber typu konštrukcie (iba vizuál + preklik na špecializované kalkulačky)
+  // ---------------------------------------------------------------------------
+  const constructionGrid = document.getElementById("constructionGrid");
+  const currentTypeLabel = document.getElementById("currentTypeLabel");
+  const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+  const goToStep2Btn = document.getElementById("goToStep2Btn"); // tlačidlo „Pokračovať na výpočet ›“
+
+  // vnútorný stav
   const state = {
     constructionTypeKey: null,
     constructionLabel: null
   };
 
-  const constructionGrid = document.getElementById("constructionGrid");
-  const currentTypeLabel = document.getElementById("currentTypeLabel");
-  const clearSelectionBtn = document.getElementById("clearSelectionBtn");
-  const goToCalcBtn = document.getElementById("goToCalcBtn");
-
-  // kam sa ide podľa typu
-  const TYPE_TARGETS = {
-    "covered-terrace": "calc_terasa_kryta.html",
-    "terrace-over-room": "calc_terasa_poschodie.html",
-    "ground-terrace": "calc_terasa_teren.html",
-    "balcony-cantilever": "calc_balkony.html"
-  };
-
-  // výber typu kliknutím na kartu
+  // po kliknutí na kartu typu
   if (constructionGrid) {
     constructionGrid.addEventListener("click", (e) => {
       const card = e.target.closest(".type-card");
@@ -54,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.constructionTypeKey = type;
       state.constructionLabel = label;
 
+      // vizuálna selekcia kariet
       document
         .querySelectorAll(".type-card")
         .forEach((c) => c.classList.toggle("selected", c === card));
@@ -61,8 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (currentTypeLabel) {
         currentTypeLabel.textContent = label || "žiadny";
       }
-      if (goToCalcBtn) {
-        goToCalcBtn.disabled = !type;
+
+      // tlačidlo „Pokračovať na výpočet“ povolíme vždy,
+      // ale neskôr v handleri rozlíšime typ
+      if (goToStep2Btn) {
+        goToStep2Btn.disabled = false;
       }
     });
   }
@@ -72,33 +73,48 @@ document.addEventListener("DOMContentLoaded", () => {
     clearSelectionBtn.addEventListener("click", () => {
       state.constructionTypeKey = null;
       state.constructionLabel = null;
+
       document
         .querySelectorAll(".type-card")
         .forEach((c) => c.classList.remove("selected"));
-      if (currentTypeLabel) currentTypeLabel.textContent = "žiadny";
-      if (goToCalcBtn) goToCalcBtn.disabled = true;
+
+      if (currentTypeLabel) {
+        currentTypeLabel.textContent = "žiadny";
+      }
+
+      if (goToStep2Btn) {
+        goToStep2Btn.disabled = true;
+      }
     });
   }
 
-  // prechod na konkrétnu kalkulačku (krok 2+3)
-  if (goToCalcBtn) {
-    goToCalcBtn.addEventListener("click", () => {
-      const type = state.constructionTypeKey;
-      const label = state.constructionLabel;
-      if (!type || !TYPE_TARGETS[type]) {
+  // klik na „Pokračovať na výpočet ›“
+  if (goToStep2Btn) {
+    goToStep2Btn.addEventListener("click", () => {
+      if (!state.constructionTypeKey) {
+        // poistka – nemal by nastať, keďže bez výberu je tlačidlo disabled
         alert("Najprv vyberte typ balkóna alebo terasy.");
         return;
       }
 
-      const target = TYPE_TARGETS[type];
-      const qp = new URLSearchParams();
-
-      if (email) qp.set("email", email);
-      qp.set("type", type);
-      if (label) qp.set("typeLabel", label);
-
-      const url = qp.toString() ? `${target}?${qp.toString()}` : target;
-      window.location.href = url;
+      // zatiaľ máme spravenú iba kalkulačku pre vysunutý balkón
+      if (state.constructionTypeKey === "balcony-cantilever") {
+        const target = "calc_balkony.html";
+        if (email) {
+          window.location.href = `${target}?email=${encodeURIComponent(email)}`;
+        } else {
+          window.location.href = target;
+        }
+      } else {
+        // ostatné typy – len informácia, kalkulačky doplníme neskôr
+        alert(
+          "Kalkulačka pre tento typ terasy/balkóna sa pripravuje.\n" +
+            "Zatiaľ je k dispozícii iba samostatná kalkulačka pre vysunutý balkón."
+        );
+      }
     });
+
+    // pri načítaní stránky je tlačidlo neaktívne
+    goToStep2Btn.disabled = true;
   }
 });

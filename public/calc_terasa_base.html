@@ -11,15 +11,20 @@
       --gap: 16px;
       --hdr-h: 96px;
       --panel-border: rgba(255, 255, 255, 0.16);
+      --desk-footer-h: 36px;
       --brand-bg: #050c22;
       --brand-bg2: #0b1636;
       --accent-yellow: #fbbf24;
+      --accent-yellow-soft: rgba(251, 191, 36, 0.09);
       --accent-border: rgba(251, 191, 36, 0.5);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
@@ -37,12 +42,21 @@
       text-decoration: none;
     }
 
-    .desktop-only { display: block; }
-    .mobile-only { display: none; }
+    .desktop-only {
+      display: block;
+    }
+
+    .mobile-only {
+      display: none;
+    }
 
     @media (max-width: 640px) {
-      .desktop-only { display: none; }
-      .mobile-only { display: block; }
+      .desktop-only {
+        display: none;
+      }
+      .mobile-only {
+        display: block;
+      }
     }
 
     /* HEADER */
@@ -128,7 +142,9 @@
     }
 
     @media (min-width: 992px) {
-      .safety-stripes { display: block; }
+      .safety-stripes {
+        display: block;
+      }
 
       .safety-stripes::before,
       .safety-stripes::after {
@@ -149,11 +165,16 @@
         filter: blur(1px);
       }
 
-      .safety-stripes::before { left: 0; }
-      .safety-stripes::after { right: 0; }
+      .safety-stripes::before {
+        left: 0;
+      }
+
+      .safety-stripes::after {
+        right: 0;
+      }
     }
 
-    /* KROK 1 */
+    /* KROK 1 – karta */
     .card-shell {
       background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
       border-radius: 22px;
@@ -163,7 +184,9 @@
     }
 
     @media (min-width: 960px) {
-      .card-shell { padding: 22px 22px 24px; }
+      .card-shell {
+        padding: 22px 22px 24px;
+      }
     }
 
     .step-header-row {
@@ -210,6 +233,7 @@
       }
     }
 
+    /* Typy konštrukcie */
     .type-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -286,6 +310,10 @@
       color: #e5e7eb;
     }
 
+    .type-chip span {
+      font-size: 0.7rem;
+    }
+
     .type-title {
       font-size: 0.86rem;
       font-weight: 600;
@@ -297,6 +325,7 @@
       color: #d1d5db;
     }
 
+    /* Info panel */
     .info-panel {
       border-radius: 18px;
       padding: 12px 13px 13px;
@@ -353,7 +382,9 @@
       color: #facc15;
     }
 
-    .info-current span { color: #e5e7eb; }
+    .info-current span {
+      color: #e5e7eb;
+    }
 
     .actions-row {
       margin-top: 16px;
@@ -379,7 +410,9 @@
       gap: 6px;
     }
 
-    .btn-inline span { font-size: 0.85rem; }
+    .btn-inline span {
+      font-size: 0.85rem;
+    }
 
     .btn-primary {
       border-radius: 999px;
@@ -415,13 +448,23 @@
       font-size: 0.72rem;
       color: #cbd5f5;
       text-align: center;
-      margin-top: 20px;
+      margin-top: 14px;
     }
 
     footer .legal {
       font-size: 0.67rem;
       margin-top: 3px;
       opacity: 0.9;
+    }
+
+    @media (max-width: 600px) {
+      .page-title {
+        font-size: 1.15rem;
+      }
+
+      .page-subtitle {
+        font-size: 0.82rem;
+      }
     }
   </style>
 </head>
@@ -458,10 +501,10 @@
     <h1 class="page-title">Schlüter® terasa – kalkulačka</h1>
     <p class="page-subtitle">
       <span class="desktop-only">
-        Krok 1 z 3 – vyberte typ balkóna alebo terasy. Krok 2 a 3 sa otvoria v samostatnej kalkulačke pre zvolený typ.
+        Krok 1 z 3 – vyberte typ balkóna alebo terasy. Podľa výberu sa otvorí ďalšia špecializovaná kalkulačka.
       </span>
       <span class="mobile-only">
-        KROK 1 – vyberte, čo riešite. Ďalšie kroky sa otvoria v novej obrazovke.
+        Najprv zvoľte, čo riešite – balkón, strešnú terasu alebo terasu na teréne.
       </span>
     </p>
 
@@ -476,7 +519,7 @@
             Intuitívny výber – stačí kliknúť na obrázok, ktorý sa najviac podobá vašej situácii.
           </span>
           <span class="mobile-only">
-            Ťuknite na obrázok balkóna alebo terasy, ktorý sa najviac podobá vašej stavbe.
+            KROK 1 – čo chcete riešiť? Ťuknite na obrázok balkóna alebo terasy.
           </span>
         </div>
       </div>
@@ -576,9 +619,9 @@
           </div>
           <div class="info-title desktop-only">Čo práve nastavujeme?</div>
           <p class="info-text desktop-only">
-            V tomto kroku len vyberieme typ konštrukcie – teda to, či ide o terasu na poschodí,
-            strešnú terasu, terasu na teréne alebo vysunutý balkón. Podľa výberu sa otvorí samostatná kalkulačka,
-            kde zadáte tvar, rozmery a skontrolujeme skladbu systému Schlüter®.
+            V prvom kroku len vyberieme typ konštrukcie – teda to, či ide o terasu na poschodí, strešnú terasu
+            alebo vysunutý balkón. Podľa výberu sa otvorí špecializovaná kalkulačka
+            s ďalšími krokmi a výpočtom.
           </p>
           <div class="info-tip desktop-only">
             Tip: Ak si nie ste istí, zvoľte možnosť, ktorá sa najviac podobá vašej stavbe.
@@ -594,7 +637,7 @@
         <button type="button" class="btn-inline" id="clearSelectionBtn">
           <span>✕</span> Vymazať výber
         </button>
-        <button type="button" class="btn-primary" id="goToCalcBtn" disabled>
+        <button type="button" class="btn-primary" id="goToStep2Btn" disabled>
           Pokračovať na výpočet ›
         </button>
       </div>
@@ -603,14 +646,15 @@
     <footer>
       <div>Prepočet pripravuje <strong>Lištové centrum</strong> (listobook.sk).</div>
       <div class="legal">
-        Výpočet je orientačný a vychádza z údajov zadaných užívateľom. Presnú skladbu a cenovú ponuku
-        potvrdíme po konzultácii s technikom Lištového centra.
+        V ďalšom kroku sa podľa zvoleného typu otvorí špecializovaná kalkulačka
+        (balkón, terasa na poschodí, terasa na teréne).
       </div>
     </footer>
   </main>
 
   <script src="/js/cookies.js"></script>
   <script src="/js/config.js"></script>
-  <script src="calc_terasa.js"></script>
+  <!-- POZOR: tu už používame calc_terasa_base.js -->
+  <script src="calc_terasa_base.js"></script>
 </body>
 </html>
