@@ -3,127 +3,614 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kalkulačka – Lištobook (BASE)</title>
-  <link rel="stylesheet" href="styles/calc_terasa.css" />
+  <title>Schlüter® terasa – kalkulačka</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --max-w: 1120px;
+      --gap: 16px;
+      --hdr-h: 96px;
+      --panel-border: rgba(255, 255, 255, 0.16);
+      --brand-bg: #050c22;
+      --brand-bg2: #0b1636;
+      --accent-yellow: #fbbf24;
+      --accent-border: rgba(251, 191, 36, 0.5);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1b2b68 0, #050c22 55%, #020617 100%);
+      color: #ffffff;
+      padding-top: var(--hdr-h);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .desktop-only { display: block; }
+    .mobile-only { display: none; }
+
+    @media (max-width: 640px) {
+      .desktop-only { display: none; }
+      .mobile-only { display: block; }
+    }
+
+    /* HEADER */
+    .app-header {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 1000;
+      background: #0c1f4b;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .app-header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 8px var(--gap);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .logo-small {
+      height: 48px;
+      margin: 2px auto 6px;
+      display: block;
+    }
+
+    .user-chip {
+      color: #cfe2ff;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .icon-btn {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-content: center;
+      border: 1px solid #ffffff33;
+      border-radius: 10px;
+      color: #e7eefc;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .icon-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* LAYOUT */
+    .wrap {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 18px 16px 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-title {
+      margin: 6px 0 4px;
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+    }
+
+    .page-subtitle {
+      margin: 0 0 18px;
+      font-size: 0.88rem;
+      color: #e5e7eb;
+    }
+
+    /* Bezpečnostné pásy */
+    .safety-stripes {
+      position: fixed;
+      inset: var(--hdr-h) 0 0 0;
+      pointer-events: none;
+      z-index: 0;
+      display: none;
+    }
+
+    @media (min-width: 992px) {
+      .safety-stripes { display: block; }
+
+      .safety-stripes::before,
+      .safety-stripes::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 11vw;
+        max-width: 170px;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          #000000 0,
+          #000000 12px,
+          #facc15 12px,
+          #facc15 24px
+        );
+        opacity: 0.2;
+        filter: blur(1px);
+      }
+
+      .safety-stripes::before { left: 0; }
+      .safety-stripes::after { right: 0; }
+    }
+
+    /* KROK 1 */
+    .card-shell {
+      background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 18px 16px 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+    }
+
+    @media (min-width: 960px) {
+      .card-shell { padding: 22px 22px 24px; }
+    }
+
+    .step-header-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .step-title-main {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+
+    .step-title-main span {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      margin-right: 6px;
+    }
+
+    .step-caption {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .layout-krok1 {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .layout-krok1 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 680px) {
+      .type-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .type-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      min-height: 176px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease,
+        border-color 0.12s ease, background 0.12s ease;
+    }
+
+    .type-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 35px rgba(15, 23, 42, 0.85);
+      border-color: rgba(251, 191, 36, 0.6);
+    }
+
+    .type-card.selected {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5),
+        0 18px 40px rgba(0, 0, 0, 0.9);
+      background: radial-gradient(circle at top,
+        rgba(250, 204, 21, 0.09) 0,
+        rgba(15, 23, 42, 0.97) 52%);
+    }
+
+    .type-card-img {
+      height: 112px;
+      overflow: hidden;
+    }
+
+    .type-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scale(1.04);
+    }
+
+    .type-card-body {
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 0.8rem;
+    }
+
+    .type-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #e5e7eb;
+    }
+
+    .type-title {
+      font-size: 0.86rem;
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    .type-text {
+      font-size: 0.77rem;
+      color: #d1d5db;
+    }
+
+    .info-panel {
+      border-radius: 18px;
+      padding: 12px 13px 13px;
+      background: radial-gradient(circle at top,
+        rgba(15, 23, 42, 0.9) 0,
+        rgba(15, 23, 42, 0.96) 60%,
+        rgba(3, 7, 18, 0.98) 100%);
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      font-size: 0.8rem;
+    }
+
+    .info-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .info-tab {
+      border-radius: 999px;
+      padding: 3px 10px 4px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .info-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .info-text {
+      color: #e5e7eb;
+      margin-bottom: 8px;
+    }
+
+    .info-tip {
+      margin-top: 6px;
+      padding: 6px 7px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      color: #e5e7eb;
+    }
+
+    .info-current {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: #facc15;
+    }
+
+    .info-current span { color: #e5e7eb; }
+
+    .actions-row {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(148, 163, 184, 0.35);
+      padding-top: 10px;
+    }
+
+    .btn-inline {
+      border-radius: 999px;
+      padding: 7px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-inline span { font-size: 0.85rem; }
+
+    .btn-primary {
+      border-radius: 999px;
+      padding: 9px 18px;
+      border: none;
+      background: linear-gradient(90deg, #f59e0b, #facc15);
+      color: #111827;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 22px rgba(251, 191, 36, 0.45);
+      min-width: 210px;
+      justify-content: center;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: default;
+      box-shadow: none;
+      filter: grayscale(0.4);
+    }
+
+    .btn-primary:not(:disabled):active {
+      transform: translateY(1px);
+      box-shadow: 0 5px 16px rgba(251, 191, 36, 0.4);
+    }
+
+    footer {
+      font-size: 0.72rem;
+      color: #cbd5f5;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    footer .legal {
+      font-size: 0.67rem;
+      margin-top: 3px;
+      opacity: 0.9;
+    }
+  </style>
 </head>
 <body>
-
-<header class="calc-header">
-  <button id="backBtn" class="back-btn">← Späť</button>
-  <div id="userChip" class="user-chip">Prihlásený: –</div>
-</header>
-
-<main class="calc-main">
-
-  <!-- KROK 1 -------------------------------------------------------------->
-  <section id="step1" class="step-section active">
-    <h2>Krok 1 – Typ konštrukcie</h2>
-
-    <div id="constructionGrid" class="type-grid">
-      <div class="type-card" data-type="balcony-cantilever" data-label="Vysunutý balkón">
-        Vysunutý balkón
-      </div>
-      <div class="type-card" data-type="terrace-ground" data-label="Terasa na teréne">
-        Terasa na teréne
-      </div>
-      <div class="type-card" data-type="terrace-upper" data-label="Terasa na poschodí">
-        Terasa na poschodí
-      </div>
-      <div class="type-card" data-type="winter-garden" data-label="Zimná záhrada">
-        Zimná záhrada
-      </div>
+  <!-- HEADER -->
+  <header class="app-header" role="banner">
+    <div class="app-header-inner">
+      <button class="icon-btn" id="backBtn" aria-label="Späť">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M15 18l-6-6 6-6"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+        </svg>
+      </button>
+      <img
+        src="logo_lc.jpg"
+        alt="Lištové centrum"
+        class="logo-small"
+      />
+      <div class="user-chip" id="userChip">Prihlásený:</div>
     </div>
+  </header>
 
-    <p>Zvolený typ: <strong id="currentTypeLabel">žiadny</strong></p>
+  <!-- Bezpečnostné pásy -->
+  <div class="safety-stripes" aria-hidden="true"></div>
 
-    <div class="btn-row">
-      <button id="clearSelectionBtn" class="secondary-btn">Zrušiť výber</button>
-      <button id="goToStep2Btn" class="primary-btn" disabled>Pokračovať na krok 2</button>
-    </div>
-  </section>
-
-
-  <!-- KROK 2 -------------------------------------------------------------->
-  <section id="step2" class="step-section">
-    <h2>Krok 2 – Tvary a rozmery</h2>
-
-    <div id="shapeGrid" class="shape-grid">
-      <div class="shape-card" data-shape="square">Štvorec</div>
-      <div class="shape-card" data-shape="rectangle">Obdĺžnik</div>
-      <div class="shape-card" data-shape="l-shape">Tvar L</div>
-    </div>
-
-    <p id="dimShapeInfo" class="shape-info">Vyberte tvar.</p>
-
-    <div class="dims-container">
-
-      <div id="fieldSideA" class="dim-field">
-        <label>A (m)</label>
-        <input id="sideA" type="number" min="0" step="0.1" />
-      </div>
-
-      <div id="fieldSideB" class="dim-field hidden">
-        <label>B (m)</label>
-        <input id="sideB" type="number" min="0" step="0.1" />
-      </div>
-
-      <div id="fieldSideC" class="dim-field hidden">
-        <label>C (m)</label>
-        <input id="sideC" type="number" min="0" step="0.1" />
-      </div>
-
-      <div id="fieldSideD" class="dim-field hidden">
-        <label>D (m)</label>
-        <input id="sideD" type="number" min="0" step="0.1" />
-      </div>
-
-      <div id="fieldSideE" class="dim-field hidden">
-        <label>E (m)</label>
-        <input id="sideE" type="number" min="0" step="0.1" />
-      </div>
-
-      <div id="fieldSideF" class="dim-field hidden">
-        <label>F (m)</label>
-        <input id="sideF" type="number" min="0" step="0.1" />
-      </div>
-    </div>
-
-    <h3>Zhrnutie</h3>
-    <p>Plocha: <strong id="summaryArea">–</strong> m²</p>
-    <p>Obvod: <strong id="summaryPerimeter">–</strong> bm</p>
-
-    <div class="btn-row">
-      <button id="backToStep1Btn" class="secondary-btn">← Späť</button>
-      <button id="goToStep3Btn" class="primary-btn" disabled>Pokračovať na krok 3</button>
-    </div>
-  </section>
-
-
-  <!-- KROK 3 -------------------------------------------------------------->
-  <section id="step3" class="step-section">
-    <h2>Krok 3 – Výpočtová logika podľa typu konštrukcie</h2>
-
-    <p>
-      Táto časť sa načíta podľa toho, čo ste vybrali v kroku 1.
-      <br>
-      Pre balkóny sa použije nová logika (9 variant), pre terasy samostatná logika.
+  <!-- MAIN -->
+  <main class="wrap">
+    <h1 class="page-title">Schlüter® terasa – kalkulačka</h1>
+    <p class="page-subtitle">
+      <span class="desktop-only">
+        Krok 1 z 3 – vyberte typ balkóna alebo terasy. Krok 2 a 3 sa otvoria v samostatnej kalkulačke pre zvolený typ.
+      </span>
+      <span class="mobile-only">
+        KROK 1 – vyberte, čo riešite. Ďalšie kroky sa otvoria v novej obrazovke.
+      </span>
     </p>
 
-    <div id="step3DynamicArea" class="dynamic-area">
-      <!-- Sem neskôr vloží obsah nový modul calc_balkony.js -->
-    </div>
+    <!-- KROK 1 -->
+    <section class="card-shell" id="step1">
+      <div class="step-header-row">
+        <div class="step-title-main">
+          <span>Krok 1</span> Výber typu konštrukcie
+        </div>
+        <div class="step-caption">
+          <span class="desktop-only">
+            Intuitívny výber – stačí kliknúť na obrázok, ktorý sa najviac podobá vašej situácii.
+          </span>
+          <span class="mobile-only">
+            Ťuknite na obrázok balkóna alebo terasy, ktorý sa najviac podobá vašej stavbe.
+          </span>
+        </div>
+      </div>
 
-    <div class="btn-row">
-      <button id="backToStep2Btn" class="secondary-btn">← Späť</button>
-    </div>
-  </section>
+      <div class="layout-krok1">
+        <div>
+          <p class="desktop-only" style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
+            Vyberte typ balkóna alebo terasy. Stačí sa pozrieť na dom z boku – ako na fotke.
+          </p>
+          <div class="type-grid" id="constructionGrid">
+            <!-- 1. prekrytá terasa / zimná záhrada -->
+            <article
+              class="type-card"
+              data-type="covered-terrace"
+              data-label="Prekrytá terasa / zimná záhrada"
+            >
+              <div class="type-card-img">
+                <img src="img/terasa-zimna-zahrada.jpg" alt="Prekrytá terasa / zimná záhrada" />
+              </div>
+              <div class="type-card-body">
+                <div class="type-chip">
+                  <span>Schlüter® systém</span> terasa / balkón
+                </div>
+                <div class="type-title">Prekrytá terasa / zimná záhrada</div>
+                <div class="type-text">
+                  Konštrukcia nad priestorom alebo pivnicou. Zasklená alebo pevne zastrešená terasa.
+                </div>
+              </div>
+            </article>
 
-</main>
+            <!-- 2. terasa na poschodí nad obytnou miestnosťou -->
+            <article
+              class="type-card"
+              data-type="terrace-over-room"
+              data-label="Terasa na poschodí"
+            >
+              <div class="type-card-img">
+                <img src="img/terasa-poschodie.jpg" alt="Terasa na poschodí" />
+              </div>
+              <div class="type-card-body">
+                <div class="type-chip">
+                  <span>Schlüter® systém</span> strešná terasa
+                </div>
+                <div class="type-title">Terasa na poschodí</div>
+                <div class="type-text">
+                  Otvorená terasa nad obytnou miestnosťou – citlivá strešná konštrukcia.
+                </div>
+              </div>
+            </article>
 
-<script src="calc_terasa_base.js"></script>
+            <!-- 3. terasa pri dome na teréne -->
+            <article
+              class="type-card"
+              data-type="ground-terrace"
+              data-label="Terasa pri dome na teréne"
+            >
+              <div class="type-card-img">
+                <img src="img/terasa-pri-dome.jpg" alt="Terasa pri dome na teréne" />
+              </div>
+              <div class="type-card-body">
+                <div class="type-chip">
+                  <span>Terasa na teréne</span>
+                </div>
+                <div class="type-title">Terasa pri dome na teréne</div>
+                <div class="type-text">
+                  Terasa na zemi, bez priestoru pod ňou. Ideálne napríklad pri rodinnom dome.
+                </div>
+              </div>
+            </article>
 
-<!-- Dynamický modul – sem sa bude nahrávať nový kód pre balkóny -->
-<script id="dynamicModule"></script>
+            <!-- 4. vysunutý balkón -->
+            <article
+              class="type-card"
+              data-type="balcony-cantilever"
+              data-label="Vysunutý balkón"
+            >
+              <div class="type-card-img">
+                <img src="img/balkon-vysunuty.jpg" alt="Vysunutý balkón" />
+              </div>
+              <div class="type-card-body">
+                <div class="type-chip">
+                  <span>Balkón</span>
+                </div>
+                <div class="type-title">Vysunutý balkón (konzola)</div>
+                <div class="type-text">
+                  Balkón odvetraný zospodu – typická konzolová doska. Priame vystavenie dažďu a mrazu.
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
 
+        <aside class="info-panel" aria-label="Informácie k výberu">
+          <div class="info-tabs">
+            <div class="info-tab">Schlüter® systém</div>
+            <div class="info-tab">Terasa / balkón</div>
+          </div>
+          <div class="info-title desktop-only">Čo práve nastavujeme?</div>
+          <p class="info-text desktop-only">
+            V tomto kroku len vyberieme typ konštrukcie – teda to, či ide o terasu na poschodí,
+            strešnú terasu, terasu na teréne alebo vysunutý balkón. Podľa výberu sa otvorí samostatná kalkulačka,
+            kde zadáte tvar, rozmery a skontrolujeme skladbu systému Schlüter®.
+          </p>
+          <div class="info-tip desktop-only">
+            Tip: Ak si nie ste istí, zvoľte možnosť, ktorá sa najviac podobá vašej stavbe.
+            Zvyšok upresníme v ďalších krokoch priamo v Lištovom centre.
+          </div>
+          <div class="info-current">
+            Aktuálne zvolený typ: <span id="currentTypeLabel">žiadny</span>
+          </div>
+        </aside>
+      </div>
+
+      <div class="actions-row">
+        <button type="button" class="btn-inline" id="clearSelectionBtn">
+          <span>✕</span> Vymazať výber
+        </button>
+        <button type="button" class="btn-primary" id="goToCalcBtn" disabled>
+          Pokračovať na výpočet ›
+        </button>
+      </div>
+    </section>
+
+    <footer>
+      <div>Prepočet pripravuje <strong>Lištové centrum</strong> (listobook.sk).</div>
+      <div class="legal">
+        Výpočet je orientačný a vychádza z údajov zadaných užívateľom. Presnú skladbu a cenovú ponuku
+        potvrdíme po konzultácii s technikom Lištového centra.
+      </div>
+    </footer>
+  </main>
+
+  <script src="/js/cookies.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="calc_terasa.js"></script>
 </body>
 </html>
