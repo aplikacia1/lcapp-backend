@@ -34,8 +34,7 @@
       background: radial-gradient(circle at top, #1b2b68 0, #050c22 55%, #020617 100%);
       color: #ffffff;
       padding-top: var(--hdr-h);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     a {
@@ -43,7 +42,6 @@
       text-decoration: none;
     }
 
-    /* spoločné helper triedy pre text */
     .desktop-only {
       display: block;
     }
@@ -61,7 +59,7 @@
       }
     }
 
-    /* HEADER – rovnaký štýl ako entertainment */
+    /* HEADER */
     .app-header {
       position: fixed;
       inset: 0 0 auto 0;
@@ -134,7 +132,6 @@
       color: #e5e7eb;
     }
 
-    /* >>> spoločná trieda pre kroky (skryté, kým nie sú aktívne) <<< */
     .step-section {
       display: none;
     }
@@ -143,7 +140,7 @@
       display: block;
     }
 
-    /* Žlto-čierne okraje – „bezpečnostný“ efekt */
+    /* Bezpečnostné pásy */
     .safety-stripes {
       position: fixed;
       inset: var(--hdr-h) 0 0 0;
@@ -185,7 +182,7 @@
       }
     }
 
-    /* HLAVNÝ PANEL KROKU 1 + 2 */
+    /* KROK 1 + 2 */
     .card-shell {
       background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
       border-radius: 22px;
@@ -244,7 +241,7 @@
       }
     }
 
-    /* KARTY TYP KONŠTRUKCIE */
+    /* Typy konštrukcie */
     .type-grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -282,8 +279,8 @@
       box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5),
         0 18px 40px rgba(0, 0, 0, 0.9);
       background: radial-gradient(circle at top,
-          rgba(250, 204, 21, 0.09) 0,
-          rgba(15, 23, 42, 0.97) 52%);
+        rgba(250, 204, 21, 0.09) 0,
+        rgba(15, 23, 42, 0.97) 52%);
     }
 
     .type-card-img {
@@ -336,14 +333,14 @@
       color: #d1d5db;
     }
 
-    /* INFO PANEL VPRAVO */
+    /* Info panel */
     .info-panel {
       border-radius: 18px;
       padding: 12px 13px 13px;
       background: radial-gradient(circle at top,
-          rgba(15, 23, 42, 0.9) 0,
-          rgba(15, 23, 42, 0.96) 60%,
-          rgba(3, 7, 18, 0.98) 100%);
+        rgba(15, 23, 42, 0.9) 0,
+        rgba(15, 23, 42, 0.96) 60%,
+        rgba(3, 7, 18, 0.98) 100%);
       border: 1px solid rgba(148, 163, 184, 0.65);
       font-size: 0.8rem;
     }
@@ -397,7 +394,6 @@
       color: #e5e7eb;
     }
 
-    /* ACTIONS – spodný rad v kroku 1 */
     .actions-row {
       margin-top: 16px;
       display: flex;
@@ -441,8 +437,7 @@
       box-shadow: 0 10px 22px rgba(251, 191, 36, 0.45);
       min-width: 210px;
       justify-content: center;
-      transition: transform 0.1s ease, box-shadow 0.1s ease,
-        filter 0.1s ease;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
     }
 
     .btn-primary:disabled {
@@ -457,12 +452,12 @@
       box-shadow: 0 5px 16px rgba(251, 191, 36, 0.4);
     }
 
-    /* === KROK 2 – tvar a rozmery === */
+    /* KROK 2 */
     .step2-shell {
       margin-top: 26px;
       background: radial-gradient(circle at top,
-          rgba(15, 23, 42, 0.96) 0,
-          rgba(3, 7, 18, 0.98) 55%);
+        rgba(15, 23, 42, 0.96) 0,
+        rgba(3, 7, 18, 0.98) 55%);
       border-radius: 22px;
       padding: 18px 16px 20px;
       border: 1px solid rgba(148, 163, 184, 0.55);
@@ -521,8 +516,8 @@
     .shape-card.selected {
       border-color: rgba(251, 191, 36, 0.7);
       background: radial-gradient(circle at top,
-          rgba(250, 204, 21, 0.12) 0,
-          rgba(15, 23, 42, 0.97) 60%);
+        rgba(250, 204, 21, 0.12) 0,
+        rgba(15, 23, 42, 0.97) 60%);
       box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
     }
 
@@ -599,7 +594,6 @@
       transform: translateY(-50%);
     }
 
-    /* FORMULÁR ROZMEROV */
     .field-group {
       display: flex;
       flex-direction: column;
@@ -697,12 +691,12 @@
       justify-content: flex-end;
     }
 
-    /* === KROK 3 – skladba systému === */
+    /* KROK 3 */
     .step3-shell {
       margin-top: 26px;
       background: radial-gradient(circle at top,
-          rgba(15, 23, 42, 0.96) 0,
-          rgba(3, 7, 18, 0.98) 55%);
+        rgba(15, 23, 42, 0.96) 0,
+        rgba(3, 7, 18, 0.98) 55%);
       border-radius: 22px;
       padding: 18px 16px 20px;
       border: 1px solid rgba(148, 163, 184, 0.55);
@@ -819,8 +813,8 @@
     .drain-option.selected {
       border-color: rgba(251, 191, 36, 0.9);
       background: radial-gradient(circle at top,
-          rgba(250, 204, 21, 0.12) 0,
-          rgba(15, 23, 42, 0.97) 60%);
+        rgba(250, 204, 21, 0.12) 0,
+        rgba(15, 23, 42, 0.97) 60%);
       box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5);
     }
 
@@ -864,7 +858,90 @@
       margin-bottom: 8px;
     }
 
-    /* FOOTER INFO */
+    .preview-btn {
+      margin-top: 8px;
+      font-size: 0.78rem;
+    }
+
+    .preview-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* Modal náhľadu */
+    .preview-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .preview-modal.visible {
+      display: flex;
+    }
+
+    .preview-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.86);
+    }
+
+    .preview-dialog {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      width: 100%;
+      margin: 0 16px;
+      background: #020617;
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9);
+      padding: 12px 14px 14px;
+    }
+
+    .preview-dialog h3 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .preview-image {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin: 6px 0 6px;
+      background: #000000;
+      display: block;
+    }
+
+    .preview-caption {
+      margin: 0;
+      font-size: 0.76rem;
+      color: #d1d5db;
+    }
+
+    .preview-close {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      cursor: pointer;
+      display: grid;
+      place-content: center;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* Footer */
     footer {
       font-size: 0.72rem;
       color: #cbd5f5;
@@ -888,7 +965,7 @@
       }
     }
 
-    /* === MOBILNÉ ÚPRAVY KROKU 2 – aby nič neprečnievalo === */
+    /* Mobilné úpravy kroku 2 */
     @media (max-width: 640px) {
       .step2-shell {
         padding: 16px 12px 18px;
@@ -933,7 +1010,7 @@
     </div>
   </header>
 
-  <!-- Bezpečnostné žlto-čierne pásy po bokoch (PC) -->
+  <!-- Bezpečnostné pásy -->
   <div class="safety-stripes" aria-hidden="true"></div>
 
   <!-- MAIN -->
@@ -948,7 +1025,7 @@
       </span>
     </p>
 
-    <!-- KROK 1 – výber typu konštrukcie -->
+    <!-- KROK 1 -->
     <section class="card-shell step-section active" id="step1">
       <div class="step-header-row">
         <div class="step-title-main">
@@ -965,7 +1042,6 @@
       </div>
 
       <div class="layout-krok1">
-        <!-- ĽAVO – 4 typy -->
         <div>
           <p class="desktop-only" style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
             Vyberte typ balkóna alebo terasy. Stačí sa pozrieť na dom z boku – ako na fotke.
@@ -1053,7 +1129,6 @@
           </div>
         </div>
 
-        <!-- PRAVO – info panel -->
         <aside class="info-panel" aria-label="Informácie k výberu">
           <div class="info-tabs">
             <div class="info-tab">Schlüter® systém</div>
@@ -1084,7 +1159,7 @@
       </div>
     </section>
 
-    <!-- KROK 2 – tvar terasy a rozmery -->
+    <!-- KROK 2 -->
     <section class="step2-shell step-section" id="step2">
       <div class="step-header-row">
         <div class="step-title-main">
@@ -1101,7 +1176,6 @@
       </div>
 
       <div class="step2-layout">
-        <!-- ĽAVÁ strana – výber tvaru -->
         <div>
           <p class="desktop-only" style="font-size:0.8rem;color:#e5e7eb;margin:0 0 8px;">
             Stačí si predstaviť terasu zhora – ako na náčrte. Kliknite na tvar, ktorý sa najviac podobá vašej terase.
@@ -1155,7 +1229,6 @@
           </div>
         </div>
 
-        <!-- PRAVÁ strana – rozmery + výpočet -->
         <div>
           <div class="field-group">
             <div class="field">
@@ -1262,7 +1335,6 @@
           </div>
 
           <div class="step2-actions">
-            <!-- späť na krok 1 v rámci jednej stránky -->
             <button type="button" class="btn-inline" id="backToStep1Btn">
               ‹ Späť na krok 1
             </button>
@@ -1274,7 +1346,7 @@
       </div>
     </section>
 
-    <!-- KROK 3 – skladba systému Schlüter® -->
+    <!-- KROK 3 -->
     <section class="step3-shell step-section" id="step3">
       <div class="step-header-row">
         <div class="step-title-main">
@@ -1293,7 +1365,6 @@
       </div>
 
       <div class="step3-layout">
-        <!-- ĽAVO – prehľad z krokov 1 a 2 -->
         <div>
           <p class="note-prep desktop-only">
             Poznámka: Táto sekcia je zatiaľ prvá verzia. Začíname vysunutým balkónom – ostatné typy doplníme postupne.
@@ -1320,9 +1391,7 @@
           </table>
         </div>
 
-        <!-- PRAVO – otázka + odporúčaná skladba -->
         <div>
-          <!-- Otázka pre vysunutý balkón -->
           <div class="question-block" id="balconyQuestion">
             <div class="question-title">Otázka 1 – ako odteká voda z balkóna?</div>
             <div class="question-text desktop-only">
@@ -1357,14 +1426,13 @@
             </div>
           </div>
 
-          <!-- Text pre ostatné typy – zatiaľ bez otázok -->
           <div class="other-note" id="otherConstructionNote">
             Pre terasy a prekryté konštrukcie pripravujeme vlastné otázky a odporúčané skladby.
             Zatiaľ tu vidíte len základný prehľad z krokov 1 a 2. Na základe týchto údajov vám
             technik Lištového centra odporučí vhodnú skladbu individuálne.
           </div>
 
-          <!-- Odporúčaná skladba -->
+          <!-- Navrhovaná skladba -->
           <div class="recommended-box">
             <div class="summary-label">Navrhovaná skladba (pracovný názov)</div>
             <div class="recommended-name" id="recommendedName">Zatiaľ nevybraná – zvoľte odtok vody.</div>
@@ -1372,9 +1440,12 @@
               Po výbere odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón.
               Podrobný technický popis a prierezy dostanete v PDF priamo v Lištobooku.
             </div>
+            <button type="button" class="btn-inline preview-btn" id="previewBtn" disabled>
+              Technický náhľad skladby
+            </button>
           </div>
 
-          <!-- Orientačné množstvá materiálu -->
+          <!-- Orientačný materiál -->
           <div class="recommended-box" id="bomBox">
             <div class="summary-label">Orientačné množstvá materiálu</div>
             <table class="summary-table">
@@ -1386,8 +1457,7 @@
                 <tr>
                   <th>Drenážna / separačná rohož</th>
                   <td>
-                    <span id="bomMembraneArea">–</span> m² /
-                    cca <span id="bomMembraneRolls">–</span> rol.
+                    <span id="bomMembraneArea">–</span> m²
                   </td>
                 </tr>
                 <tr>
@@ -1400,8 +1470,7 @@
                 <tr>
                   <th>Lepidlo (Sopro / Mapei)</th>
                   <td>
-                    cca <span id="bomAdhesiveBags">–</span> vriec –
-                    značku si vyberiete podľa preferencie.
+                    cca <span id="bomAdhesiveBags">–</span> vriec – značku si vyberiete podľa preferencie.
                   </td>
                 </tr>
               </tbody>
@@ -1419,6 +1488,17 @@
       </div>
     </section>
 
+    <!-- MODAL NÁHĽADU SKLADBY -->
+    <div id="previewModal" class="preview-modal" aria-hidden="true">
+      <div class="preview-backdrop"></div>
+      <div class="preview-dialog" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+        <button type="button" class="preview-close" id="previewCloseBtn" aria-label="Zavrieť náhľad">×</button>
+        <h3 id="previewTitle">Technický náhľad skladby</h3>
+        <img id="previewImage" class="preview-image" src="" alt="" />
+        <p id="previewCaption" class="preview-caption"></p>
+      </div>
+    </div>
+
     <footer>
       <div>Prepočet pripravuje <strong>Lištové centrum</strong> (listobook.sk).</div>
       <div class="legal">
@@ -1428,11 +1508,8 @@
     </footer>
   </main>
 
-  <!-- Globálne skripty (cookies, config) -->
   <script src="/js/cookies.js"></script>
   <script src="/js/config.js"></script>
-
-  <!-- Logika kalkulačky -->
   <script src="calc_terasa.js"></script>
 </body>
 </html>

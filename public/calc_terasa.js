@@ -16,9 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     backBtn.addEventListener("click", () => {
       const target = "calc_index.html";
       if (email) {
-        window.location.href = `${target}?email=${encodeURIComponent(
-          email
-        )}`;
+        window.location.href = `${target}?email=${encodeURIComponent(email)}`;
       } else {
         window.location.href = target;
       }
@@ -26,21 +24,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---------------------------------------------------------------------------
-  // PARAMETRE MATERIÁLOV – podľa technických listov (zlaté stredné cesty)
+  // PARAMETRE MATERIÁLOV
   // ---------------------------------------------------------------------------
-  // Namiesto jedného MATERIAL_PARAMS máme malú databázu + balíčky pre balkóny.
-
   const MATERIAL_DB = {
     DITRA: {
       key: "DITRA",
       label: "Schlüter®-DITRA",
-      // bežná rola cca 30 m² (1,0 × 30 m)
       rollAreaM2: 30
     },
     DITRA_DRAIN_4: {
       key: "DITRA_DRAIN_4",
       label: "Schlüter®-DITRA-DRAIN 4",
-      // podľa TL: 1,0 × 12,5 m ≈ 12,5 m²
       rollAreaM2: 12.5
     },
     BARA_RT: {
@@ -56,20 +50,17 @@ document.addEventListener("DOMContentLoaded", () => {
     BARIN: {
       key: "BARIN",
       label: "Schlüter®-BARIN (žľab)",
-      // orientačne 2,0 m segmenty žľabu
       pieceLengthBm: 2.0
     },
     ADHESIVE: {
       key: "ADHESIVE",
       label: "Lepidlo (Sopro / Mapei)",
-      // orientačne 1 vrece ≈ 5 m² (izolácia + lepenie dlažby)
       coverageM2PerBag: 5
     }
   };
 
-  // „Balíčky“ – zlaté stredné cesty pre vysunutý balkón
+  // Balíčky pre vysunutý balkón
   const BALCONY_SYSTEMS = {
-    // 1) voda cez voľnú hranu
     "edge-free": {
       key: "edge-free",
       membraneKey: "DITRA_DRAIN_4",
@@ -77,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
       gutterKey: null,
       drainKey: null
     },
-    // 2) voda do žľabu pri hrane
     "edge-gutter": {
       key: "edge-gutter",
       membraneKey: "DITRA_DRAIN_4",
@@ -85,27 +75,17 @@ document.addEventListener("DOMContentLoaded", () => {
       gutterKey: "BARIN",
       drainKey: null
     },
-    // 3) voda do vnútorného vpustu
     "internal-drain": {
       key: "internal-drain",
-      // tu môžeme voliť DITRA alebo DITRA-DRAIN; berieme DITRA ako základ
       membraneKey: "DITRA",
       profileKey: "BARA_RT",
       gutterKey: null,
-      drainKey: "KERDI_DRAIN" // zatiaľ len informačne
+      drainKey: "KERDI_DRAIN"
     }
   };
 
   function getMaterial(key) {
     return key ? MATERIAL_DB[key] || null : null;
-  }
-
-  function computeRollCount(materialKey, neededAreaM2) {
-    const mat = getMaterial(materialKey);
-    if (!mat || !mat.rollAreaM2 || !neededAreaM2 || neededAreaM2 <= 0) {
-      return null;
-    }
-    return Math.max(1, Math.ceil(neededAreaM2 / mat.rollAreaM2));
   }
 
   function computePiecesByLength(materialKey, neededBm) {
@@ -124,6 +104,26 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(1, Math.ceil(neededAreaM2 / mat.coverageM2PerBag));
   }
 
+  // --- Náhľadové obrázky pre balkón (technický rez) ---
+  // Sem neskôr uložíš reálne PNG/JPG súbory do public/img/systems/
+  const PREVIEW_IMAGES = {
+    "edge-free": {
+      src: "img/systems/balkon-edge-free.png",
+      caption:
+        "Vysunutý balkón s voľnou odkvapovou hranou – orientačný prierez skladby Schlüter®."
+    },
+    "edge-gutter": {
+      src: "img/systems/balkon-edge-gutter.png",
+      caption:
+        "Balkón s oplechovaním a žľabom Schlüter®-BARIN – orientačný prierez skladby."
+    },
+    "internal-drain": {
+      src: "img/systems/balkon-internal-drain.png",
+      caption:
+        "Balkón s vnútorným vpustom a systémom Schlüter®-KERDI-DRAIN – orientačný prierez skladby."
+    }
+  };
+
   // --- Spoločný stav ---
   const state = {
     currentStep: 1,
@@ -137,9 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Prepínanie krokov ---
-  const stepSections = Array.from(
-    document.querySelectorAll(".step-section")
-  );
+  const stepSections = Array.from(document.querySelectorAll(".step-section"));
 
   function showStep(stepNo) {
     state.currentStep = stepNo;
@@ -161,11 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateBalconyQuestionVisibility() {
     const balconyQuestion = document.getElementById("balconyQuestion");
-    const otherConstructionNote = document.getElementById(
-      "otherConstructionNote"
-    );
-    const isBalcony =
-      state.constructionTypeKey === "balcony-cantilever";
+    const otherConstructionNote = document.getElementById("otherConstructionNote");
+    const isBalcony = state.constructionTypeKey === "balcony-cantilever";
 
     if (balconyQuestion) {
       balconyQuestion.style.display = isBalcony ? "block" : "none";
@@ -173,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (otherConstructionNote) {
       otherConstructionNote.style.display = isBalcony ? "none" : "block";
     }
+    updatePreviewButton();
   }
 
   // --- KROK 2 – tvary a rozmery ---
@@ -209,29 +205,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const k3AreaEl = document.getElementById("k3Area");
   const k3PerimeterEl = document.getElementById("k3Perimeter");
 
-  const drainOptions = Array.from(
-    document.querySelectorAll(".drain-option")
-  );
+  const drainOptions = Array.from(document.querySelectorAll(".drain-option"));
   const recommendedName = document.getElementById("recommendedName");
   const recommendedNote = document.getElementById("recommendedNote");
 
   // BOM prvky
   const bomAreaEl = document.getElementById("bomArea");
   const bomMembraneAreaEl = document.getElementById("bomMembraneArea");
-  const bomMembraneRollsEl = document.getElementById("bomMembraneRolls");
   const bomPerimeterEl = document.getElementById("bomPerimeter");
   const bomProfilesCountEl = document.getElementById("bomProfilesCount");
   const bomAdhesiveBagsEl = document.getElementById("bomAdhesiveBags");
   const bomNoteEl = document.getElementById("bomNote");
 
+  // Náhľad – prvky
+  const previewBtn = document.getElementById("previewBtn");
+  const previewModal = document.getElementById("previewModal");
+  const previewImage = document.getElementById("previewImage");
+  const previewCaption = document.getElementById("previewCaption");
+  const previewCloseBtn = document.getElementById("previewCloseBtn");
+
   // --- KONFIGURÁCIA TVAROV ---
   const shapeConfigs = {
-    "square": {
+    square: {
       label: "Štvorec",
       sides: ["A"],
       info: "Štvorec – všetky strany A sú rovnaké."
     },
-    "rectangle": {
+    rectangle: {
       label: "Obdĺžnik / „kosoštvorec“",
       sides: ["A", "B"],
       info: "Obdĺžnik – dve rôzne strany A a B. Mierna šikmina nevadí."
@@ -239,7 +239,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "l-shape": {
       label: "Balkón v tvare L",
       sides: ["A", "B", "C", "D", "E", "F"],
-      info: "Balkón v tvare L – doplňte postupne všetkých 6 strán A–F v smere hodinových ručičiek okolo balkóna."
+      info:
+        "Balkón v tvare L – doplňte postupne všetkých 6 strán A–F v smere hodinových ručičiek okolo balkóna."
     }
   };
 
@@ -259,9 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (state.shapeKey === "rectangle") {
       return d.A != null && d.B != null;
     } else if (state.shapeKey === "l-shape") {
-      return ["A", "B", "C", "D", "E", "F"].every(
-        (key) => d[key] != null
-      );
+      return ["A", "B", "C", "D", "E", "F"].every((key) => d[key] != null);
     }
     return false;
   }
@@ -289,11 +288,10 @@ document.addEventListener("DOMContentLoaded", () => {
         per = 2 * (A + B);
       }
     } else if (shapeKey === "l-shape") {
-      // L-tvar – spočítame aspoň OBVOD (súčet A–F)
       const sides = ["A", "B", "C", "D", "E", "F"].map((k) => d[k]);
       if (sides.every((v) => v != null)) {
         per = sides.reduce((sum, v) => sum + v, 0);
-        // area nechávame null – dopočíta sa pri konzultácii
+        // area nechávame na konzultáciu
       }
     }
 
@@ -314,9 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
         k3AreaEl.textContent = state.area.toFixed(1).replace(".", ",");
       } else if (
         state.shapeKey === "l-shape" &&
-        ["A", "B", "C", "D", "E", "F"].every(
-          (k) => state.dims[k] != null
-        )
+        ["A", "B", "C", "D", "E", "F"].every((k) => state.dims[k] != null)
       ) {
         k3AreaEl.textContent = "dopočítame pri konzultácii";
       } else {
@@ -336,7 +332,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (
       !bomAreaEl ||
       !bomMembraneAreaEl ||
-      !bomMembraneRollsEl ||
       !bomPerimeterEl ||
       !bomProfilesCountEl ||
       !bomAdhesiveBagsEl ||
@@ -345,8 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const isBalcony =
-      state.constructionTypeKey === "balcony-cantilever";
+    const isBalcony = state.constructionTypeKey === "balcony-cantilever";
     const hasDrain = !!state.drainOption;
     const area = state.area;
     const per = state.perimeter;
@@ -354,7 +348,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetBom(placeNote) {
       bomAreaEl.textContent = "–";
       bomMembraneAreaEl.textContent = "–";
-      bomMembraneRollsEl.textContent = "–";
       bomPerimeterEl.textContent = "–";
       bomProfilesCountEl.textContent = "–";
       bomAdhesiveBagsEl.textContent = "–";
@@ -377,7 +370,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // L-tvar – zatiaľ bez BOM, potrebujeme presnú plochu
     if (state.shapeKey === "l-shape") {
       resetBom(
         "Pri balkóne v tvare L zatiaľ zobrazujeme len obvod. Plochu a orientačné množstvá materiálu doplníme po konzultácii v Lištovom centre."
@@ -398,25 +390,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // výpočet – už podľa konkrétneho systému
-    const memRolls = computeRollCount(system.membraneKey, area);
     const profileCount = computePiecesByLength(system.profileKey, per);
     const adhesiveBags = computeAdhesiveBags(area);
 
     bomAreaEl.textContent = area.toFixed(1).replace(".", ",");
-
-    if (memRolls != null) {
-      bomMembraneAreaEl.textContent =
-        area.toFixed(1).replace(".", ",");
-      bomMembraneRollsEl.textContent = String(memRolls);
-    } else {
-      bomMembraneAreaEl.textContent = "–";
-      bomMembraneRollsEl.textContent = "–";
-    }
+    bomMembraneAreaEl.textContent = area.toFixed(1).replace(".", ",");
 
     if (profileCount != null) {
-      bomPerimeterEl.textContent =
-        per.toFixed(1).replace(".", ",");
+      bomPerimeterEl.textContent = per.toFixed(1).replace(".", ",");
       bomProfilesCountEl.textContent = String(profileCount);
     } else {
       bomPerimeterEl.textContent = "–";
@@ -426,7 +407,6 @@ document.addEventListener("DOMContentLoaded", () => {
     bomAdhesiveBagsEl.textContent =
       adhesiveBags != null ? String(adhesiveBags) : "–";
 
-    // Text – jemné vysvetlenie podľa variantu
     if (state.drainOption === "edge-free") {
       bomNoteEl.textContent =
         "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany. Drenážna rohož Schlüter®-DITRA-DRAIN pokrýva celú plochu, ukončovacie profily BARA-RT rátame po obvode bez styku so stenou. Lepidlo (Sopro / Mapei) je uvedené orientačne.";
@@ -464,8 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isLShape = state.shapeKey === "l-shape";
     const lComplete =
-      isLShape &&
-      ["A", "B", "C", "D", "E", "F"].every((k) => dims[k] != null);
+      isLShape && ["A", "B", "C", "D", "E", "F"].every((k) => dims[k] != null);
 
     if (summaryAreaEl) {
       if (res.area != null) {
@@ -493,14 +472,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!shapeConfigs[shapeKey]) return;
     state.shapeKey = shapeKey;
 
-    document
-      .querySelectorAll(".shape-card")
-      .forEach((card) => {
-        card.classList.toggle(
-          "selected",
-          card.dataset.shape === shapeKey
-        );
-      });
+    document.querySelectorAll(".shape-card").forEach((card) => {
+      card.classList.toggle("selected", card.dataset.shape === shapeKey);
+    });
 
     const cfg = shapeConfigs[shapeKey];
     if (dimShapeInfo && cfg) {
@@ -515,6 +489,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     recomputeFromInputs();
+  }
+
+  // --- Náhľad – tlačidlo enable/disable ---
+  function updatePreviewButton() {
+    if (!previewBtn) return;
+    const opt = state.drainOption;
+    const isBalcony = state.constructionTypeKey === "balcony-cantilever";
+    const cfg = opt && PREVIEW_IMAGES[opt];
+    const enabled = isBalcony && !!cfg;
+
+    previewBtn.disabled = !enabled;
+    previewBtn.dataset.previewKey = enabled ? opt : "";
+  }
+
+  function openPreviewModal() {
+    if (!previewModal || !previewImage || !previewCaption || !previewBtn) return;
+    const key = previewBtn.dataset.previewKey;
+    if (!key) return;
+    const cfg = PREVIEW_IMAGES[key];
+    if (!cfg) return;
+
+    previewImage.src = cfg.src;
+    previewImage.alt = cfg.caption;
+    previewCaption.textContent = cfg.caption;
+    previewModal.classList.add("visible");
+  }
+
+  function closePreviewModal() {
+    if (!previewModal) return;
+    previewModal.classList.remove("visible");
   }
 
   // --- LISTENERY KROKU 1 ---
@@ -544,7 +548,6 @@ document.addEventListener("DOMContentLoaded", () => {
       updateStep3Summary();
       updateBom();
 
-      // MOBIL: po výbere typu poscrolluj k tlačidlu "Pokračovať na krok 2"
       if (window.innerWidth <= 768 && goToStep2Btn) {
         goToStep2Btn.scrollIntoView({
           behavior: "smooth",
@@ -563,20 +566,19 @@ document.addEventListener("DOMContentLoaded", () => {
         .forEach((c) => c.classList.remove("selected"));
       if (currentTypeLabel) currentTypeLabel.textContent = "žiadny";
       if (goToStep2Btn) goToStep2Btn.disabled = true;
+      state.drainOption = null;
 
       updateBalconyQuestionVisibility();
       updateStep3Summary();
       updateBom();
+      updatePreviewButton();
     });
   }
 
   if (goToStep2Btn) {
     goToStep2Btn.addEventListener("click", () => {
+      // už neotvárame klávesnicu automatickým fókusom
       showStep(2);
-      const firstInput = document.getElementById("sideA");
-      if (firstInput) {
-        firstInput.focus();
-      }
     });
   }
 
@@ -588,7 +590,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const shapeKey = card.dataset.shape;
       setShape(shapeKey);
 
-      // MOBIL: po výbere tvaru poscrolluj k poliam s rozmermi a zaostri na A
       if (window.innerWidth <= 768) {
         const sideAInput = dimInputs.A;
         if (sideAInput) {
@@ -596,9 +597,6 @@ document.addEventListener("DOMContentLoaded", () => {
             behavior: "smooth",
             block: "center"
           });
-          setTimeout(() => {
-            sideAInput.focus();
-          }, 350);
         }
       }
     });
@@ -625,7 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- LISTENERY KROKU 3 – odtok vody ---
+  // --- LISTENERY KROKU 3 – odtok vody + náhľad ---
   if (drainOptions.length) {
     drainOptions.forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -661,7 +659,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         updateBom();
+        updatePreviewButton();
       });
+    });
+  }
+
+  if (previewBtn && previewModal) {
+    previewBtn.addEventListener("click", openPreviewModal);
+
+    if (previewCloseBtn) {
+      previewCloseBtn.addEventListener("click", closePreviewModal);
+    }
+
+    const backdrop = previewModal.querySelector(".preview-backdrop");
+    if (backdrop) {
+      backdrop.addEventListener("click", closePreviewModal);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && previewModal.classList.contains("visible")) {
+        closePreviewModal();
+      }
     });
   }
 
@@ -672,4 +690,5 @@ document.addEventListener("DOMContentLoaded", () => {
   updateStep2ContinueButton();
   updateStep3Summary();
   updateBom();
+  updatePreviewButton();
 });
