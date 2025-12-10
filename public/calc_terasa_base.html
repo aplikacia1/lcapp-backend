@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalkulačka – Lištobook (BASE)</title>
+  <link rel="stylesheet" href="styles/calc_terasa.css" />
+</head>
+<body>
+
+<header class="calc-header">
+  <button id="backBtn" class="back-btn">← Späť</button>
+  <div id="userChip" class="user-chip">Prihlásený: –</div>
+</header>
+
+<main class="calc-main">
+
+  <!-- KROK 1 -------------------------------------------------------------->
+  <section id="step1" class="step-section active">
+    <h2>Krok 1 – Typ konštrukcie</h2>
+
+    <div id="constructionGrid" class="type-grid">
+      <div class="type-card" data-type="balcony-cantilever" data-label="Vysunutý balkón">
+        Vysunutý balkón
+      </div>
+      <div class="type-card" data-type="terrace-ground" data-label="Terasa na teréne">
+        Terasa na teréne
+      </div>
+      <div class="type-card" data-type="terrace-upper" data-label="Terasa na poschodí">
+        Terasa na poschodí
+      </div>
+      <div class="type-card" data-type="winter-garden" data-label="Zimná záhrada">
+        Zimná záhrada
+      </div>
+    </div>
+
+    <p>Zvolený typ: <strong id="currentTypeLabel">žiadny</strong></p>
+
+    <div class="btn-row">
+      <button id="clearSelectionBtn" class="secondary-btn">Zrušiť výber</button>
+      <button id="goToStep2Btn" class="primary-btn" disabled>Pokračovať na krok 2</button>
+    </div>
+  </section>
+
+
+  <!-- KROK 2 -------------------------------------------------------------->
+  <section id="step2" class="step-section">
+    <h2>Krok 2 – Tvary a rozmery</h2>
+
+    <div id="shapeGrid" class="shape-grid">
+      <div class="shape-card" data-shape="square">Štvorec</div>
+      <div class="shape-card" data-shape="rectangle">Obdĺžnik</div>
+      <div class="shape-card" data-shape="l-shape">Tvar L</div>
+    </div>
+
+    <p id="dimShapeInfo" class="shape-info">Vyberte tvar.</p>
+
+    <div class="dims-container">
+
+      <div id="fieldSideA" class="dim-field">
+        <label>A (m)</label>
+        <input id="sideA" type="number" min="0" step="0.1" />
+      </div>
+
+      <div id="fieldSideB" class="dim-field hidden">
+        <label>B (m)</label>
+        <input id="sideB" type="number" min="0" step="0.1" />
+      </div>
+
+      <div id="fieldSideC" class="dim-field hidden">
+        <label>C (m)</label>
+        <input id="sideC" type="number" min="0" step="0.1" />
+      </div>
+
+      <div id="fieldSideD" class="dim-field hidden">
+        <label>D (m)</label>
+        <input id="sideD" type="number" min="0" step="0.1" />
+      </div>
+
+      <div id="fieldSideE" class="dim-field hidden">
+        <label>E (m)</label>
+        <input id="sideE" type="number" min="0" step="0.1" />
+      </div>
+
+      <div id="fieldSideF" class="dim-field hidden">
+        <label>F (m)</label>
+        <input id="sideF" type="number" min="0" step="0.1" />
+      </div>
+    </div>
+
+    <h3>Zhrnutie</h3>
+    <p>Plocha: <strong id="summaryArea">–</strong> m²</p>
+    <p>Obvod: <strong id="summaryPerimeter">–</strong> bm</p>
+
+    <div class="btn-row">
+      <button id="backToStep1Btn" class="secondary-btn">← Späť</button>
+      <button id="goToStep3Btn" class="primary-btn" disabled>Pokračovať na krok 3</button>
+    </div>
+  </section>
+
+
+  <!-- KROK 3 -------------------------------------------------------------->
+  <section id="step3" class="step-section">
+    <h2>Krok 3 – Výpočtová logika podľa typu konštrukcie</h2>
+
+    <p>
+      Táto časť sa načíta podľa toho, čo ste vybrali v kroku 1.
+      <br>
+      Pre balkóny sa použije nová logika (9 variant), pre terasy samostatná logika.
+    </p>
+
+    <div id="step3DynamicArea" class="dynamic-area">
+      <!-- Sem neskôr vloží obsah nový modul calc_balkony.js -->
+    </div>
+
+    <div class="btn-row">
+      <button id="backToStep2Btn" class="secondary-btn">← Späť</button>
+    </div>
+  </section>
+
+</main>
+
+<script src="calc_terasa_base.js"></script>
+
+<!-- Dynamický modul – sem sa bude nahrávať nový kód pre balkóny -->
+<script id="dynamicModule"></script>
+
+</body>
+</html>
