@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lištové centrum – Technický podklad balkón</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0b1636;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      color: #f9fafb;
+    }
+
+    /* A4 strana – vhodné pre neskorší export do PDF */
+    .pdf-page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 20mm 18mm;
+      position: relative;
+      background: #020617;
+      overflow: hidden;
+    }
+
+    /* Jemný vodoznak – logo cez stránku */
+    .pdf-watermark {
+      position: absolute;
+      inset: 25mm 15mm;
+      background-image: url("/logo_lc.jpg"); /* ak chceš iný súbor, zmeň cestu */
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.06;            /* veľmi jemné, aby nerušilo text */
+      pointer-events: none;
+      filter: grayscale(100%);  /* efekt "bez farby" */
+    }
+
+    .pdf-content {
+      position: relative;
+      z-index: 1; /* nad vodoznakom */
+    }
+
+    .pdf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18mm;
+    }
+
+    .pdf-logo {
+      display: inline-block;
+    }
+
+    .pdf-logo img {
+      height: 32mm;
+      width: auto;
+      display: block;
+    }
+
+    .pdf-code-box {
+      text-align: right;
+      font-size: 0.78rem;
+      color: #e5e7eb;
+    }
+
+    .pdf-code-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
+
+    .pdf-code-value {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-top: 4px;
+      color: #facc15;
+    }
+
+    .pdf-title-block {
+      margin-bottom: 14mm;
+      padding: 10mm 10mm;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: radial-gradient(
+        circle at top,
+        rgba(15, 23, 42, 0.98) 0,
+        rgba(3, 7, 18, 0.98) 60%
+      );
+      text-align: center;
+    }
+
+    .pdf-main-title {
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 0 4mm;
+    }
+
+    .pdf-sub-title {
+      font-size: 0.95rem;
+      margin: 0 0 2mm;
+      color: #e5e7eb;
+    }
+
+    .pdf-sub-note {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin: 0;
+    }
+
+    .pdf-columns {
+      display: grid;
+      grid-template-columns: 1.2fr 1.1fr;
+      gap: 12mm;
+      margin-bottom: 12mm;
+    }
+
+    .pdf-box {
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      padding: 6mm 7mm;
+      font-size: 0.8rem;
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .pdf-box-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      margin: 0 0 3mm;
+    }
+
+    .pdf-box strong {
+      color: #f9fafb;
+    }
+
+    .pdf-contact-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .pdf-contact-list li {
+      margin-bottom: 1.5mm;
+    }
+
+    .pdf-note-block {
+      font-size: 0.8rem;
+      border-radius: 8px;
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      padding: 5mm 6mm;
+      background: rgba(15, 23, 42, 0.96);
+      margin-bottom: 10mm;
+    }
+
+    .pdf-note-block strong {
+      color: #facc15;
+    }
+
+    .pdf-outline {
+      font-size: 0.8rem;
+    }
+
+    .pdf-outline-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      margin: 0 0 2mm;
+    }
+
+    .pdf-outline ol {
+      margin: 0;
+      padding-left: 4.5mm;
+    }
+
+    .pdf-outline li {
+      margin-bottom: 1mm;
+    }
+
+    .pdf-footer {
+      position: absolute;
+      left: 18mm;
+      right: 18mm;
+      bottom: 12mm;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pdf-footer span {
+      white-space: nowrap;
+    }
+
+    /* zobrazovať pätičku len v PDF / pri tlači */
+    .only-pdf {
+      display: none;
+    }
+
+    @media print {
+      .only-pdf {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="pdf-page">
+    <div class="pdf-watermark"></div>
+
+    <div class="pdf-content">
+      <!-- HLAVIČKA -->
+      <header class="pdf-header">
+        <div class="pdf-logo">
+          <!-- použijeme rovnaký súbor ako na webe (v prípade potreby upravíš cestu) -->
+          <img src="/logo_lc.jpg" alt="Lištové centrum" />
+        </div>
+        <div class="pdf-code-box">
+          <div class="pdf-code-label">Číslo PDF podkladu</div>
+          <!-- server neskôr doplní skutočnú hodnotu, napr. LIS-PP250001 -->
+          <div class="pdf-code-value">{{pdfCode}}</div>
+        </div>
+      </header>
+
+      <!-- HLAVNÝ NADPIS -->
+      <section class="pdf-title-block">
+        <h1 class="pdf-main-title">
+          TECHNICKÝ PODKLAD – BALKÓNOVÁ SKLADBA SCHLÜTER SYSTEMS®
+        </h1>
+        <p class="pdf-sub-title">
+          PDF výpočet a orientačný návrh skladby pre vysunutý balkón
+        </p>
+        <p class="pdf-sub-note">
+          Dokument bol vytvorený automaticky na základe údajov z kalkulačky Lištobooku.
+        </p>
+      </section>
+
+      <!-- DVE KARTY – OD KOHO / PRE KOHO -->
+      <section class="pdf-columns">
+        <!-- ĽAVO: Lištové centrum -->
+        <article class="pdf-box">
+          <h2 class="pdf-box-title">Vypracoval</h2>
+          <p><strong>Lištové centrum EU, s.r.o.</strong></p>
+          <ul class="pdf-contact-list">
+            <li>Sasinkova 13, 010 01 Žilina</li>
+            <li>IČO: 45&nbsp;533&nbsp;628</li>
+            <li>DIČ: 2023034046</li>
+            <li>IČ DPH: SK2023034046</li>
+            <li>E-mail: <strong>bratislava@listovecentrum.sk</strong></li>
+            <li>Tel.: <strong>+421&nbsp;947&nbsp;922&nbsp;181</strong></li>
+            <li>Vytvorené cez: <strong>listobook.sk</strong></li>
+          </ul>
+        </article>
+
+        <!-- PRAVO: Zákazník -->
+        <article class="pdf-box">
+          <h2 class="pdf-box-title">Vypracované pre zákazníka</h2>
+          <p><strong>{{customerName}}</strong></p>
+          <ul class="pdf-contact-list">
+            <li>E-mail: <strong>{{customerEmail}}</strong></li>
+            <li>Dátum vytvorenia: <strong>{{createdAt}}</strong></li>
+            <li>Typ konštrukcie: <strong>{{constructionType}}</strong></li>
+            <li>Skladba: <strong>{{systemTitle}}</strong></li>
+          </ul>
+        </article>
+      </section>
+
+      <!-- POZNÁMKA K VÝPOČTU -->
+      <section class="pdf-note-block">
+        <p>
+          Tento technický podklad bol vygenerovaný na základe údajov zadaných
+          používateľom v kalkulačke Lištobooku. Výsledky majú
+          <strong>orientačný</strong> charakter a slúžia ako odporúčaná skladba
+          systému Schlüter® pre danú konštrukčnú výšku a spôsob odtoku vody.
+        </p>
+        <p style="margin-top: 3mm;">
+          Presnú skladbu, jednotkové ceny, dostupnosť profilov a detailný výkaz
+          materiálu vám potvrdí technik Lištového centra po konzultácii.
+        </p>
+      </section>
+
+      <!-- OBSAH -->
+      <section class="pdf-outline">
+        <h2 class="pdf-outline-title">Obsah dokumentu</h2>
+        <ol>
+          <li>Úvodná strana – základné informácie a číslo PDF podkladu</li>
+          <li>
+            Popis zvolenej skladby balkóna
+            (nízka / stredná / vysoká výška, podľa výberu v kalkulačke)
+          </li>
+          <li>
+            Technický prierez zvolenej skladby – obrázok a vysvetlenie jednotlivých vrstiev
+          </li>
+          <li>
+            Detailné stránky jednotlivých komponentov podľa zvolenej skladby
+            (napr. DITRA, DITRA-DRAIN, KERDI, TROBA, TROBA-PLUS, BARA, BARIN …)
+          </li>
+          <li>Zhrnutie orientačnej spotreby materiálu a komponentov</li>
+          <li>Záverečná poznámka a kontakt na technika Lištového centra</li>
+        </ol>
+      </section>
+
+      <!-- PÄTIČKA – zobrazí sa len v PDF -->
+      <footer class="pdf-footer only-pdf">
+        <span>Lištové centrum EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+        <span>Strana 1 / {{totalPages}}</span>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

@@ -546,8 +546,9 @@
       display: none;
     }
 
-    /* KROK 3 */
-    .step3-shell {
+    /* KROK 3 + 4 – obal */
+    .step3-shell,
+    .step4-shell {
       margin-top: 26px;
       background: radial-gradient(circle at top,
         rgba(15, 23, 42, 0.96) 0,
@@ -559,7 +560,8 @@
     }
 
     @media (min-width: 960px) {
-      .step3-shell {
+      .step3-shell,
+      .step4-shell {
         padding: 22px 22px 24px;
       }
     }
@@ -570,8 +572,15 @@
       gap: 18px;
     }
 
+    .step4-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 2.4fr);
+      gap: 18px;
+    }
+
     @media (max-width: 900px) {
-      .step3-layout {
+      .step3-layout,
+      .step4-layout {
         grid-template-columns: minmax(0, 1fr);
       }
     }
@@ -603,7 +612,7 @@
       text-align: left;
       color: #9ca3af;
       font-weight: 500;
-      width: 40%;
+      width: 50%;
     }
 
     .summary-table td {
@@ -824,6 +833,96 @@
         font-size: 0.82rem;
       }
     }
+
+    /* KONŠTRUKČNÁ VÝŠKA – blok v kroku 3 */
+    .height-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .height-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 7px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 0.78rem;
+    }
+
+    .height-option input {
+      margin-top: 3px;
+    }
+
+    .height-main {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .height-note {
+      display: block;
+      font-size: 0.74rem;
+      color: #d1d5db;
+    }
+
+    /* KROK 4 – obrázok a sumár */
+    .k4-preview-box {
+      border-radius: 16px;
+      padding: 9px 10px;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: 0.8rem;
+    }
+
+    .k4-preview-image {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin: 6px 0 8px;
+      background: #000;
+      display: block;
+    }
+
+    .k4-preview-title {
+      font-weight: 600;
+      color: #fbbf24;
+      margin-bottom: 4px;
+    }
+
+    .k4-preview-note {
+      font-size: 0.76rem;
+      color: #d1d5db;
+    }
+
+    .k4-actions {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .btn-secondary {
+      border-radius: 999px;
+      padding: 8px 16px;
+      border: 1px solid rgba(148, 163, 184, 0.85);
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
   </style>
 </head>
 <body>
@@ -858,7 +957,7 @@
   <main class="wrap">
     <h1 class="page-title">Schlüter® vysunutý balkón – kalkulačka</h1>
     <p class="page-subtitle">
-      Krok 2 a 3 z 3 – najprv zadáte tvar a rozmery balkóna, potom skladbu systému Schlüter®.
+      Kroky 2–4 z 4 – najprv zadáte tvar a rozmery balkóna, potom zvolíte skladbu systému Schlüter® a na konci získate sumár pre PDF.
     </p>
     <p class="page-subtitle-small">
       Vybraný typ z kroku 1: <strong id="typeLabelText">Vysunutý balkón (konzola)</strong>
@@ -1097,7 +1196,7 @@
             Z niekoľkých jednoduchých otázok vyberieme „zlatú strednú cestu“ pre váš vysunutý balkón.
           </span>
           <span class="mobile-only">
-            KROK 3 – skladba balkóna, orientačný materiál a technický náhľad.
+            KROK 3 – skladba balkóna, orientačný materiál a voľba systému.
           </span>
         </div>
       </div>
@@ -1131,6 +1230,51 @@
         </div>
 
         <div>
+          <!-- KONŠTRUKČNÁ VÝŠKA -->
+          <div class="question-block" id="heightQuestion">
+            <div class="question-title">Otázka 0 – konštrukčná výška balkóna</div>
+            <div class="question-text desktop-only">
+              Vyberte približnú konštrukčnú výšku – teda hrúbku skladby od hydroizolácie po vrch dlažby.
+              V PDF podklade vám ukážeme zvolenú variantu a spomenieme aj ďalšie možnosti.
+            </div>
+            <div class="question-text mobile-only">
+              Zvoľte, aká hrubá bude skladba balkóna (od hydroizolácie po vrch dlažby).
+            </div>
+
+            <div class="height-options">
+              <label class="height-option">
+                <input type="radio" name="heightOption" value="low" />
+                <div>
+                  <span class="height-main">Nízka konštrukčná výška (do cca 60&nbsp;mm)</span>
+                  <span class="height-note">
+                    Vhodné, keď je málo miesta na dvere alebo napojenie na vnútornú podlahu.
+                  </span>
+                </div>
+              </label>
+
+              <label class="height-option">
+                <input type="radio" name="heightOption" value="medium" />
+                <div>
+                  <span class="height-main">Stredná konštrukčná výška (cca 60–100&nbsp;mm)</span>
+                  <span class="height-note">
+                    Najčastejšie riešenie – dostatok priestoru pre štandardnú skladbu so spádom a drenážou.
+                  </span>
+                </div>
+              </label>
+
+              <label class="height-option">
+                <input type="radio" name="heightOption" value="high" />
+                <div>
+                  <span class="height-main">Vysoká konštrukčná výška (cca 100–150+&nbsp;mm)</span>
+                  <span class="height-note">
+                    Vhodné pri hrubšej doske alebo pri požiadavke na vyššie vrstvy a väčší spád.
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- ODTOK VODY -->
           <div class="question-block" id="balconyQuestion">
             <div class="question-title">Otázka 1 – ako odteká voda z balkóna?</div>
             <div class="question-text desktop-only">
@@ -1168,14 +1312,11 @@
           <!-- Navrhovaná skladba -->
           <div class="recommended-box">
             <div class="summary-label">Navrhovaná skladba (pracovný názov)</div>
-            <div class="recommended-name" id="recommendedName">Zatiaľ nevybraná – zvoľte odtok vody.</div>
+            <div class="recommended-name" id="recommendedName">Zatiaľ nevybraná – zvoľte výšku a odtok vody.</div>
             <div class="recommended-note" id="recommendedNote">
-              Po výbere odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón.
+              Po výbere konštrukčnej výšky a odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón.
               Podrobný technický popis a prierezy dostanete v PDF priamo v Lištobooku.
             </div>
-            <button type="button" class="btn-inline preview-btn" id="previewBtn" disabled>
-              Technický náhľad skladby
-            </button>
           </div>
 
           <!-- Orientačný materiál -->
@@ -1196,7 +1337,7 @@
                 <tr>
                   <th>Ukončovacie profily</th>
                   <td>
-                    <span id="bomPerimeter">–</span> bm /
+                    <span id="bomPerimeter">–</span> bm / 
                     cca <span id="bomProfilesCount">–</span> ks
                   </td>
                 </tr>
@@ -1219,9 +1360,116 @@
           </p>
         </div>
       </div>
+
+      <div class="step2-actions">
+        <button type="button" class="btn-inline" id="backToStep2Btn">
+          ‹ Späť na krok 2
+        </button>
+        <button type="button" class="btn-primary" id="goToStep4Btn" disabled>
+          Pokračovať na krok 4 (sumár & PDF) ›
+        </button>
+      </div>
     </section>
 
-    <!-- MODAL NÁHĽADU SKLADBY -->
+    <!-- KROK 4 -->
+    <section class="step4-shell step-section" id="step4">
+      <div class="step-header-row">
+        <div class="step-title-main">
+          <span>Krok 4</span> Sumár, technický náhľad a PDF podklad
+        </div>
+        <div class="step-caption">
+          Skontrolujte zvolený systém, plochu, obvod a orientačný materiál. Potom si zvolíte, čo s PDF ďalej.
+        </div>
+      </div>
+
+      <div class="step4-layout">
+        <!-- ĽAVÁ STRANA – SUMÁR -->
+        <div>
+          <p class="note-prep">
+            Tento sumár vychádza z údajov z kroku 2 a 3. V PDF podklade doplníme technické detaily a ďalšie vhodné varianty.
+          </p>
+          <table class="summary-table">
+            <tbody>
+              <tr>
+                <th>Typ konštrukcie</th>
+                <td id="k4Type">–</td>
+              </tr>
+              <tr>
+                <th>Tvar</th>
+                <td id="k4Shape">–</td>
+              </tr>
+              <tr>
+                <th>Plocha balkóna</th>
+                <td><span id="k4Area">–</span> m²</td>
+              </tr>
+              <tr>
+                <th>Obvod pre lišty</th>
+                <td><span id="k4Perimeter">–</span> bm</td>
+              </tr>
+              <tr>
+                <th>Konštrukčná výška</th>
+                <td id="k4HeightLabel">–</td>
+              </tr>
+              <tr>
+                <th>Spôsob odtoku vody</th>
+                <td id="k4DrainLabel">–</td>
+              </tr>
+              <tr>
+                <th>Vybraný systém Schlüter®</th>
+                <td id="k4SystemName">–</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="recommended-box" style="margin-top:10px;">
+            <div class="summary-label">Orientačné množstvá (z kroku 3)</div>
+            <div class="recommended-note">
+              Plocha pre výpočet: <strong><span id="k4BomArea">–</span> m²</strong><br />
+              Drenážna / separačná rohož: <strong><span id="k4BomMembraneArea">–</span> m²</strong><br />
+              Ukončovacie profily: <strong><span id="k4BomPerimeter">–</span> bm</strong>,
+              cca <strong><span id="k4BomProfilesCount">–</span> ks</strong><br />
+              Lepidlo (Sopro / Mapei): cca <strong><span id="k4BomAdhesiveBags">–</span> vriec</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRAVÁ STRANA – NÁHĽAD SKLADBY + AKCIE -->
+        <div>
+          <div class="k4-preview-box">
+            <div class="summary-label">Technický náhľad skladby</div>
+            <div class="k4-preview-title" id="k4PreviewTitle">Zatiaľ nevybraný – doplňte výšku a odtok vo kroku 3.</div>
+            <img
+              id="k4PreviewImage"
+              class="k4-preview-image"
+              src=""
+              alt="Technický náhľad skladby balkóna"
+            />
+            <p class="k4-preview-note" id="k4PreviewCaption">
+              Po výbere systému zobrazíme orientačný prierez so skladbou Schlüter® pre váš balkón. Detailné technické informácie budú v PDF podklade.
+            </p>
+          </div>
+
+          <div class="k4-actions">
+            <button type="button" class="btn-secondary" id="btnPdfDownload" disabled>
+              📄 Vygenerovať PDF a uložiť
+            </button>
+            <button type="button" class="btn-secondary" id="btnPdfToEmail" disabled>
+              ✉️ Poslať PDF na môj e-mail
+            </button>
+            <button type="button" class="btn-primary" id="btnPdfRequestOffer" disabled>
+              💬 Požiadať o cenovú ponuku
+            </button>
+          </div>
+
+          <p style="font-size:0.75rem;color:#9ca3af;margin-top:8px;">
+            Funkcie pre generovanie a odosielanie PDF budeme aktivovať v ďalšom kroku vývoja.
+            Zatiaľ slúži tento krok ako prehľad, ktorý preberie technik Lištového centra.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL NÁHĽADU SKLADBY (môžeme neskôr použiť aj z kroku 4) -->
     <div id="previewModal" class="preview-modal" aria-hidden="true">
       <div class="preview-backdrop"></div>
       <div class="preview-dialog" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
@@ -1229,6 +1477,43 @@
         <h3 id="previewTitle">Technický náhľad skladby</h3>
         <img id="previewImage" class="preview-image" src="" alt="" />
         <p id="previewCaption" class="preview-caption"></p>
+      </div>
+    </div>
+
+        <!-- MODAL – hrúbka dlažby / obkladu -->
+    <div id="tileModal" class="preview-modal" aria-hidden="true">
+      <div class="preview-backdrop"></div>
+      <div class="preview-dialog" role="dialog" aria-modal="true">
+        <button
+          type="button"
+          class="preview-close"
+          id="tileCloseBtn"
+          aria-label="Zavrieť okno"
+        >
+          ×
+        </button>
+        <h3>Hrúbka dlažby / obkladu</h3>
+        <p style="font-size:0.8rem;color:#d1d5db;margin-bottom:8px;">
+          Uveďte hrúbku dlažby, ktorú plánujete použiť (napr. 10, 20 alebo 30&nbsp;mm).
+          Túto hodnotu potrebujeme na presný výber Schlüter® BARA profilu a prípravu cenovej ponuky.
+        </p>
+        <input
+          type="number"
+          id="tileThicknessInput"
+          min="5"
+          max="50"
+          step="1"
+          placeholder="napr. 20"
+          style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #9ca3af;background:#020617;color:#e5e7eb;"
+        />
+        <button
+          type="button"
+          id="tileConfirmBtn"
+          class="btn-primary"
+          style="margin-top:10px;width:100%;justify-content:center;"
+        >
+          Pokračovať
+        </button>
       </div>
     </div>
 
@@ -1241,9 +1526,11 @@
     </footer>
   </main>
 
-  <script src="/js/cookies.js"></script>
+   <script src="/js/cookies.js"></script>
   <script src="/js/config.js"></script>
-  <script src="config_balkony.js"></script>
+  <!-- konfigurácia systémových skladieb pre balkóny -->
+  <script src="/js/config_balkony.js"></script>
+  <!-- logika kalkulačky (ostáva v koreňovom public/) -->
   <script src="calc_balkony.js"></script>
 </body>
 </html>
