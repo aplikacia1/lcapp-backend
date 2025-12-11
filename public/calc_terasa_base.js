@@ -40,8 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateUI() {
     if (currentTypeLabelEl) {
-      currentTypeLabelEl.textContent =
-        state.constructionLabel || "žiadny";
+      currentTypeLabelEl.textContent = state.constructionLabel || "žiadny";
     }
     if (goToStep2Btn) {
       goToStep2Btn.disabled = !state.constructionTypeKey;
@@ -96,7 +95,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // pripravíme parametre pre ďalšiu stránku
+      // Momentálne máme hotovú iba kalkulačku pre vysunutý balkón
+      if (state.constructionTypeKey !== "balcony-cantilever") {
+        alert(
+          "Kalkulačka pre tento typ terasy je v príprave.\n\n" +
+          "Momentálne je dostupná iba kalkulačka pre vysunutý balkón (konzolu)."
+        );
+        return;
+      }
+
+      // ✅ Vysunutý balkón → preklik na calc_balkony.html, s parametrami
       const nextParams = new URLSearchParams();
       if (email) {
         nextParams.set("email", email);
@@ -106,13 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         nextParams.set("label", state.constructionLabel);
       }
 
-      let target = "calc_terasa.html";
-
-      // vysunutý balkón ide na samostatnú balkónovú kalkulačku
-      if (state.constructionTypeKey === "balcony-cantilever") {
-        target = "calc_balkony.html";
-      }
-
+      const target = "calc_balkony.html";
       window.location.href = `${target}?${nextParams.toString()}`;
     });
 
