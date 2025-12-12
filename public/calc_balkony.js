@@ -8,9 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const userChip = document.getElementById("userChip");
   if (userChip) {
-    userChip.textContent = email
-      ? `Prihlásený: ${email}`
-      : "Prihlásený: –";
+    userChip.textContent = email ? `Prihlásený: ${email}` : "Prihlásený: –";
   }
 
   const backBtn = document.getElementById("backBtn");
@@ -18,9 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     backBtn.addEventListener("click", () => {
       const target = "calc_terasa_base.html";
       if (email) {
-        window.location.href = `${target}?email=${encodeURIComponent(
-          email
-        )}`;
+        window.location.href = `${target}?email=${encodeURIComponent(email)}`;
       } else {
         window.location.href = target;
       }
@@ -88,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Nízka konštrukčná výška – vnútorný vpust (Schlüter®-KERDI-DRAIN) napojený na rohož Schlüter®-DITRA.",
     },
 
-    // STREDNÁ VÝŠKA – DITRA-DRAIN (pôvodné obrázky)
+    // STREDNÁ VÝŠKA – DITRA-DRAIN
     MEDIUM_EDGE_FREE: {
       src: "img/systems/balkon-edge-free.png",
       caption:
@@ -130,14 +126,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const state = {
     currentStep: 2,
     fromStep1TypeKey: params.get("type") || "balcony-cantilever",
-    fromStep1TypeLabel:
-      params.get("label") || "Vysunutý balkón (konzola)",
+    fromStep1TypeLabel: params.get("label") || "Vysunutý balkón (konzola)",
 
     // krok 2 – tvary
     shapeKey: "square",
     dims: {},
     area: null,
-    perimeter: null,
+    perimeter: null, // obvod pre ukončovacie lišty (po odpočítaní strán pri stene)
+    geometryError: null, // pre L-tvar
+
     wallSides: {
       A: false,
       B: false,
@@ -156,9 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
   // ELEMENTY – kroky
   // ---------------------------------------------------------------------------
-  const stepSections = Array.from(
-    document.querySelectorAll(".step-section")
-  );
+  const stepSections = Array.from(document.querySelectorAll(".step-section"));
   function showStep(stepNo) {
     state.currentStep = stepNo;
     stepSections.forEach((sec) => {
@@ -193,8 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const summaryAreaEl = document.getElementById("summaryArea");
-  const summaryPerimeterEl =
-    document.getElementById("summaryPerimeter");
+  const summaryPerimeterEl = document.getElementById("summaryPerimeter");
 
   const backToStep1Btn = document.getElementById("backToStep1Btn");
   const goToStep3Btn = document.getElementById("goToStep3Btn");
@@ -208,23 +202,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const heightRadios = Array.from(
     document.querySelectorAll('input[name="heightOption"]')
   );
-  const drainOptions = Array.from(
-    document.querySelectorAll(".drain-option")
-  );
+  const drainOptions = Array.from(document.querySelectorAll(".drain-option"));
 
-  const recommendedName =
-    document.getElementById("recommendedName");
-  const recommendedNote =
-    document.getElementById("recommendedNote");
+  const recommendedName = document.getElementById("recommendedName");
+  const recommendedNote = document.getElementById("recommendedNote");
 
   const bomAreaEl = document.getElementById("bomArea");
-  const bomMembraneAreaEl =
-    document.getElementById("bomMembraneArea");
+  const bomMembraneAreaEl = document.getElementById("bomMembraneArea");
   const bomPerimeterEl = document.getElementById("bomPerimeter");
-  const bomProfilesCountEl =
-    document.getElementById("bomProfilesCount");
-  const bomAdhesiveBagsEl =
-    document.getElementById("bomAdhesiveBags");
+  const bomProfilesCountEl = document.getElementById("bomProfilesCount");
+  const bomAdhesiveBagsEl = document.getElementById("bomAdhesiveBags");
   const bomNoteEl = document.getElementById("bomNote");
 
   const goToStep4Btn = document.getElementById("goToStep4Btn");
@@ -240,36 +227,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const k4SystemNameEl = document.getElementById("k4SystemName");
 
   const k4BomAreaEl = document.getElementById("k4BomArea");
-  const k4BomMembraneAreaEl =
-    document.getElementById("k4BomMembraneArea");
-  const k4BomPerimeterEl =
-    document.getElementById("k4BomPerimeter");
-  const k4BomProfilesCountEl =
-    document.getElementById("k4BomProfilesCount");
-  const k4BomAdhesiveBagsEl =
-    document.getElementById("k4BomAdhesiveBags");
+  const k4BomMembraneAreaEl = document.getElementById("k4BomMembraneArea");
+  const k4BomPerimeterEl = document.getElementById("k4BomPerimeter");
+  const k4BomProfilesCountEl = document.getElementById("k4BomProfilesCount");
+  const k4BomAdhesiveBagsEl = document.getElementById("k4BomAdhesiveBags");
 
   const backToStep3Btn = document.getElementById("backToStep3Btn");
 
+  // (voliteľné, ak niekde máš tlačidlo na modal náhľadu – v tvojom HTML môže byť null)
   const previewBtn = document.getElementById("previewBtn");
   const previewModal = document.getElementById("previewModal");
   const previewImage = document.getElementById("previewImage");
   const previewCaption = document.getElementById("previewCaption");
-  const previewCloseBtn =
-    document.getElementById("previewCloseBtn");
+  const previewCloseBtn = document.getElementById("previewCloseBtn");
 
-  const k4PreviewTitleEl =
-    document.getElementById("k4PreviewTitle");
-  const k4PreviewImageEl =
-    document.getElementById("k4PreviewImage");
-  const k4PreviewCaptionEl =
-    document.getElementById("k4PreviewCaption");
+  const k4PreviewTitleEl = document.getElementById("k4PreviewTitle");
+  const k4PreviewImageEl = document.getElementById("k4PreviewImage");
+  const k4PreviewCaptionEl = document.getElementById("k4PreviewCaption");
 
   // PDF tlačidlá zatiaľ necháme neaktívne (future feature)
   const btnPdfDownload = document.getElementById("btnPdfDownload");
   const btnPdfToEmail = document.getElementById("btnPdfToEmail");
-  const btnPdfRequestOffer =
-    document.getElementById("btnPdfRequestOffer");
+  const btnPdfRequestOffer = document.getElementById("btnPdfRequestOffer");
 
   // ---------------------------------------------------------------------------
   // TVARY
@@ -283,14 +262,13 @@ document.addEventListener("DOMContentLoaded", () => {
     rectangle: {
       label: "Obdĺžnik / „kosoštvorec“",
       sides: ["A", "B"],
-      info:
-        "Obdĺžnik – dve rôzne strany A a B. Mierna šikmina nevadí.",
+      info: "Obdĺžnik – dve rôzne strany A a B. Mierna šikmina nevadí.",
     },
     "l-shape": {
       label: "Balkón v tvare L",
       sides: ["A", "B", "C", "D", "E", "F"],
       info:
-        "Balkón v tvare L – doplňte všetkých 6 strán A–F v smere hodinových ručičiek.",
+        "Balkón v tvare L – doplňte všetkých 6 strán A–F v smere hodinových ručičiek (pravé uhly).",
     },
   };
 
@@ -324,6 +302,11 @@ document.addEventListener("DOMContentLoaded", () => {
     return num;
   }
 
+  function approxEqual(a, b, tol = 0.01) {
+    // tol v metroch (0.01 m = 1 cm)
+    return Math.abs(a - b) <= tol;
+  }
+
   function canGoToStep3() {
     const d = state.dims;
     if (state.shapeKey === "square") {
@@ -331,16 +314,20 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (state.shapeKey === "rectangle") {
       return d.A != null && d.B != null;
     } else if (state.shapeKey === "l-shape") {
-      return ["A", "B", "C", "D", "E", "F"].every(
-        (key) => d[key] != null
-      );
+      // L: musia byť zadané všetky strany + geometria musí sedieť
+      const all = ["A", "B", "C", "D", "E", "F"].every((key) => d[key] != null);
+      return all && state.area != null && !state.geometryError;
     }
     return false;
   }
 
+  // ✅ OPRAVA: Krok 4 len keď existuje systém + reálny sumár (aj pri L musí sedieť geometria)
   function canGoToStep4() {
-    // stačí mať zvolenú výšku + odtok => nájdený systém
-    return !!state.system;
+    if (!state.system) return false;
+    if (state.perimeter == null) return false;
+    if (state.area == null) return false;
+    if (state.geometryError) return false;
+    return true;
   }
 
   function updateStep2ContinueButton() {
@@ -357,6 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function computeAreaPerimeter(shapeKey, d) {
     let area = null;
     let per = null;
+    let geometryError = null;
 
     if (shapeKey === "square") {
       const A = d.A;
@@ -372,14 +360,48 @@ document.addEventListener("DOMContentLoaded", () => {
         per = 2 * (A + B);
       }
     } else if (shapeKey === "l-shape") {
-      const sides = ["A", "B", "C", "D", "E", "F"].map((k) => d[k]);
-      if (sides.every((v) => v != null)) {
-        per = sides.reduce((sum, v) => sum + v, 0);
-        // plochu L nechávame na konzultáciu
+      // očakávané poradie po obvode (pravé uhly):
+      // A (hore), B (vpravo), C (vnútorná vodorovná), D (vnútorná zvislá), E (dole), F (vľavo)
+      const A = d.A,
+        B = d.B,
+        C = d.C,
+        D = d.D,
+        E = d.E,
+        F = d.F;
+
+      const all = [A, B, C, D, E, F].every((v) => v != null);
+      if (all) {
+        per = A + B + C + D + E + F;
+
+        // geometrická kontrola:
+        // E = A - C
+        // B = F - D
+        const expectE = A - C;
+        const expectB = F - D;
+
+        if (expectE <= 0 || expectB <= 0) {
+          geometryError =
+            "Rozmery L-tvaru nedávajú zmysel. Skontrolujte, že A > C a F > D.";
+        } else if (
+          !approxEqual(E, expectE, 0.02) ||
+          !approxEqual(B, expectB, 0.02)
+        ) {
+          // 2 cm tolerancia
+          geometryError =
+            "Rozmery nesedia pre pravé uhly. Musí platiť E = A − C a B = F − D (v smere hodinových ručičiek).";
+        } else {
+          // plocha = veľký obdĺžnik - výrez
+          area = A * F - C * D;
+          if (!(area > 0)) {
+            geometryError =
+              "Plocha vyšla neplatná. Skontrolujte prosím zadanie strán A–F.";
+            area = null;
+          }
+        }
       }
     }
 
-    return { area, perimeter: per };
+    return { area, perimeter: per, geometryError };
   }
 
   function getWallDeduction(dims) {
@@ -392,29 +414,44 @@ document.addEventListener("DOMContentLoaded", () => {
     return deduction;
   }
 
+  // ---------------------------------------------------------------------------
+  // “kótovanie” náčrtov (písmeno -> číslo) + zvýraznenie “pri stene”
+  // ---------------------------------------------------------------------------
+  function formatLen(val) {
+    return val.toFixed(1).replace(".", ",");
+  }
+
+  function updateShapePreviewLabels() {
+    const nodes = Array.from(document.querySelectorAll("[data-preview-side]"));
+    if (!nodes.length) return;
+
+    nodes.forEach((el) => {
+      const side = String(el.dataset.previewSide || "").toUpperCase();
+      if (!side) return;
+
+      const val = state.dims[side];
+      const text = val != null ? formatLen(val) : side;
+      el.textContent = text;
+
+      const isWall = !!state.wallSides[side];
+      el.classList.toggle("at-wall", isWall);
+    });
+  }
+
   function updateStep3Summary() {
     if (k3TypeEl) {
-      k3TypeEl.textContent =
-        state.fromStep1TypeLabel || "Vysunutý balkón";
+      k3TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
     }
     if (k3ShapeEl) {
       const cfg = shapeConfigs[state.shapeKey];
       k3ShapeEl.textContent = cfg ? cfg.label : "–";
     }
 
-    const d = state.dims;
-    const isLShape = state.shapeKey === "l-shape";
-    const allL = ["A", "B", "C", "D", "E", "F"].every(
-      (k) => d[k] != null
-    );
-
     if (k3AreaEl) {
       if (state.area != null) {
-        k3AreaEl.textContent = state.area
-          .toFixed(1)
-          .replace(".", ",");
-      } else if (isLShape && allL) {
-        k3AreaEl.textContent = "dopočítame pri konzultácii";
+        k3AreaEl.textContent = state.area.toFixed(1).replace(".", ",");
+      } else if (state.geometryError) {
+        k3AreaEl.textContent = "skontrolujte rozmery";
       } else {
         k3AreaEl.textContent = "–";
       }
@@ -422,9 +459,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (k3PerimeterEl) {
       k3PerimeterEl.textContent =
-        state.perimeter != null
-          ? state.perimeter.toFixed(1).replace(".", ",")
-          : "–";
+        state.perimeter != null ? state.perimeter.toFixed(1).replace(".", ",") : "–";
     }
   }
 
@@ -432,27 +467,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!document.getElementById("step4")) return;
 
     if (k4TypeEl) {
-      k4TypeEl.textContent =
-        state.fromStep1TypeLabel || "Vysunutý balkón";
+      k4TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
     }
     if (k4ShapeEl) {
       const cfg = shapeConfigs[state.shapeKey];
       k4ShapeEl.textContent = cfg ? cfg.label : "–";
     }
 
-    const d = state.dims;
-    const isLShape = state.shapeKey === "l-shape";
-    const allL = ["A", "B", "C", "D", "E", "F"].every(
-      (k) => d[k] != null
-    );
-
     if (k4AreaEl) {
       if (state.area != null) {
-        k4AreaEl.textContent = state.area
-          .toFixed(1)
-          .replace(".", ",");
-      } else if (isLShape && allL) {
-        k4AreaEl.textContent = "dopočítame pri konzultácii";
+        k4AreaEl.textContent = state.area.toFixed(1).replace(".", ",");
+      } else if (state.geometryError) {
+        k4AreaEl.textContent = "skontrolujte rozmery";
       } else {
         k4AreaEl.textContent = "–";
       }
@@ -460,19 +486,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (k4PerimeterEl) {
       k4PerimeterEl.textContent =
-        state.perimeter != null
-          ? state.perimeter.toFixed(1).replace(".", ",")
-          : "–";
+        state.perimeter != null ? state.perimeter.toFixed(1).replace(".", ",") : "–";
     }
 
     if (k4HeightLabelEl) {
-      k4HeightLabelEl.textContent =
-        getHeightLabel(state.heightDomId) || "–";
+      k4HeightLabelEl.textContent = getHeightLabel(state.heightDomId) || "–";
     }
 
     if (k4DrainLabelEl) {
-      k4DrainLabelEl.textContent =
-        getDrainLabel(state.drainDomId) || "–";
+      k4DrainLabelEl.textContent = getDrainLabel(state.drainDomId) || "–";
     }
 
     if (k4SystemNameEl) {
@@ -483,8 +505,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateStep4Preview() {
-    if (!k4PreviewImageEl || !k4PreviewTitleEl || !k4PreviewCaptionEl)
-      return;
+    if (!k4PreviewImageEl || !k4PreviewTitleEl || !k4PreviewCaptionEl) return;
 
     if (!state.system) {
       k4PreviewTitleEl.textContent =
@@ -497,8 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const cfg = getPreviewConfigForSystem(state.system);
     k4PreviewTitleEl.textContent =
-      state.system.uiTitle ||
-      "Technický náhľad skladby balkóna";
+      state.system.uiTitle || "Technický náhľad skladby balkóna";
 
     if (cfg) {
       k4PreviewImageEl.src = cfg.src;
@@ -523,15 +543,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    k4BomAreaEl.textContent = bomAreaEl
-      ? bomAreaEl.textContent
-      : "–";
+    k4BomAreaEl.textContent = bomAreaEl ? bomAreaEl.textContent : "–";
     k4BomMembraneAreaEl.textContent = bomMembraneAreaEl
       ? bomMembraneAreaEl.textContent
       : "–";
-    k4BomPerimeterEl.textContent = bomPerimeterEl
-      ? bomPerimeterEl.textContent
-      : "–";
+    k4BomPerimeterEl.textContent = bomPerimeterEl ? bomPerimeterEl.textContent : "–";
     k4BomProfilesCountEl.textContent = bomProfilesCountEl
       ? bomProfilesCountEl.textContent
       : "–";
@@ -543,18 +559,17 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateRecommendedBox() {
     if (!recommendedName || !recommendedNote) return;
 
-    // ešte nemáme nič zvolené
     if (!state.heightDomId || !state.drainDomId) {
       if (state.heightDomId === "high") {
         recommendedName.textContent =
           "Zatiaľ nevybraná – zvoľte spôsob odtoku vody.";
         recommendedNote.textContent =
-          "Pri vyššej konštrukčnej výške Schlüter® neponúka systém s voľnou voľnou hranou. Vyberte prosím variant so žľabom pri hrane alebo s podlahovou vpustou. Detailný návrh doplníme v PDF podklade z Lištobooku.";
+          "Pri vyššej konštrukčnej výške Schlüter® neponúka systém s voľnou hranou. Vyberte prosím variant so žľabom pri hrane alebo s podlahovou vpustou.";
       } else {
         recommendedName.textContent =
           "Zatiaľ nevybraná – zvoľte výšku a odtok vody.";
         recommendedNote.textContent =
-          "Po výbere konštrukčnej výšky aj spôsobu odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón. Detailný popis a prierezy dostanete v PDF priamo v Lištobooku.";
+          "Po výbere konštrukčnej výšky aj spôsobu odtoku vody vám zobrazíme návrh skladby. Detailný popis a prierezy dostanete v PDF priamo v Lištobooku.";
       }
       return;
     }
@@ -567,8 +582,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    recommendedName.textContent =
-      state.system.uiTitle || "Navrhovaná skladba";
+    recommendedName.textContent = state.system.uiTitle || "Navrhovaná skladba";
     recommendedNote.textContent =
       state.system.description ||
       "Detailný popis skladby doplníme v PDF podklade z Lištobooku.";
@@ -616,21 +630,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // špeciálny režim pre L-tvar – zobrazíme len obvod
-    if (state.shapeKey === "l-shape") {
-      if (per != null) {
-        bomAreaEl.textContent = "–";
-        bomMembraneAreaEl.textContent = "–";
-        bomPerimeterEl.textContent = per
-          .toFixed(1)
-          .replace(".", ",");
-        bomProfilesCountEl.textContent = "cca –";
-        bomAdhesiveBagsEl.textContent = "–";
-        bomNoteEl.textContent =
-          "Pri balkóne v tvare L zatiaľ zobrazujeme len obvod. Plochu a orientačné množstvá materiálu doplníme po individuálnom návrhu v Lištobooku.";
-      } else {
-        resetBom();
-      }
+    if (state.geometryError) {
+      resetBom(
+        "Najprv opravte rozmery balkóna v kroku 2 (L-tvar musí sedieť geometricky)."
+      );
       syncBomToStep4();
       return;
     }
@@ -643,14 +646,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Jednoduchý orientačný výpočet – nezávisle od konkrétneho systému:
+    // Jednoduchý orientačný výpočet:
     const profilePieces = Math.max(1, Math.ceil(per / 2.5)); // 1 ks profilu ≈ 2,5 bm
     const adhesiveBags = Math.max(1, Math.ceil(area / 5)); // 1 vrece ≈ 5 m²
 
     bomAreaEl.textContent = area.toFixed(1).replace(".", ",");
-    bomMembraneAreaEl.textContent = area
-      .toFixed(1)
-      .replace(".", ",");
+    bomMembraneAreaEl.textContent = area.toFixed(1).replace(".", ",");
 
     bomPerimeterEl.textContent = per.toFixed(1).replace(".", ",");
     bomProfilesCountEl.textContent = String(profilePieces);
@@ -659,16 +660,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const drainDom = state.drainDomId;
     if (drainDom === "edge-free") {
       bomNoteEl.textContent =
-        "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany (bez stien). Drenážna / separačná vrstva pokrýva celú plochu, ukončovacie profily rátame len po voľných hranách. Lepidlo (Sopro / Mapei) je uvedené orientačne.";
+        "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany (bez stien). Ukončovacie profily rátame len po voľných hranách.";
     } else if (drainDom === "edge-gutter") {
       bomNoteEl.textContent =
-        "Výpočet je prispôsobený balkónu s oplechovaním a žľabom pri hrane. Profily nesú žľab Schlüter®-BARIN, drenážna rohož pokrýva celú plochu. Lepidlo (Sopro / Mapei) je uvedené orientačne.";
+        "Výpočet je prispôsobený balkónu so žľabom pri hrane. Profily rátame po voľných hranách podľa zadania.";
     } else if (drainDom === "internal-drain") {
       bomNoteEl.textContent =
-        "Pre balkón s vnútorným vpustom rátame plochu pre kontaktnú izoláciu, drenážnu / separačnú vrstvu a orientačné množstvo lepidla. Detaily spádovania k vpustu a napojenia na prvky KERDI-DRAIN doplníme v PDF podklade.";
+        "Pre balkón s vnútorným vpustom rátame plochu pre izoláciu/drenáž a orientačné množstvo lepidla. Detaily doplníme v PDF.";
     } else {
       bomNoteEl.textContent =
-        "Hodnoty sú orientačné. Presný výpočet a konkrétne skladby doplníme v PDF podklade po konzultácii s technikom Lištového centra.";
+        "Hodnoty sú orientačné. Presný výpočet doplníme po konzultácii s technikom Lištového centra.";
     }
 
     syncBomToStep4();
@@ -693,6 +694,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const base = computeAreaPerimeter(state.shapeKey, dims);
     state.area = base.area;
+    state.geometryError = base.geometryError || null;
 
     let per = base.perimeter;
     if (per != null) {
@@ -703,16 +705,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isLShape = state.shapeKey === "l-shape";
     const lComplete =
-      isLShape &&
-      ["A", "B", "C", "D", "E", "F"].every((k) => dims[k] != null);
+      isLShape && ["A", "B", "C", "D", "E", "F"].every((k) => dims[k] != null);
 
     if (summaryAreaEl) {
       if (state.area != null) {
-        summaryAreaEl.textContent = state.area
-          .toFixed(1)
-          .replace(".", ",");
+        summaryAreaEl.textContent = state.area.toFixed(1).replace(".", ",");
+      } else if (state.geometryError) {
+        summaryAreaEl.textContent = state.geometryError;
       } else if (lComplete) {
-        summaryAreaEl.textContent = "dopočítame pri konzultácii";
+        summaryAreaEl.textContent = "–";
       } else {
         summaryAreaEl.textContent = "–";
       }
@@ -720,30 +721,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (summaryPerimeterEl) {
       summaryPerimeterEl.textContent =
-        state.perimeter != null
-          ? state.perimeter.toFixed(1).replace(".", ",")
-          : "–";
+        state.perimeter != null ? state.perimeter.toFixed(1).replace(".", ",") : "–";
     }
+
+    // ✅ dopisovanie čísel do náčrtu + zvýraznenie “pri stene”
+    updateShapePreviewLabels();
 
     updateStep2ContinueButton();
     updateStep3Summary();
+    updateRecommendedBox();
     updateBom();
     updateStep3ContinueButton();
     updateStep4Summary();
+    updateStep4Preview();
   }
 
   function setShape(shapeKey) {
     if (!shapeConfigs[shapeKey]) return;
     state.shapeKey = shapeKey;
 
-    document
-      .querySelectorAll(".shape-card")
-      .forEach((card) => {
-        card.classList.toggle(
-          "selected",
-          card.dataset.shape === shapeKey
-        );
-      });
+    document.querySelectorAll(".shape-card").forEach((card) => {
+      card.classList.toggle("selected", card.dataset.shape === shapeKey);
+    });
 
     const cfg = shapeConfigs[shapeKey];
     if (dimShapeInfo && cfg) {
@@ -754,11 +753,11 @@ document.addEventListener("DOMContentLoaded", () => {
     Object.keys(fieldElems).forEach((side) => {
       const field = fieldElems[side];
       if (!field) return;
-      field.classList.toggle(
-        "hidden",
-        !activeSides.has(side)
-      );
+      field.classList.toggle("hidden", !activeSides.has(side));
     });
+
+    // reset geometrickej chyby pri zmene tvaru
+    state.geometryError = null;
 
     recomputeFromInputs();
   }
@@ -775,13 +774,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function openPreviewModal() {
-    if (
-      !previewModal ||
-      !previewImage ||
-      !previewCaption ||
-      !previewBtn
-    )
-      return;
+    if (!previewModal || !previewImage || !previewCaption || !previewBtn) return;
     const key = previewBtn.dataset.previewKey;
     if (!key) return;
     const cfg = SYSTEM_PREVIEWS[key];
@@ -805,7 +798,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const opt = btn.dataset.drainOption;
 
       if (isHigh && opt === "edge-free") {
-        // túto kombináciu Schlüter pri vysokej výške neponúka – zakážeme
         btn.disabled = true;
         btn.classList.add("drain-disabled");
         if (state.drainDomId === "edge-free") {
@@ -819,11 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function recalcSystemFromSelections() {
-    // nájdi systém podľa výšky + odtoku
-    state.system = findBalconySystem(
-      state.heightDomId,
-      state.drainDomId
-    );
+    state.system = findBalconySystem(state.heightDomId, state.drainDomId);
 
     updateRecommendedBox();
     updateBom();
@@ -846,10 +834,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.innerWidth <= 768) {
         const sideAInput = dimInputs.A;
         if (sideAInput) {
-          sideAInput.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
+          sideAInput.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
     });
@@ -887,9 +872,7 @@ document.addEventListener("DOMContentLoaded", () => {
     backToStep1Btn.addEventListener("click", () => {
       const target = "calc_terasa_base.html";
       if (email) {
-        window.location.href = `${target}?email=${encodeURIComponent(
-          email
-        )}`;
+        window.location.href = `${target}?email=${encodeURIComponent(email)}`;
       } else {
         window.location.href = target;
       }
@@ -898,6 +881,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (goToStep3Btn) {
     goToStep3Btn.addEventListener("click", () => {
+      // ✅ istota: pred prechodom prepočítať
+      recomputeFromInputs();
+      if (!canGoToStep3()) return;
       showStep(3);
       updateStep3Summary();
       updateBom();
@@ -943,6 +929,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (goToStep4Btn) {
     goToStep4Btn.addEventListener("click", () => {
+      // ✅ brzda: pred prechodom prepočítať + skontrolovať
+      recomputeFromInputs();
+      updateStep3ContinueButton();
+      if (!canGoToStep4()) return;
+
       showStep(4);
       updateStep4Summary();
       updateStep4Preview();
@@ -972,16 +963,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     document.addEventListener("keydown", (e) => {
-      if (
-        e.key === "Escape" &&
-        previewModal.classList.contains("visible")
-      ) {
+      if (e.key === "Escape" && previewModal.classList.contains("visible")) {
         closePreviewModal();
       }
     });
   }
 
-  // PDF tlačidlá zatiaľ nič nerobia – funkciu doplníme v ďalšom kroku vývoja
+  // PDF tlačidlá zatiaľ nič nerobia
   [btnPdfDownload, btnPdfToEmail, btnPdfRequestOffer].forEach((btn) => {
     if (!btn) return;
     btn.disabled = true;
@@ -990,12 +978,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
   // INITIALIZÁCIA
   // ---------------------------------------------------------------------------
-  if (k3TypeEl) {
-    k3TypeEl.textContent = state.fromStep1TypeLabel;
-  }
-  if (k4TypeEl) {
-    k4TypeEl.textContent = state.fromStep1TypeLabel;
-  }
+  if (k3TypeEl) k3TypeEl.textContent = state.fromStep1TypeLabel;
+  if (k4TypeEl) k4TypeEl.textContent = state.fromStep1TypeLabel;
 
   showStep(2);
   setShape("square");
@@ -1009,4 +993,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateStep4Summary();
   updateStep4Preview();
   syncBomToStep4();
+
+  // ✅ istota: po načítaní hneď vykótovať
+  updateShapePreviewLabels();
 });

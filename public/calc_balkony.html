@@ -18,16 +18,8 @@
       --accent-border: rgba(251, 191, 36, 0.5);
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
 
     body {
       background: radial-gradient(circle at top, #1b2b68 0, #050c22 55%, #020617 100%);
@@ -36,26 +28,14 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    a { color: inherit; text-decoration: none; }
 
-    .desktop-only {
-      display: block;
-    }
-
-    .mobile-only {
-      display: none;
-    }
+    .desktop-only { display: block; }
+    .mobile-only { display: none; }
 
     @media (max-width: 640px) {
-      .desktop-only {
-        display: none;
-      }
-      .mobile-only {
-        display: block;
-      }
+      .desktop-only { display: none; }
+      .mobile-only { display: block; }
     }
 
     /* HEADER */
@@ -105,10 +85,7 @@
       cursor: pointer;
     }
 
-    .icon-btn svg {
-      width: 22px;
-      height: 22px;
-    }
+    .icon-btn svg { width: 22px; height: 22px; }
 
     /* LAYOUT */
     .wrap {
@@ -119,23 +96,9 @@
       z-index: 1;
     }
 
-    .page-title {
-      margin: 6px 0 4px;
-      font-size: 1.35rem;
-      letter-spacing: 0.02em;
-    }
-
-    .page-subtitle {
-      margin: 0 0 4px;
-      font-size: 0.88rem;
-      color: #e5e7eb;
-    }
-
-    .page-subtitle-small {
-      margin: 0 0 18px;
-      font-size: 0.8rem;
-      color: #9ca3af;
-    }
+    .page-title { margin: 6px 0 4px; font-size: 1.35rem; letter-spacing: 0.02em; }
+    .page-subtitle { margin: 0 0 4px; font-size: 0.88rem; color: #e5e7eb; }
+    .page-subtitle-small { margin: 0 0 18px; font-size: 0.8rem; color: #9ca3af; }
 
     /* Bezpečnostné pásy */
     .safety-stripes {
@@ -147,9 +110,7 @@
     }
 
     @media (min-width: 992px) {
-      .safety-stripes {
-        display: block;
-      }
+      .safety-stripes { display: block; }
 
       .safety-stripes::before,
       .safety-stripes::after {
@@ -170,40 +131,24 @@
         filter: blur(1px);
       }
 
-      .safety-stripes::before {
-        left: 0;
-      }
-
-      .safety-stripes::after {
-        right: 0;
-      }
+      .safety-stripes::before { left: 0; }
+      .safety-stripes::after { right: 0; }
     }
 
-    .step-section {
-      display: none;
-    }
-
-    .step-section.active {
-      display: block;
-    }
+    .step-section { display: none; }
+    .step-section.active { display: block; }
 
     /* KROK 2 */
     .step2-shell {
       margin-top: 10px;
-      background: radial-gradient(circle at top,
-        rgba(15, 23, 42, 0.96) 0,
-        rgba(3, 7, 18, 0.98) 55%);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96) 0, rgba(3, 7, 18, 0.98) 55%);
       border-radius: 22px;
       padding: 18px 16px 20px;
       border: 1px solid rgba(148, 163, 184, 0.55);
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
     }
 
-    @media (min-width: 960px) {
-      .step2-shell {
-        padding: 22px 22px 24px;
-      }
-    }
+    @media (min-width: 960px) { .step2-shell { padding: 22px 22px 24px; } }
 
     .step-header-row {
       display: flex;
@@ -232,10 +177,7 @@
       margin-right: 6px;
     }
 
-    .step-caption {
-      font-size: 0.8rem;
-      color: #9ca3af;
-    }
+    .step-caption { font-size: 0.8rem; color: #9ca3af; }
 
     .step2-layout {
       display: grid;
@@ -243,11 +185,7 @@
       gap: 18px;
     }
 
-    @media (max-width: 900px) {
-      .step2-layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
+    @media (max-width: 900px) { .step2-layout { grid-template-columns: minmax(0, 1fr); } }
 
     .shape-grid {
       display: grid;
@@ -255,11 +193,7 @@
       gap: 10px;
     }
 
-    @media (max-width: 640px) {
-      .shape-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
+    @media (max-width: 640px) { .shape-grid { grid-template-columns: minmax(0, 1fr); } }
 
     .shape-card {
       position: relative;
@@ -271,32 +205,19 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      transition: transform 0.1s ease, box-shadow 0.1s ease,
-        border-color 0.1s ease, background 0.1s ease;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease, background 0.1s ease;
     }
 
-    .shape-card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.7);
-    }
+    .shape-card:hover { transform: translateY(-1px); box-shadow: 0 14px 26px rgba(0, 0, 0, 0.7); }
 
     .shape-card.selected {
       border-color: rgba(251, 191, 36, 0.7);
-      background: radial-gradient(circle at top,
-        rgba(250, 204, 21, 0.12) 0,
-        rgba(15, 23, 42, 0.97) 60%);
+      background: radial-gradient(circle at top, rgba(250, 204, 21, 0.12) 0, rgba(15, 23, 42, 0.97) 60%);
       box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
     }
 
-    .shape-title {
-      font-size: 0.84rem;
-      font-weight: 600;
-    }
-
-    .shape-note {
-      font-size: 0.75rem;
-      color: #d1d5db;
-    }
+    .shape-title { font-size: 0.84rem; font-weight: 600; }
+    .shape-note { font-size: 0.75rem; color: #d1d5db; }
 
     .shape-figure {
       margin-top: 4px;
@@ -318,75 +239,57 @@
       position: relative;
     }
 
-    .shape-rect.l-shape {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 1.1rem;
-      letter-spacing: 0.08em;
-    }
-
     .side-label {
       position: absolute;
       font-size: 0.7rem;
-      padding: 2px 5px;
+      padding: 2px 6px;
       border-radius: 999px;
       background: rgba(15, 23, 42, 0.96);
       border: 1px solid rgba(251, 191, 36, 0.7);
       color: #facc15;
+      font-variant-numeric: tabular-nums;
+      min-width: 22px;
+      text-align: center;
     }
 
-    .side-label.top {
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+    .side-label.top { top: -10px; left: 50%; transform: translateX(-50%); }
+    .side-label.right { right: -10px; top: 50%; transform: translateY(-50%); }
+    .side-label.bottom { bottom: -10px; left: 50%; transform: translateX(-50%); }
+    .side-label.left { left: -10px; top: 50%; transform: translateY(-50%); }
 
-    .side-label.right {
-      right: -10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .side-label.bottom {
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .side-label.left {
-      left: -10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-      font-size: 0.8rem;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .field.hidden {
-      display: none;
-    }
-
-    .field label {
-      font-size: 0.8rem;
+    /* zvýraznenie strany pri stene (len vizuál) */
+    .side-label.at-wall {
       color: #e5e7eb;
+      border-color: rgba(148, 163, 184, 0.85);
+      background: rgba(2, 6, 23, 0.92);
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.35);
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
     }
 
-    .field small {
-      font-size: 0.7rem;
-      color: #9ca3af;
+    /* L SVG */
+    .shape-l-svg { width: 90%; max-width: 240px; height: auto; display: block; }
+    .shape-l-label {
+      font-size: 13px;
+      font-weight: 700;
+      fill: #facc15;
+      paint-order: stroke;
+      stroke: rgba(15, 23, 42, 0.95);
+      stroke-width: 4px;
+      stroke-linejoin: round;
     }
+    .shape-l-label.at-wall {
+      fill: #e5e7eb;
+      text-decoration: underline;
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 9px; font-size: 0.8rem; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field.hidden { display: none; }
+
+    .field label { font-size: 0.8rem; color: #e5e7eb; }
+    .field small { font-size: 0.7rem; color: #9ca3af; }
 
     .field input {
       border-radius: 999px;
@@ -398,19 +301,10 @@
       outline: none;
     }
 
-    .field input:focus {
-      border-color: rgba(251, 191, 36, 0.9);
-      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4);
-    }
+    .field input:focus { border-color: rgba(251, 191, 36, 0.9); box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4); }
 
-    .dim-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .dim-row .field {
-      flex: 1;
-    }
+    .dim-row { display: flex; gap: 8px; }
+    .dim-row .field { flex: 1; }
 
     .pill-info {
       margin-top: 6px;
@@ -431,24 +325,10 @@
       font-size: 0.8rem;
     }
 
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 3px;
-    }
-
-    .summary-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .summary-label {
-      color: #9ca3af;
-    }
-
-    .summary-value {
-      font-weight: 600;
-      color: #fbbf24;
-    }
+    .summary-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+    .summary-row:last-child { margin-bottom: 0; }
+    .summary-label { color: #9ca3af; }
+    .summary-value { font-weight: 600; color: #fbbf24; }
 
     .step2-actions {
       margin-top: 12px;
@@ -471,10 +351,6 @@
       gap: 6px;
     }
 
-    .btn-inline span {
-      font-size: 0.85rem;
-    }
-
     .btn-primary {
       border-radius: 999px;
       padding: 9px 18px;
@@ -493,17 +369,8 @@
       transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
     }
 
-    .btn-primary:disabled {
-      opacity: 0.4;
-      cursor: default;
-      box-shadow: none;
-      filter: grayscale(0.4);
-    }
-
-    .btn-primary:not(:disabled):active {
-      transform: translateY(1px);
-      box-shadow: 0 5px 16px rgba(251, 191, 36, 0.4);
-    }
+    .btn-primary:disabled { opacity: 0.4; cursor: default; box-shadow: none; filter: grayscale(0.4); }
+    .btn-primary:not(:disabled):active { transform: translateY(1px); box-shadow: 0 5px 16px rgba(251, 191, 36, 0.4); }
 
     /* Box pre strany pri stene */
     .wall-box {
@@ -515,75 +382,33 @@
       font-size: 0.76rem;
     }
 
-    .wall-box-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
+    .wall-box-title { font-weight: 600; margin-bottom: 4px; }
+    .wall-box-text { margin: 0 0 6px; color: #d1d5db; }
 
-    .wall-box-text {
-      margin: 0 0 6px;
-      color: #d1d5db;
-    }
-
-    .wall-box-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 12px;
-    }
-
-    .wall-box-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.75rem;
-    }
-
-    .wall-box-label input {
-      transform: translateY(1px);
-    }
-
-    .wall-box-label.hidden {
-      display: none;
-    }
+    .wall-box-row { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+    .wall-box-label { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; }
+    .wall-box-label input { transform: translateY(1px); }
+    .wall-box-label.hidden { display: none; }
 
     /* KROK 3 + 4 – obal */
-    .step3-shell,
-    .step4-shell {
+    .step3-shell, .step4-shell {
       margin-top: 26px;
-      background: radial-gradient(circle at top,
-        rgba(15, 23, 42, 0.96) 0,
-        rgba(3, 7, 18, 0.98) 55%);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96) 0, rgba(3, 7, 18, 0.98) 55%);
       border-radius: 22px;
       padding: 18px 16px 20px;
       border: 1px solid rgba(148, 163, 184, 0.55);
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
     }
 
-    @media (min-width: 960px) {
-      .step3-shell,
-      .step4-shell {
-        padding: 22px 22px 24px;
-      }
-    }
+    @media (min-width: 960px) { .step3-shell, .step4-shell { padding: 22px 22px 24px; } }
 
-    .step3-layout {
+    .step3-layout, .step4-layout {
       display: grid;
       grid-template-columns: minmax(0, 2.1fr) minmax(0, 2.4fr);
       gap: 18px;
     }
 
-    .step4-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 2.1fr) minmax(0, 2.4fr);
-      gap: 18px;
-    }
-
-    @media (max-width: 900px) {
-      .step3-layout,
-      .step4-layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
+    @media (max-width: 900px) { .step3-layout, .step4-layout { grid-template-columns: minmax(0, 1fr); } }
 
     .note-prep {
       font-size: 0.74rem;
@@ -602,24 +427,9 @@
       margin-top: 6px;
     }
 
-    .summary-table th,
-    .summary-table td {
-      padding: 5px 6px;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.4);
-    }
-
-    .summary-table th {
-      text-align: left;
-      color: #9ca3af;
-      font-weight: 500;
-      width: 50%;
-    }
-
-    .summary-table td {
-      text-align: right;
-      font-weight: 600;
-      color: #e5e7eb;
-    }
+    .summary-table th, .summary-table td { padding: 5px 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.4); }
+    .summary-table th { text-align: left; color: #9ca3af; font-weight: 500; width: 50%; }
+    .summary-table td { text-align: right; font-weight: 600; color: #e5e7eb; }
 
     .question-block {
       font-size: 0.8rem;
@@ -630,29 +440,11 @@
       margin-bottom: 10px;
     }
 
-    .question-title {
-      font-size: 0.84rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
+    .question-title { font-size: 0.84rem; font-weight: 600; margin-bottom: 4px; }
+    .question-text { font-size: 0.78rem; color: #d1d5db; margin-bottom: 8px; }
 
-    .question-text {
-      font-size: 0.78rem;
-      color: #d1d5db;
-      margin-bottom: 8px;
-    }
-
-    .drain-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    @media (max-width: 680px) {
-      .drain-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
+    .drain-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    @media (max-width: 680px) { .drain-grid { grid-template-columns: minmax(0, 1fr); } }
 
     .drain-option {
       border-radius: 14px;
@@ -664,33 +456,19 @@
       display: flex;
       flex-direction: column;
       gap: 3px;
-      transition: transform 0.08s ease, box-shadow 0.08s ease,
-        border-color 0.08s ease, background 0.08s ease;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease, background 0.08s ease;
       font-size: 0.78rem;
     }
 
-    .drain-option:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.7);
-    }
-
+    .drain-option:hover { transform: translateY(-1px); box-shadow: 0 10px 18px rgba(0, 0, 0, 0.7); }
     .drain-option.selected {
       border-color: rgba(251, 191, 36, 0.9);
-      background: radial-gradient(circle at top,
-        rgba(250, 204, 21, 0.12) 0,
-        rgba(15, 23, 42, 0.97) 60%);
+      background: radial-gradient(circle at top, rgba(250, 204, 21, 0.12) 0, rgba(15, 23, 42, 0.97) 60%);
       box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5);
     }
 
-    .drain-label {
-      font-weight: 600;
-      color: #fbbf24;
-    }
-
-    .drain-note {
-      color: #d1d5db;
-      font-size: 0.76rem;
-    }
+    .drain-label { font-weight: 600; color: #fbbf24; }
+    .drain-note { color: #d1d5db; font-size: 0.76rem; }
 
     .recommended-box {
       border-radius: 16px;
@@ -701,26 +479,8 @@
       margin-top: 10px;
     }
 
-    .recommended-name {
-      font-weight: 600;
-      color: #fbbf24;
-      margin-bottom: 4px;
-    }
-
-    .recommended-note {
-      font-size: 0.76rem;
-      color: #d1d5db;
-    }
-
-    .preview-btn {
-      margin-top: 8px;
-      font-size: 0.78rem;
-    }
-
-    .preview-btn:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
+    .recommended-name { font-weight: 600; color: #fbbf24; margin-bottom: 4px; }
+    .recommended-note { font-size: 0.76rem; color: #d1d5db; }
 
     /* Modal náhľadu */
     .preview-modal {
@@ -732,15 +492,9 @@
       z-index: 2000;
     }
 
-    .preview-modal.visible {
-      display: flex;
-    }
+    .preview-modal.visible { display: flex; }
 
-    .preview-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.86);
-    }
+    .preview-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.86); }
 
     .preview-dialog {
       position: relative;
@@ -772,11 +526,7 @@
       display: block;
     }
 
-    .preview-caption {
-      margin: 0;
-      font-size: 0.76rem;
-      color: #d1d5db;
-    }
+    .preview-caption { margin: 0; font-size: 0.76rem; color: #d1d5db; }
 
     .preview-close {
       position: absolute;
@@ -795,52 +545,20 @@
       line-height: 1;
     }
 
-    footer {
-      font-size: 0.72rem;
-      color: #cbd5f5;
-      text-align: center;
-      margin-top: 14px;
-    }
-
-    footer .legal {
-      font-size: 0.67rem;
-      margin-top: 3px;
-      opacity: 0.9;
-    }
+    footer { font-size: 0.72rem; color: #cbd5f5; text-align: center; margin-top: 14px; }
+    footer .legal { font-size: 0.67rem; margin-top: 3px; opacity: 0.9; }
 
     @media (max-width: 640px) {
-      .step2-shell {
-        padding: 16px 12px 18px;
-      }
-
-      .dim-row {
-        flex-direction: column;
-      }
-
-      .dim-row .field {
-        width: 100%;
-      }
-
-      .step2-layout {
-        gap: 12px;
-      }
-
-      .page-title {
-        font-size: 1.15rem;
-      }
-
-      .page-subtitle {
-        font-size: 0.82rem;
-      }
+      .step2-shell { padding: 16px 12px 18px; }
+      .dim-row { flex-direction: column; }
+      .dim-row .field { width: 100%; }
+      .step2-layout { gap: 12px; }
+      .page-title { font-size: 1.15rem; }
+      .page-subtitle { font-size: 0.82rem; }
     }
 
     /* KONŠTRUKČNÁ VÝŠKA – blok v kroku 3 */
-    .height-options {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 6px;
-    }
+    .height-options { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 
     .height-option {
       display: flex;
@@ -853,21 +571,9 @@
       font-size: 0.78rem;
     }
 
-    .height-option input {
-      margin-top: 3px;
-    }
-
-    .height-main {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    .height-note {
-      display: block;
-      font-size: 0.74rem;
-      color: #d1d5db;
-    }
+    .height-option input { margin-top: 3px; }
+    .height-main { display: block; font-weight: 600; margin-bottom: 2px; }
+    .height-note { display: block; font-size: 0.74rem; color: #d1d5db; }
 
     /* KROK 4 – obrázok a sumár */
     .k4-preview-box {
@@ -887,24 +593,10 @@
       display: block;
     }
 
-    .k4-preview-title {
-      font-weight: 600;
-      color: #fbbf24;
-      margin-bottom: 4px;
-    }
+    .k4-preview-title { font-weight: 600; color: #fbbf24; margin-bottom: 4px; }
+    .k4-preview-note { font-size: 0.76rem; color: #d1d5db; }
 
-    .k4-preview-note {
-      font-size: 0.76rem;
-      color: #d1d5db;
-    }
-
-    .k4-actions {
-      margin-top: 14px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: flex-end;
-    }
+    .k4-actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 
     .btn-secondary {
       border-radius: 999px;
@@ -919,33 +611,21 @@
       gap: 6px;
     }
 
-    .btn-secondary:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
+    .btn-secondary:disabled { opacity: 0.5; cursor: default; }
   </style>
 </head>
+
 <body>
   <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <button class="icon-btn" id="backBtn" aria-label="Späť">
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M15 18l-6-6 6-6"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            fill="none"
-          />
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
         </svg>
       </button>
-      <img
-        src="logo_lc.jpg"
-        alt="Lištové centrum"
-        class="logo-small"
-      />
+
+      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small" />
       <div class="user-chip" id="userChip">Prihlásený:</div>
     </div>
   </header>
@@ -994,10 +674,10 @@
               </div>
               <div class="shape-figure">
                 <div class="shape-rect" aria-hidden="true">
-                  <span class="side-label top">A</span>
-                  <span class="side-label right">A</span>
-                  <span class="side-label bottom">A</span>
-                  <span class="side-label left">A</span>
+                  <span class="side-label top" data-preview-side="A">A</span>
+                  <span class="side-label right" data-preview-side="A">A</span>
+                  <span class="side-label bottom" data-preview-side="A">A</span>
+                  <span class="side-label left" data-preview-side="A">A</span>
                 </div>
               </div>
             </article>
@@ -1010,10 +690,10 @@
               </div>
               <div class="shape-figure">
                 <div class="shape-rect" aria-hidden="true">
-                  <span class="side-label top">A</span>
-                  <span class="side-label right">B</span>
-                  <span class="side-label bottom">A</span>
-                  <span class="side-label left">B</span>
+                  <span class="side-label top" data-preview-side="A">A</span>
+                  <span class="side-label right" data-preview-side="B">B</span>
+                  <span class="side-label bottom" data-preview-side="A">A</span>
+                  <span class="side-label left" data-preview-side="B">B</span>
                 </div>
               </div>
             </article>
@@ -1022,12 +702,25 @@
             <article class="shape-card" data-shape="l-shape">
               <div class="shape-title">Balkón v tvare L</div>
               <div class="shape-note">
-                Balkón, ktorý lemuje dve steny domu. Budeme zadávať 6 strán A–F podľa náčrtu.
+                Balkón, ktorý lemuje dve steny domu. Zadáte 6 strán A–F podľa náčrtu (v smere hodinových ručičiek).
               </div>
+
               <div class="shape-figure">
-                <div class="shape-rect l-shape" aria-hidden="true">
-                  L
-                </div>
+                <svg class="shape-l-svg" viewBox="0 0 200 150" aria-hidden="true">
+                  <path
+                    d="M20 20 H180 V55 H110 V130 H20 Z"
+                    fill="none"
+                    stroke="rgba(251, 191, 36, 0.9)"
+                    stroke-width="3"
+                    stroke-linejoin="round"
+                  />
+                  <text class="shape-l-label" x="100" y="14" text-anchor="middle" data-preview-side="A">A</text>
+                  <text class="shape-l-label" x="186" y="40" text-anchor="middle" data-preview-side="B">B</text>
+                  <text class="shape-l-label" x="145" y="70" text-anchor="middle" data-preview-side="C">C</text>
+                  <text class="shape-l-label" x="104" y="105" text-anchor="middle" data-preview-side="D">D</text>
+                  <text class="shape-l-label" x="65" y="144" text-anchor="middle" data-preview-side="E">E</text>
+                  <text class="shape-l-label" x="14" y="78" text-anchor="middle" data-preview-side="F">F</text>
+                </svg>
               </div>
             </article>
           </div>
@@ -1043,40 +736,19 @@
             <div class="dim-row">
               <div class="field" id="fieldSideA">
                 <label for="sideA">Strana A (m)</label>
-                <input
-                  type="number"
-                  id="sideA"
-                  inputmode="decimal"
-                  step="0.1"
-                  min="0"
-                  placeholder="napr. 4,0"
-                />
+                <input type="number" id="sideA" inputmode="decimal" step="0.1" min="0" placeholder="napr. 4,0" />
                 <small>Zapíšte čistú dĺžku bez presahu. Desatinnú čiarku môžete písať bodkou.</small>
               </div>
 
               <div class="field" id="fieldSideB">
                 <label for="sideB">Strana B (m)</label>
-                <input
-                  type="number"
-                  id="sideB"
-                  inputmode="decimal"
-                  step="0.1"
-                  min="0"
-                  placeholder="napr. 5,2"
-                />
+                <input type="number" id="sideB" inputmode="decimal" step="0.1" min="0" placeholder="napr. 5,2" />
                 <small>Pri štvorci ju môžete nechať prázdnu – použijeme A.</small>
               </div>
 
               <div class="field hidden" id="fieldSideC">
                 <label for="sideC">Strana C (m)</label>
-                <input
-                  type="number"
-                  id="sideC"
-                  inputmode="decimal"
-                  step="0.1"
-                  min="0"
-                  placeholder="napr. 2,5"
-                />
+                <input type="number" id="sideC" inputmode="decimal" step="0.1" min="0" placeholder="napr. 2,5" />
                 <small>Pri L-tvare pokračujeme stranou C podľa náčrtu.</small>
               </div>
             </div>
@@ -1084,40 +756,19 @@
             <div class="dim-row">
               <div class="field hidden" id="fieldSideD">
                 <label for="sideD">Strana D (m)</label>
-                <input
-                  type="number"
-                  id="sideD"
-                  inputmode="decimal"
-                  step="0.1"
-                  min="0"
-                  placeholder="napr. 3,0"
-                />
+                <input type="number" id="sideD" inputmode="decimal" step="0.1" min="0" placeholder="napr. 3,0" />
                 <small>Pri L-tvare zadáte aj D, E a F – všetko v metroch.</small>
               </div>
 
               <div class="field hidden" id="fieldSideE">
                 <label for="sideE">Strana E (m)</label>
-                <input
-                  type="number"
-                  id="sideE"
-                  inputmode="decimal"
-                  step="0.1"
-                  min="0"
-                  placeholder="napr. 1,8"
-                />
+                <input type="number" id="sideE" inputmode="decimal" step="0.1" min="0" placeholder="napr. 1,8" />
                 <small>Pokračujeme po obvode balkóna v smere hodinových ručičiek.</small>
               </div>
 
               <div class="field hidden" id="fieldSideF">
                 <label for="sideF">Strana F (m)</label>
-                <input
-                  type="number"
-                  id="sideF"
-                  inputmode="decimal"
-                  step="0.1"
-                  min="0"
-                  placeholder="napr. 6,0"
-                />
+                <input type="number" id="sideF" inputmode="decimal" step="0.1" min="0" placeholder="napr. 6,0" />
                 <small>Posledná strana by mala doviesť obvod späť na začiatok.</small>
               </div>
             </div>
@@ -1174,12 +825,8 @@
           </div>
 
           <div class="step2-actions">
-            <button type="button" class="btn-inline" id="backToStep1Btn">
-              ‹ Späť na krok 1
-            </button>
-            <button type="button" class="btn-primary" id="goToStep3Btn" disabled>
-              Pokračovať na krok 3 (skladba) ›
-            </button>
+            <button type="button" class="btn-inline" id="backToStep1Btn">‹ Späť na krok 1</button>
+            <button type="button" class="btn-primary" id="goToStep3Btn" disabled>Pokračovať na krok 3 (skladba) ›</button>
           </div>
         </div>
       </div>
@@ -1192,39 +839,22 @@
           <span>Krok 3</span> Skladba systému Schlüter® – vysunutý balkón
         </div>
         <div class="step-caption">
-          <span class="desktop-only">
-            Z niekoľkých jednoduchých otázok vyberieme „zlatú strednú cestu“ pre váš vysunutý balkón.
-          </span>
-          <span class="mobile-only">
-            KROK 3 – skladba balkóna, orientačný materiál a voľba systému.
-          </span>
+          <span class="desktop-only">Z niekoľkých jednoduchých otázok vyberieme „zlatú strednú cestu“ pre váš vysunutý balkón.</span>
+          <span class="mobile-only">KROK 3 – skladba balkóna, orientačný materiál a voľba systému.</span>
         </div>
       </div>
 
       <div class="step3-layout">
         <div>
           <p class="note-prep desktop-only">
-            Poznámka: Toto je prvá verzia pre vysunutý balkón. Detaily a prípadné špeciálne situácie
-            doplníme v PDF podklade z Lištobooku.
+            Poznámka: Toto je prvá verzia pre vysunutý balkón. Detaily a prípadné špeciálne situácie doplníme v PDF podklade z Lištobooku.
           </p>
           <table class="summary-table">
             <tbody>
-              <tr>
-                <th>Typ konštrukcie</th>
-                <td id="k3Type">Vysunutý balkón (konzola)</td>
-              </tr>
-              <tr>
-                <th>Tvar</th>
-                <td id="k3Shape">–</td>
-              </tr>
-              <tr>
-                <th>Plocha</th>
-                <td><span id="k3Area">–</span> m²</td>
-              </tr>
-              <tr>
-                <th>Obvod pre lišty</th>
-                <td><span id="k3Perimeter">–</span> bm</td>
-              </tr>
+              <tr><th>Typ konštrukcie</th><td id="k3Type">Vysunutý balkón (konzola)</td></tr>
+              <tr><th>Tvar</th><td id="k3Shape">–</td></tr>
+              <tr><th>Plocha</th><td><span id="k3Area">–</span> m²</td></tr>
+              <tr><th>Obvod pre lišty</th><td><span id="k3Perimeter">–</span> bm</td></tr>
             </tbody>
           </table>
         </div>
@@ -1237,18 +867,14 @@
               Vyberte približnú konštrukčnú výšku – teda hrúbku skladby od hydroizolácie po vrch dlažby.
               V PDF podklade vám ukážeme zvolenú variantu a spomenieme aj ďalšie možnosti.
             </div>
-            <div class="question-text mobile-only">
-              Zvoľte, aká hrubá bude skladba balkóna (od hydroizolácie po vrch dlažby).
-            </div>
+            <div class="question-text mobile-only">Zvoľte, aká hrubá bude skladba balkóna (od hydroizolácie po vrch dlažby).</div>
 
             <div class="height-options">
               <label class="height-option">
                 <input type="radio" name="heightOption" value="low" />
                 <div>
                   <span class="height-main">Nízka konštrukčná výška (do cca 60&nbsp;mm)</span>
-                  <span class="height-note">
-                    Vhodné, keď je málo miesta na dvere alebo napojenie na vnútornú podlahu.
-                  </span>
+                  <span class="height-note">Vhodné, keď je málo miesta na dvere alebo napojenie na vnútornú podlahu.</span>
                 </div>
               </label>
 
@@ -1256,9 +882,7 @@
                 <input type="radio" name="heightOption" value="medium" />
                 <div>
                   <span class="height-main">Stredná konštrukčná výška (cca 60–100&nbsp;mm)</span>
-                  <span class="height-note">
-                    Najčastejšie riešenie – dostatok priestoru pre štandardnú skladbu so spádom a drenážou.
-                  </span>
+                  <span class="height-note">Najčastejšie riešenie – dostatok priestoru pre štandardnú skladbu so spádom a drenážou.</span>
                 </div>
               </label>
 
@@ -1266,9 +890,7 @@
                 <input type="radio" name="heightOption" value="high" />
                 <div>
                   <span class="height-main">Vysoká konštrukčná výška (cca 100–150+&nbsp;mm)</span>
-                  <span class="height-note">
-                    Vhodné pri hrubšej doske alebo pri požiadavke na vyššie vrstvy a väčší spád.
-                  </span>
+                  <span class="height-note">Vhodné pri hrubšej doske alebo pri požiadavke na vyššie vrstvy a väčší spád.</span>
                 </div>
               </label>
             </div>
@@ -1278,33 +900,24 @@
           <div class="question-block" id="balconyQuestion">
             <div class="question-title">Otázka 1 – ako odteká voda z balkóna?</div>
             <div class="question-text desktop-only">
-              Vyberte možnosť, ktorá sa najviac podobá vašej situácii. Podľa toho zvolíme vhodnú skladbu Schlüter®
-              pre vysunutý balkón.
+              Vyberte možnosť, ktorá sa najviac podobá vašej situácii. Podľa toho zvolíme vhodnú skladbu Schlüter® pre vysunutý balkón.
             </div>
-            <div class="question-text mobile-only">
-              Vyberte, kadiaľ odteká voda. Podľa toho zvolíme skladbu balkóna.
-            </div>
+            <div class="question-text mobile-only">Vyberte, kadiaľ odteká voda. Podľa toho zvolíme skladbu balkóna.</div>
 
             <div class="drain-grid">
               <button type="button" class="drain-option" data-drain-option="edge-free">
                 <div class="drain-label">Voda steká cez voľnú hranu</div>
-                <div class="drain-note">
-                  Pod balkónom je voľný priestor / záhrada, voda voľne odkvapkáva na zem.
-                </div>
+                <div class="drain-note">Pod balkónom je voľný priestor / záhrada, voda voľne odkvapkáva na zem.</div>
               </button>
 
               <button type="button" class="drain-option" data-drain-option="edge-gutter">
                 <div class="drain-label">Voda ide do žľabu pri hrane</div>
-                <div class="drain-note">
-                  Na hrane balkóna je oplechovanie a žľab, ktorý odvádza dažďovú vodu preč.
-                </div>
+                <div class="drain-note">Na hrane balkóna je oplechovanie a žľab, ktorý odvádza dažďovú vodu preč.</div>
               </button>
 
               <button type="button" class="drain-option" data-drain-option="internal-drain">
                 <div class="drain-label">Voda odteká do vpustu v podlahe</div>
-                <div class="drain-note">
-                  V podlahe balkóna je vpust (gulička / kanálik), do ktorého sa zbieha voda.
-                </div>
+                <div class="drain-note">V podlahe balkóna je vpust (gulička / kanálik), do ktorého sa zbieha voda.</div>
               </button>
             </div>
           </div>
@@ -1324,100 +937,44 @@
             <div class="summary-label">Orientačné množstvá materiálu</div>
             <table class="summary-table">
               <tbody>
-                <tr>
-                  <th>Plocha pre výpočet</th>
-                  <td><span id="bomArea">–</span> m²</td>
-                </tr>
-                <tr>
-                  <th>Drenážna / separačná rohož</th>
-                  <td>
-                    <span id="bomMembraneArea">–</span> m²
-                  </td>
-                </tr>
-                <tr>
-                  <th>Ukončovacie profily</th>
-                  <td>
-                    <span id="bomPerimeter">–</span> bm / 
-                    cca <span id="bomProfilesCount">–</span> ks
-                  </td>
-                </tr>
-                <tr>
-                  <th>Lepidlo (Sopro / Mapei)</th>
-                  <td>
-                    cca <span id="bomAdhesiveBags">–</span> vriec – značku si vyberiete podľa preferencie.
-                  </td>
-                </tr>
+                <tr><th>Plocha pre výpočet</th><td><span id="bomArea">–</span> m²</td></tr>
+                <tr><th>Drenážna / separačná rohož</th><td><span id="bomMembraneArea">–</span> m²</td></tr>
+                <tr><th>Ukončovacie profily</th><td><span id="bomPerimeter">–</span> bm / cca <span id="bomProfilesCount">–</span> ks</td></tr>
+                <tr><th>Lepidlo (Sopro / Mapei)</th><td>cca <span id="bomAdhesiveBags">–</span> vriec – značku si vyberiete podľa preferencie.</td></tr>
               </tbody>
             </table>
             <div class="recommended-note" id="bomNote">
-              Hodnoty sú orientačné. Presný výpočet a konkrétne skladby doplníme v PDF podklade
-              po konzultácii s technikom Lištového centra.
+              Hodnoty sú orientačné. Presný výpočet a konkrétne skladby doplníme v PDF podklade po konzultácii s technikom Lištového centra.
             </div>
           </div>
-
-          <p class="mobile-only" style="font-size:0.78rem;color:#e5e7eb;margin-top:8px;">
-            Pre úplný technický výklad a detaily skladby vám technik pripraví PDF podklad v Lištobooku.
-          </p>
         </div>
       </div>
 
       <div class="step2-actions">
-        <button type="button" class="btn-inline" id="backToStep2Btn">
-          ‹ Späť na krok 2
-        </button>
-        <button type="button" class="btn-primary" id="goToStep4Btn" disabled>
-          Pokračovať na krok 4 (sumár & PDF) ›
-        </button>
+        <button type="button" class="btn-inline" id="backToStep2Btn">‹ Späť na krok 2</button>
+        <button type="button" class="btn-primary" id="goToStep4Btn" disabled>Pokračovať na krok 4 (sumár & PDF) ›</button>
       </div>
     </section>
 
     <!-- KROK 4 -->
     <section class="step4-shell step-section" id="step4">
       <div class="step-header-row">
-        <div class="step-title-main">
-          <span>Krok 4</span> Sumár, technický náhľad a PDF podklad
-        </div>
-        <div class="step-caption">
-          Skontrolujte zvolený systém, plochu, obvod a orientačný materiál. Potom si zvolíte, čo s PDF ďalej.
-        </div>
+        <div class="step-title-main"><span>Krok 4</span> Sumár, technický náhľad a PDF podklad</div>
+        <div class="step-caption">Skontrolujte zvolený systém, plochu, obvod a orientačný materiál. Potom si zvolíte, čo s PDF ďalej.</div>
       </div>
 
       <div class="step4-layout">
-        <!-- ĽAVÁ STRANA – SUMÁR -->
         <div>
-          <p class="note-prep">
-            Tento sumár vychádza z údajov z kroku 2 a 3. V PDF podklade doplníme technické detaily a ďalšie vhodné varianty.
-          </p>
+          <p class="note-prep">Tento sumár vychádza z údajov z kroku 2 a 3. V PDF podklade doplníme technické detaily a ďalšie vhodné varianty.</p>
           <table class="summary-table">
             <tbody>
-              <tr>
-                <th>Typ konštrukcie</th>
-                <td id="k4Type">–</td>
-              </tr>
-              <tr>
-                <th>Tvar</th>
-                <td id="k4Shape">–</td>
-              </tr>
-              <tr>
-                <th>Plocha balkóna</th>
-                <td><span id="k4Area">–</span> m²</td>
-              </tr>
-              <tr>
-                <th>Obvod pre lišty</th>
-                <td><span id="k4Perimeter">–</span> bm</td>
-              </tr>
-              <tr>
-                <th>Konštrukčná výška</th>
-                <td id="k4HeightLabel">–</td>
-              </tr>
-              <tr>
-                <th>Spôsob odtoku vody</th>
-                <td id="k4DrainLabel">–</td>
-              </tr>
-              <tr>
-                <th>Vybraný systém Schlüter®</th>
-                <td id="k4SystemName">–</td>
-              </tr>
+              <tr><th>Typ konštrukcie</th><td id="k4Type">–</td></tr>
+              <tr><th>Tvar</th><td id="k4Shape">–</td></tr>
+              <tr><th>Plocha balkóna</th><td><span id="k4Area">–</span> m²</td></tr>
+              <tr><th>Obvod pre lišty</th><td><span id="k4Perimeter">–</span> bm</td></tr>
+              <tr><th>Konštrukčná výška</th><td id="k4HeightLabel">–</td></tr>
+              <tr><th>Spôsob odtoku vody</th><td id="k4DrainLabel">–</td></tr>
+              <tr><th>Vybraný systém Schlüter®</th><td id="k4SystemName">–</td></tr>
             </tbody>
           </table>
 
@@ -1426,39 +983,26 @@
             <div class="recommended-note">
               Plocha pre výpočet: <strong><span id="k4BomArea">–</span> m²</strong><br />
               Drenážna / separačná rohož: <strong><span id="k4BomMembraneArea">–</span> m²</strong><br />
-              Ukončovacie profily: <strong><span id="k4BomPerimeter">–</span> bm</strong>,
-              cca <strong><span id="k4BomProfilesCount">–</span> ks</strong><br />
+              Ukončovacie profily: <strong><span id="k4BomPerimeter">–</span> bm</strong>, cca <strong><span id="k4BomProfilesCount">–</span> ks</strong><br />
               Lepidlo (Sopro / Mapei): cca <strong><span id="k4BomAdhesiveBags">–</span> vriec</strong>
             </div>
           </div>
         </div>
 
-        <!-- PRAVÁ STRANA – NÁHĽAD SKLADBY + AKCIE -->
         <div>
           <div class="k4-preview-box">
             <div class="summary-label">Technický náhľad skladby</div>
             <div class="k4-preview-title" id="k4PreviewTitle">Zatiaľ nevybraný – doplňte výšku a odtok vo kroku 3.</div>
-            <img
-              id="k4PreviewImage"
-              class="k4-preview-image"
-              src=""
-              alt="Technický náhľad skladby balkóna"
-            />
+            <img id="k4PreviewImage" class="k4-preview-image" src="" alt="Technický náhľad skladby balkóna" />
             <p class="k4-preview-note" id="k4PreviewCaption">
               Po výbere systému zobrazíme orientačný prierez so skladbou Schlüter® pre váš balkón. Detailné technické informácie budú v PDF podklade.
             </p>
           </div>
 
           <div class="k4-actions">
-            <button type="button" class="btn-secondary" id="btnPdfDownload" disabled>
-              📄 Vygenerovať PDF a uložiť
-            </button>
-            <button type="button" class="btn-secondary" id="btnPdfToEmail" disabled>
-              ✉️ Poslať PDF na môj e-mail
-            </button>
-            <button type="button" class="btn-primary" id="btnPdfRequestOffer" disabled>
-              💬 Požiadať o cenovú ponuku
-            </button>
+            <button type="button" class="btn-secondary" id="btnPdfDownload" disabled>📄 Vygenerovať PDF a uložiť</button>
+            <button type="button" class="btn-secondary" id="btnPdfToEmail" disabled>✉️ Poslať PDF na môj e-mail</button>
+            <button type="button" class="btn-primary" id="btnPdfRequestOffer" disabled>💬 Požiadať o cenovú ponuku</button>
           </div>
 
           <p style="font-size:0.75rem;color:#9ca3af;margin-top:8px;">
@@ -1469,7 +1013,7 @@
       </div>
     </section>
 
-    <!-- MODAL NÁHĽADU SKLADBY (môžeme neskôr použiť aj z kroku 4) -->
+    <!-- MODAL NÁHĽADU SKLADBY -->
     <div id="previewModal" class="preview-modal" aria-hidden="true">
       <div class="preview-backdrop"></div>
       <div class="preview-dialog" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
@@ -1480,18 +1024,11 @@
       </div>
     </div>
 
-        <!-- MODAL – hrúbka dlažby / obkladu -->
+    <!-- MODAL – hrúbka dlažby / obkladu (nechávame, ak ho používaš inde) -->
     <div id="tileModal" class="preview-modal" aria-hidden="true">
       <div class="preview-backdrop"></div>
       <div class="preview-dialog" role="dialog" aria-modal="true">
-        <button
-          type="button"
-          class="preview-close"
-          id="tileCloseBtn"
-          aria-label="Zavrieť okno"
-        >
-          ×
-        </button>
+        <button type="button" class="preview-close" id="tileCloseBtn" aria-label="Zavrieť okno">×</button>
         <h3>Hrúbka dlažby / obkladu</h3>
         <p style="font-size:0.8rem;color:#d1d5db;margin-bottom:8px;">
           Uveďte hrúbku dlažby, ktorú plánujete použiť (napr. 10, 20 alebo 30&nbsp;mm).
@@ -1506,12 +1043,7 @@
           placeholder="napr. 20"
           style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid #9ca3af;background:#020617;color:#e5e7eb;"
         />
-        <button
-          type="button"
-          id="tileConfirmBtn"
-          class="btn-primary"
-          style="margin-top:10px;width:100%;justify-content:center;"
-        >
+        <button type="button" id="tileConfirmBtn" class="btn-primary" style="margin-top:10px;width:100%;justify-content:center;">
           Pokračovať
         </button>
       </div>
@@ -1526,11 +1058,9 @@
     </footer>
   </main>
 
-   <script src="/js/cookies.js"></script>
+  <script src="/js/cookies.js"></script>
   <script src="/js/config.js"></script>
-  <!-- konfigurácia systémových skladieb pre balkóny -->
   <script src="/js/config_balkony.js"></script>
-  <!-- logika kalkulačky (ostáva v koreňovom public/) -->
   <script src="calc_balkony.js"></script>
 </body>
 </html>
