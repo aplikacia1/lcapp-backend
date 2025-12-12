@@ -3,67 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <title>LIŠTOVÉ CENTRUM EU, s.r.o – Technický podklad balkón</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
 
-    html,
-    body {
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
       margin: 0;
       padding: 0;
     }
 
     body {
       background: #0b1636;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #f9fafb;
     }
 
-    /* A4 strana – vhodné pre neskorší export do PDF */
+    /* =========================
+       A4 SETUP
+    ========================= */
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
     .pdf-page {
       width: 210mm;
-      min-height: 297mm;
+      height: 297mm;
       margin: 0 auto;
-      padding: 20mm 18mm;
+      padding: 18mm;
       position: relative;
       background: #020617;
       overflow: hidden;
     }
 
-    /* Jemný vodoznak – logo cez stránku */
+    /* =========================
+       VODOZNAK – OBRAZOVKA
+    ========================= */
     .pdf-watermark {
       position: absolute;
       inset: 25mm 15mm;
-      background-image: url("/logo_lc.jpg"); /* ak chceš iný súbor, zmeň cestu */
+      background-image: url("/logo_lc.jpg");
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
-      opacity: 0.06;            /* veľmi jemné, aby nerušilo text */
+      opacity: 0.06;
       pointer-events: none;
-      filter: grayscale(100%);  /* efekt "bez farby" */
+      filter: grayscale(100%);
     }
 
     .pdf-content {
       position: relative;
-      z-index: 1; /* nad vodoznakom */
+      z-index: 1;
+      padding-bottom: 20mm;
     }
 
+    /* =========================
+       HEADER
+    ========================= */
     .pdf-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18mm;
-    }
-
-    .pdf-logo {
-      display: inline-block;
+      margin-bottom: 14mm;
     }
 
     .pdf-logo img {
       height: 32mm;
-      width: auto;
       display: block;
     }
 
@@ -74,76 +79,74 @@
     }
 
     .pdf-code-label {
+      font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      font-size: 0.7rem;
       color: #9ca3af;
     }
 
     .pdf-code-value {
-      font-weight: 600;
-      font-size: 0.9rem;
       margin-top: 4px;
+      font-weight: 700;
+      font-size: 0.9rem;
       color: #facc15;
     }
 
+    /* =========================
+       TITLE
+    ========================= */
     .pdf-title-block {
-      margin-bottom: 14mm;
-      padding: 10mm 10mm;
+      margin-bottom: 12mm;
+      padding: 10mm;
       border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      background: radial-gradient(
-        circle at top,
-        rgba(15, 23, 42, 0.98) 0,
-        rgba(3, 7, 18, 0.98) 60%
-      );
+      border: 1px solid rgba(148,163,184,.7);
+      background: radial-gradient(circle at top, rgba(15,23,42,.98), rgba(3,7,18,.98));
       text-align: center;
     }
 
     .pdf-main-title {
-      font-size: 1.25rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
       margin: 0 0 4mm;
+      font-size: 1.25rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
     }
 
     .pdf-sub-title {
-      font-size: 0.95rem;
       margin: 0 0 2mm;
+      font-size: .95rem;
       color: #e5e7eb;
     }
 
     .pdf-sub-note {
-      font-size: 0.78rem;
-      color: #9ca3af;
       margin: 0;
+      font-size: .78rem;
+      color: #9ca3af;
     }
 
+    /* =========================
+       COLUMNS
+    ========================= */
     .pdf-columns {
       display: grid;
       grid-template-columns: 1.2fr 1.1fr;
       gap: 12mm;
-      margin-bottom: 12mm;
+      margin-bottom: 10mm;
     }
 
     .pdf-box {
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
       padding: 6mm 7mm;
-      font-size: 0.8rem;
-      background: rgba(15, 23, 42, 0.96);
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,.7);
+      background: rgba(15,23,42,.96);
+      font-size: .8rem;
     }
 
     .pdf-box-title {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #9ca3af;
       margin: 0 0 3mm;
-    }
-
-    .pdf-box strong {
-      color: #f9fafb;
+      font-size: .78rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #9ca3af;
     }
 
     .pdf-contact-list {
@@ -152,91 +155,111 @@
       margin: 0;
     }
 
-    .pdf-contact-list li {
-      margin-bottom: 1.5mm;
-    }
+    .pdf-contact-list li { margin-bottom: 1.5mm; }
 
+    /* =========================
+       NOTE
+    ========================= */
     .pdf-note-block {
-      font-size: 0.8rem;
+      margin-top: 2mm;
+      padding: 6mm 7mm;
       border-radius: 8px;
-      border: 1px dashed rgba(148, 163, 184, 0.7);
-      padding: 5mm 6mm;
-      background: rgba(15, 23, 42, 0.96);
-      margin-bottom: 10mm;
+      border: 1px dashed rgba(148,163,184,.7);
+      background: rgba(15,23,42,.96);
+      font-size: .8rem;
+      line-height: 1.35;
     }
 
-    .pdf-note-block strong {
-      color: #facc15;
-    }
+    .pdf-note-block strong { color: #facc15; }
 
-    .pdf-outline {
-      font-size: 0.8rem;
-    }
-
-    .pdf-outline-title {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #9ca3af;
-      margin: 0 0 2mm;
-    }
-
-    .pdf-outline ol {
-      margin: 0;
-      padding-left: 4.5mm;
-    }
-
-    .pdf-outline li {
-      margin-bottom: 1mm;
-    }
-
+    /* =========================
+       FOOTER
+    ========================= */
     .pdf-footer {
       position: absolute;
       left: 18mm;
       right: 18mm;
       bottom: 12mm;
-      font-size: 0.75rem;
+      font-size: .75rem;
       color: #9ca3af;
-      display: flex;
+      display: none;
       justify-content: space-between;
       align-items: center;
     }
 
-    .pdf-footer span {
-      white-space: nowrap;
-    }
+    .pdf-footer span { white-space: nowrap; }
 
-    /* zobrazovať pätičku len v PDF / pri tlači */
-    .only-pdf {
-      display: none;
-    }
-
+    /* =========================
+       PRINT – BIELA + VODOZNAK
+    ========================= */
     @media print {
-      .only-pdf {
+      html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .pdf-page {
+        background: #ffffff !important;
+        margin: 0 !important;
+      }
+
+      /* VODOZNAK OSTÁVA AJ V TLAČI – EXTRÉMNE JEMNÝ */
+      .pdf-watermark {
+        display: block !important;
+        opacity: 0.025;          /* veľmi jemný */
+        filter: grayscale(100%);
+      }
+
+      .pdf-title-block,
+      .pdf-box,
+      .pdf-note-block {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border-color: #999999 !important;
+      }
+
+      .pdf-main-title,
+      .pdf-sub-title,
+      .pdf-sub-note,
+      .pdf-box-title,
+      .pdf-code-box,
+      .pdf-code-label,
+      .pdf-code-value,
+      .pdf-footer {
+        color: #000000 !important;
+      }
+
+      .pdf-note-block strong,
+      .pdf-code-value {
+        color: #000000 !important;
+        font-weight: 700;
+      }
+
+      .pdf-footer {
         display: flex;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="pdf-page">
     <div class="pdf-watermark"></div>
 
     <div class="pdf-content">
-      <!-- HLAVIČKA -->
       <header class="pdf-header">
         <div class="pdf-logo">
-          <!-- použijeme rovnaký súbor ako na webe (v prípade potreby upravíš cestu) -->
           <img src="/logo_lc.jpg" alt="Lištové centrum" />
         </div>
+
         <div class="pdf-code-box">
           <div class="pdf-code-label">Číslo PDF podkladu</div>
-          <!-- server neskôr doplní skutočnú hodnotu, napr. LIS-PP250001 -->
           <div class="pdf-code-value">{{pdfCode}}</div>
         </div>
       </header>
 
-      <!-- HLAVNÝ NADPIS -->
       <section class="pdf-title-block">
         <h1 class="pdf-main-title">
           TECHNICKÝ PODKLAD – BALKÓNOVÁ SKLADBA SCHLÜTER SYSTEMS®
@@ -249,9 +272,7 @@
         </p>
       </section>
 
-      <!-- DVE KARTY – OD KOHO / PRE KOHO -->
       <section class="pdf-columns">
-        <!-- ĽAVO: Lištové centrum -->
         <article class="pdf-box">
           <h2 class="pdf-box-title">Vypracoval</h2>
           <p><strong>LIŠTOVÉ CENTRUM EU, s.r.o.</strong></p>
@@ -266,7 +287,6 @@
           </ul>
         </article>
 
-        <!-- PRAVO: Zákazník -->
         <article class="pdf-box">
           <h2 class="pdf-box-title">Vypracované pre zákazníka</h2>
           <p><strong>{{customerName}}</strong></p>
@@ -279,43 +299,13 @@
         </article>
       </section>
 
-      <!-- POZNÁMKA K VÝPOČTU -->
       <section class="pdf-note-block">
-        <p>
-          Tento technický podklad bol vygenerovaný na základe údajov zadaných
-          používateľom v kalkulačke Lištobooku. Výsledky majú
-          <strong>orientačný</strong> charakter a slúžia ako odporúčaná skladba
-          systému Schlüter® pre danú konštrukčnú výšku a spôsob odtoku vody.
-        </p>
-        <p style="margin-top: 3mm;">
-          Presnú skladbu, jednotkové ceny, dostupnosť profilov a detailný výkaz
-          materiálu vám potvrdí technik Lištového centra po konzultácii.
-        </p>
+        Tento technický podklad bol vygenerovaný na základe údajov zadaných používateľom v kalkulačke Lištobooku.
+        Výsledky majú <strong>orientačný</strong> charakter a slúžia ako odporúčaná skladba systému Schlüter Systems®.
+        <br><br>        
       </section>
 
-      <!-- OBSAH -->
-      <section class="pdf-outline">
-        <h2 class="pdf-outline-title">Obsah dokumentu</h2>
-        <ol>
-          <li>Úvodná strana – základné informácie a číslo PDF podkladu</li>
-          <li>
-            Popis zvolenej skladby balkóna
-            (nízka / stredná / vysoká výška, podľa výberu v kalkulačke)
-          </li>
-          <li>
-            Technický prierez zvolenej skladby – obrázok a vysvetlenie jednotlivých vrstiev
-          </li>
-          <li>
-            Detailné stránky jednotlivých komponentov podľa zvolenej skladby
-            (napr. DITRA, DITRA-DRAIN, KERDI, TROBA, TROBA-PLUS, BARA, BARIN …)
-          </li>
-          <li>Zhrnutie orientačnej spotreby materiálu a komponentov</li>
-          <li>Záverečná poznámka a kontakt na technika Lištového centra</li>
-        </ol>
-      </section>
-
-      <!-- PÄTIČKA – zobrazí sa len v PDF -->
-      <footer class="pdf-footer only-pdf">
+      <footer class="pdf-footer">
         <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
         <span>Strana 1 / {{totalPages}}</span>
       </footer>

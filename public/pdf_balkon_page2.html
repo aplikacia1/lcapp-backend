@@ -13,11 +13,13 @@
       color: #f9fafb;
     }
 
+    @page { size: A4; margin: 0; }
+
     .pdf-page {
       width: 210mm;
-      min-height: 297mm;
+      height: 297mm;
       margin: 0 auto;
-      padding: 16mm 18mm 26mm; /* ✅ väčšia rezerva dole */
+      padding: 16mm 18mm;
       position: relative;
       background: #020617;
       overflow: hidden;
@@ -35,7 +37,15 @@
       filter: grayscale(100%);
     }
 
-    .pdf-content { position: relative; z-index: 1; }
+    /* ✅ najdôležitejšie: content je pevná výška a skladá sa FLEXom */
+    .pdf-content {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 14mm; /* rezerva na pätičku */
+    }
 
     .pdf-mini-header {
       display: flex;
@@ -44,7 +54,8 @@
       gap: 10mm;
       padding-bottom: 6mm;
       border-bottom: 1px solid rgba(148, 163, 184, 0.35);
-      margin-bottom: 8mm;
+      margin-bottom: 5mm;
+      flex: 0 0 auto;
     }
 
     .mini-left {
@@ -74,7 +85,7 @@
       font-size: 0.86rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      line-height: 1.2;
+      line-height: 1.15;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -104,25 +115,38 @@
     }
 
     .pdf-h2 {
-      margin: 0 0 2mm;
-      font-size: 1rem;
+      margin: 0 0 1.5mm;
+      font-size: 0.98rem;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-    }
-    .pdf-sub {
-      margin: 0 0 6mm;
-      color: #cbd5e1;
-      font-size: 0.78rem;
-      line-height: 1.4;
-      max-width: 170mm;
+      flex: 0 0 auto;
     }
 
+    .pdf-sub {
+      margin: 0 0 4mm;
+      color: #cbd5e1;
+      font-size: 0.76rem;
+      line-height: 1.35;
+      max-width: 170mm;
+      flex: 0 0 auto;
+    }
+
+    /* HORE: 2 karty */
     .grid-top {
       display: grid;
-      grid-template-columns: 1fr 1.25fr;
-      gap: 8mm;
-      margin-bottom: 8mm;
+      grid-template-columns: 1fr 1fr;
+      gap: 7mm;
+      margin-bottom: 5mm;
       align-items: stretch;
+      flex: 0 0 auto;
+    }
+
+    /* DOLE: veľký prierez = zvyšok strany */
+    .grid-bottom {
+      flex: 1 1 auto;
+      min-height: 0; /* ✅ nutné pre flex, aby sa vnútro vedelo zmenšovať */
+      display: grid;
+      grid-template-columns: 1fr;
     }
 
     .card {
@@ -130,6 +154,7 @@
       border: 1px solid rgba(148, 163, 184, 0.55);
       background: rgba(15, 23, 42, 0.92);
       overflow: hidden;
+      min-height: 0;
     }
 
     .card-inner { padding: 6mm 7mm; }
@@ -147,14 +172,14 @@
       font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      margin-bottom: 4mm;
+      margin-bottom: 3.5mm;
     }
 
     .kv {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 3.2mm 6mm;
-      padding-top: 2mm;
+      gap: 2.4mm 6mm;
+      padding-top: 1mm;
     }
 
     .kv .k {
@@ -164,87 +189,35 @@
       letter-spacing: 0.08em;
     }
     .kv .v {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: #f9fafb;
       text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .sep {
       height: 1px;
       background: rgba(148, 163, 184, 0.25);
-      margin: 5mm 0;
+      margin: 3.2mm 0;
     }
 
     .note-box {
       border-radius: 8px;
       border: 1px dashed rgba(148, 163, 184, 0.55);
       background: rgba(2, 6, 23, 0.45);
-      padding: 4mm 5mm;
-      margin-top: 5mm;
-      font-size: 0.76rem;
+      padding: 3.2mm 5mm;
+      margin-top: 3.2mm;
+      font-size: 0.74rem;
       color: #e5e7eb;
-      line-height: 1.45;
+      line-height: 1.42;
     }
     .note-box strong { color: #facc15; }
 
-    .cutaway-head {
-      padding: 5mm 7mm 4mm;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-      background: radial-gradient(circle at top, rgba(2,6,23,0.2), rgba(2,6,23,0.0));
-    }
-    .cutaway-head .t {
-      font-size: 0.8rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin: 0;
-    }
-    .cutaway-head .s {
-      margin: 1.5mm 0 0;
-      font-size: 0.72rem;
-      color: #9ca3af;
-    }
-
-    .cutaway-body { padding: 6mm 7mm; }
-
-    .cutaway-img {
-      width: 100%;
-      height: 78mm;
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: rgba(255,255,255,0.06);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .cutaway-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-      background: #ffffff;
-    }
-
-    .cutaway-caption {
-      margin: 4mm 0 0;
-      font-size: 0.74rem;
-      color: #e5e7eb;
-      line-height: 1.4;
-    }
-    .cutaway-caption strong { color: #facc15; }
-
-    .grid-bottom {
-      display: grid;
-      grid-template-columns: 1fr 1.25fr;
-      gap: 8mm;
-      align-items: start;
-      margin-bottom: 16mm; /* ✅ ešte viac priestoru pred pätičkou */
-    }
-
+    /* malý náčrt hore */
     .sketch-box { padding: 6mm 7mm; }
-
     .sketch-title {
       margin: 0 0 2mm;
       font-size: 0.78rem;
@@ -257,8 +230,8 @@
       border-radius: 10px;
       border: 1px solid rgba(148, 163, 184, 0.35);
       background: rgba(2, 6, 23, 0.35);
-      padding: 5mm;
-      min-height: 70mm;
+      padding: 4mm;
+      height: 58mm; /* ✅ malý náčrt */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -266,10 +239,10 @@
     }
 
     .legend {
-      margin-top: 4mm;
-      font-size: 0.74rem;
+      margin-top: 3mm;
+      font-size: 0.72rem;
       color: #cbd5e1;
-      line-height: 1.35;
+      line-height: 1.25;
     }
     .legend .dot {
       display: inline-block;
@@ -289,71 +262,76 @@
       transform: translateY(-0.5mm);
     }
 
-    /* ✅ NOVÉ: kompaktné “komponenty” */
-    .components { padding: 6mm 7mm; }
+    /* veľký prierez dole – FLEX vo vnútri */
+    .cutaway-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
 
-    .components-title {
-      margin: 0 0 2mm;
-      font-size: 0.78rem;
+    .cutaway-head {
+      padding: 5mm 7mm 4mm;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+      background: radial-gradient(circle at top, rgba(2,6,23,0.2), rgba(2,6,23,0.0));
+      flex: 0 0 auto;
+    }
+    .cutaway-head .t {
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #9ca3af;
-    }
-
-    .components-sub {
-      margin: 0 0 4mm;
-      font-size: 0.74rem;
-      color: #cbd5e1;
-      line-height: 1.4;
-    }
-
-    .comp-list {
-      list-style: none;
       margin: 0;
-      padding: 0;
-      display: grid;
+    }
+    .cutaway-head .s {
+      margin: 1.5mm 0 0;
+      font-size: 0.72rem;
+      color: #9ca3af;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cutaway-body {
+      padding: 6mm 7mm;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
       gap: 3mm;
     }
 
-    .comp-item {
+    .cutaway-img {
+      flex: 1 1 auto;      /* ✅ zoberie presne zvyšok výšky */
+      min-height: 0;
+      width: 100%;
       border-radius: 10px;
       border: 1px solid rgba(148, 163, 184, 0.35);
-      background: rgba(2, 6, 23, 0.35);
-      padding: 3.6mm 5mm;
-      display: grid;
-      grid-template-columns: 18mm 1fr;
-      gap: 4mm;
-      align-items: start;
+      background: rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .cutaway-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #ffffff;
     }
 
-    .comp-tag {
-      font-size: 0.62rem;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding-top: 0.8mm;
-    }
-
-    .comp-val {
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: #f9fafb;
-      line-height: 1.25;
-    }
-
-    .important {
-      margin-top: 5mm;
-      border-radius: 10px;
-      border: 1px dashed rgba(148, 163, 184, 0.55);
-      background: rgba(2, 6, 23, 0.35);
-      padding: 4mm 6mm;
-      font-size: 0.75rem;
+    .cutaway-caption {
+      flex: 0 0 auto;
+      margin: 0;
+      font-size: 0.74rem;
       color: #e5e7eb;
-      line-height: 1.45;
+      line-height: 1.35;
     }
-    .important strong { color: #facc15; }
+    .cutaway-caption strong { color: #facc15; }
 
     .only-pdf { display: none; }
+
     .pdf-footer {
       position: absolute;
       left: 18mm;
@@ -364,10 +342,48 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      white-space: nowrap;
+      z-index: 2;
     }
-    .pdf-footer span { white-space: nowrap; }
 
     @media print {
+      html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .pdf-page { background: #ffffff !important; margin: 0 !important; }
+      body { background: #ffffff !important; }
+      .pdf-watermark { opacity: 0.025; }
+
+      .card,
+      .mini-logo,
+      .note-box,
+      .sketch-wrap {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border-color: #999999 !important;
+      }
+
+      .pdf-sub,
+      .mini-title span,
+      .kv .k,
+      .legend,
+      .cutaway-head .s,
+      .pdf-footer,
+      .mini-code .label {
+        color: #000000 !important;
+      }
+
+      .mini-code .value,
+      .chip,
+      .note-box strong,
+      .cutaway-caption strong {
+        color: #000000 !important;
+      }
+
       .only-pdf { display: flex; }
     }
   </style>
@@ -397,10 +413,10 @@
 
       <h2 class="pdf-h2">2. Popis zvolenej skladby</h2>
       <p class="pdf-sub">
-        Nižšie je zhrnutie zadaných parametrov (tvar, rozmery, výška, odtok) a odporúčaná skladba.
-        Technický prierez je orientačný – detailné napojenia doplníme v PDF podklade.
+        Nižšie je zhrnutie zadaných parametrov a veľký orientačný technický prierez zvolenej skladby.
       </p>
 
+      <!-- HORE: skladba + malý náčrt -->
       <section class="grid-top">
         <article class="card">
           <div class="card-inner">
@@ -440,6 +456,26 @@
         </article>
 
         <article class="card">
+          <div class="sketch-box">
+            <div class="sketch-title">Náčrt tvaru a rozmerov (krok 2)</div>
+
+            <div class="sketch-wrap">
+              <div class="svg-host">
+                {{shapeSketchSvg}}
+              </div>
+            </div>
+
+            <div class="legend">
+              <div><span class="dot"></span> čísla = zadané rozmery (m)</div>
+              <div style="margin-top: 1.5mm;"><span class="line"></span> čiarkovane = strana pri stene / napojení</div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- DOLE: prierez = presne zvyšok výšky strany -->
+      <section class="grid-bottom">
+        <article class="card cutaway-card">
           <div class="cutaway-head">
             <p class="t">Technický prierez skladby</p>
             <p class="s">{{systemCutawayCaption}}</p>
@@ -456,70 +492,12 @@
           </div>
         </article>
       </section>
-
-      <section class="grid-bottom">
-        <article class="card">
-          <div class="sketch-box">
-            <div class="sketch-title">Náčrt tvaru a rozmerov (krok 2)</div>
-
-            <div class="sketch-wrap">
-              <div class="svg-host">
-                {{shapeSketchSvg}}
-              </div>
-            </div>
-
-            <div class="legend">
-              <div><span class="dot"></span> čísla = zadané rozmery (m)</div>
-              <div style="margin-top: 1.5mm;"><span class="line"></span> čiarkovane = strana pri stene / napojení</div>
-            </div>
-          </div>
-        </article>
-
-        <!-- ✅ namiesto vrstiev: kľúčové komponenty -->
-        <article class="card">
-          <div class="components">
-            <div class="components-title">Kľúčové komponenty skladby</div>
-            <div class="components-sub">
-              Zoznam sa mení podľa vybraného systému (nízka / stredná / vysoká výška a typ odtoku).
-              Detailné vrstvenie a napojenia budú na ďalších stranách PDF.
-            </div>
-
-            <ul class="comp-list">
-              <li class="comp-item">
-                <div class="comp-tag">Rohož / dosky</div>
-                <div class="comp-val">{{componentMembrane}}</div>
-              </li>
-
-              <li class="comp-item">
-                <div class="comp-tag">Okraj</div>
-                <div class="comp-val">{{componentEdge}}</div>
-              </li>
-
-              <li class="comp-item">
-                <div class="comp-tag">Žľab</div>
-                <div class="comp-val">{{componentGutter}}</div>
-              </li>
-
-              <li class="comp-item">
-                <div class="comp-tag">Vpusť</div>
-                <div class="comp-val">{{componentDrain}}</div>
-              </li>
-            </ul>
-
-            <div class="important">
-              <strong>Dôležité:</strong>
-              Napojenia na žľab/vpust, detaily pri stene a dilatácie sa riešia podľa konkrétnej stavby.
-              V ďalších stranách PDF budú podklady ku komponentom použitým v skladbe.
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <footer class="pdf-footer only-pdf">
-        <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
-        <span>Strana 2 / {{totalPages}}</span>
-      </footer>
     </div>
+
+    <footer class="pdf-footer only-pdf">
+      <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+      <span>Strana 2 / {{totalPages}}</span>
+    </footer>
   </div>
 </body>
 </html>
