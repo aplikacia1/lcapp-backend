@@ -72,16 +72,24 @@ function escapeHtml(s = '') {
 }
 function escapeAttr(s = '') { return escapeHtml(s).replace(/"/g, '&quot;'); }
 
-async function sendMail({ to, subject, html, text }) {
+/**
+ * sendMail – základný odosielač (rozšírený bezpečne)
+ * - attachments, cc/bcc/replyTo sú voliteľné a nič existujúce nelámu.
+ */
+async function sendMail({ to, subject, html, text, attachments, cc, bcc, replyTo }) {
   if (!to) throw new Error('sendMail: "to" je povinné');
   await verifyOnce();
   const fromPretty = `${APP_NAME} <${user}>`; // musí = SMTP_USER kvôli SPF/DMARC
   const info = await transporter.sendMail({
     from: fromPretty,
     to,
+    cc,
+    bcc,
+    replyTo,
     subject,
     text: text || (html ? stripHtml(html) : ''),
     html,
+    attachments: Array.isArray(attachments) ? attachments : undefined,
   });
   console.log('✉️ Message sent:', info.messageId, 'to', to);
   return info;
@@ -149,6 +157,31 @@ function signupTemplate(/* toEmail */) {
   return { subject, html };
 }
 
+/* ===================== PDF MAIL ===================== */
+
+/**
+ * sendPdfEmail – pošle PDF ako prílohu
+ * pdfBuffer: Buffer (alebo Uint8Array)
+ */
+async function sendPdfEmail({ to, subject, html, text, pdfBuffer, filename = 'kalkulacia.pdf', cc, bcc }) {
+  if (!to) throw new Error('sendPdfEmail: "to" je povinné');
+  if (!pdfBuffer) throw new Error('sendPdfEmail: "pdfBuffer" je povinné');
+
+  return sendMail({
+    to,
+    cc,
+    bcc,
+    subject: subject || `${APP_NAME} – PDF`,
+    html,
+    text,
+    attachments: [{
+      filename,
+      content: pdfBuffer,
+      contentType: 'application/pdf',
+    }],
+  });
+}
+
 /* ===================== VEREJNÉ API ===================== */
 
 async function sendSignupEmail(toEmail) {
@@ -163,6 +196,7 @@ async function sendWelcomeEmail(toEmail) {
 
 module.exports = {
   sendMail,
+  sendPdfEmail,
   sendSignupEmail,
   sendWelcomeEmail,
 };

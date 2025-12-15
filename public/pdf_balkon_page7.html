@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 7 (Komponenty)</title>
+
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      background: #0b1636;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f9fafb;
+    }
+
+    @page { size: A4; margin: 0; }
+
+    .pdf-page {
+      width: 210mm;
+      height: 297mm;
+      margin: 0 auto;
+      padding: 14mm 18mm 12mm;
+      position: relative;
+      background: #020617;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pdf-watermark {
+      position: absolute;
+      inset: 26mm 16mm;
+      background-image: url("/logo_lc.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.05;
+      pointer-events: none;
+      filter: grayscale(100%);
+    }
+
+    .pdf-content {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* ===== HLAVIČKA ===== */
+    .pdf-mini-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 5mm;
+      border-bottom: 1px solid rgba(148,163,184,0.35);
+      margin-bottom: 6mm;
+      gap: 10mm;
+      flex: 0 0 auto;
+    }
+
+    .mini-left { display: flex; align-items: center; gap: 5mm; min-width: 0; }
+
+    .mini-logo {
+      width: 18mm; height: 18mm;
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.85);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; flex: 0 0 auto;
+    }
+    .mini-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+    .mini-title { min-width: 0; }
+    .mini-title strong{
+      display:block; font-size:0.86rem; letter-spacing:0.06em; text-transform:uppercase;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;
+    }
+    .mini-title span{
+      display:block; font-size:0.72rem; color:#9ca3af; margin-top:1mm;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+
+    .mini-code { text-align:right; flex:0 0 auto; }
+    .mini-code .label{ font-size:0.65rem; color:#9ca3af; text-transform:uppercase; letter-spacing:0.08em; }
+    .mini-code .value{ font-size:0.82rem; font-weight:700; color:#facc15; margin-top:1mm; }
+
+    h2 {
+      margin: 0 0 2.4mm;
+      font-size: 0.98rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex: 0 0 auto;
+    }
+
+    .subtitle{
+      font-size:0.74rem; color:#cbd5e1; line-height:1.38;
+      margin:0 0 5.2mm; max-width:175mm; flex:0 0 auto;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6mm;
+      align-items: stretch;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .card{
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,0.55);
+      background:rgba(15,23,42,0.92);
+      overflow:hidden;
+      min-height: 0;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .card-inner{
+      padding:5mm 6mm;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    .chip{
+      display:inline-block;
+      padding:1.1mm 3mm;
+      border-radius:999px;
+      border:1px solid rgba(250,204,21,0.55);
+      background:rgba(250,204,21,0.08);
+      color:#facc15;
+      font-weight:800;
+      font-size:0.64rem;
+      letter-spacing:0.06em;
+      text-transform:uppercase;
+      margin-bottom:3mm;
+      white-space:nowrap;
+    }
+
+    .p{ margin:0; font-size:0.72rem; line-height:1.36; color:#e5e7eb; }
+    .p + .p{ margin-top:2mm; }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.72rem;
+      margin-top:2.8mm;
+    }
+    th,td{
+      padding:2.1mm 1.6mm;
+      border-bottom:1px solid rgba(148,163,184,0.20);
+      text-align:left;
+      vertical-align:top;
+    }
+    th{
+      color:#9ca3af;
+      text-transform:uppercase;
+      font-size:0.60rem;
+      letter-spacing:0.08em;
+      padding-top:2.4mm;
+    }
+    td:last-child{
+      text-align:right;
+      font-weight:900;
+      color:#f9fafb;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ✅ MINI legenda s obrázkami – veľmi kompaktná */
+    .mini-legend{
+      margin-top:3mm;
+      padding-top:2.6mm;
+      border-top:1px solid rgba(148,163,184,0.16);
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4mm;
+      align-items:center;
+    }
+    .mini-item{
+      display:flex;
+      align-items:center;
+      gap:2mm;
+      min-width:0;
+    }
+    .mini-item img{
+      width: 18mm;
+      height: 12mm;
+      object-fit: contain;
+      background:#ffffff;
+      border-radius:6px;
+      border:1px solid rgba(148,163,184,0.22);
+      display:block;
+    }
+    .mini-label{
+      font-size:0.64rem;
+      color:#cbd5e1;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* ✅ malý profil obrázok – ešte menší */
+    .profile-img{
+      margin-top:3mm;
+      padding:3mm;
+      border:1px solid rgba(148,163,184,0.20);
+      border-radius:10px;
+      background:rgba(2,6,23,0.30);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      overflow:hidden;
+    }
+    .profile-img img{
+      width:100%;
+      max-height: 22mm;   /* ✅ zmenšené, aby sa zmestilo */
+      object-fit:contain;
+      background:#ffffff;
+      border-radius:6px;
+      display:block;
+    }
+
+    /* ✅ KOMPAKTNÝ SUMÁR – 1 box, 2 stĺpce, bez veľkých kariet */
+    .summary{
+      margin-top: 5mm;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,0.55);
+      background:rgba(15,23,42,0.92);
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .summary-inner{ padding:4.6mm 6mm; }
+    .summary-title{
+      margin:0 0 2.4mm;
+      font-size:0.76rem;
+      font-weight:900;
+      letter-spacing:0.05em;
+      text-transform:uppercase;
+      color:#facc15;
+    }
+    .summary-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6mm;
+    }
+    .sum-col{
+      font-size:0.72rem;
+      line-height:1.32;
+      color:#e5e7eb;
+    }
+    .sum-col strong{ color:#f9fafb; font-variant-numeric: tabular-nums; }
+
+    .pdf-footer{
+      margin-top:auto;
+      padding-top:5mm;
+      font-size:0.74rem;
+      color:#9ca3af;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex:0 0 auto;
+    }
+    .pdf-footer span{ white-space:nowrap; }
+
+    @media print{
+      html, body { background:#ffffff !important; color:#111827 !important; }
+      .pdf-page { background:#ffffff !important; color:#111827 !important; }
+      .pdf-watermark { opacity:0.06 !important; }
+      .card, .summary { background:#ffffff !important; border-color: rgba(17,24,39,0.22) !important; }
+      .subtitle, .p, .mini-label, .sum-col, .pdf-footer { color:#111827 !important; }
+      td:last-child { color:#111827 !important; }
+      .mini-code .value { color:#111827 !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="pdf-page">
+    <div class="pdf-watermark"></div>
+
+    <div class="pdf-content">
+      <header class="pdf-mini-header">
+        <div class="mini-left">
+          <div class="mini-logo"><img src="/logo_lc.jpg" alt="Lištové centrum"></div>
+          <div class="mini-title">
+            <strong>Technický podklad – balkónová skladba</strong>
+            <span>Komponenty ukončenia hrany + alternatíva profilu</span>
+          </div>
+        </div>
+        <div class="mini-code">
+          <div class="label">Číslo PDF</div>
+          <div class="value" id="pdfCode">{{pdfCode}}</div>
+        </div>
+      </header>
+
+      <h2>7. Ukončenie hrany – komponenty a varianty (BARA-RT / BARA-RW)</h2>
+      <p class="subtitle">
+        Strana slúži ako rýchla pomôcka: čo je <strong>roh</strong> a čo je <strong>spojka</strong> a koľko ich môže byť potrebných.
+        Profily sa dodávajú v dĺžke <strong>2,50 m</strong>. (Počty sa vyplnia z kalkulačky alebo sa dajú orientačne dopočítať pri náhľade.)
+      </p>
+
+      <section class="grid">
+        <!-- RT -->
+        <article class="card">
+          <div class="card-inner">
+            <span class="chip">Variant A: BARA-RT (bez rýny)</span>
+
+            <p class="p">
+              <strong>BARA-RT</strong> rieši ukončenie voľnej hrany a riadený odvod vody cez presah.
+            </p>
+
+            <table>
+              <tr><th>Položka</th><th>Hodnota</th></tr>
+              <tr><td>Voľná hrana (m)</td><td id="rtEdge">{{edgeLengthText}}</td></tr>
+              <tr><td>Profily (2,50 m)</td><td id="rtProfiles">{{rtProfilePiecesText}}</td></tr>
+              <tr><td>Rohy 90°</td><td id="rtCorners">{{rtCornersText}}</td></tr>
+              <tr><td>Spojky</td><td id="rtConnectors">{{rtConnectorsText}}</td></tr>
+              <tr><td>Farba</td><td id="rtColor">{{rtColorCode}}</td></tr>
+            </table>
+
+            <div class="mini-legend">
+              <div class="mini-item">
+                <img src="/img/pdf/balkon/bara-rt-corner-e90.png" alt="Roh 90° BARA-RT">
+                <div class="mini-label">Roh 90° (E90)</div>
+              </div>
+              <div class="mini-item">
+                <img src="/img/pdf/balkon/bara-rt-connector-v.png" alt="Spojka BARA-RT">
+                <div class="mini-label">Spojka (V)</div>
+              </div>
+            </div>
+
+            <div class="profile-img">
+              <img src="/img/pdf/balkon/bara-rt-profile.png" alt="Schlüter BARA-RT – profil">
+            </div>
+          </div>
+        </article>
+
+        <!-- RW -->
+        <article class="card">
+          <div class="card-inner">
+            <span class="chip">Variant B: BARA-RW (alternatíva)</span>
+
+            <p class="p">
+              <strong>BARA-RW</strong> je alternatíva. Výška profilu (RW60 / RW100 …) sa volí podľa výšky čela (konštrukcia + dlažba).
+            </p>
+
+            <table>
+              <tr><th>Položka</th><th>Hodnota</th></tr>
+              <tr><td>Voľná hrana (m)</td><td id="rwEdge">{{rwLengthText}}</td></tr>
+              <tr><td>Profily (2,50 m)</td><td id="rwProfiles">{{rwProfilePiecesText}}</td></tr>
+              <tr><td>Roh 90° (kód)</td><td id="rwCornerCode">{{rwCornerCodeAndQty}}</td></tr>
+              <tr><td>Spojka (kód)</td><td id="rwConnectorCode">{{rwConnectorCodeAndQty}}</td></tr>
+              <tr><td>Farba</td><td id="rwColor">{{rwColorCode}}</td></tr>
+            </table>
+
+            <div class="mini-legend">
+              <div class="mini-item">
+                <img src="/img/pdf/balkon/bara-rw-corner-e90.png" alt="Roh 90° BARA-RW">
+                <div class="mini-label">Roh 90° (E90/RW)</div>
+              </div>
+              <div class="mini-item">
+                <img src="/img/pdf/balkon/bara-rw-connector-v.png" alt="Spojka BARA-RW">
+                <div class="mini-label">Spojka (V/RW)</div>
+              </div>
+            </div>
+
+            <div class="profile-img">
+              <img src="/img/pdf/balkon/bara-rw-profile.png" alt="Schlüter BARA-RW – profil">
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- ✅ Kompaktný sumár (už sa zmestí) -->
+      <section class="summary">
+        <div class="summary-inner">
+          <p class="summary-title">Rýchly sumár pre zákazníka (orientačne)</p>
+          <div class="summary-grid">
+            <div class="sum-col">
+              <strong>BARA-RT:</strong>
+              profily <strong id="sumRtProfiles">{{rtProfilePiecesText}}</strong>,
+              rohy <strong id="sumRtCorners">{{rtCornersText}}</strong>,
+              spojky <strong id="sumRtConnectors">{{rtConnectorsText}}</strong>
+            </div>
+            <div class="sum-col">
+              <strong>BARA-RW:</strong>
+              profily <strong id="sumRwProfiles">{{rwProfilePiecesText}}</strong>,
+              roh <strong id="sumRwCorner">{{rwCornerCodeAndQty}}</strong>,
+              spojka <strong id="sumRwConnector">{{rwConnectorCodeAndQty}}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="pdf-footer">
+        <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+        <span>Strana 7 / {{totalPages}}</span>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // ✅ VOLITEĽNÉ: rýchly auto-výpočet pre náhľad
+    // /pdf_balkon_page7.html?walls=2&edges=3.2,1.6
+    // walls = 1/2/3 (počet stien)
+    // edges = čiarkami oddelené voľné hrany v metroch (pre lepší výpočet spojok)
+    // edge  = celková voľná hrana (menej presné)
+    (function(){
+      const qs = new URLSearchParams(location.search);
+      const walls = Number(qs.get('walls') || '');
+      const edgesStr = qs.get('edges');
+      const edgeTotal = Number(qs.get('edge') || '');
+      const PROFILE_LEN = 2.5;
+
+      function fmtMeters(n){ return (isFinite(n) && n>0) ? (n.toFixed(2).replace('.', ',') + ' m') : null; }
+      function fmtKs(n){ return (isFinite(n) && n>=0) ? (n + ' ks') : null; }
+
+      let corners = null;
+      if (walls === 1) corners = 2;
+      else if (walls === 2) corners = 1;
+      else if (walls === 3) corners = 0;
+
+      let totalEdge = null, pieces = null, connectors = null;
+
+      if (edgesStr) {
+        const edges = edgesStr.split(',')
+          .map(s => Number(String(s).trim().replace(',', '.')))
+          .filter(n => isFinite(n) && n > 0);
+
+        if (edges.length) {
+          totalEdge = edges.reduce((a,b)=>a+b,0);
+          let piecesSum = 0, connSum = 0;
+          edges.forEach(L => {
+            const p = Math.ceil(L / PROFILE_LEN);
+            piecesSum += p;
+            connSum += Math.max(0, p - 1);
+          });
+          pieces = piecesSum;
+          connectors = connSum;
+        }
+      } else if (isFinite(edgeTotal) && edgeTotal > 0) {
+        totalEdge = edgeTotal;
+        pieces = Math.ceil(edgeTotal / PROFILE_LEN);
+        connectors = Math.max(0, pieces - 1);
+      }
+
+      if (totalEdge === null && corners === null) return;
+
+      if (totalEdge !== null) {
+        const edgeText = fmtMeters(totalEdge);
+        if (edgeText) {
+          ['rtEdge','rwEdge'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = edgeText;
+          });
+        }
+      }
+
+      if (pieces !== null) {
+        const pcsText = fmtKs(pieces);
+        ['rtProfiles','rwProfiles','sumRtProfiles','sumRwProfiles'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && pcsText) el.textContent = pcsText;
+        });
+      }
+
+      if (connectors !== null) {
+        const cText = fmtKs(connectors);
+        ['rtConnectors','sumRtConnectors'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && cText) el.textContent = cText;
+        });
+      }
+
+      if (corners !== null) {
+        const rText = fmtKs(corners);
+        ['rtCorners','sumRtCorners'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && rText) el.textContent = rText;
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
