@@ -152,8 +152,9 @@ mountRoute('/api/push',           './routes/pushRoutes');
 mountRoute('/api/ads',            './routes/adRoutes');
 mountRoute('/api/uploads',        './routes/uploadRoutes'); // ping/debug
 
-// ✅ PDF test route (nové)
+// ✅ PDF routes (test + html->pdf) – obe pod /api/pdf
 mountRoute('/api/pdf',            './routes/pdfTestRoutes');
+mountRoute('/api/pdf',            './routes/pdfHtmlRoutes');
 
 /* --- Štart po DB --- */
 const PORT = process.env.PORT || 5000;

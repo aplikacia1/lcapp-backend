@@ -802,7 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const payload = buildBridgePayload();
 
       // ✅ TU JE ZMENA: bridge -> final
-      const res = await fetch("/api/pdf/balkon-final", {
+      const res = await fetch("/api/pdf/balkon-final-html", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ payload }),
