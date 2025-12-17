@@ -1,0 +1,441 @@
+/* public/css/pdf_balkon_common.css */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: #0b1636;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f9fafb;
+}
+
+@page { size: A4; margin: 0; }
+
+/* =========================================================
+   PAGE SHELL (unified)
+   ========================================================= */
+.pdf-page {
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto;
+  position: relative;
+  background: #020617;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* padding helpers (kept, to fit content per page) */
+.pdf-pad-18 { padding: 18mm; }                 /* intro */
+.pdf-pad-16-18 { padding: 16mm 18mm; }         /* default */
+.pdf-pad-16-18-14 { padding: 16mm 18mm 14mm; } /* e.g. recap */
+.pdf-pad-16-18-18 { padding: 16mm 18mm 18mm; } /* safe bottom */
+.pdf-pad-14-18-12 { padding: 14mm 18mm 12mm; } /* compact */
+
+/* watermark */
+.pdf-watermark {
+  position: absolute;
+  inset: 26mm 16mm;
+  background-image: url("/logo_lc.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.05;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+/* content wrapper */
+.pdf-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* =========================================================
+   MINI HEADER (unified)
+   ========================================================= */
+.pdf-mini-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10mm;
+  padding-bottom: 6mm;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  margin-bottom: 6mm;
+  flex: 0 0 auto;
+}
+
+.mini-left { display: flex; align-items: center; gap: 5mm; min-width: 0; }
+
+.mini-logo {
+  width: 18mm;
+  height: 18mm;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+.mini-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.mini-title { min-width: 0; }
+.mini-title strong {
+  display: block;
+  font-size: 0.86rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-title span {
+  display: block;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin-top: 1mm;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-code { text-align: right; flex: 0 0 auto; }
+.mini-code .label {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.mini-code .value {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #facc15;
+  margin-top: 1mm;
+}
+
+/* =========================================================
+   TYPO
+   ========================================================= */
+.pdf-h2 {
+  margin: 0 0 2.6mm;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex: 0 0 auto;
+}
+
+.pdf-sub {
+  margin: 0 0 6mm;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+  max-width: 175mm;
+  flex: 0 0 auto;
+}
+
+.subtitle {
+  margin: 0 0 8mm;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+  max-width: 172mm;
+  flex: 0 0 auto;
+}
+
+.subtitle-sm {
+  margin: 0 0 5.2mm;
+  font-size: 0.74rem;
+  color: #cbd5e1;
+  line-height: 1.38;
+  max-width: 175mm;
+  flex: 0 0 auto;
+}
+
+.p { margin: 0; font-size: 0.72rem; line-height: 1.36; color: #e5e7eb; }
+.p + .p { margin-top: 2mm; }
+
+.muted { color: #9ca3af; font-weight: 600; font-size: 0.70rem; }
+.highlight { color: #facc15; font-weight: 800; }
+
+/* =========================================================
+   LAYOUT HELPERS
+   ========================================================= */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7mm;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.grid-2-stretch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6mm;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.grid-110-90 {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 8mm;
+  align-items: start;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.grid-top { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-bottom: 6mm; align-items: stretch; flex: 0 0 auto; }
+.grid-mid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 6mm; align-items: start; flex: 1 1 auto; min-height: 0; }
+
+/* =========================================================
+   CARD + CHIP/BADGE
+   ========================================================= */
+.card {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: rgba(15, 23, 42, 0.92);
+  overflow: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.card-inner { padding: 5.5mm 6.5mm; min-height: 0; }
+
+.card-inner.compact { padding: 5mm 6mm; }
+
+.badge, .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2mm;
+  padding: 1.4mm 3mm;
+  border-radius: 999px;
+  border: 1px solid rgba(250, 204, 21, 0.55);
+  background: rgba(250, 204, 21, 0.08);
+  color: #facc15;
+  font-weight: 900;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3.4mm;
+  white-space: nowrap;
+}
+
+/* lists */
+.bullet {
+  margin: 0;
+  padding-left: 5mm;
+  color: #e5e7eb;
+  font-size: 0.76rem;
+  line-height: 1.40;
+}
+.bullet li { margin: 1.1mm 0; }
+.bullet strong { color: #facc15; }
+
+/* =========================================================
+   PAGE8/11 blocks (KV + SEP + LIST + CTA)  ✅ doplnené
+   ========================================================= */
+.kv {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.4mm 6mm;
+  padding-top: 1mm;
+}
+.kv .k {
+  font-size: 0.62rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.kv .v {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: #f9fafb;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.sep {
+  height: 1px;
+  background: rgba(148,163,184,0.22);
+  margin: 3.4mm 0;
+}
+
+.list {
+  margin: 0;
+  padding-left: 5mm;
+  font-size: 0.76rem;
+  color: #e5e7eb;
+  line-height: 1.35;
+}
+.list li { margin: 1.1mm 0; }
+.list strong { color: #facc15; }
+
+.note, .info-box {
+  margin-top: 3.6mm;
+  border-radius: 10px;
+  border: 1px dashed rgba(148,163,184,0.45);
+  background: rgba(2,6,23,0.35);
+  padding: 3mm 4.8mm;
+  font-size: 0.73rem;
+  color: #e5e7eb;
+  line-height: 1.4;
+}
+.info-box { margin-top: 5mm; padding: 4mm 6mm; font-size: 0.75rem; line-height: 1.45; }
+.note strong, .info-box strong { color: #facc15; }
+
+.cta {
+  margin-top: 6mm;
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,0.55);
+  background: radial-gradient(circle at top, rgba(250,204,21,0.10), rgba(15,23,42,0.92));
+  padding: 4.8mm 6.5mm;
+  flex: 0 0 auto;
+}
+.cta-title {
+  margin: 0 0 2mm;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #facc15;
+}
+.cta p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #e5e7eb;
+  line-height: 1.35;
+}
+.cta .contact {
+  margin-top: 2.8mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2mm 8mm;
+  font-size: 0.76rem;
+  color: #f9fafb;
+  font-variant-numeric: tabular-nums;
+}
+.cta .contact div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================================
+   TABLES + IMAGES (used across pages)
+   ========================================================= */
+.table-kv {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin-top: 4mm;
+}
+.table-kv th, .table-kv td {
+  padding: 3mm 2mm;
+  border-bottom: 1px solid rgba(148,163,184,0.25);
+  text-align: left;
+}
+.table-kv th {
+  color: #9ca3af;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+}
+.table-kv td:last-child {
+  text-align: right;
+  font-weight: 800;
+  color: #f9fafb;
+}
+
+.img-box {
+  padding: 6mm;
+  border: 1px solid rgba(148,163,184,0.35);
+  border-radius: 10px;
+  background: rgba(2,6,23,0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.img-box img {
+  width: 100%;
+  max-height: 80mm;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 6px;
+  display: block;
+}
+.img-caption {
+  margin-top: 3mm;
+  font-size: 0.74rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   FOOTER (unified – in flow, never overlaps)
+   ========================================================= */
+.pdf-footer {
+  margin-top: auto;
+  padding-top: 6mm;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  font-size: 0.75rem;
+  color: #9ca3af;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.pdf-footer span { white-space: nowrap; }
+
+/* avoid ugly breaks in print engines */
+.grid-top, .grid-mid, .grid-2, .grid-110-90, .grid-2-stretch,
+.card, .cta, .note, .info-box, .img-box { break-inside: avoid; page-break-inside: avoid; }
+
+/* =========================================================
+   PRINT (unified)
+   ========================================================= */
+@media print {
+  html, body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .pdf-page { background: #ffffff !important; color: #111827 !important; margin: 0 !important; }
+  .pdf-watermark { opacity: 0.06 !important; filter: grayscale(100%) !important; }
+
+  .mini-logo { background: #ffffff !important; border-color: rgba(17,24,39,0.18) !important; }
+
+  .pdf-sub, .subtitle, .subtitle-sm, .img-caption { color: #374151 !important; }
+  .mini-title span, .mini-code .label { color: #6b7280 !important; }
+  .mini-code .value { color: #111827 !important; }
+
+  .card, .note, .info-box, .img-box, .cta {
+    background: #ffffff !important;
+    border-color: rgba(17, 24, 39, 0.22) !important;
+    color: #111827 !important;
+  }
+
+  .p, .bullet, .list, .cta p, .cta .contact { color: #111827 !important; }
+  .kv .v { color: #111827 !important; }
+
+  .note strong, .info-box strong, .bullet strong, .list strong, .cta-title, .highlight {
+    color: #111827 !important;
+  }
+
+  .table-kv td:last-child { color: #111827 !important; }
+
+  .pdf-footer { color: #111827 !important; border-top-color: rgba(17,24,39,0.22) !important; }
+}
