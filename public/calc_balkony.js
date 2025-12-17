@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Nízka konštrukčná výška – voda steká cez voľnú hranu, orientačný prierez skladby Schlüter®-DITRA.",
     },
     LOW_EDGE_GUTTER: {
-      src: "img/systems/balkon-low-edge-gutter.png",
+      src: "img/systems/balkon-low-edge-gutter.png поправло??",
       caption:
         "Nízka konštrukčná výška – žľab pri hrane (Schlüter®-BARIN) s ukončovacím profilom BARA-RTKE / BARA-RTK.",
     },
@@ -124,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
     perimeter: null,
     geometryError: null,
 
-    // pozor: toto si nechávame, lebo logika a prepočty sú OK.
     wallSides: { A: false, B: false, C: false, D: false, E: false, F: false },
 
     heightDomId: null,
@@ -317,7 +316,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const ok = canGoToStep4();
     if (btnPdfDownload) btnPdfDownload.disabled = !ok;
     if (btnPdfToEmail) btnPdfToEmail.disabled = !ok;
-    // requestOffer zatiaľ necháme vypnuté
     if (btnPdfRequestOffer) btnPdfRequestOffer.disabled = true;
   }
 
@@ -410,10 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---------------------------------------------------------------------------
-  // ✅ SVG náčrt pre PDF (krok 2) – prenesieme rovnakú logiku do PDF
-  // - Štvorec / Obdĺžnik: v PDF označíme strany A,B,C,D (aj keď sa zadáva len A/B)
-  // - L-tvar: A–F ostáva
-  // - Strany pri stene: budú čiarkované
+  // ✅ SVG náčrt pre PDF (krok 2)
   // ---------------------------------------------------------------------------
   function buildShapeSketchSvg() {
     const shape = state.shapeKey;
@@ -429,13 +424,12 @@ document.addEventListener("DOMContentLoaded", () => {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 
-    // jednoduché “plátno”
     const vbW = 360;
     const vbH = 260;
     const pad = 26;
 
     const stroke = "#facc15";
-    const strokeWall = "#facc15"; // len iný pattern (dash)
+    const strokeWall = "#facc15";
     const bg = "rgba(0,0,0,0)";
 
     const txt = "#e5e7eb";
@@ -457,16 +451,6 @@ document.addEventListener("DOMContentLoaded", () => {
         t
       )}</text>`;
 
-    // Vizuálne mapovanie strán pre štvorec/obdĺžnik do A,B,C,D:
-    // top=A, right=B, bottom=C, left=D
-    const rectMap = {
-      top: { id: "A", len: d.A, wall: !!w.A },
-      right: { id: "B", len: d.B, wall: !!w.B },
-      bottom: { id: "C", len: d.A, wall: !!w.C }, // C = A (len vizuálne)
-      left: { id: "D", len: d.B, wall: !!w.D }, // D = B (len vizuálne)
-    };
-
-    // default rámik
     const x1 = pad;
     const y1 = pad;
     const x2 = vbW - pad;
@@ -475,7 +459,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let body = "";
 
     if (shape === "square") {
-      // zadáva sa len A, ale zobrazíme A,B,C,D (všetko rovnaké)
       const A = d.A;
       if (A == null) return "";
 
@@ -485,7 +468,39 @@ document.addEventListener("DOMContentLoaded", () => {
       const leftLen = fmt(A);
 
       const topWall = !!w.A;
-      const rightWall = !!w.B;  // ak user klikne B, berieme ako “pravá strana”
+      const rightWall = !!w.B;
+      const bottomWall = !!w.C;
+      const leftWall = !!w.D;
+
+      body += (topWall ? lineWall(x1, y1, x2, y1) : lineSolid(x1, y1, x2, y1));
+      body += (rightWall ? lineWall(x2, y1, x2, y2) : lineSolid(x2, y1, x2, y2));
+      body += (bottomWall ? lineWall(x1, y2, x2, y2) : lineSolid(x1, y2, x2, y2));
+      body += (leftWall ? lineWall(x1, y1, x1, y2) : lineSolid(x1, y1, x1, y2));
+
+      body += label((x1 + x2) / 2, y1 - 16, topLen);
+      body += label(x2 + 18, (y1 + y2) / 2, rightLen, "start");
+      body += label((x1 + x2) / 2, y2 + 16, bottomLen);
+      body += label(x1 - 18, (y1 + y2) / 2, leftLen, "end");
+
+      // rohové písmená A B C D (nie A A A A)
+      body += labelSmall(x1 + 10, y1 + 18, "A", "start");
+      body += labelSmall(x2 - 10, y1 + 18, "B", "end");
+      body += labelSmall(x2 - 10, y2 - 18, "C", "end");
+      body += labelSmall(x1 + 10, y2 - 18, "D", "start");
+    }
+
+    if (shape === "rectangle") {
+      const A = d.A;
+      const B = d.B;
+      if (A == null || B == null) return "";
+
+      const topLen = fmt(A);
+      const rightLen = fmt(B);
+      const bottomLen = fmt(A);
+      const leftLen = fmt(B);
+
+      const topWall = !!w.A;
+      const rightWall = !!w.B;
       const bottomWall = !!w.C;
       const leftWall = !!w.D;
 
@@ -505,72 +520,25 @@ document.addEventListener("DOMContentLoaded", () => {
       body += labelSmall(x1 + 10, y2 - 18, "D", "start");
     }
 
-    if (shape === "rectangle") {
-      const A = d.A;
-      const B = d.B;
-      if (A == null || B == null) return "";
-
-      const topLen = fmt(A);
-      const rightLen = fmt(B);
-      const bottomLen = fmt(A);
-      const leftLen = fmt(B);
-
-      const topWall = rectMap.top.wall;
-      const rightWall = rectMap.right.wall;
-      const bottomWall = rectMap.bottom.wall;
-      const leftWall = rectMap.left.wall;
-
-      body += (topWall ? lineWall(x1, y1, x2, y1) : lineSolid(x1, y1, x2, y1));
-      body += (rightWall ? lineWall(x2, y1, x2, y2) : lineSolid(x2, y1, x2, y2));
-      body += (bottomWall ? lineWall(x1, y2, x2, y2) : lineSolid(x1, y2, x2, y2));
-      body += (leftWall ? lineWall(x1, y1, x1, y2) : lineSolid(x1, y1, x1, y2));
-
-      body += label((x1 + x2) / 2, y1 - 16, topLen);
-      body += label(x2 + 18, (y1 + y2) / 2, rightLen, "start");
-      body += label((x1 + x2) / 2, y2 + 16, bottomLen);
-      body += label(x1 - 18, (y1 + y2) / 2, leftLen, "end");
-
-      // vizuálne písmená strán A,B,C,D
-      body += labelSmall(x1 + 10, y1 + 18, "A", "start");
-      body += labelSmall(x2 - 10, y1 + 18, "B", "end");
-      body += labelSmall(x2 - 10, y2 - 18, "C", "end");
-      body += labelSmall(x1 + 10, y2 - 18, "D", "start");
-    }
-
     if (shape === "l-shape") {
-      // L-tvar – jednoduchý pravouhlý náčrt: použijeme relatívnu mierku.
       const A = d.A, B = d.B, C = d.C, D = d.D, E = d.E, F = d.F;
       const all = [A, B, C, D, E, F].every((v) => v != null);
       if (!all) return "";
 
-      // skica v smere hodinových ručičiek (približne podľa logiky: E=A-C, B=F-D)
-      // mierka
       const maxX = Math.max(A, C, E);
       const maxY = Math.max(F, D);
       const sx = (vbW - 2 * pad) / (maxX || 1);
       const sy = (vbH - 2 * pad) / (maxY || 1);
       const s = Math.min(sx, sy);
 
-      const px = (v) => pad + v * s;
-      const py = (v) => pad + v * s;
-
-      // body tvaru (x,y) v metroch
-      // začneme hore-ľavo (0,0)
-      // A: doprava
-      // B: dole (vnútorný zlom)
-      // C: doľava
-      // D: dole
-      // E: doľava
-      // F: hore (späť)
       const p0 = { x: 0, y: 0 };
-      const p1 = { x: A, y: 0 };         // po A
-      const p2 = { x: A, y: B };         // po B
-      const p3 = { x: C, y: B };         // po C (doľava)
-      const p4 = { x: C, y: B + D };     // po D
-      const p5 = { x: 0, y: B + D };     // po E
-      const p6 = { x: 0, y: 0 + F };     // po F (hore)
+      const p1 = { x: A, y: 0 };
+      const p2 = { x: A, y: B };
+      const p3 = { x: C, y: B };
+      const p4 = { x: C, y: B + D };
+      const p5 = { x: 0, y: B + D };
+      const p6 = { x: 0, y: 0 + F };
 
-      // pre istotu centrovanie v rámci viewBox
       const pts = [p0, p1, p2, p3, p4, p5, p6];
       const minX = Math.min(...pts.map((p) => p.x));
       const minY = Math.min(...pts.map((p) => p.y));
@@ -600,21 +568,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const xB = X(s1.to.x), yB = Y(s1.to.y);
         body += (s1.wall ? lineWall(xA, yA, xB, yB) : lineSolid(xA, yA, xB, yB));
 
-        // číslo (dĺžka) – poloha podľa orientácie segmentu
         const mx = (xA + xB) / 2;
         const my = (yA + yB) / 2;
 
         if (Math.abs(yA - yB) < 1) {
-          // horizontálna
           const dy = s1.pos === "bottom" ? 18 : -16;
           body += label(mx, my + dy, fmt(s1.len));
         } else {
-          // vertikálna
           const dx = s1.pos === "left" ? -18 : 18;
           body += label(mx + dx, my, fmt(s1.len), dx < 0 ? "end" : "start");
         }
 
-        // písmeno
         body += labelSmall(mx, my, s1.id);
       });
     }
@@ -628,13 +592,48 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---------------------------------------------------------------------------
+  // ✅ NORMALIZÁCIA STRÁN (kľúčové)
+  // - štvorcový: A,B,C,D = A
+  // - obdĺžnik: A,C = A ; B,D = B
+  // - L: necháme A–F
+  // ---------------------------------------------------------------------------
+  function buildNormalizedDims() {
+    const d = state.dims || {};
+    if (state.shapeKey === "square") {
+      if (d.A == null) return { A: null, B: null, C: null, D: null };
+      return { A: d.A, B: d.A, C: d.A, D: d.A };
+    }
+    if (state.shapeKey === "rectangle") {
+      if (d.A == null || d.B == null) return { A: null, B: null, C: null, D: null };
+      return { A: d.A, B: d.B, C: d.A, D: d.B };
+    }
+    if (state.shapeKey === "l-shape") {
+      return { ...d };
+    }
+    return { ...d };
+  }
+
+  function buildNormalizedWallSides() {
+    const w = state.wallSides || {};
+    if (state.shapeKey === "square") {
+      // umožní označiť aj B/C/D (ak checkboxy existujú)
+      return { A: !!w.A, B: !!w.B, C: !!w.C, D: !!w.D };
+    }
+    if (state.shapeKey === "rectangle") {
+      return { A: !!w.A, B: !!w.B, C: !!w.C, D: !!w.D };
+    }
+    if (state.shapeKey === "l-shape") {
+      return { ...w };
+    }
+    return { ...w };
+  }
+
+  // ---------------------------------------------------------------------------
   // krok 3/4 summary helpery
   // ---------------------------------------------------------------------------
   function updateStep3Summary() {
-    if (k3TypeEl)
-      k3TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
-    if (k3ShapeEl)
-      k3ShapeEl.textContent = shapeConfigs[state.shapeKey]?.label || "–";
+    if (k3TypeEl) k3TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
+    if (k3ShapeEl) k3ShapeEl.textContent = shapeConfigs[state.shapeKey]?.label || "–";
 
     if (k3AreaEl) {
       if (state.area != null) k3AreaEl.textContent = state.area.toFixed(1).replace(".", ",");
@@ -651,10 +650,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateStep4Summary() {
     if (!document.getElementById("step4")) return;
 
-    if (k4TypeEl)
-      k4TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
-    if (k4ShapeEl)
-      k4ShapeEl.textContent = shapeConfigs[state.shapeKey]?.label || "–";
+    if (k4TypeEl) k4TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
+    if (k4ShapeEl) k4ShapeEl.textContent = shapeConfigs[state.shapeKey]?.label || "–";
 
     if (k4AreaEl) {
       if (state.area != null) k4AreaEl.textContent = state.area.toFixed(1).replace(".", ",");
@@ -667,22 +664,17 @@ document.addEventListener("DOMContentLoaded", () => {
         state.perimeter != null ? state.perimeter.toFixed(1).replace(".", ",") : "–";
     }
 
-    if (k4HeightLabelEl)
-      k4HeightLabelEl.textContent = getHeightLabel(state.heightDomId) || "–";
-    if (k4DrainLabelEl)
-      k4DrainLabelEl.textContent = getDrainLabel(state.drainDomId) || "–";
+    if (k4HeightLabelEl) k4HeightLabelEl.textContent = getHeightLabel(state.heightDomId) || "–";
+    if (k4DrainLabelEl) k4DrainLabelEl.textContent = getDrainLabel(state.drainDomId) || "–";
     if (k4SystemNameEl)
-      k4SystemNameEl.textContent = state.system
-        ? state.system.uiTitle || "Vybraný systém"
-        : "–";
+      k4SystemNameEl.textContent = state.system ? state.system.uiTitle || "Vybraný systém" : "–";
   }
 
   function updateStep4Preview() {
     if (!k4PreviewImageEl || !k4PreviewTitleEl || !k4PreviewCaptionEl) return;
 
     if (!state.system) {
-      k4PreviewTitleEl.textContent =
-        "Zatiaľ nevybraný – doplňte výšku a odtok vo kroku 3.";
+      k4PreviewTitleEl.textContent = "Zatiaľ nevybraný – doplňte výšku a odtok vo kroku 3.";
       k4PreviewImageEl.src = "";
       k4PreviewCaptionEl.textContent =
         "Po výbere systému zobrazíme orientačný prierez so skladbou Schlüter® pre váš balkón.";
@@ -690,8 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const cfg = getPreviewConfigForSystem(state.system);
-    k4PreviewTitleEl.textContent =
-      state.system.uiTitle || "Technický náhľad skladby balkóna";
+    k4PreviewTitleEl.textContent = state.system.uiTitle || "Technický náhľad skladby balkóna";
 
     if (cfg) {
       k4PreviewImageEl.src = cfg.src;
@@ -726,13 +717,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!state.heightDomId || !state.drainDomId) {
       if (state.heightDomId === "high") {
-        recommendedName.textContent =
-          "Zatiaľ nevybraná – zvoľte spôsob odtoku vody.";
+        recommendedName.textContent = "Zatiaľ nevybraná – zvoľte spôsob odtoku vody.";
         recommendedNote.textContent =
           "Pri vyššej konštrukčnej výške Schlüter® neponúka systém s voľnou hranou. Vyberte prosím variant so žľabom pri hrane alebo s podlahovou vpustou.";
       } else {
-        recommendedName.textContent =
-          "Zatiaľ nevybraná – zvoľte výšku a odtok vody.";
+        recommendedName.textContent = "Zatiaľ nevybraná – zvoľte výšku a odtok vody.";
         recommendedNote.textContent =
           "Po výbere konštrukčnej výšky aj spôsobu odtoku vody vám zobrazíme návrh skladby. Detailný popis a prierezy dostanete v PDF priamo v Lištobooku.";
       }
@@ -740,8 +729,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!state.system) {
-      recommendedName.textContent =
-        "Zatiaľ nevybraná – skladbu pre túto kombináciu ešte nemáme.";
+      recommendedName.textContent = "Zatiaľ nevybraná – skladbu pre túto kombináciu ešte nemáme.";
       recommendedNote.textContent =
         "Pre zvolenú kombináciu výšky a odtoku zatiaľ nemáme definovanú skladbu. Skúste inú kombináciu alebo nás kontaktujte.";
       return;
@@ -749,8 +737,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     recommendedName.textContent = state.system.uiTitle || "Navrhovaná skladba";
     recommendedNote.textContent =
-      state.system.description ||
-      "Detailný popis skladby doplníme v PDF podklade z Lištobooku.";
+      state.system.description || "Detailný popis skladby doplníme v PDF podklade z Lištobooku.";
   }
 
   function updateBom() {
@@ -795,9 +782,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (state.geometryError) {
-      resetBom(
-        "Najprv opravte rozmery balkóna v kroku 2 (L-tvar musí sedieť geometricky)."
-      );
+      resetBom("Najprv opravte rozmery balkóna v kroku 2 (L-tvar musí sedieť geometricky).");
       syncBomToStep4();
       return;
     }
@@ -976,19 +961,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const bom = {
       area: bomAreaEl ? parseFloat(String(bomAreaEl.textContent).replace(",", ".")) : null,
-      membraneArea: bomMembraneAreaEl ? parseFloat(String(bomMembraneAreaEl.textContent).replace(",", ".")) : null,
+      membraneArea: bomMembraneAreaEl
+        ? parseFloat(String(bomMembraneAreaEl.textContent).replace(",", "."))
+        : null,
       perimeter: bomPerimeterEl ? parseFloat(String(bomPerimeterEl.textContent).replace(",", ".")) : null,
-      profilesCount: bomProfilesCountEl ? parseInt(String(bomProfilesCountEl.textContent || "0"), 10) : null,
-      adhesiveBags: bomAdhesiveBagsEl ? parseInt(String(bomAdhesiveBagsEl.textContent || "0"), 10) : null,
+      profilesCount: bomProfilesCountEl
+        ? parseInt(String(bomProfilesCountEl.textContent || "0"), 10)
+        : null,
+      adhesiveBags: bomAdhesiveBagsEl
+        ? parseInt(String(bomAdhesiveBagsEl.textContent || "0"), 10)
+        : null,
     };
 
-    // ✅ kľúčové: SVG náčrt z kroku 2 (aj s čiarami pri stene)
     const shapeSketchSvg = buildShapeSketchSvg();
+
+    // ✅ kľúčové: normalizované strany (A,B,C,D) pre štvorec/obdĺžnik
+    const dimsNormalized = buildNormalizedDims();
+    const wallSidesNormalized = buildNormalizedWallSides();
 
     return {
       meta: {
         app: "calc_balkony",
-        version: 1,
+        version: 2,
         email: email || "",
       },
       calc: {
@@ -996,20 +990,29 @@ document.addEventListener("DOMContentLoaded", () => {
         typeLabel: state.fromStep1TypeLabel,
         shapeKey: state.shapeKey,
         shapeLabel: shapeConfigs[state.shapeKey]?.label || "",
-        dims: { ...state.dims },
-        wallSides: { ...state.wallSides },
+
+        // RAW (tak ako zadávaš dnes)
+        dimsRaw: { ...state.dims },
+        wallSidesRaw: { ...state.wallSides },
+
+        // NORMALIZED (pre PDF a ďalšie kroky)
+        dims: dimsNormalized,
+        wallSides: wallSidesNormalized,
+
         area: state.area,
         perimeter: state.perimeter,
+
         heightId: state.heightDomId,
         heightLabel: getHeightLabel(state.heightDomId),
         drainId: state.drainDomId,
         drainLabel: getDrainLabel(state.drainDomId),
+
         systemId: sys ? sys.id : null,
         systemTitle: sys ? sys.uiTitle || "" : null,
+
         previewId: sys ? sys.id : null,
         previewSrc: preview ? preview.src : null,
 
-        // ✅ pošleme SVG do PDF
         shapeSketchSvg,
       },
       bom,
@@ -1121,9 +1124,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   Object.values(dimInputs).forEach((input) => {
     if (!input) return;
-    ["input", "change", "blur"].forEach((evt) =>
-      input.addEventListener(evt, recomputeFromInputs)
-    );
+    ["input", "change", "blur"].forEach((evt) => input.addEventListener(evt, recomputeFromInputs));
   });
 
   const wallCheckboxNodeList = Array.from(
@@ -1148,9 +1149,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (backToStep1Btn) {
     backToStep1Btn.addEventListener("click", () => {
       const target = "calc_terasa_base.html";
-      window.location.href = email
-        ? `${target}?email=${encodeURIComponent(email)}`
-        : target;
+      window.location.href = email ? `${target}?email=${encodeURIComponent(email)}` : target;
     });
   }
 
@@ -1186,9 +1185,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btn.disabled) return;
         state.drainDomId = btn.dataset.drainOption;
 
-        drainOptions.forEach((other) =>
-          other.classList.toggle("selected", other === btn)
-        );
+        drainOptions.forEach((other) => other.classList.toggle("selected", other === btn));
         recalcSystemFromSelections();
       });
     });
@@ -1223,8 +1220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (backdrop) backdrop.addEventListener("click", closePreviewModal);
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && previewModal.classList.contains("visible"))
-        closePreviewModal();
+      if (e.key === "Escape" && previewModal.classList.contains("visible")) closePreviewModal();
     });
   }
 

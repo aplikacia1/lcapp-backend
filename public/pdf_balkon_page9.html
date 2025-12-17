@@ -2,299 +2,15 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
-  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 9 (Komponenty)</title>
+  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 9</title>
 
-  <style>
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-
-    body {
-      background: #0b1636;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #f9fafb;
-    }
-
-    @page { size: A4; margin: 0; }
-
-    .pdf-page {
-      width: 210mm;
-      height: 297mm;
-      margin: 0 auto;
-      padding: 14mm 18mm 12mm;
-      position: relative;
-      background: #020617;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .pdf-watermark {
-      position: absolute;
-      inset: 26mm 16mm;
-      background-image: url("/logo_lc.jpg");
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-      opacity: 0.05;
-      pointer-events: none;
-      filter: grayscale(100%);
-    }
-
-    .pdf-content {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    /* ===== HLAVIČKA ===== */
-    .pdf-mini-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 5mm;
-      border-bottom: 1px solid rgba(148,163,184,0.35);
-      margin-bottom: 6mm;
-      gap: 10mm;
-      flex: 0 0 auto;
-    }
-
-    .mini-left { display: flex; align-items: center; gap: 5mm; min-width: 0; }
-
-    .mini-logo {
-      width: 18mm; height: 18mm;
-      border-radius: 8px;
-      border: 1px solid rgba(148,163,184,0.5);
-      background: rgba(15,23,42,0.85);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden; flex: 0 0 auto;
-    }
-    .mini-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
-
-    .mini-title { min-width: 0; }
-    .mini-title strong{
-      display:block; font-size:0.86rem; letter-spacing:0.06em; text-transform:uppercase;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;
-    }
-    .mini-title span{
-      display:block; font-size:0.72rem; color:#9ca3af; margin-top:1mm;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-
-    .mini-code { text-align:right; flex:0 0 auto; }
-    .mini-code .label{ font-size:0.65rem; color:#9ca3af; text-transform:uppercase; letter-spacing:0.08em; }
-    .mini-code .value{ font-size:0.82rem; font-weight:700; color:#facc15; margin-top:1mm; }
-
-    h2 {
-      margin: 0 0 2.4mm;
-      font-size: 0.98rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      flex: 0 0 auto;
-    }
-
-    .subtitle{
-      font-size:0.74rem; color:#cbd5e1; line-height:1.38;
-      margin:0 0 5.2mm; max-width:175mm; flex:0 0 auto;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6mm;
-      align-items: stretch;
-      flex: 1 1 auto;
-      min-height: 0;
-    }
-
-    .card{
-      border-radius:10px;
-      border:1px solid rgba(148,163,184,0.55);
-      background:rgba(15,23,42,0.92);
-      overflow:hidden;
-      min-height: 0;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .card-inner{
-      padding:5mm 6mm;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-    }
-
-    .chip{
-      display:inline-block;
-      padding:1.1mm 3mm;
-      border-radius:999px;
-      border:1px solid rgba(250,204,21,0.55);
-      background:rgba(250,204,21,0.08);
-      color:#facc15;
-      font-weight:800;
-      font-size:0.64rem;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
-      margin-bottom:3mm;
-      white-space:nowrap;
-    }
-
-    .p{ margin:0; font-size:0.72rem; line-height:1.36; color:#e5e7eb; }
-    .p + .p{ margin-top:2mm; }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:0.72rem;
-      margin-top:2.8mm;
-    }
-    th,td{
-      padding:2.1mm 1.6mm;
-      border-bottom:1px solid rgba(148,163,184,0.20);
-      text-align:left;
-      vertical-align:top;
-    }
-    th{
-      color:#9ca3af;
-      text-transform:uppercase;
-      font-size:0.60rem;
-      letter-spacing:0.08em;
-      padding-top:2.4mm;
-    }
-    td:last-child{
-      text-align:right;
-      font-weight:900;
-      color:#f9fafb;
-      white-space:nowrap;
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* MINI legenda */
-    .mini-legend{
-      margin-top:3mm;
-      padding-top:2.6mm;
-      border-top:1px solid rgba(148,163,184,0.16);
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4mm;
-      align-items:center;
-    }
-    .mini-item{
-      display:flex;
-      align-items:center;
-      gap:2mm;
-      min-width:0;
-    }
-    .mini-item img{
-      width: 18mm;
-      height: 12mm;
-      object-fit: contain;
-      background:#ffffff;
-      border-radius:6px;
-      border:1px solid rgba(148,163,184,0.22);
-      display:block;
-    }
-    .mini-label{
-      font-size:0.64rem;
-      color:#cbd5e1;
-      line-height:1.15;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    /* profil obrázok */
-    .profile-img{
-      margin-top:3mm;
-      padding:3mm;
-      border:1px solid rgba(148,163,184,0.20);
-      border-radius:10px;
-      background:rgba(2,6,23,0.30);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      overflow:hidden;
-    }
-    .profile-img img{
-      width:100%;
-      max-height: 22mm;
-      object-fit:contain;
-      background:#ffffff;
-      border-radius:6px;
-      display:block;
-    }
-
-    /* Kompaktný sumár */
-    .summary{
-      margin-top: 5mm;
-      border-radius:10px;
-      border:1px solid rgba(148,163,184,0.55);
-      background:rgba(15,23,42,0.92);
-      overflow:hidden;
-      flex:0 0 auto;
-    }
-    .summary-inner{ padding:4.6mm 6mm; }
-    .summary-title{
-      margin:0 0 2.4mm;
-      font-size:0.76rem;
-      font-weight:900;
-      letter-spacing:0.05em;
-      text-transform:uppercase;
-      color:#facc15;
-    }
-    .summary-grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6mm;
-    }
-    .sum-col{
-      font-size:0.72rem;
-      line-height:1.32;
-      color:#e5e7eb;
-    }
-    .sum-col strong{ color:#f9fafb; font-variant-numeric: tabular-nums; }
-
-    .note{
-      margin-top:3mm;
-      border-radius:10px;
-      border:1px dashed rgba(148,163,184,0.45);
-      background:rgba(2,6,23,0.35);
-      padding:3mm 4.8mm;
-      font-size:0.73rem;
-      color:#e5e7eb;
-      line-height:1.4;
-    }
-    .note strong{ color:#facc15; }
-
-    .pdf-footer{
-      margin-top:auto;
-      padding-top:5mm;
-      font-size:0.74rem;
-      color:#9ca3af;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex:0 0 auto;
-    }
-    .pdf-footer span{ white-space:nowrap; }
-
-    @media print{
-      html, body { background:#ffffff !important; color:#111827 !important; }
-      .pdf-page { background:#ffffff !important; color:#111827 !important; }
-      .pdf-watermark { opacity:0.06 !important; }
-      .card, .summary { background:#ffffff !important; border-color: rgba(17,24,39,0.22) !important; }
-      .subtitle, .p, .mini-label, .sum-col, .pdf-footer, .note { color:#111827 !important; }
-      td:last-child { color:#111827 !important; }
-      .mini-code .value { color:#111827 !important; }
-      .note strong, .summary-title { color:#111827 !important; }
-    }
-  </style>
+  <!-- ✅ jednotný dizajn -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common.css" />
 </head>
 
 <body>
-  <div class="pdf-page">
+  <!-- ✅ jednotný wrapper + jednotný padding (ako kompaktné strany) -->
+  <div class="pdf-page pdf-pad-14-18-12">
     <div class="pdf-watermark"></div>
 
     <div class="pdf-content">
@@ -306,23 +22,24 @@
             <span>Ukončenie hrany so žľabom (profil BARA-RTK)</span>
           </div>
         </div>
+
         <div class="mini-code">
           <div class="label">Číslo PDF</div>
           <div class="value" id="pdfCode">{{pdfCode}}</div>
         </div>
       </header>
 
-      <h2>9. Ukončenie hrany so žľabom – komponenty (BARA-RTK + BARIN)</h2>
-      <p class="subtitle">
+      <h2 class="pdf-h2">9. Ukončenie hrany so žľabom – komponenty (BARA-RTK + BARIN)</h2>
+      <p class="subtitle-sm">
         Táto strana je rýchla pomôcka k riešeniu hrany, kde sa voda vedie do žľabu <strong>Schlüter®-BARIN</strong>.
         Ukončenie hrany tvorí profil <strong>Schlüter®-BARA-RTK</strong> v dĺžke <strong>2,50 m</strong>.
         (Počty sa preberajú z kalkulačky orientačne podľa dĺžky voľnej hrany.)
       </p>
 
-      <section class="grid">
+      <section class="grid-2-stretch">
         <!-- RTK -->
-        <article class="card">
-          <div class="card-inner">
+        <article class="card col">
+          <div class="card-inner compact">
             <span class="chip">Profil hrany: BARA-RTK</span>
 
             <p class="p">
@@ -330,7 +47,7 @@
               Rohy a spojky sa používajú podľa potreby, rovnako ako pri štandardnom ukončení hrany.
             </p>
 
-            <table>
+            <table class="table-compact">
               <tr><th>Položka</th><th>Hodnota</th></tr>
               <tr><td>Voľná hrana (m)</td><td id="rtkEdge">{{edgeLengthText}}</td></tr>
               <tr><td>Profily (2,50 m)</td><td id="rtkProfiles">{{rtProfilePiecesText}}</td></tr>
@@ -361,9 +78,9 @@
           </div>
         </article>
 
-        <!-- BARIN (len stručne, detail bude na str.10) -->
-        <article class="card">
-          <div class="card-inner">
+        <!-- BARIN -->
+        <article class="card col">
+          <div class="card-inner compact">
             <span class="chip">Žľab pri hrane: BARIN (stručný prehľad)</span>
 
             <p class="p">
@@ -383,7 +100,6 @@
         </article>
       </section>
 
-      <!-- Sumár -->
       <section class="summary">
         <div class="summary-inner">
           <p class="summary-title">Rýchly sumár pre zákazníka (orientačne)</p>

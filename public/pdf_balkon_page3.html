@@ -3,305 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 3</title>
-  <style>
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
 
-    body {
-      background: #0b1636;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #f9fafb;
-    }
-
-    .pdf-page{
-      width: 210mm;
-      min-height: 297mm;
-      margin: 0 auto;
-      padding: 16mm 18mm 14mm;
-      position: relative;
-      background: #020617;
-      overflow: hidden;
-      display: flex;
-    }
-
-    .pdf-watermark {
-      position: absolute;
-      inset: 26mm 16mm;
-      background-image: url("/logo_lc.jpg");
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-      opacity: 0.05;
-      pointer-events: none;
-      filter: grayscale(100%);
-    }
-
-    .pdf-content{
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
-
-    /* ===== header ===== */
-    .pdf-mini-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10mm;
-      padding-bottom: 6mm;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.35);
-      margin-bottom: 7mm;
-      flex: 0 0 auto;
-    }
-
-    .mini-left {
-      display: flex;
-      align-items: center;
-      gap: 5mm;
-      min-width: 0;
-    }
-
-    .mini-logo {
-      width: 18mm;
-      height: 18mm;
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      background: rgba(15, 23, 42, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      flex: 0 0 auto;
-    }
-    .mini-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
-
-    .mini-title { min-width: 0; }
-    .mini-title strong {
-      display: block;
-      font-size: 0.86rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      line-height: 1.2;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .mini-title span {
-      display: block;
-      font-size: 0.72rem;
-      color: #9ca3af;
-      margin-top: 1mm;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .mini-code { text-align: right; flex: 0 0 auto; }
-    .mini-code .label {
-      font-size: 0.65rem;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .mini-code .value {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #facc15;
-      margin-top: 1mm;
-    }
-
-    /* ===== titles ===== */
-    .pdf-h2 {
-      margin: 0 0 2mm;
-      font-size: 1rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      flex: 0 0 auto;
-    }
-    .pdf-sub {
-      margin: 0 0 5mm;
-      color: #cbd5e1;
-      font-size: 0.78rem;
-      line-height: 1.35;
-      max-width: 175mm;
-      flex: 0 0 auto;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 2mm;
-      padding: 1.4mm 3mm;
-      border-radius: 999px;
-      border: 1px solid rgba(250, 204, 21, 0.55);
-      background: rgba(250, 204, 21, 0.08);
-      color: #facc15;
-      font-weight: 800;
-      font-size: 0.66rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 3mm;
-      white-space: nowrap;
-    }
-
-    /* ===== layout ===== */
-    .grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 7mm;
-      align-items: start;
-      flex: 1 1 auto;
-      min-height: 0;
-    }
-
-    .card {
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.55);
-      background: rgba(15, 23, 42, 0.92);
-      overflow: hidden;
-    }
-
-    .card-inner { padding: 5.3mm 6.3mm; }
-
-    .card-head {
-      padding: 5mm 6.5mm 3.6mm;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-      background: radial-gradient(circle at top, rgba(2,6,23,0.2), rgba(2,6,23,0.0));
-    }
-    .card-head .t {
-      font-size: 0.78rem;
-      font-weight: 900;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin: 0;
-    }
-    .card-head .s {
-      margin: 1.2mm 0 0;
-      font-size: 0.70rem;
-      color: #9ca3af;
-      line-height: 1.35;
-    }
-
-    .p {
-      margin: 0;
-      font-size: 0.76rem;
-      color: #e5e7eb;
-      line-height: 1.42;
-    }
-    .p + .p { margin-top: 2.6mm; }
-
-    .bul {
-      margin: 2.6mm 0 0;
-      padding-left: 5mm;
-      color: #e5e7eb;
-      font-size: 0.73rem;
-      line-height: 1.35;
-    }
-    .bul li { margin: 1mm 0; }
-
-    .kv {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2.6mm 6mm;
-      margin-top: 3mm;
-      padding-top: 2.6mm;
-      border-top: 1px solid rgba(148, 163, 184, 0.22);
-    }
-    .kv .k {
-      font-size: 0.60rem;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .kv .v {
-      font-size: 0.77rem;
-      font-weight: 800;
-      color: #f9fafb;
-      text-align: right;
-    }
-
-    .imgbox {
-      width: 100%;
-      height: 64mm;
-      border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.35);
-      background: rgba(2, 6, 23, 0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .imgbox img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .under-img {
-      margin-top: 3mm;
-      padding: 3mm 4.5mm;
-      border-radius: 10px;
-      border: 1px dashed rgba(148, 163, 184, 0.45);
-      background: rgba(2, 6, 23, 0.28);
-      font-size: 0.73rem;
-      color: #cbd5e1;
-      line-height: 1.38;
-    }
-    .under-img strong { color: #facc15; }
-
-    .warn {
-      margin-top: 2.6mm;
-      padding: 2.8mm 4.5mm;
-      border-radius: 10px;
-      border: 1px dashed rgba(250, 204, 21, 0.35);
-      background: rgba(250, 204, 21, 0.06);
-      font-size: 0.72rem;
-      color: #e5e7eb;
-      line-height: 1.35;
-    }
-    .warn strong { color: #facc15; }
-
-    /* ✅ footer vždy dole */
-    .pdf-footer {
-      margin-top: auto;
-      padding-top: 3mm;
-      border-top: 1px solid rgba(148, 163, 184, 0.25);
-      font-size: 0.75rem;
-      color: #9ca3af;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex: 0 0 auto;
-    }
-    .pdf-footer span { white-space: nowrap; }
-
-    /* ===== PRINT: biele pozadie + čierny text ===== */
-    @media print {
-      body { background: #ffffff !important; color: #111827 !important; }
-      .pdf-page { background: #ffffff !important; color: #111827 !important; }
-      .pdf-watermark { opacity: 0.06 !important; filter: grayscale(100%) !important; }
-      .mini-title span,
-      .mini-code .label,
-      .pdf-sub,
-      .kv .k,
-      .pdf-footer { color: #374151 !important; }
-
-      .mini-code .value { color: #b45309 !important; } /* tmavá “zlatá” do tlače */
-      .card { background: #ffffff !important; border-color: rgba(31,41,55,0.25) !important; }
-      .p, .bul, .kv .v { color: #111827 !important; }
-      .imgbox { background: #ffffff !important; border-color: rgba(31,41,55,0.20) !important; }
-      .under-img { background: #f9fafb !important; color: #111827 !important; border-color: rgba(31,41,55,0.20) !important; }
-      .warn { background: #fff7ed !important; color: #111827 !important; border-color: rgba(180,83,9,0.30) !important; }
-      .warn strong, .under-img strong { color: #b45309 !important; }
-    }
-  </style>
+  <link rel="stylesheet" href="/css/pdf_balkon_common.css">
 </head>
 
 <body>
-  <div class="pdf-page">
+  <div class="pdf-page pdf-pad-16-18-14">
     <div class="pdf-watermark"></div>
 
     <div class="pdf-content">
@@ -331,7 +38,7 @@
       <section class="grid">
         <!-- LEFT -->
         <article class="card">
-          <div class="card-inner">
+          <div class="card-inner tight">
             <div class="chip">Vrstvy – krok 1 / 1 (základ)</div>
 
             <p class="p">
@@ -399,12 +106,12 @@
           </div>
         </article>
       </section>
-
-      <footer class="pdf-footer">
-        <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
-        <span>Strana 3 / {{totalPages}}</span>
-      </footer>
     </div>
+
+    <footer class="pdf-footer only-pdf">
+      <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+      <span>Strana 3 / {{totalPages}}</span>
+    </footer>
   </div>
 </body>
 </html>

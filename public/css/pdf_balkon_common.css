@@ -193,8 +193,24 @@ body {
   min-height: 0;
 }
 
-.grid-top { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-bottom: 6mm; align-items: stretch; flex: 0 0 auto; }
-.grid-mid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 6mm; align-items: start; flex: 1 1 auto; min-height: 0; }
+/* Page2 top */
+.grid-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5mm;
+  margin-bottom: 5mm;
+  align-items: stretch;
+  flex: 0 0 auto;
+}
+
+.grid-mid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 6mm;
+  align-items: start;
+  flex: 1 1 auto;
+  min-height: 0;
+}
 
 /* =========================================================
    CARD + CHIP/BADGE
@@ -208,24 +224,24 @@ body {
   display: flex;
   flex-direction: column;
 }
-.card-inner { padding: 5.5mm 6.5mm; min-height: 0; }
 
-.card-inner.compact { padding: 5mm 6mm; }
+.card-inner { padding: 5mm 6mm; min-height: 0; }
+.card-inner.compact { padding: 4.6mm 5.6mm; }
 
 .badge, .chip {
   display: inline-flex;
   align-items: center;
   gap: 2mm;
-  padding: 1.4mm 3mm;
+  padding: 1.2mm 3mm;
   border-radius: 999px;
   border: 1px solid rgba(250, 204, 21, 0.55);
   background: rgba(250, 204, 21, 0.08);
   color: #facc15;
   font-weight: 900;
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin-bottom: 3.4mm;
+  margin-bottom: 3mm;
   white-space: nowrap;
 }
 
@@ -241,35 +257,43 @@ body {
 .bullet strong { color: #facc15; }
 
 /* =========================================================
-   PAGE8/11 blocks (KV + SEP + LIST + CTA)  ✅ doplnené
+   KV – wrap + clamp (max 2 lines)
    ========================================================= */
 .kv {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2.4mm 6mm;
+  gap: 2.2mm 6mm;
   padding-top: 1mm;
 }
 .kv .k {
-  font-size: 0.62rem;
+  font-size: 0.60rem;
   color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+
 .kv .v {
-  font-size: 0.78rem;
-  font-weight: 900;
+  font-size: 0.74rem;
+  font-weight: 800;
   color: #f9fafb;
   text-align: right;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
+
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  line-height: 1.22;
+
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .sep {
   height: 1px;
   background: rgba(148,163,184,0.22);
-  margin: 3.4mm 0;
+  margin: 3.2mm 0;
 }
 
 .list {
@@ -283,18 +307,21 @@ body {
 .list strong { color: #facc15; }
 
 .note, .info-box {
-  margin-top: 3.6mm;
+  margin-top: 3.2mm;
   border-radius: 10px;
   border: 1px dashed rgba(148,163,184,0.45);
   background: rgba(2,6,23,0.35);
-  padding: 3mm 4.8mm;
-  font-size: 0.73rem;
+  padding: 2.8mm 4.6mm;
+  font-size: 0.72rem;
   color: #e5e7eb;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 .info-box { margin-top: 5mm; padding: 4mm 6mm; font-size: 0.75rem; line-height: 1.45; }
 .note strong, .info-box strong { color: #facc15; }
 
+/* =========================================================
+   CTA
+   ========================================================= */
 .cta {
   margin-top: 6mm;
   border-radius: 10px;
@@ -333,7 +360,7 @@ body {
 }
 
 /* =========================================================
-   TABLES + IMAGES (used across pages)
+   TABLES + IMAGES
    ========================================================= */
 .table-kv {
   width: 100%;
@@ -358,8 +385,9 @@ body {
   color: #f9fafb;
 }
 
+/* ✅ SAFE PRINT: viac “vzduchu” v boxe, aby tlačiareň nič neodsekla */
 .img-box {
-  padding: 6mm;
+  padding: 7mm; /* bolo 5mm */
   border: 1px solid rgba(148,163,184,0.35);
   border-radius: 10px;
   background: rgba(2,6,23,0.35);
@@ -367,14 +395,16 @@ body {
   justify-content: center;
   align-items: center;
 }
+
 .img-box img {
   width: 100%;
-  max-height: 80mm;
+  max-height: 68mm; /* bolo 72mm -> trochu menšie, viac rezervy */
   object-fit: contain;
   background: #ffffff;
   border-radius: 6px;
   display: block;
 }
+
 .img-caption {
   margin-top: 3mm;
   font-size: 0.74rem;
@@ -383,7 +413,7 @@ body {
 }
 
 /* =========================================================
-   FOOTER (unified – in flow, never overlaps)
+   FOOTER
    ========================================================= */
 .pdf-footer {
   margin-top: auto;
@@ -403,7 +433,7 @@ body {
 .card, .cta, .note, .info-box, .img-box { break-inside: avoid; page-break-inside: avoid; }
 
 /* =========================================================
-   PRINT (unified)
+   PRINT
    ========================================================= */
 @media print {
   html, body {
@@ -438,4 +468,113 @@ body {
   .table-kv td:last-child { color: #111827 !important; }
 
   .pdf-footer { color: #111827 !important; border-top-color: rgba(17,24,39,0.22) !important; }
+}
+
+/* =========================================================
+   INTRO PAGE – missing classes (page 1)
+   ========================================================= */
+.pdf-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:14mm;
+}
+
+.pdf-logo img{
+  width:42mm;
+  height:auto;
+}
+
+.pdf-code-box{
+  text-align:right;
+  border:1px solid rgba(148,163,184,0.35);
+  border-radius:10px;
+  padding:4mm 6mm;
+  background:rgba(15,23,42,0.9);
+}
+
+.pdf-code-label{
+  font-size:0.65rem;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  color:#9ca3af;
+}
+
+.pdf-code-value{
+  margin-top:1.5mm;
+  font-size:0.9rem;
+  font-weight:800;
+  color:#facc15;
+}
+
+.pdf-title-block{
+  margin-bottom:12mm;
+  max-width:170mm;
+}
+
+.pdf-main-title{
+  margin:0 0 4mm;
+  font-size:1.35rem;
+  line-height:1.25;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+
+.pdf-sub-title{
+  margin:0 0 3mm;
+  font-size:0.9rem;
+  color:#cbd5e1;
+}
+
+.pdf-sub-note{
+  margin:0;
+  font-size:0.75rem;
+  color:#9ca3af;
+}
+
+.pdf-columns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10mm;
+  margin-bottom:10mm;
+}
+
+.pdf-box{
+  border:1px solid rgba(148,163,184,0.35);
+  border-radius:10px;
+  background:rgba(15,23,42,0.9);
+  padding:6mm 7mm;
+}
+
+.pdf-box-title{
+  margin:0 0 3mm;
+  font-size:0.85rem;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+}
+
+.pdf-contact-list{
+  margin:0;
+  padding-left:4mm;
+  font-size:0.75rem;
+  line-height:1.45;
+}
+
+.pdf-note-block{
+  font-size:0.75rem;
+  line-height:1.45;
+  color:#cbd5e1;
+}
+
+/* =========================================================
+   PAGE 2 – small helpers (kept)
+   ========================================================= */
+.grid-bottom { margin-top: 5mm; }
+
+.cutaway-img img {
+  width: 100%;
+  max-height: 68mm; /* rovnaká bezpečná výška */
+  object-fit: contain;
+  background: #fff;
+  border-radius: 6px;
 }

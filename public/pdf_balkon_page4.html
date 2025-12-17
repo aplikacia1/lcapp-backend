@@ -3,291 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 4</title>
-  <style>
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
 
-    body {
-      background: #0b1636;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #f9fafb;
-    }
-
-    .pdf-page {
-      width: 210mm;
-      min-height: 297mm;
-      margin: 0 auto;
-      padding: 16mm 18mm 18mm;
-      position: relative;
-      background: #020617;
-      overflow: hidden;
-
-      /* ✅ dôležité pre tlač farieb / vodoznaku */
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    /* ✅ VODOZNAK – bol stratený, vraciame ho */
-    .pdf-watermark {
-      position: absolute;
-      inset: 26mm 16mm;
-      background-image: url("/logo_lc.jpg");
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-      opacity: 0.05;
-      pointer-events: none;
-      filter: grayscale(100%);
-
-      /* ✅ dôležité pre tlač */
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
-    .pdf-content { position: relative; z-index: 1; }
-
-    /* HEADER */
-    .pdf-mini-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10mm;
-      padding-bottom: 6mm;
-      border-bottom: 1px solid rgba(148,163,184,.35);
-      margin-bottom: 7mm;
-    }
-
-    .mini-left {
-      display: flex;
-      align-items: center;
-      gap: 5mm;
-      min-width: 0;
-    }
-
-    .mini-logo {
-      width: 18mm;
-      height: 18mm;
-      border-radius: 8px;
-      border: 1px solid rgba(148,163,184,.5);
-      background: rgba(15,23,42,.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      flex: 0 0 auto;
-    }
-    .mini-logo img { width:100%; height:100%; object-fit:contain; display:block; }
-
-    .mini-title { min-width: 0; }
-    .mini-title strong {
-      display:block;
-      font-size:.86rem;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.2;
-    }
-    .mini-title span {
-      display:block;
-      font-size:.72rem;
-      color:#9ca3af;
-      margin-top: 1mm;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .mini-code { text-align:right; flex: 0 0 auto; }
-    .mini-code .label {
-      font-size:.65rem;
-      color:#9ca3af;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
-    .mini-code .value {
-      font-size:.82rem;
-      font-weight:700;
-      color:#facc15;
-      margin-top: 1mm;
-    }
-
-    h2 {
-      margin:0 0 3mm;
-      font-size:1rem;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-    }
-
-    .intro {
-      font-size:.78rem;
-      color:#cbd5e1;
-      line-height:1.45;
-      max-width:175mm;
-      margin-bottom:7mm;
-    }
-
-    /* GRID */
-    .grid {
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8mm;
-      margin-bottom: 8mm;
-    }
-
-    .card {
-      border-radius:10px;
-      border:1px solid rgba(148,163,184,.55);
-      background:rgba(15,23,42,.92);
-      padding:6mm;
-    }
-
-    .product {
-      display:flex;
-      gap:5mm;
-      align-items:center;
-      min-height: 44mm;
-    }
-
-    .product img {
-      height:38mm;
-      object-fit:contain;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,.25));
-    }
-
-    .product h3 {
-      margin:0;
-      font-size:.9rem;
-      font-weight:800;
-      line-height: 1.2;
-    }
-
-    .product p {
-      margin:1.5mm 0 0;
-      font-size:.75rem;
-      color:#cbd5e1;
-      line-height:1.4;
-    }
-
-    /* TABLE */
-    table {
-      width:100%;
-      border-collapse:collapse;
-      font-size:.75rem;
-      margin-top:6mm;
-    }
-
-    th, td {
-      border:1px solid rgba(148,163,184,.35);
-      padding:3mm;
-      text-align:center;
-    }
-
-    th {
-      background:rgba(2,6,23,.6);
-      color:#facc15;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.05em;
-    }
-
-    td:first-child {
-      text-align:left;
-      color:#cbd5e1;
-      font-weight:700;
-    }
-
-    .note {
-      margin-top:6mm;
-      padding:4mm 5mm;
-      border-radius:10px;
-      border:1px dashed rgba(148,163,184,.45);
-      background:rgba(2,6,23,.35);
-      font-size:.75rem;
-      color:#e5e7eb;
-      line-height:1.45;
-    }
-
-    .note strong { color:#facc15; }
-
-    /* footer v toku – nič neprekrýva */
-    .pdf-footer {
-      margin-top:6mm;
-      padding-top:3mm;
-      border-top:1px solid rgba(148,163,184,.25);
-      font-size:.75rem;
-      color:#9ca3af;
-      display:flex;
-      justify-content:space-between;
-      align-items: center;
-    }
-    .pdf-footer span { white-space: nowrap; }
-
-    /* ============================================================
-       ✅ TLAČ: biele pozadie (šetri toner) + čitateľnosť
-       - nič nemení v HTML zobrazení, iba pri print.
-       ============================================================ */
-    @media print {
-      html, body {
-        background: #ffffff !important;
-        color: #111827 !important;
-      }
-
-      .pdf-page {
-        background: #ffffff !important;
-        color: #111827 !important;
-      }
-
-      /* vodoznak nech ostane jemný */
-      .pdf-watermark {
-        opacity: 0.06 !important;
-        filter: grayscale(100%) !important;
-      }
-
-      /* karty nech sú biele, aby tlač bola čistá */
-      .card {
-        background: #ffffff !important;
-        border: 1px solid rgba(17,24,39,.25) !important;
-      }
-
-      .intro, .product p, td:first-child {
-        color: #111827 !important;
-      }
-
-      th {
-        background: #f3f4f6 !important;
-        color: #111827 !important;
-      }
-
-      th, td {
-        border: 1px solid rgba(17,24,39,.22) !important;
-      }
-
-      .note {
-        background: #ffffff !important;
-        color: #111827 !important;
-        border: 1px dashed rgba(17,24,39,.35) !important;
-      }
-
-      .note strong {
-        color: #111827 !important;
-      }
-
-      .mini-code .value {
-        color: #111827 !important;
-      }
-
-      .pdf-footer {
-        color: #111827 !important;
-        border-top: 1px solid rgba(17,24,39,.22) !important;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/css/pdf_balkon_common.css">
 </head>
 
 <body>
-  <div class="pdf-page">
+  <div class="pdf-page pdf-pad-16-18-18">
     <div class="pdf-watermark"></div>
 
     <div class="pdf-content">
@@ -308,13 +29,13 @@
         </div>
       </header>
 
-      <h2>4. Vhodné lepidlá pod separačné rohože</h2>
-      <p class="intro">
+      <h2 class="pdf-h2">4. Vhodné lepidlá pod separačné rohože</h2>
+      <p class="pdf-sub">
         Na lepenie separačných rohoží (napr. Schlüter®-DITRA, DITRA-DRAIN alebo KERDI) sa používajú lepidlá triedy <strong>C2</strong>.
         Nižšie sú uvedené lepidlá, ktoré má <strong>LIŠTOVÉ CENTRUM</strong> štandardne v ponuke.
       </p>
 
-      <section class="grid">
+      <section class="grid-2">
         <div class="card product">
           <img src="/img/pdf/balkon/adhesive-mapei-keraflex-maxi-s1-v1.png" alt="MAPEI Keraflex Maxi S1" />
           <div>
@@ -332,7 +53,7 @@
         </div>
       </section>
 
-      <table>
+      <table class="pdf-table">
         <tr>
           <th>Parameter</th>
           <th>MAPEI</th>
@@ -372,12 +93,12 @@
         Použitie iných lepidiel triedy C2 je technicky možné, avšak pri produktoch mimo náš sortiment
         nie je možné určiť presnú spotrebu ani zahrnúť ich do výpočtu materiálu.
       </div>
-
-      <footer class="pdf-footer">
-        <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
-        <span>Strana 4 / {{totalPages}}</span>
-      </footer>
     </div>
+
+    <footer class="pdf-footer only-pdf">
+      <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+      <span>Strana 4 / {{totalPages}}</span>
+    </footer>
   </div>
 </body>
 </html>

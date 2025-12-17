@@ -2,275 +2,17 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
-  <title>PDF – Ukončenie balkóna so žľabom – Schlüter® BARA-RTK + BARIN</title>
+  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 10</title>
 
-  <style>
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-
-    body {
-      background: #0b1636;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #f9fafb;
-    }
-
-    .pdf-page {
-      width: 210mm;
-      min-height: 297mm;
-      margin: 0 auto;
-      padding: 16mm 18mm 16mm;
-      position: relative;
-      background: #020617;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ===== VODOZNAK ===== */
-    .pdf-watermark {
-      position: absolute;
-      inset: 26mm 16mm;
-      background-image: url("/logo_lc.jpg");
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-      opacity: 0.05;
-      pointer-events: none;
-      filter: grayscale(100%);
-    }
-
-    .pdf-content {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ===== HLAVIČKA ===== */
-    .pdf-mini-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 6mm;
-      border-bottom: 1px solid rgba(148,163,184,0.35);
-      margin-bottom: 8mm;
-      gap: 10mm;
-    }
-
-    .mini-left {
-      display: flex;
-      align-items: center;
-      gap: 5mm;
-      min-width: 0;
-    }
-
-    .mini-logo {
-      width: 18mm;
-      height: 18mm;
-      border-radius: 8px;
-      border: 1px solid rgba(148,163,184,0.5);
-      background: rgba(15,23,42,0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      flex: 0 0 auto;
-    }
-
-    .mini-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .mini-title { min-width: 0; }
-    .mini-title strong {
-      display: block;
-      font-size: 0.86rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .mini-title span {
-      display: block;
-      font-size: 0.72rem;
-      color: #9ca3af;
-      margin-top: 1mm;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .mini-code {
-      text-align: right;
-      font-size: 0.8rem;
-      flex: 0 0 auto;
-    }
-
-    .mini-code .label {
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-size: 0.65rem;
-    }
-
-    .mini-code .value {
-      color: #facc15;
-      font-weight: 700;
-      margin-top: 1mm;
-    }
-
-    /* ===== NADPIS ===== */
-    h2 {
-      margin: 0 0 3mm;
-      font-size: 1rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .subtitle {
-      font-size: 0.78rem;
-      color: #cbd5e1;
-      line-height: 1.45;
-      margin-bottom: 8mm;
-      max-width: 172mm;
-    }
-
-    /* ===== GRID ===== */
-    .grid {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 8mm;
-      align-items: start;
-    }
-
-    .card {
-      border-radius: 10px;
-      border: 1px solid rgba(148,163,184,0.55);
-      background: rgba(15,23,42,0.92);
-      overflow: hidden;
-    }
-
-    .card-inner {
-      padding: 6mm 7mm;
-    }
-
-    .chip {
-      display: inline-block;
-      padding: 1.5mm 3mm;
-      border-radius: 999px;
-      border: 1px solid rgba(250,204,21,0.55);
-      background: rgba(250,204,21,0.08);
-      color: #facc15;
-      font-weight: 700;
-      font-size: 0.68rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-bottom: 4mm;
-    }
-
-    ul {
-      margin: 0;
-      padding-left: 5mm;
-      font-size: 0.78rem;
-      line-height: 1.45;
-    }
-
-    ul li { margin-bottom: 2mm; }
-
-    .highlight { color: #facc15; font-weight: 700; }
-
-    .info-box {
-      margin-top: 5mm;
-      padding: 4mm 6mm;
-      border-radius: 10px;
-      border: 1px dashed rgba(148,163,184,0.55);
-      background: rgba(2,6,23,0.35);
-      font-size: 0.75rem;
-      line-height: 1.45;
-      color: #e5e7eb;
-    }
-
-    /* ===== OBRÁZOK ===== */
-    .img-box {
-      padding: 6mm;
-      border: 1px solid rgba(148,163,184,0.35);
-      border-radius: 10px;
-      background: rgba(2,6,23,0.35);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .img-box img {
-      width: 100%;
-      max-height: 80mm;
-      object-fit: contain;
-      background: #ffffff;
-      border-radius: 6px;
-      display: block;
-    }
-
-    .img-caption {
-      margin-top: 3mm;
-      font-size: 0.74rem;
-      color: #cbd5e1;
-      line-height: 1.4;
-    }
-
-    /* ===== TABUĽKA ===== */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.78rem;
-      margin-top: 4mm;
-    }
-
-    th, td {
-      padding: 3mm 2mm;
-      border-bottom: 1px solid rgba(148,163,184,0.25);
-      text-align: left;
-    }
-
-    th {
-      color: #9ca3af;
-      text-transform: uppercase;
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-    }
-
-    td:last-child {
-      text-align: right;
-      font-weight: 700;
-      color: #f9fafb;
-    }
-
-    /* ===== PÄTIČKA ===== */
-    .pdf-footer {
-      margin-top: auto;
-      padding-top: 6mm;
-      font-size: 0.75rem;
-      color: #9ca3af;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .pdf-footer span { white-space: nowrap; }
-  </style>
+  <!-- ✅ jednotný dizajn -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common.css" />
 </head>
 
 <body>
-  <div class="pdf-page">
+  <div class="pdf-page pdf-pad-16-18-18">
     <div class="pdf-watermark"></div>
 
     <div class="pdf-content">
-
       <header class="pdf-mini-header">
         <div class="mini-left">
           <div class="mini-logo">
@@ -287,19 +29,20 @@
         </div>
       </header>
 
-      <h2>10. Ukončenie balkóna so žľabom – Schlüter®-BARA-RTK + BARIN</h2>
+      <h2 class="pdf-h2">10. Ukončenie balkóna so žľabom – Schlüter®-BARA-RTK + BARIN</h2>
       <p class="subtitle">
         Ak má balkón odvodnenie riešené <strong>žľabom pri hrane</strong>, ukončenie hrany tvorí profil
         <strong>Schlüter®-BARA-RTK</strong> a samotný zber/odvod vody zabezpečuje systém
         <strong>Schlüter®-BARIN</strong>. Ide o čisté a bezpečné riešenie detailu hrany so zberom vody do rýny.
       </p>
 
-      <section class="grid">
+      <section class="grid-110-90">
+        <!-- LEFT -->
         <article class="card">
           <div class="card-inner">
             <span class="chip">Odporúčané riešenie (so žľabom)</span>
 
-            <ul>
+            <ul class="bullet">
               <li>určené pre <span class="highlight">balkóny so žľabom pri hrane</span></li>
               <li>profil <strong>BARA-RTK</strong> tvorí ukončenie hrany a napojenie na žľab</li>
               <li>žľabový systém <strong>BARIN</strong> zbiera vodu a vedie ju k odtoku</li>
@@ -307,7 +50,7 @@
               <li>farby závisia od profilu; na požiadanie je možné riešiť aj <span class="highlight">lakovanie do RAL</span></li>
             </ul>
 
-            <table>
+            <table class="table-kv">
               <tr>
                 <th>Parameter</th>
                 <th>Hodnota</th>
@@ -338,6 +81,7 @@
           </div>
         </article>
 
+        <!-- RIGHT -->
         <article class="card">
           <div class="card-inner">
             <div class="img-box">
@@ -363,7 +107,6 @@
         <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
         <span>Strana 10 / {{totalPages}}</span>
       </footer>
-
     </div>
   </div>
 </body>

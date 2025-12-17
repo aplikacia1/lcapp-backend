@@ -25,6 +25,9 @@ function isoDateTimeSk() {
   )}:${pad(d.getMinutes())}`;
 }
 
+/**
+ * Vloží premenné do template + vynúti <base href="..."> pre správne načítanie /img a /css v Puppeteeri.
+ */
 function applyTemplate(html, vars, baseHref) {
   let out = html;
 
@@ -34,7 +37,7 @@ function applyTemplate(html, vars, baseHref) {
     out = out.replace(token, safeText(v));
   }
 
-  // doplň <base> (aby fungovali src/href na localhost aj na produkcii)
+  // doplň / prepíš <base>
   if (!/<base\s/i.test(out)) {
     out = out.replace(/<head([^>]*)>/i, `<head$1><base href="${baseHref}">`);
   } else {
@@ -45,9 +48,29 @@ function applyTemplate(html, vars, baseHref) {
 }
 
 /**
+ * Spraví ABS URL na public asset:
+ * - "img/..." => "https://host/img/..."
+ * - "/img/..." => "https://host/img/..."
+ * - "http..." => nechá tak
+ */
+function toAbsPublicUrl(baseOrigin, maybePath) {
+  if (!maybePath) return "";
+  let p = String(maybePath).trim();
+  if (!p) return "";
+
+  if (/^https?:\/\//i.test(p)) return p;
+
+  // normalizácia
+  if (p.startsWith("img/")) p = "/" + p;
+  if (!p.startsWith("/")) p = "/" + p;
+
+  return baseOrigin.replace(/\/$/, "") + p;
+}
+
+/**
  * PLÁN STRÁN podľa výška + odtok
  * - nízka + voľná hrana: intro + 2..8
- * - nízka + rýna:        intro + 2..6 + 10 + 9 + 11  (ako si písal)
+ * - nízka + rýna:        intro + 2..6 + 10 + 9 + 11
  */
 function resolvePlan(payload) {
   const heightId = safeText(payload?.calc?.heightId).toLowerCase();
@@ -55,7 +78,8 @@ function resolvePlan(payload) {
 
   const isLow = heightId === "low";
   const isFree = drainId === "edge-free";
-  const isGutter = drainId === "edge-gutter" || drainId.includes("gutter") || drainId.includes("ryn");
+  const isGutter =
+    drainId === "edge-gutter" || drainId.includes("gutter") || drainId.includes("ryn");
 
   if (isLow && isFree) {
     return [
@@ -85,10 +109,15 @@ function resolvePlan(payload) {
   }
 
   // fallback – nech to nikdy “nezomrie”
-  return ["pdf_balkon_intro.html", "pdf_balkon_page2.html", "pdf_balkon_page3.html", "pdf_balkon_page4.html"];
+  return [
+    "pdf_balkon_intro.html",
+    "pdf_balkon_page2.html",
+    "pdf_balkon_page3.html",
+    "pdf_balkon_page4.html",
+  ];
 }
 
-function buildVars(payload, pageNo, totalPages) {
+function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const email = safeText(payload?.meta?.email || "");
   const calc = payload?.calc || {};
   const bom = payload?.bom || {};
@@ -99,7 +128,6 @@ function buildVars(payload, pageNo, totalPages) {
   const area = calc?.area;
   const perimeter = calc?.perimeter;
 
-  // TEXTY, ktoré sa objavujú v HTML stránkach
   const shapeLabel = safeText(calc?.shapeLabel || "–");
   const heightLabel = safeText(calc?.heightLabel || "–");
   const drainLabel = safeText(calc?.drainLabel || "–");
@@ -107,35 +135,79 @@ function buildVars(payload, pageNo, totalPages) {
   const areaText = area != null ? `${formatNumSk(area, 1)} m²` : "–";
   const perimeterText = perimeter != null ? `${formatNumSk(perimeter, 1)} bm` : "–";
 
-  // orientačne z BOM
   const ditraAreaText =
-    bom?.membraneArea != null ? `${formatNumSk(bom.membraneArea, 1)} m²` : (area != null ? `${formatNumSk(area, 1)} m²` : "–");
+    bom?.membraneArea != null
+      ? `${formatNumSk(bom.membraneArea, 1)} m²`
+      : area != null
+      ? `${formatNumSk(area, 1)} m²`
+      : "–";
 
   const adhesiveBagsText =
     bom?.adhesiveBags != null ? `${safeText(bom.adhesiveBags)} ks` : "–";
 
-  // ak zatiaľ nemáš presnú spotrebu v payload, aspoň niečo rozumne
   const adhesiveConsumptionText =
-    (bom?.adhesiveBags != null && area != null && area > 0)
+    bom?.adhesiveBags != null && area != null && area > 0
       ? `≈ ${formatNumSk((bom.adhesiveBags * 25) / area, 1)} kg/m²`
       : "–";
 
-  // hrana (ak nie je vypočítané, dáme aspoň perimeter)
-  const edgeLengthText =
-    perimeter != null ? `${formatNumSk(perimeter, 1)} m` : "–";
-
+  const edgeLengthText = perimeter != null ? `${formatNumSk(perimeter, 1)} m` : "–";
   const edgeProfilePiecesText =
     bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
 
-  // tieto zatiaľ nemáš v payload – nech neostávajú {{...}}
   const systemShortNote = safeText(calc?.systemTitle || "");
-  const shapeSketchSvg = ""; // neskôr môžeme generovať SVG podľa tvaru
+
+  // TODO: neskôr dorobíme real SVG z kalkulačky
+  const shapeSketchSvg = safeText(calc?.shapeSketchSvg || "");;
+
   const systemCutawayCaption = safeText(calc?.systemTitle || "");
+
+  // =========================================================
+  // ✅ TECHNICKÝ PRIEREZ: výber obrázka podľa výšky + odtoku
+  // (vložené podľa tvojho zadania; v buildVars nemáme req, tak použijeme baseOrigin)
+  // =========================================================
+  const heightId = safeText(calc?.heightId || "").toLowerCase();
+  const drainId = safeText(calc?.drainId || "").toLowerCase();
+
+  // mapovanie na súbory v /public/img/systems/
+  let cutawayImage = "";
+
+  if (heightId === "low" && drainId === "edge-free") {
+    cutawayImage = "/img/systems/balkon-low-edge-free.png";
+  } else if (heightId === "low" && drainId === "edge-gutter") {
+    cutawayImage = "/img/systems/balkon-low-edge-gutter.png";
+  } else if (heightId === "low" && drainId === "internal-drain") {
+    cutawayImage = "/img/systems/balkon-low-internal-drain.png";
+  } else if (heightId === "medium" && drainId === "edge-free") {
+    cutawayImage = "/img/systems/balkon-edge-free.png";
+  } else if (heightId === "medium" && drainId === "edge-gutter") {
+    cutawayImage = "/img/systems/balkon-edge-gutter.png";
+  } else if (heightId === "medium" && drainId === "internal-drain") {
+    cutawayImage = "/img/systems/balkon-internal-drain.png";
+  } else if (heightId === "high" && drainId === "edge-gutter") {
+    cutawayImage = "/img/systems/balkon-high-edge-gutter.png";
+  } else if (heightId === "high" && drainId === "internal-drain") {
+    cutawayImage = "/img/systems/balkon-high-internal-drain.png";
+  }
+
+  // Ak kalkulačka poslala previewSrc, môžeme ním prebiť (ak chceš presne z FE)
+  // (nechávam zapnuté – je to bezpečné a presnejšie)
+  const fromCalcPreview = safeText(calc?.previewSrc);
+  if (fromCalcPreview) {
+    cutawayImage = fromCalcPreview.startsWith("/")
+      ? fromCalcPreview
+      : (fromCalcPreview.startsWith("img/") ? "/" + fromCalcPreview : fromCalcPreview);
+  }
+
+  // absolútna URL pre Puppeteer
+  const systemCutawayImageAbs = cutawayImage
+    ? toAbsPublicUrl(baseOrigin, cutawayImage)
+    : "";
+  // =========================================================
+
   const collConsumptionText = "–";
   const collPacksText = "–";
   const kebaMetersText = "–";
 
-  // strana 7 – varianty (zatiaľ “–” aby nezostali tokeny)
   const rtProfilePiecesText = edgeProfilePiecesText;
   const rtCornersText = "–";
   const rtConnectorsText = "–";
@@ -148,7 +220,9 @@ function buildVars(payload, pageNo, totalPages) {
   const rwColorCode = "–";
 
   return {
-    // header + intro
+    // pre <base href="{{baseUrl}}/"> v template (ak ho máš v HTML)
+    baseUrl: baseOrigin.replace(/\/$/, ""),
+
     pdfCode,
     customerName: safeText(calc?.customerName || "Zákazník"),
     customerEmail: email,
@@ -156,37 +230,33 @@ function buildVars(payload, pageNo, totalPages) {
     constructionType: safeText(calc?.typeLabel || ""),
     systemTitle: safeText(calc?.systemTitle || ""),
 
-    // stránkovanie
     totalPages,
     pageNumber: pageNo,
 
-    // najčastejšie tokeny v page2..page8
     shapeLabel,
     heightLabel,
     drainLabel,
     areaText,
     perimeterText,
 
-    // page2
     systemShortNote,
     shapeSketchSvg,
     systemCutawayCaption,
 
-    // page3
+    // ✅ ABS obrázok pre stranu 2
+    systemCutawayImageAbs,
+
     ditraAreaText,
     adhesiveConsumptionText,
     adhesiveBagsText,
 
-    // page5
     kebaMetersText,
     collConsumptionText,
     collPacksText,
 
-    // page6
     edgeLengthText,
     edgeProfilePiecesText,
 
-    // page7
     rtProfilePiecesText,
     rtCornersText,
     rtConnectorsText,
@@ -202,12 +272,10 @@ function buildVars(payload, pageNo, totalPages) {
 async function htmlToPdfBuffer(browser, html) {
   const page = await browser.newPage();
 
-  // Dôležité: necháme dobehnúť assety (logo, obrázky…)
   await page.setContent(html, { waitUntil: "networkidle0" });
 
-  // Puppeteer generuje PDF v “print” logike.
-  // (Ak chceš tmavý export, dá sa tu prepnúť na screen a zrušiť @media print biele prepísania.)
-  await page.emulateMediaType("print");
+  // ✅ EXPORT PDF má byť dizajnový (screen). Biely režim nech rieši iba reálna tlač v browseri.
+  await page.emulateMediaType("screen");
 
   const pdf = await page.pdf({
     format: "A4",
@@ -242,18 +310,20 @@ router.post("/balkon-final-html", async (req, res) => {
     const plan = resolvePlan(payload);
     const totalPages = plan.length;
 
-    const baseHref = `${req.protocol}://${req.get("host")}/`;
+    const baseOrigin = `${req.protocol}://${req.get("host")}`;
 
     const htmlPages = plan.map((fileName, idx) => {
       const filePath = path.join(process.cwd(), "public", fileName);
       if (!fs.existsSync(filePath)) throw new Error(`Chýba HTML stránka: ${filePath}`);
 
       const raw = fs.readFileSync(filePath, "utf8");
-      const vars = buildVars(payload, idx + 1, totalPages);
-      // pdfCode drž konzistentne počas requestu
+      const vars = buildVars(payload, idx + 1, totalPages, baseOrigin);
+
       if (!payload.meta) payload.meta = {};
       payload.meta.pdfCode = vars.pdfCode;
 
+      // baseHref musí končiť / (kvôli relatívnym cestám)
+      const baseHref = `${baseOrigin}/`;
       return applyTemplate(raw, vars, baseHref);
     });
 
