@@ -5,6 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Lokálne štýly len pre štatistiky (aby sme nemuseli siahať do style.css) -->
+  <style>
+    .admin-stats {
+      margin-top: 18px;
+      width: min(720px, 92vw);
+      margin-left: auto;
+      margin-right: auto;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .admin-stats h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      text-align: center;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .stat-card {
+      background: rgba(10,30,80,0.25);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .stat-title {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+      color: #fff;
+      font-weight: 700;
+    }
+    .stat-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 3px 0;
+      color: #fff;
+      font-size: 13px;
+      opacity: 0.95;
+    }
+    .stat-value {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.2px;
+      color: #fff;
+      min-width: 44px;
+      text-align: right;
+    }
+    .stats-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      opacity: 0.85;
+      color: #fff;
+      text-align: center;
+    }
+    .stats-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .stats-actions button {
+      cursor: pointer;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(10,30,80,0.35);
+      color: #fff;
+      font-weight: 800;
+    }
+    @media (max-width: 560px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -26,6 +107,69 @@
 
       <button id="adminLogoutBtn">🚪 Odhlásiť sa</button>
     </div>
+
+    <!-- ✅ NOVÉ: jednoduché admin štatistiky (Dnes / Spolu) -->
+    <section class="admin-stats" aria-label="Admin štatistiky">
+      <h2>📈 Prehľad dnes / spolu</h2>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">⭐ Hodnotenia</div>
+          <div class="stat-row">
+            <span>Dnes</span>
+            <span class="stat-value" id="statRatingsToday">—</span>
+          </div>
+          <div class="stat-row">
+            <span>Spolu</span>
+            <span class="stat-value" id="statRatingsTotal">—</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">🧵 Lištobook aktivita</div>
+          <div class="stat-row">
+            <span>Dnes (príspevky+komentáre)</span>
+            <span class="stat-value" id="statTimelineToday">—</span>
+          </div>
+          <div class="stat-row">
+            <span>Spolu (príspevky+komentáre)</span>
+            <span class="stat-value" id="statTimelineTotal">—</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">📦 Objednávky / správy adminovi</div>
+          <div class="stat-row">
+            <span>Dnes</span>
+            <span class="stat-value" id="statOrdersToday">—</span>
+          </div>
+          <div class="stat-row">
+            <span>Spolu</span>
+            <span class="stat-value" id="statOrdersTotal">—</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">🔗 Prekliky na hodnotenie</div>
+          <div class="stat-row">
+            <span>Dnes</span>
+            <span class="stat-value" id="statClicksToday">—</span>
+          </div>
+          <div class="stat-row">
+            <span>Spolu</span>
+            <span class="stat-value" id="statClicksTotal">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-actions">
+        <button id="refreshStatsBtn" type="button">🔄 Obnoviť štatistiky</button>
+      </div>
+
+      <div class="stats-hint">
+        Poznámka: „Prekliky na hodnotenie“ budú fungovať až po doplnení tichého click-logu na serveri (bez cookies).
+      </div>
+    </section>
   </div>
 
   <!-- ✳️ config musí byť načítaný skôr -->

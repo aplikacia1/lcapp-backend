@@ -138,6 +138,10 @@ function mountRoute(url, modPath) {
 mountRoute('/api/auth',           './routes/authRoutes');
 mountRoute('/api/password',       './routes/passwordRoutes');
 mountRoute('/api/admin',          './routes/adminRoutes');
+
+// ✅ NOVÉ: admin dashboard štatistiky (Dnes / Spolu)
+mountRoute('/api/admin',          './routes/adminDashboardStatsRoutes');
+
 mountRoute('/api/users',          './routes/userRoutes');
 mountRoute('/api/categories',     './routes/categoryRoutes');
 mountRoute('/api/products',       './routes/productRoutes');
