@@ -14,6 +14,37 @@
   // Voláme relatívne cesty (backend beží na rovnakom pôvode).
   const API_BASE = '';
 
+  // ✅ Presmerovanie na next s doplneným email= (ak chýba)
+  function redirectToNextWithEmail(email) {
+    const params = new URLSearchParams(window.location.search);
+    const nextRaw = params.get('next');
+
+    // fallback keď nie je next
+    const fallback = `timeline.html?email=${encodeURIComponent(email)}`;
+
+    if (!nextRaw) {
+      window.location.replace(fallback);
+      return;
+    }
+
+    let nextUrl = '';
+    try {
+      nextUrl = decodeURIComponent(nextRaw);
+    } catch {
+      nextUrl = nextRaw;
+    }
+
+    // Ak next je len cesta bez query, nič nevadí
+    const join = nextUrl.includes('?') ? '&' : '?';
+
+    // nepridávaj, ak už email je
+    if (!/[\?&]email=/.test(nextUrl)) {
+      nextUrl = nextUrl + join + 'email=' + encodeURIComponent(email);
+    }
+
+    window.location.replace(nextUrl);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     /* ----- LOGIN ----- */
     const form = pickForm();
@@ -49,11 +80,9 @@
           return;
         }
 
-        // presmerovanie po úspechu
-        const params = new URLSearchParams(location.search);
-        const next = params.get('next');
-        const dest = next || `timeline.html?email=${encodeURIComponent(email)}`;
-        window.location.replace(dest);
+        // ✅ presmerovanie po úspechu: next + email (alebo fallback)
+        redirectToNextWithEmail(email);
+
       } catch (err) {
         console.error('Login error', err);
         alert('Chyba pri pripojení.');

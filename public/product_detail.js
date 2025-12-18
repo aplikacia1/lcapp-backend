@@ -55,6 +55,27 @@
   }
   window.goBack = goBack;
 
+  // ✅ next URL (návrat na tento produkt po login/registrácii)
+  function buildNextUrlWithEmail(nextEmail) {
+    const p = new URLSearchParams(location.search);
+    // vždy chceme mať id
+    p.set("id", productId);
+    if (categoryId) p.set("categoryId", categoryId);
+    if (nextEmail) p.set("email", nextEmail);
+    // vrátime relatívnu URL
+    return `product_detail.html?${p.toString()}`;
+  }
+
+  function buildNextParam() {
+    // pre návštevníka bez emailu: uložíme návratovú URL bez emailu,
+    // login/register si po úspechu typicky doplní email do návratu (ak to podporuje).
+    const p = new URLSearchParams(location.search);
+    p.set("id", productId);
+    if (categoryId) p.set("categoryId", categoryId);
+    p.delete("email");
+    return encodeURIComponent(`product_detail.html?${p.toString()}`);
+  }
+
   async function j(url, opts) {
     const r = await fetch(url, opts);
     if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
@@ -259,11 +280,204 @@
     paint();
   }
 
-  async function sendRating() {
-    // 🔔 ak nie je email, ukáž pekné vyskakovacie okno namiesto alertu
+  // ===== Auth modal helpers =====
+  function openAuthModal() {
+    const modal = $("#authPrompt");
+    if (modal) modal.style.display = "flex";
+  }
+
+  function wireAuthModal() {
+    const authModal = $("#authPrompt");
+    if (!authModal) return;
+
+    const closeBtn = authModal.querySelector("[data-auth-close]");
+    const login = authModal.querySelector("[data-auth-login]");
+    const register = authModal.querySelector("[data-auth-register]");
+
+    const hide = () => { authModal.style.display = "none"; };
+
+    closeBtn && closeBtn.addEventListener("click", hide);
+    authModal.addEventListener("click", (e) => { if (e.target === authModal) hide(); });
+
+    // ✅ Presmerovanie s next parametrom
+    login && login.addEventListener("click", () => {
+      location.href = `login.html?next=${buildNextParam()}`;
+    });
+    register && register.addEventListener("click", () => {
+      location.href = `register.html?next=${buildNextParam()}`;
+    });
+  }
+
+  // ===== Nickname modal =====
+  function openNickModal() {
+    const modal = $("#nickPrompt");
+    if (modal) modal.style.display = "flex";
+  }
+  function closeNickModal() {
+    const modal = $("#nickPrompt");
+    if (modal) modal.style.display = "none";
+  }
+
+  async function saveNickname(nickname) {
+    const msg = $("#nickMsg");
+    const btn = document.querySelector("[data-nick-save]");
+
+    const setMsg = (t) => { if (msg) msg.textContent = t || ""; };
+    const lock = (v) => {
+      if (btn) btn.disabled = !!v;
+      if (btn) btn.textContent = v ? "Ukladám…" : "Uložiť prezývku";
+    };
+
+    const clean = String(nickname || "").trim();
+    if (!clean || clean.length < 2) {
+      setMsg("Zadajte prezývku (min. 2 znaky).");
+      return false;
+    }
+
+    try {
+      lock(true);
+      setMsg("");
+
+      // Skúsime viac možností endpointu, aby to fungovalo aj pri odlišnej implementácii
+      const candidates = [
+        {
+          url: `${API_BASE}/api/users/${encodeURIComponent(email)}`,
+          method: "PUT",
+          body: { name: clean }
+        },
+        {
+          url: `${API_BASE}/api/users/${encodeURIComponent(email)}`,
+          method: "PATCH",
+          body: { name: clean }
+        },
+        {
+          url: `${API_BASE}/api/users/update`,
+          method: "POST",
+          body: { email, name: clean }
+        }
+      ];
+
+      let lastErr = null;
+      for (const c of candidates) {
+        try {
+          const res = await fetch(c.url, {
+            method: c.method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(c.body)
+          });
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok) {
+            // typicky: 409 konflikt prezývky, 400 validácia, 403 atď.
+            lastErr = data?.message || `Chyba ${res.status}`;
+            continue;
+          }
+
+          // úspech
+          setMsg("Prezývka uložená ✅");
+          await loadUserLabel(); // nech sa hneď ukáže v hlavičke
+          return true;
+        } catch (e) {
+          lastErr = e?.message || "Server neodpovedá";
+        }
+      }
+
+      setMsg(lastErr || "Nepodarilo sa uložiť prezývku.");
+      return false;
+    } finally {
+      lock(false);
+    }
+  }
+
+  function wireNickModal() {
+    const modal = $("#nickPrompt");
+    if (!modal) return;
+
+    const close = modal.querySelector("[data-nick-close]");
+    const later = modal.querySelector("[data-nick-later]");
+    const save = modal.querySelector("[data-nick-save]");
+    const input = $("#nickInput");
+
+    const hide = () => closeNickModal();
+
+    close && close.addEventListener("click", hide);
+    later && later.addEventListener("click", hide);
+    modal.addEventListener("click", (e) => { if (e.target === modal) hide(); });
+
+    save && save.addEventListener("click", async () => {
+      const ok = await saveNickname(input?.value || "");
+      if (ok) closeNickModal();
+    });
+
+    input && input.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const ok = await saveNickname(input.value || "");
+        if (ok) closeNickModal();
+      }
+    });
+  }
+
+  // ✅ načítanie používateľa do hlavičky + zistenie prezývky
+  async function fetchUser(emailAddr) {
+    const urls = [
+      `/api/users/${encodeURIComponent(emailAddr)}`,
+      `${API_BASE}/api/users/${encodeURIComponent(emailAddr)}`
+    ];
+    for (const u of urls) {
+      try {
+        const res = await fetch(u);
+        if (!res.ok) continue;
+        return await res.json();
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  async function loadUserLabel() {
+    const el = $("#userGreeting");
+    if (!el) return;
+
     if (!email) {
-      const modal = $("#authPrompt");
-      if (modal) modal.style.display = "flex";
+      el.textContent = "Neprihlásený návštevník (len náhľad produktu)";
+      return;
+    }
+
+    try {
+      const u = await fetchUser(email);
+      if (!u) {
+        el.textContent = email;
+        return;
+      }
+      const nick = (u.name || "").trim();
+      if (nick) {
+        el.textContent = `Prihlásený ako: ${nick}`;
+      } else {
+        el.textContent = email;
+      }
+    } catch {
+      el.textContent = email;
+    }
+  }
+
+  // ✅ po návrate: ak je prihlásený, ale nemá prezývku → otvor modal
+  async function maybePromptNickname() {
+    if (!email) return;
+
+    const u = await fetchUser(email);
+    const nick = (u?.name || "").trim();
+    if (!nick) {
+      // otvor iba raz za načítanie (aby to neotravovalo)
+      openNickModal();
+      const inp = $("#nickInput");
+      if (inp) setTimeout(() => inp.focus(), 50);
+    }
+  }
+
+  async function sendRating() {
+    // 🔔 ak nie je email, ukáž prihlásenie/registráciu s návratom
+    if (!email) {
+      openAuthModal();
       return;
     }
 
@@ -284,8 +498,13 @@
         body: JSON.stringify({ productId, email, stars: selectedStars, comment })
       });
       const data = await res.json().catch(() => ({}));
+
       if (res.status === 403) {
-        msg && (msg.textContent = data?.message || "Najprv si v dashboarde nastav prezývku.");
+        // ✅ Ak server povie "nemáš prezývku" → otvor modal a rovno nastav
+        msg && (msg.textContent = data?.message || "Najprv si nastav prezývku.");
+        openNickModal();
+        const inp = $("#nickInput");
+        if (inp) setTimeout(() => inp.focus(), 50);
         return;
       }
       if (res.status === 409) {
@@ -296,6 +515,7 @@
         msg && (msg.textContent = data?.message || "Chyba pri odoslaní hodnotenia.");
         return;
       }
+
       $("#rateComment") && ($("#rateComment").value = "");
       msg && (msg.textContent = "Hodnotenie bolo uložené. Ďakujeme!");
       await loadSummary();
@@ -307,91 +527,27 @@
     }
   }
 
-  // ✅ načítanie používateľa do hlavičky
-  async function loadUserLabel() {
-    const el = $("#userGreeting");
-    if (!el) return;
-
-    if (!email) {
-      el.textContent = "Neprihlásený návštevník (len náhľad produktu)";
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/users/${encodeURIComponent(email)}`);
-      if (!res.ok) {
-        el.textContent = email;
-        return;
-      }
-      const u = await res.json();
-      const nick = (u.name || "").trim();
-      if (nick) {
-        el.textContent = `Prihlásený ako: ${nick}`;
-      } else {
-        el.textContent = email;
-      }
-    } catch {
-      el.textContent = email;
-    }
-  }
-
   document.addEventListener("DOMContentLoaded", async () => {
     if (!productId) {
       alert("Chýba ID produktu.");
       return;
     }
 
-    // ⭐ hviezdičky + odoslanie hodnotenia
     bindStars();
-    $("#rateSubmit") &&
-      $("#rateSubmit").addEventListener("click", e => {
-        e.preventDefault();
-        sendRating();
-      });
+    $("#rateSubmit") && $("#rateSubmit").addEventListener("click", e => {
+      e.preventDefault();
+      sendRating();
+    });
 
-    // 🔗 tlačidlá v spodnom guest bare (ak ho niekedy zobrazíme)
-    const loginBtn = $("#loginBtn");
-    const registerBtn = $("#registerBtn");
-    if (loginBtn) {
-      loginBtn.addEventListener("click", () => {
-        location.href = "login.html";
-      });
-    }
-    if (registerBtn) {
-      registerBtn.addEventListener("click", () => {
-        location.href = "register.html";
-      });
-    }
-
-    // 🔔 nastavenie modálu na prihlásenie pri hodnotení
-    const authModal = $("#authPrompt");
-    if (authModal) {
-      const closeBtn = authModal.querySelector("[data-auth-close]");
-      const login = authModal.querySelector("[data-auth-login]");
-      const register = authModal.querySelector("[data-auth-register]");
-
-      const hide = () => {
-        authModal.style.display = "none";
-      };
-
-      // zavrieť krížikom
-      closeBtn && closeBtn.addEventListener("click", hide);
-      // zavrieť klikom mimo dialogu
-      authModal.addEventListener("click", (e) => {
-        if (e.target === authModal) hide();
-      });
-      // preklik na login / register
-      login && login.addEventListener("click", () => {
-        location.href = "login.html";
-      });
-      register && register.addEventListener("click", () => {
-        location.href = "register.html";
-      });
-    }
+    wireAuthModal();
+    wireNickModal();
 
     await loadUserLabel();
     await loadProduct();
     await loadSummary();
     await loadReviews();
+
+    // ✅ po načítaní: ak je prihlásený, ale bez prezývky → rovno ponúkni nastavenie
+    await maybePromptNickname();
   });
 })();

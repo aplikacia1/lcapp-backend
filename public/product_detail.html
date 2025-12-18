@@ -177,21 +177,6 @@
     }
     .rate-msg{ grid-column:1 / -1; font-size:12px; opacity:.85; margin-top:4px; }
 
-    /* panel pre návštevníka (bez emailu) – zatiaľ len text + tlačidlá dole */
-    #rateBarGuest{ display:none; }
-    #rateBarGuest .rate-inner{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      align-items:flex-start;
-    }
-    #rateBarGuest .rate-actions{
-      display:flex;
-      gap:8px;
-      width:100%;
-      justify-content:flex-end;
-    }
-
     /* ===== PC ONLY: Neónové pulzujúce pásy pri okrajoch ===== */
     @media (min-width: 992px){
       .neon-beams{
@@ -228,92 +213,6 @@
         0%,100%{ opacity:.10; transform: scale(1); }
         50%    { opacity:.22; transform: scale(1.08); }
       }
-    }
-
-    /* ====== PWA MODAL (rovnaký ako na indexe) ====== */
-    #pwaPrompt {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,.55);
-      z-index: 9000;
-    }
-    .pwa-dialog {
-      width: 100%;
-      max-width: 380px;
-      margin: 0 16px;
-      background:
-        radial-gradient(circle at 0 0,#1d4ed8 0,rgba(15,23,42,0.96) 52%,#020617 100%);
-      color:#e5edff;
-      border-radius: 18px;
-      padding: 18px 18px 16px;
-      box-shadow: 0 24px 60px rgba(3,7,18,.96);
-      border: 1px solid rgba(129,140,248,.9);
-      box-sizing: border-box;
-      position: relative;
-    }
-    .pwa-close {
-      position:absolute;
-      top:8px;
-      right:10px;
-      border:none;
-      background:transparent;
-      color:#9ca3af;
-      font-size:22px;
-      line-height:1;
-      cursor:pointer;
-    }
-    .pwa-close:hover{
-      color:#e5edff;
-    }
-    .pwa-icon {
-      width:52px;
-      height:52px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      font-size:26px;
-      background:rgba(15,23,42,.9);
-      border:1px solid rgba(191,219,254,.9);
-      box-shadow:0 0 22px rgba(59,130,246,.75);
-      margin-bottom:10px;
-    }
-    .pwa-dialog h2{
-      margin:4px 0 6px;
-      font-size:1.15rem;
-    }
-    .pwa-dialog p{
-      margin:0 0 10px;
-      font-size:.9rem;
-      color:#dbeafe;
-    }
-    .pwa-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:10px;
-    }
-    .pwa-btn{
-      flex:1 1 auto;
-      height:40px;
-      border-radius:999px;
-      border:1px solid rgba(148,163,255,.7);
-      background:transparent;
-      color:#e5edff;
-      cursor:pointer;
-      font-size:.9rem;
-      font-weight:500;
-    }
-    .pwa-btn-primary{
-      background:linear-gradient(135deg,#60a5fa,#2563eb);
-      border:none;
-      color:#f9fafb;
-      box-shadow:0 14px 30px rgba(37,99,235,.55);
-    }
-    .pwa-btn-primary:hover{
-      filter:brightness(1.05);
     }
 
     /* ====== MODÁL – PRIHLÁSENIE NA HODNOTENIE ====== */
@@ -389,6 +288,100 @@
     .auth-btn-primary:hover{
       filter:brightness(1.05);
     }
+
+    /* ====== MODÁL – ZVOĽ SI PREZÝVKU ====== */
+    #nickPrompt{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.55);
+      z-index:9600;
+    }
+    .nick-dialog{
+      width:100%;
+      max-width:380px;
+      margin:0 16px;
+      background:
+        radial-gradient(circle at 0 0,#1d4ed8 0,rgba(15,23,42,0.96) 52%,#020617 100%);
+      color:#e5edff;
+      border-radius:18px;
+      padding:18px 18px 16px;
+      box-shadow:0 20px 50px rgba(3,7,18,.9);
+      border:1px solid rgba(129,140,248,.9);
+      box-sizing:border-box;
+      position:relative;
+    }
+    .nick-close{
+      position:absolute;
+      top:8px;
+      right:10px;
+      border:none;
+      background:transparent;
+      color:#9ca3af;
+      font-size:22px;
+      line-height:1;
+      cursor:pointer;
+    }
+    .nick-close:hover{ color:#e5edff; }
+    .nick-title{
+      margin:4px 0 6px;
+      font-size:1.05rem;
+      font-weight:700;
+    }
+    .nick-text{
+      margin:0 0 10px;
+      font-size:.9rem;
+      color:#dbeafe;
+    }
+    .nick-input{
+      width:100%;
+      height:40px;
+      border-radius:12px;
+      border:1px solid rgba(148,163,255,.7);
+      background:rgba(255,255,255,.08);
+      color:#e5edff;
+      padding:8px 10px;
+      outline:none;
+      box-sizing:border-box;
+    }
+    .nick-msg{
+      margin-top:8px;
+      font-size:12px;
+      opacity:.92;
+      color:#e5edff;
+      min-height:16px;
+    }
+    .nick-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+    .nick-btn{
+      height:38px;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,255,.7);
+      background:transparent;
+      color:#e5edff;
+      cursor:pointer;
+      font-size:.9rem;
+      font-weight:600;
+    }
+    .nick-btn-primary{
+      background:linear-gradient(135deg,#60a5fa,#2563eb);
+      border:none;
+      color:#f9fafb;
+      box-shadow:0 10px 26px rgba(37,99,235,.55);
+    }
+    .nick-btn-primary:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
   </style>
 </head>
 <body>
@@ -446,7 +439,7 @@
     <section class="reviews" id="reviewsList"></section>
   </main>
 
-  <!-- Fixný hodnotiaci panel – default pre všetkých (logika rieši prístup) -->
+  <!-- Fixný hodnotiaci panel -->
   <div class="rate-bar" id="rateBar">
     <div class="rate-inner">
       <div id="rateStars" class="rate-stars" aria-label="Zvoľte počet hviezdičiek">
@@ -455,19 +448,6 @@
       <input id="rateComment" class="rate-text" placeholder="Napíšte svoje hodnotenie (nepovinné)..." />
       <button id="rateSubmit" class="rate-btn">Odoslať</button>
       <div id="rateMsg" class="rate-msg"></div>
-    </div>
-  </div>
-
-  <!-- Panel pre návštevníkov (bez emailu) – môžeš použiť neskôr, zatiaľ len na kliknutie Prihlásiť/Registrovať -->
-  <div class="rate-bar" id="rateBarGuest">
-    <div class="rate-inner">
-      <div class="muted" style="font-size:13px;">
-        Na hodnotenie tohto produktu sa prosím prihláste alebo zaregistrujte.
-      </div>
-      <div class="rate-actions">
-        <button id="loginBtn" class="rate-btn">Prihlásiť</button>
-        <button id="registerBtn" class="rate-btn">Registrovať</button>
-      </div>
     </div>
   </div>
 
@@ -486,32 +466,26 @@
     </div>
   </div>
 
-  <!-- PWA inštalačné okno (rovnaké ako na indexe) -->
-  <div id="pwaPrompt" aria-hidden="true">
-    <div class="pwa-dialog" role="dialog" aria-modal="true" aria-labelledby="pwaTitle">
-      <button type="button" class="pwa-close" data-pwa-close aria-label="Zavrieť">×</button>
-      <div class="pwa-icon" aria-hidden="true">📲</div>
-      <h2 id="pwaTitle">Nainštalovať aplikáciu LCAPP?</h2>
-      <p>
-        LCAPP si môžete pridať ako aplikáciu do svojho zariadenia.
-        Spustíte ju potom priamo z domovskej obrazovky – bez prehliadača.
+  <!-- MODÁL – zvoľ si prezývku -->
+  <div id="nickPrompt" aria-hidden="true">
+    <div class="nick-dialog" role="dialog" aria-modal="true" aria-labelledby="nickTitle">
+      <button type="button" class="nick-close" data-nick-close aria-label="Zavrieť">×</button>
+      <h2 id="nickTitle" class="nick-title">Zvoľte si prezývku</h2>
+      <p class="nick-text">
+        Aby ste mohli hodnotiť, nastavte si prosím prezývku. Zobrazí sa pri vašich hodnoteniach.
       </p>
-      <div class="pwa-actions">
-        <button type="button" class="pwa-btn pwa-btn-primary" data-pwa-install>
-          Nainštalovať
-        </button>
-        <button type="button" class="pwa-btn" data-pwa-later>
-          Neskôr
-        </button>
+      <input id="nickInput" class="nick-input" maxlength="24" placeholder="napr. Julo_Stavbar" />
+      <div id="nickMsg" class="nick-msg"></div>
+      <div class="nick-actions">
+        <button type="button" class="nick-btn" data-nick-later>Teraz nie</button>
+        <button type="button" class="nick-btn nick-btn-primary" data-nick-save>Uložiť prezývku</button>
       </div>
     </div>
   </div>
 
   <script src="/js/config.js"></script>
   <script src="/js/share-clean-link.js"></script>
-  <!-- cookies banner (rovnaké správanie ako na ostatných stránkach) -->
   <script src="/js/cookies.js"></script>
-  <!-- PWA prompt – používa rovnakú logiku / limit 3x denne -->
   <script src="/js/pwa-prompt.js"></script>
 
   <script>
@@ -523,12 +497,12 @@
       const q = email ? ('?email=' + encodeURIComponent(email)) : '';
       back.href = 'products.html' + q;
 
-      // nastav zdieľacie tlačidlo – link bez emailu pre cudzích ľudí
       if (typeof setupShareButton === 'function') {
         setupShareButton('shareProductBtn');
       }
     })();
   </script>
+
   <script src="product_detail.js"></script>
 </body>
 </html>

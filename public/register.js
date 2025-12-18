@@ -12,6 +12,35 @@
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
+  // ✅ Presmerovanie na next s doplneným email= (ak chýba)
+  function redirectToNextWithEmail(email) {
+    const params = new URLSearchParams(window.location.search);
+    const nextRaw = params.get('next');
+
+    // fallback keď nie je next
+    const fallback = `onboarding.html?email=${encodeURIComponent(email)}`;
+
+    if (!nextRaw) {
+      window.location.replace(fallback);
+      return;
+    }
+
+    let nextUrl = '';
+    try {
+      nextUrl = decodeURIComponent(nextRaw);
+    } catch {
+      nextUrl = nextRaw;
+    }
+
+    const join = nextUrl.includes('?') ? '&' : '?';
+
+    if (!/[\?&]email=/.test(nextUrl)) {
+      nextUrl = nextUrl + join + 'email=' + encodeURIComponent(email);
+    }
+
+    window.location.replace(nextUrl);
+  }
+
   // Zobrazí/Skryje chybovú hlášku a označí vstup ako ne/platný
   function showErr(errEl, msg) {
     if (!errEl) return;
@@ -139,13 +168,19 @@
           return;
         }
 
-        // ✅ ÚSPECH → PRESMEROVAŤ NA ONBOARDING
+        // ✅ ÚSPECH:
+        // Ak existuje next -> preskoč onboarding a choď rovno na next + email
+        // Ak next nie je -> pôvodné správanie: onboarding.html?email=...
         const urlParams = new URLSearchParams(location.search);
         const next = urlParams.get('next');
 
+        if (next) {
+          redirectToNextWithEmail(email);
+          return;
+        }
+
         const onboarding = new URL('onboarding.html', location.origin);
         onboarding.searchParams.set('email', email);
-        if (next) onboarding.searchParams.set('next', next);
 
         window.location.replace(onboarding.pathname + '?' + onboarding.searchParams.toString());
       } catch (err) {
