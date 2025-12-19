@@ -7,52 +7,56 @@ const { PDFDocument } = require("pdf-lib");
 
 const router = express.Router();
 
+/* ================== HELPERS ================== */
+
 function safeText(v) {
   if (v === null || v === undefined) return "";
   return String(v);
 }
 
 function formatNumSk(n, digits = 1) {
-  if (n === null || n === undefined || Number.isNaN(Number(n))) return "–";
+  if (n === null || n === undefined || Number.isNaN(Number(n))) return "-";
   return Number(n).toFixed(digits).replace(".", ",");
 }
 
 function isoDateTimeSk() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
+  return (
+    pad(d.getDate()) +
+    "." +
+    pad(d.getMonth() + 1) +
+    "." +
+    d.getFullYear() +
+    " " +
+    pad(d.getHours()) +
+    ":" +
+    pad(d.getMinutes())
+  );
 }
 
-/**
- * Vloží premenné do template + vynúti <base href="..."> pre správne načítanie /img a /css v Puppeteeri.
- */
+/* ================== TEMPLATE ================== */
+
 function applyTemplate(html, vars, baseHref) {
   let out = html;
 
-  // {{key}} nahrádzanie
   for (const [k, v] of Object.entries(vars)) {
-    const token = new RegExp(`\\{\\{\\s*${k}\\s*\\}\\}`, "g");
+    const token = new RegExp("\\{\\{\\s*" + k + "\\s*\\}\\}", "g");
     out = out.replace(token, safeText(v));
   }
 
-  // doplň / prepíš <base>
   if (!/<base\s/i.test(out)) {
     out = out.replace(/<head([^>]*)>/i, `<head$1><base href="${baseHref}">`);
   } else {
-    out = out.replace(/<base[^>]*href="[^"]*"[^>]*>/i, `<base href="${baseHref}">`);
+    out = out.replace(
+      /<base[^>]*href="[^"]*"[^>]*>/i,
+      `<base href="${baseHref}">`
+    );
   }
 
   return out;
 }
 
-/**
- * Spraví ABS URL na public asset:
- * - "img/..." => "https://host/img/..."
- * - "/img/..." => "https://host/img/..."
- * - "http..." => nechá tak
- */
 function toAbsPublicUrl(baseOrigin, maybePath) {
   if (!maybePath) return "";
   let p = String(maybePath).trim();
@@ -60,28 +64,19 @@ function toAbsPublicUrl(baseOrigin, maybePath) {
 
   if (/^https?:\/\//i.test(p)) return p;
 
-  // normalizácia
   if (p.startsWith("img/")) p = "/" + p;
   if (!p.startsWith("/")) p = "/" + p;
 
   return baseOrigin.replace(/\/$/, "") + p;
 }
 
-/**
- * PLÁN STRÁN podľa výška + odtok
- * - nízka + voľná hrana: intro + 2..8
- * - nízka + rýna:        intro + 2..6 + 10 + 9 + 11
- */
+/* ================== PLAN ================== */
+
 function resolvePlan(payload) {
   const heightId = safeText(payload?.calc?.heightId).toLowerCase();
   const drainId = safeText(payload?.calc?.drainId).toLowerCase();
 
-  const isLow = heightId === "low";
-  const isFree = drainId === "edge-free";
-  const isGutter =
-    drainId === "edge-gutter" || drainId.includes("gutter") || drainId.includes("ryn");
-
-  if (isLow && isFree) {
+  if (heightId === "low" && drainId === "edge-free") {
     return [
       "pdf_balkon_intro.html",
       "pdf_balkon_page2.html",
@@ -94,7 +89,7 @@ function resolvePlan(payload) {
     ];
   }
 
-  if (isLow && isGutter) {
+  if (heightId === "low" && drainId.includes("gutter")) {
     return [
       "pdf_balkon_intro.html",
       "pdf_balkon_page2.html",
@@ -108,7 +103,6 @@ function resolvePlan(payload) {
     ];
   }
 
-  // fallback – nech to nikdy “nezomrie”
   return [
     "pdf_balkon_intro.html",
     "pdf_balkon_page2.html",
@@ -117,239 +111,141 @@ function resolvePlan(payload) {
   ];
 }
 
+/* ================== BUILD VARS ================== */
+
 function buildVars(payload, pageNo, totalPages, baseOrigin) {
-  const email = safeText(payload?.meta?.email || "");
   const calc = payload?.calc || {};
   const bom = payload?.bom || {};
 
-  // stabilnejší kód (rovnaký počas jedného requestu)
-  const pdfCode = safeText(payload?.meta?.pdfCode) || `LC-${Date.now()}`;
+  const pdfCode = payload?.meta?.pdfCode || "LC-" + Date.now();
 
-  const area = calc?.area;
-  const perimeter = calc?.perimeter;
-
-  const shapeLabel = safeText(calc?.shapeLabel || "–");
-  const heightLabel = safeText(calc?.heightLabel || "–");
-  const drainLabel = safeText(calc?.drainLabel || "–");
-
-  const areaText = area != null ? `${formatNumSk(area, 1)} m²` : "–";
-  const perimeterText = perimeter != null ? `${formatNumSk(perimeter, 1)} bm` : "–";
-
-  const ditraAreaText =
-    bom?.membraneArea != null
-      ? `${formatNumSk(bom.membraneArea, 1)} m²`
-      : area != null
-      ? `${formatNumSk(area, 1)} m²`
-      : "–";
-
-  const adhesiveBagsText =
-    bom?.adhesiveBags != null ? `${safeText(bom.adhesiveBags)} ks` : "–";
-
-  const adhesiveConsumptionText =
-    bom?.adhesiveBags != null && area != null && area > 0
-      ? `≈ ${formatNumSk((bom.adhesiveBags * 25) / area, 1)} kg/m²`
-      : "–";
-
-  const edgeLengthText = perimeter != null ? `${formatNumSk(perimeter, 1)} m` : "–";
-  const edgeProfilePiecesText =
-    bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
-
-  const systemShortNote = safeText(calc?.systemTitle || "");
-
-  // TODO: neskôr dorobíme real SVG z kalkulačky
-  const shapeSketchSvg = safeText(calc?.shapeSketchSvg || "");;
-
-  const systemCutawayCaption = safeText(calc?.systemTitle || "");
-
-  // =========================================================
-  // ✅ TECHNICKÝ PRIEREZ: výber obrázka podľa výšky + odtoku
-  // (vložené podľa tvojho zadania; v buildVars nemáme req, tak použijeme baseOrigin)
-  // =========================================================
-  const heightId = safeText(calc?.heightId || "").toLowerCase();
-  const drainId = safeText(calc?.drainId || "").toLowerCase();
-
-  // mapovanie na súbory v /public/img/systems/
-  let cutawayImage = "";
-
-  if (heightId === "low" && drainId === "edge-free") {
-    cutawayImage = "/img/systems/balkon-low-edge-free.png";
-  } else if (heightId === "low" && drainId === "edge-gutter") {
-    cutawayImage = "/img/systems/balkon-low-edge-gutter.png";
-  } else if (heightId === "low" && drainId === "internal-drain") {
-    cutawayImage = "/img/systems/balkon-low-internal-drain.png";
-  } else if (heightId === "medium" && drainId === "edge-free") {
-    cutawayImage = "/img/systems/balkon-edge-free.png";
-  } else if (heightId === "medium" && drainId === "edge-gutter") {
-    cutawayImage = "/img/systems/balkon-edge-gutter.png";
-  } else if (heightId === "medium" && drainId === "internal-drain") {
-    cutawayImage = "/img/systems/balkon-internal-drain.png";
-  } else if (heightId === "high" && drainId === "edge-gutter") {
-    cutawayImage = "/img/systems/balkon-high-edge-gutter.png";
-  } else if (heightId === "high" && drainId === "internal-drain") {
-    cutawayImage = "/img/systems/balkon-high-internal-drain.png";
-  }
-
-  // Ak kalkulačka poslala previewSrc, môžeme ním prebiť (ak chceš presne z FE)
-  // (nechávam zapnuté – je to bezpečné a presnejšie)
-  const fromCalcPreview = safeText(calc?.previewSrc);
-  if (fromCalcPreview) {
-    cutawayImage = fromCalcPreview.startsWith("/")
-      ? fromCalcPreview
-      : (fromCalcPreview.startsWith("img/") ? "/" + fromCalcPreview : fromCalcPreview);
-  }
-
-  // absolútna URL pre Puppeteer
-  const systemCutawayImageAbs = cutawayImage
-    ? toAbsPublicUrl(baseOrigin, cutawayImage)
-    : "";
-  // =========================================================
-
-  const collConsumptionText = "–";
-  const collPacksText = "–";
-  const kebaMetersText = "–";
-
-  const rtProfilePiecesText = edgeProfilePiecesText;
-  const rtCornersText = "–";
-  const rtConnectorsText = "–";
-  const rtColorCode = "–";
-
-  const rwLengthText = edgeLengthText;
-  const rwProfilePiecesText = edgeProfilePiecesText;
-  const rwCornerCodeAndQty = "–";
-  const rwConnectorCodeAndQty = "–";
-  const rwColorCode = "–";
+  const cutawayImage =
+    calc?.previewSrc ||
+    "/img/systems/balkon-" +
+      safeText(calc?.heightId || "low") +
+      "-" +
+      safeText(calc?.drainId || "edge-free") +
+      ".png";
 
   return {
-    // pre <base href="{{baseUrl}}/"> v template (ak ho máš v HTML)
     baseUrl: baseOrigin.replace(/\/$/, ""),
-
     pdfCode,
-    customerName: safeText(calc?.customerName || "Zákazník"),
-    customerEmail: email,
+    customerName: safeText(calc?.customerName || "Zakaznik"),
     createdAt: isoDateTimeSk(),
-    constructionType: safeText(calc?.typeLabel || ""),
-    systemTitle: safeText(calc?.systemTitle || ""),
-
-    totalPages,
     pageNumber: pageNo,
-
-    shapeLabel,
-    heightLabel,
-    drainLabel,
-    areaText,
-    perimeterText,
-
-    systemShortNote,
-    shapeSketchSvg,
-    systemCutawayCaption,
-
-    // ✅ ABS obrázok pre stranu 2
-    systemCutawayImageAbs,
-
-    ditraAreaText,
-    adhesiveConsumptionText,
-    adhesiveBagsText,
-
-    kebaMetersText,
-    collConsumptionText,
-    collPacksText,
-
-    edgeLengthText,
-    edgeProfilePiecesText,
-
-    rtProfilePiecesText,
-    rtCornersText,
-    rtConnectorsText,
-    rtColorCode,
-    rwLengthText,
-    rwProfilePiecesText,
-    rwCornerCodeAndQty,
-    rwConnectorCodeAndQty,
-    rwColorCode,
+    totalPages,
+    systemCutawayImageAbs: toAbsPublicUrl(baseOrigin, cutawayImage),
+    areaText:
+      calc?.area != null ? formatNumSk(calc.area, 1) + " m2" : "-",
+    perimeterText:
+      calc?.perimeter != null ? formatNumSk(calc.perimeter, 1) + " bm" : "-",
   };
 }
 
+/* ================== CHROME FINDER ================== */
+
+function findRenderChromeExecutable() {
+  if (
+    process.env.PUPPETEER_EXECUTABLE_PATH &&
+    fs.existsSync(process.env.PUPPETEER_EXECUTABLE_PATH)
+  ) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+
+  try {
+    const p = puppeteer.executablePath();
+    if (p && fs.existsSync(p)) return p;
+  } catch (e) {}
+
+  const base = "/opt/render/.cache/puppeteer/chrome";
+  if (fs.existsSync(base)) {
+    const dirs = fs.readdirSync(base);
+    for (const d of dirs) {
+      const candidate = path.join(
+        base,
+        d,
+        "chrome-linux64",
+        "chrome"
+      );
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
+
+  return "";
+}
+
+/* ================== PDF ================== */
+
 async function htmlToPdfBuffer(browser, html) {
   const page = await browser.newPage();
-
   await page.setContent(html, { waitUntil: "networkidle0" });
-
-  // ✅ EXPORT PDF má byť dizajnový (screen). Biely režim nech rieši iba reálna tlač v browseri.
   await page.emulateMediaType("screen");
-
   const pdf = await page.pdf({
     format: "A4",
     printBackground: true,
-    preferCSSPageSize: true,
     margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
   });
-
   await page.close();
   return pdf;
 }
 
 async function mergePdfBuffers(buffers) {
   const outDoc = await PDFDocument.create();
-
   for (const buf of buffers) {
     const src = await PDFDocument.load(buf);
     const pages = await outDoc.copyPages(src, src.getPageIndices());
     pages.forEach((p) => outDoc.addPage(p));
   }
-
-  const merged = await outDoc.save();
-  return Buffer.from(merged);
+  return Buffer.from(await outDoc.save());
 }
 
-// ✅ endpoint voláš z FE: /api/pdf/balkon-final-html
+/* ================== ROUTE ================== */
+
 router.post("/balkon-final-html", async (req, res) => {
   try {
     const payload = req.body?.payload;
-    if (!payload) return res.status(400).json({ message: "Chýba payload." });
+    if (!payload) return res.status(400).json({ message: "Missing payload" });
 
     const plan = resolvePlan(payload);
-    const totalPages = plan.length;
-
     const baseOrigin = `${req.protocol}://${req.get("host")}`;
 
-    const htmlPages = plan.map((fileName, idx) => {
-      const filePath = path.join(process.cwd(), "public", fileName);
-      if (!fs.existsSync(filePath)) throw new Error(`Chýba HTML stránka: ${filePath}`);
-
-      const raw = fs.readFileSync(filePath, "utf8");
-      const vars = buildVars(payload, idx + 1, totalPages, baseOrigin);
-
-      if (!payload.meta) payload.meta = {};
-      payload.meta.pdfCode = vars.pdfCode;
-
-      // baseHref musí končiť / (kvôli relatívnym cestám)
-      const baseHref = `${baseOrigin}/`;
-      return applyTemplate(raw, vars, baseHref);
+    const htmlPages = plan.map((file, idx) => {
+      const raw = fs.readFileSync(
+        path.join(process.cwd(), "public", file),
+        "utf8"
+      );
+      const vars = buildVars(payload, idx + 1, plan.length, baseOrigin);
+      return applyTemplate(raw, vars, baseOrigin + "/");
     });
+
+    const chromePath = findRenderChromeExecutable();
+    if (!chromePath) throw new Error("Chrome not found");
 
     const browser = await puppeteer.launch({
       headless: "new",
+      executablePath: chromePath,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     try {
-      const pdfBuffers = [];
+      const buffers = [];
       for (const html of htmlPages) {
-        const buf = await htmlToPdfBuffer(browser, html);
-        pdfBuffers.push(buf);
+        buffers.push(await htmlToPdfBuffer(browser, html));
       }
 
-      const merged = await mergePdfBuffers(pdfBuffers);
-
+      const merged = await mergePdfBuffers(buffers);
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", 'attachment; filename="balkon-final.pdf"');
-      return res.status(200).send(merged);
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="balkon-final.pdf"'
+      );
+      res.send(merged);
     } finally {
       await browser.close();
     }
   } catch (e) {
-    console.error("balkon-final-html error:", e);
-    return res.status(500).json({ message: e.message || "PDF chyba" });
+    console.error("PDF ERROR:", e);
+    res.status(500).json({ message: e.message || "PDF error" });
   }
 });
 
