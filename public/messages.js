@@ -12,6 +12,30 @@ const userEmail = params.get('email') || '';
 const toParam   = params.get('to') || '';
 if (!userEmail) location.href = 'index.html';
 
+/* ---------- MOBILE VIEW (len dizajn/UX) ---------- */
+const mqMobile = window.matchMedia('(max-width: 900px)');
+const isMobile = () => mqMobile.matches;
+
+function showMobileList(){
+  if (!isMobile()) return;
+  document.body.classList.add('mobile-show-list');
+  document.body.classList.remove('mobile-show-thread');
+}
+function showMobileThread(){
+  if (!isMobile()) return;
+  document.body.classList.add('mobile-show-thread');
+  document.body.classList.remove('mobile-show-list');
+}
+function ensureMobileModeOnResize(){
+  if (!isMobile()){
+    document.body.classList.remove('mobile-show-list','mobile-show-thread');
+    return;
+  }
+  // ak nemáme otvorenú konverzáciu, nech je list default
+  if (!currentOtherEmail) showMobileList();
+  else showMobileThread();
+}
+
 /* ---------- globals ---------- */
 let userProfile = null;
 let ADMIN = { email:'', name:'Lištové centrum' };
@@ -91,6 +115,15 @@ function wireHeader(){
 
   // ak by niekde bol logoutBtn (napr. v menu), ponechajme podporu
   $('#logoutBtn')?.addEventListener('click', () => location.href = 'index.html');
+
+  // mobilné tlačidlo v head vlákna: späť na zoznam konverzácií
+  $('#mobileListBtn')?.addEventListener('click', () => {
+    showMobileList();
+  });
+
+  // pri zmene šírky (otočenie, resize) udržať správny view
+  mqMobile.addEventListener?.('change', ensureMobileModeOnResize);
+  window.addEventListener('resize', ensureMobileModeOnResize);
 }
 
 /* ---------- LOAD SELF + ADMIN ---------- */
@@ -318,6 +351,9 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
 
   highlightActive();
 
+  // ✅ MOBILE: po výbere konverzácie prepnúť do vlákna
+  showMobileThread();
+
   try{
     const sincePart = lastThreadStamp ? `&since=${encodeURIComponent(lastThreadStamp)}` : '';
     const url = `/api/messages/thread?email=${encodeURIComponent(userEmail)}&with=${encodeURIComponent(otherEmail)}${sincePart}`;
@@ -481,6 +517,9 @@ async function deleteConversationUser(otherEmail, otherLabel){
     if (oldBtn) oldBtn.remove();
 
     await refreshConversationsDiff();
+
+    // ✅ MOBILE: po vymazaní späť na zoznam
+    showMobileList();
   }catch(e){
     alert('Server neodpovedá.');
   }
@@ -509,6 +548,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   await loadSelf();
   await loadAdmin();
   await refreshConversationsDiff();
+
+  // ✅ default mobilný view (bez zásahu do logiky správ)
+  if (isMobile()) {
+    if (toParam) showMobileThread();     // keď príde ?to=, otvoríme thread (nižšie)
+    else showMobileList();               // keď prídeš z timeline na mobile bez ?to=, chceš vidieť zoznam
+  }
 
   // ak prišiel ?to= (email alebo prezývka) → otvor vlákno s danou osobou
   if (toParam) {
@@ -553,7 +598,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         first.click();
       }
     }
-    // 📱 MOBILE: nič neotvárame – používateľ prišiel z timeline s ?to=
+    // 📱 MOBILE: nič neotvárame – zobrazí sa zoznam konverzácií
   }
 
   setInterval(()=> { if (!document.hidden) safeRefresh(); }, 4000);

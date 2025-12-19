@@ -94,16 +94,43 @@
     .button{ height:40px; padding:0 12px; border:1px solid #bcd6ff; border-radius:12px; background:#eef6ff; color:#0c1f4b; cursor:pointer; }
     .button:hover{ background:#e3f0ff; }
 
+    /* malé tlačidlo pre mobil - späť na zoznam konverzácií */
+    .mobile-list-btn{
+      height:32px;
+      padding:0 10px;
+      border-radius:10px;
+      border:1px solid #bcd6ff;
+      background:#eef6ff;
+      color:#0c1f4b;
+      cursor:pointer;
+      font-size:13px;
+      white-space:nowrap;
+      display:none; /* desktop: skryté */
+    }
+
     @media (min-width: 901px){
       :root{ --max-w: 100vw; }
       .app-header-inner, .composer-wrap{ max-width:none; width:100%; }
       .wrap{ max-width:none; width:100%; padding-left:24px; padding-right:24px; grid-template-columns: minmax(320px, 28vw) minmax(0, 1fr); }
       .list-panel{ min-width:320px; }
     }
+
+    /* ✅ MOBILNÝ REŽIM: nehideovať list-panel navždy, ale prepínať view */
     @media (max-width: 900px){
       .wrap{ grid-template-columns: 1fr; padding-left: 12px; padding-right: 12px; }
-      .list-panel{ display: none !important; }
       .thread-panel{ min-height: calc(100vh - var(--hdr-h)); }
+
+      /* defaultne sa rozhodne cez body class */
+      body.mobile-show-list .list-panel{ display:flex !important; }
+      body.mobile-show-list .thread-panel{ display:none !important; }
+      body.mobile-show-list #composerBar{ display:none !important; }
+
+      body.mobile-show-thread .list-panel{ display:none !important; }
+      body.mobile-show-thread .thread-panel{ display:flex !important; }
+      body.mobile-show-thread #composerBar{ display:flex !important; }
+
+      /* na mobile zobrazíme tlačidlo "Konverzácie" */
+      body.mobile-show-thread .mobile-list-btn{ display:inline-flex; align-items:center; gap:6px; }
     }
 
     #deleteConvBtn{
@@ -155,7 +182,12 @@
 
     <!-- RIGHT -->
     <section class="card thread-panel" aria-labelledby="threadHead">
-      <div class="head" id="threadHead"><div id="threadTitle">Vyberte konverzáciu</div></div>
+      <div class="head" id="threadHead">
+        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+          <button id="mobileListBtn" class="mobile-list-btn" type="button" aria-label="Späť na zoznam konverzácií">← Konverzácie</button>
+          <div id="threadTitle" style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Vyberte konverzáciu</div>
+        </div>
+      </div>
       <div class="thread-wrap"><div id="thread" class="thread"></div></div>
     </section>
   </div>
