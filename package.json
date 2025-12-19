@@ -24,7 +24,7 @@
     "nodemailer": "^7.0.5",
     "pdf-lib": "^1.17.1",
     "pdfkit": "^0.17.2",
-    "puppeteer": "^24.33.0",
+    "puppeteer": "^24.34.0",
     "web-push": "^3.6.7"
   }
 }
