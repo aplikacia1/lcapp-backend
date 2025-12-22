@@ -13,31 +13,31 @@ function safeText(v) {
 }
 
 function formatNumSk(n, digits = 1) {
-  if (n === null || n === undefined || Number.isNaN(Number(n))) return "-";
+  if (n === null || n === undefined || Number.isNaN(Number(n))) return "–";
   return Number(n).toFixed(digits).replace(".", ",");
 }
 
 function isoDateTimeSk() {
   const d = new Date();
-  const pad = (x) => String(x).padStart(2, "0");
+  const pad = (n) => String(n).padStart(2, "0");
   return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(
     d.getHours()
   )}:${pad(d.getMinutes())}`;
 }
 
 /**
- * Vlozi premenne do template + vynuti <base href="..."> pre spravne nacitanie /img a /css v Puppeteeri.
+ * Vloží premenné do template + vynúti <base href="..."> pre správne načítanie /img a /css v Puppeteeri.
  */
 function applyTemplate(html, vars, baseHref) {
   let out = html;
 
-  // {{key}} nahradzanie
+  // {{key}} nahrádzanie
   for (const [k, v] of Object.entries(vars)) {
     const token = new RegExp(`\\{\\{\\s*${k}\\s*\\}\\}`, "g");
     out = out.replace(token, safeText(v));
   }
 
-  // dopln / prepis <base>
+  // doplň / prepíš <base>
   if (!/<base\s/i.test(out)) {
     out = out.replace(/<head([^>]*)>/i, `<head$1><base href="${baseHref}">`);
   } else {
@@ -51,10 +51,10 @@ function applyTemplate(html, vars, baseHref) {
 }
 
 /**
- * Spravi ABS URL na public asset:
+ * Spraví ABS URL na public asset:
  * - "img/..." => "https://host/img/..."
  * - "/img/..." => "https://host/img/..."
- * - "http..." => necha tak
+ * - "http..." => nechá tak
  */
 function toAbsPublicUrl(baseOrigin, maybePath) {
   if (!maybePath) return "";
@@ -70,9 +70,7 @@ function toAbsPublicUrl(baseOrigin, maybePath) {
 }
 
 /**
- * PLAN STRAN podla vyska + odtok
- * - nizka + volna hrana: intro + 2..8
- * - nizka + ryna:        intro + 2..6 + 10 + 9 + 11
+ * PLÁN STRÁN podľa výška + odtok
  */
 function resolvePlan(payload) {
   const heightId = safeText(payload?.calc?.heightId).toLowerCase();
@@ -81,9 +79,7 @@ function resolvePlan(payload) {
   const isLow = heightId === "low";
   const isFree = drainId === "edge-free";
   const isGutter =
-    drainId === "edge-gutter" ||
-    drainId.includes("gutter") ||
-    drainId.includes("ryn");
+    drainId === "edge-gutter" || drainId.includes("gutter") || drainId.includes("ryn");
 
   if (isLow && isFree) {
     return [
@@ -112,7 +108,6 @@ function resolvePlan(payload) {
     ];
   }
 
-  // fallback - nech to nikdy "nezomrie"
   return [
     "pdf_balkon_intro.html",
     "pdf_balkon_page2.html",
@@ -126,46 +121,41 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const calc = payload?.calc || {};
   const bom = payload?.bom || {};
 
-  // stabilnejsi kod (rovnaky pocas jedneho requestu)
   const pdfCode = safeText(payload?.meta?.pdfCode) || `LC-${Date.now()}`;
 
   const area = calc?.area;
   const perimeter = calc?.perimeter;
 
-  const shapeLabel = safeText(calc?.shapeLabel || "-");
-  const heightLabel = safeText(calc?.heightLabel || "-");
-  const drainLabel = safeText(calc?.drainLabel || "-");
+  const shapeLabel = safeText(calc?.shapeLabel || "–");
+  const heightLabel = safeText(calc?.heightLabel || "–");
+  const drainLabel = safeText(calc?.drainLabel || "–");
 
-  const areaText = area != null ? `${formatNumSk(area, 1)} m²` : "-";
-  const perimeterText = perimeter != null ? `${formatNumSk(perimeter, 1)} bm` : "-";
+  const areaText = area != null ? `${formatNumSk(area, 1)} m²` : "–";
+  const perimeterText = perimeter != null ? `${formatNumSk(perimeter, 1)} bm` : "–";
 
   const ditraAreaText =
     bom?.membraneArea != null
       ? `${formatNumSk(bom.membraneArea, 1)} m²`
       : area != null
       ? `${formatNumSk(area, 1)} m²`
-      : "-";
+      : "–";
 
-  const adhesiveBagsText = bom?.adhesiveBags != null ? `${safeText(bom.adhesiveBags)} ks` : "-";
+  const adhesiveBagsText =
+    bom?.adhesiveBags != null ? `${safeText(bom.adhesiveBags)} ks` : "–";
 
   const adhesiveConsumptionText =
     bom?.adhesiveBags != null && area != null && area > 0
-      ? `~ ${formatNumSk((bom.adhesiveBags * 25) / area, 1)} kg/m²`
-      : "-";
+      ? `≈ ${formatNumSk((bom.adhesiveBags * 25) / area, 1)} kg/m²`
+      : "–";
 
-  const edgeLengthText = perimeter != null ? `${formatNumSk(perimeter, 1)} m` : "-";
-  const edgeProfilePiecesText = bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "-";
+  const edgeLengthText = perimeter != null ? `${formatNumSk(perimeter, 1)} m` : "–";
+  const edgeProfilePiecesText =
+    bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
 
   const systemShortNote = safeText(calc?.systemTitle || "");
-
-  // TODO: neskor dorobime real SVG z kalkulacky
   const shapeSketchSvg = safeText(calc?.shapeSketchSvg || "");
-
   const systemCutawayCaption = safeText(calc?.systemTitle || "");
 
-  // =========================================================
-  // TECHNICKY PRIEREZ: vyber obrazka podla vysky + odtoku
-  // =========================================================
   const heightId = safeText(calc?.heightId || "").toLowerCase();
   const drainId = safeText(calc?.drainId || "").toLowerCase();
 
@@ -189,7 +179,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     cutawayImage = "/img/systems/balkon-high-internal-drain.png";
   }
 
-  // Ak FE poslal previewSrc, prebijeme (bezpecne a presnejsie)
   const fromCalcPreview = safeText(calc?.previewSrc);
   if (fromCalcPreview) {
     cutawayImage = fromCalcPreview.startsWith("/")
@@ -199,29 +188,30 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
       : fromCalcPreview;
   }
 
-  const systemCutawayImageAbs = cutawayImage ? toAbsPublicUrl(baseOrigin, cutawayImage) : "";
-  // =========================================================
+  const systemCutawayImageAbs = cutawayImage
+    ? toAbsPublicUrl(baseOrigin, cutawayImage)
+    : "";
 
-  const collConsumptionText = "-";
-  const collPacksText = "-";
-  const kebaMetersText = "-";
+  const collConsumptionText = "–";
+  const collPacksText = "–";
+  const kebaMetersText = "–";
 
   const rtProfilePiecesText = edgeProfilePiecesText;
-  const rtCornersText = "-";
-  const rtConnectorsText = "-";
-  const rtColorCode = "-";
+  const rtCornersText = "–";
+  const rtConnectorsText = "–";
+  const rtColorCode = "–";
 
   const rwLengthText = edgeLengthText;
   const rwProfilePiecesText = edgeProfilePiecesText;
-  const rwCornerCodeAndQty = "-";
-  const rwConnectorCodeAndQty = "-";
-  const rwColorCode = "-";
+  const rwCornerCodeAndQty = "–";
+  const rwConnectorCodeAndQty = "–";
+  const rwColorCode = "–";
 
   return {
     baseUrl: baseOrigin.replace(/\/$/, ""),
 
     pdfCode,
-    customerName: safeText(calc?.customerName || "Zakaznik"),
+    customerName: safeText(calc?.customerName || "Zákazník"),
     customerEmail: email,
     createdAt: isoDateTimeSk(),
     constructionType: safeText(calc?.typeLabel || ""),
@@ -265,41 +255,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   };
 }
 
-function tryEnsureRenderPuppeteerCache() {
-  // Render predeploy instaluje chrome sem:
-  // /opt/render/.cache/puppeteer/...
-  // Ak to Puppeteer pri runtime nehleda tam, nastavime mu to.
-  if (!process.env.PUPPETEER_CACHE_DIR) {
-    process.env.PUPPETEER_CACHE_DIR = "/opt/render/.cache/puppeteer";
-  }
-  if (!process.env.HOME) {
-    // niekedy pomoze, ked je HOME prazdne
-    process.env.HOME = "/opt/render";
-  }
-}
-
-function findChromeExecutableFallback() {
-  // najprv skusime priamo puppeteer.executablePath()
-  try {
-    const p = puppeteer.executablePath();
-    if (p && fs.existsSync(p)) return p;
-  } catch (_) {}
-
-  // potom Render cache standard:
-  const base = "/opt/render/.cache/puppeteer/chrome";
-  try {
-    if (!fs.existsSync(base)) return "";
-    // hladame nieco ako .../chrome-linux64/chrome
-    const versions = fs.readdirSync(base).map((x) => path.join(base, x));
-    for (const v of versions) {
-      const candidate = path.join(v, "chrome-linux64", "chrome");
-      if (fs.existsSync(candidate)) return candidate;
-    }
-  } catch (_) {}
-
-  return "";
-}
-
 async function htmlToPdfBuffer(browser, html) {
   const page = await browser.newPage();
 
@@ -330,11 +285,88 @@ async function mergePdfBuffers(buffers) {
   return Buffer.from(merged);
 }
 
-// endpoint volas z FE: /api/pdf/balkon-final-html
+/**
+ * Nájde chrome binárku aj keď sa štruktúra cache líši.
+ * - PUPPETEER_EXECUTABLE_PATH (ak existuje a sedí)
+ * - puppeteer.executablePath()
+ * - potom hľadanie v typických Render cache priečinkoch (rekurzívne do pár úrovní)
+ */
+function findChromeExecutable() {
+  const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  if (envPath && fs.existsSync(envPath)) return envPath;
+
+  try {
+    const p = puppeteer.executablePath();
+    if (p && fs.existsSync(p)) return p;
+  } catch (e) {
+    // ignore
+  }
+
+  const roots = [
+    "/opt/render/.cache/puppeteer",
+    "/opt/render/project/.cache/puppeteer",
+    path.join(process.cwd(), ".cache", "puppeteer"),
+  ];
+
+  const isLikelyChrome = (p) => {
+    const base = path.basename(p);
+    if (base !== "chrome" && base !== "chromium") return false;
+    try {
+      const st = fs.statSync(p);
+      return st.isFile();
+    } catch {
+      return false;
+    }
+  };
+
+  // jednoduchý DFS s limitom hĺbky, aby sme to nepreháňali
+  const maxDepth = 6;
+  const walk = (dir, depth) => {
+    if (depth > maxDepth) return "";
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return "";
+    }
+
+    // najprv skús priamo známe cesty (rýchle)
+    const fastCandidates = [
+      path.join(dir, "chrome-linux64", "chrome"),
+      path.join(dir, "chrome-linux", "chrome"),
+      path.join(dir, "chrome", "chrome"),
+      path.join(dir, "chromium-linux64", "chrome"),
+    ];
+    for (const c of fastCandidates) {
+      if (fs.existsSync(c)) return c;
+    }
+
+    for (const e of entries) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        const found = walk(full, depth + 1);
+        if (found) return found;
+      } else if (e.isFile()) {
+        if (isLikelyChrome(full)) return full;
+      }
+    }
+    return "";
+  };
+
+  for (const r of roots) {
+    if (!fs.existsSync(r)) continue;
+    const found = walk(r, 0);
+    if (found) return found;
+  }
+
+  return "";
+}
+
+// ✅ endpoint voláš z FE: /api/pdf/balkon-final-html
 router.post("/balkon-final-html", async (req, res) => {
   try {
     const payload = req.body?.payload;
-    if (!payload) return res.status(400).json({ message: "Chyba: chyba payload." });
+    if (!payload) return res.status(400).json({ message: "Chýba payload." });
 
     const plan = resolvePlan(payload);
     const totalPages = plan.length;
@@ -343,7 +375,7 @@ router.post("/balkon-final-html", async (req, res) => {
 
     const htmlPages = plan.map((fileName, idx) => {
       const filePath = path.join(process.cwd(), "public", fileName);
-      if (!fs.existsSync(filePath)) throw new Error(`Chyba: chyba HTML stranka: ${filePath}`);
+      if (!fs.existsSync(filePath)) throw new Error(`Chýba HTML stránka: ${filePath}`);
 
       const raw = fs.readFileSync(filePath, "utf8");
       const vars = buildVars(payload, idx + 1, totalPages, baseOrigin);
@@ -355,23 +387,34 @@ router.post("/balkon-final-html", async (req, res) => {
       return applyTemplate(raw, vars, baseHref);
     });
 
-    // ======= PUPPETEER FIX (Render) =======
-    tryEnsureRenderPuppeteerCache();
+    const chromePath = findChromeExecutable();
+    console.log("[PDF] chromePath:", chromePath || "(not found)");
+    console.log("[PDF] puppeteer.executablePath():", (() => {
+      try { return puppeteer.executablePath(); } catch { return "(error)"; }
+    })());
 
-    const executablePath =
-      process.env.PUPPETEER_EXECUTABLE_PATH ||
-      findChromeExecutableFallback();
-
-    if (!executablePath) {
-      throw new Error("Chrome not found (Render cache/executablePath missing).");
+    let browser;
+    try {
+      if (chromePath) {
+        browser = await puppeteer.launch({
+          headless: "new",
+          executablePath: chromePath,
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+      } else {
+        // fallback: skús spustiť bez executablePath (ak má puppeteer vlastný chromium)
+        browser = await puppeteer.launch({
+          headless: "new",
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+      }
+    } catch (launchErr) {
+      console.error("[PDF] puppeteer launch error:", launchErr);
+      return res.status(500).json({
+        message:
+          "Chyba pri generovaní PDF: nepodarilo sa spustiť Chromium/Chrome na Renderi. Pozri logy (chromePath + launch error).",
+      });
     }
-
-    const browser = await puppeteer.launch({
-      headless: "new",
-      executablePath,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    // =====================================
 
     try {
       const pdfBuffers = [];
