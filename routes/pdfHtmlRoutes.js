@@ -113,6 +113,100 @@ function pickNumber(obj, keys) {
   return null;
 }
 
+function ceilPositive(n) {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return null;
+  if (x <= 0) return 0;
+  return Math.ceil(x);
+}
+
+/**
+ * Page 5 logic:
+ * - DITRA width is ~ 1.0 m
+ * - number of joints = max(0, ceil(B / 1.0) - 1)
+ * - KEBA meters = perimeter + joints * A
+ * - COLL kg:
+ *    perimeter * 0.35  (DITRA + BARA napojenie ~350 g/m)
+ *  + joints*A * 0.36   (DITRA spoj ~360 g/m)
+ * - packaging: 4.25 kg (large), 1.85 kg (small)
+ */
+function buildPage5Consumption(calc) {
+  const perimeter = pickNumber(calc, ["perimeter"]);
+  // A = length, B = width (we try several key names, to survive current FE naming)
+  const A = pickNumber(calc, ["a", "A", "lengthA", "lenA", "length", "longSide", "sideA"]);
+  const B = pickNumber(calc, ["b", "B", "widthB", "lenB", "width", "shortSide", "sideB"]);
+
+  // If we don't have A/B, we can still show edge consumption (perimeter).
+  const widthForJoints = B;
+  const joints = widthForJoints != null ? Math.max(0, ceilPositive(widthForJoints / 1.0) - 1) : null;
+
+  const kebaEdge = perimeter != null ? perimeter : null;
+  const kebaJoints = (joints != null && A != null) ? (joints * A) : 0;
+  const kebaTotal = (kebaEdge != null) ? (kebaEdge + kebaJoints) : null;
+
+  // COLL kg based on tech sheet:
+  // - edge (DITRA + BARA): 0.35 kg/m
+  // - joints (DITRA joints): 0.36 kg/m
+  const collEdgeKg = (perimeter != null) ? (perimeter * 0.35) : null;
+  const collJointsKg = (joints != null && A != null) ? (joints * A * 0.36) : 0;
+  const collTotalKg = (collEdgeKg != null) ? (collEdgeKg + collJointsKg) : null;
+
+  const PACK_L = 4.25;
+  const PACK_S = 1.85;
+
+  let packsText = "–";
+  if (collTotalKg != null) {
+    const big = Math.ceil(collTotalKg / PACK_L);
+    const rem = collTotalKg - big * PACK_L;
+
+    // Simple, customer-friendly:
+    // - if <= 4.25 kg -> 1x veľké, else big x veľké
+    // - if small top-up makes sense (rem > 0), offer small as alternative (optional)
+    if (collTotalKg <= PACK_L) {
+      packsText = `1× 4,25 kg (alebo 1× 1,85 kg pri menšej spotrebe)`;
+    } else {
+      // Optional small top-up suggestion if remainder is more than ~0.3kg
+      if (rem > 0.3) {
+        // Offer either one more big, or one small (depending on rem)
+        if (rem <= PACK_S) {
+          packsText = `${big}× 4,25 kg + 1× 1,85 kg`;
+        } else {
+          packsText = `${big + 1}× 4,25 kg`;
+        }
+      } else {
+        packsText = `${big}× 4,25 kg`;
+      }
+    }
+  }
+
+  const ditraJointsText =
+    joints == null
+      ? "–"
+      : joints === 0
+      ? "0 (šírka do 1,0 m)"
+      : `${joints} (šírka nad 1,0 m)`;
+
+  const kebaEdgeText = kebaEdge != null ? `${formatNumSk(kebaEdge, 1)} m` : "–";
+  const kebaJointsText =
+    (joints != null && A != null)
+      ? joints === 0
+        ? "0,0 m"
+        : `${formatNumSk(kebaJoints, 1)} m (≈ ${joints}× ${formatNumSk(A, 1)} m)`
+      : "0,0 m";
+
+  const kebaMetersText = kebaTotal != null ? `${formatNumSk(kebaTotal, 1)} m` : "–";
+  const collConsumptionText = collTotalKg != null ? `≈ ${formatNumSk(collTotalKg, 2)} kg` : "–";
+
+  return {
+    ditraJointsText,
+    kebaEdgeText,
+    kebaJointsText,
+    kebaMetersText,
+    collConsumptionText,
+    collPacksText: packsText,
+  };
+}
+
 function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const email = safeText(payload?.meta?.email || "");
   const calc = payload?.calc || {};
@@ -189,29 +283,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     ? toAbsPublicUrl(baseOrigin, cutawayImage)
     : "";
 
-  // ✅ PAGE 5 – doplnenie výpočtov (ak ich FE/BOM posiela)
-  const kebaMeters = pickNumber(bom, [
-    "kebaMeters",
-    "kerdiKebaMeters",
-    "kerdiKebaTotalMeters",
-    "kebaTotalMeters",
-  ]);
-  const collKg = pickNumber(bom, [
-    "collKg",
-    "kerdiCollKg",
-    "collConsumptionKg",
-    "kerdiCollConsumptionKg",
-  ]);
-  const collPacks = pickNumber(bom, [
-    "collPacks",
-    "kerdiCollPacks",
-    "collPackCount",
-    "kerdiCollPackCount",
-  ]);
-
-  const kebaMetersText = kebaMeters != null ? `${formatNumSk(kebaMeters, 1)} m` : "–";
-  const collConsumptionText = collKg != null ? `≈ ${formatNumSk(collKg, 1)} kg` : "–";
-  const collPacksText = collPacks != null ? `${formatNumSk(collPacks, 0)} ks` : "–";
+  // ✅ PAGE 5 – compute on server (no need FE/BOM)
+  const page5 = buildPage5Consumption(calc);
 
   return {
     baseUrl: baseOrigin.replace(/\/$/, ""),
@@ -245,9 +318,12 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     edgeProfilePiecesText,
 
     // ✅ page5 variables
-    kebaMetersText,
-    collConsumptionText,
-    collPacksText,
+    ditraJointsText: page5.ditraJointsText,
+    kebaEdgeText: page5.kebaEdgeText,
+    kebaJointsText: page5.kebaJointsText,
+    kebaMetersText: page5.kebaMetersText,
+    collConsumptionText: page5.collConsumptionText,
+    collPacksText: page5.collPacksText,
   };
 }
 

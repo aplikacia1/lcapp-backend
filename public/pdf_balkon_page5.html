@@ -30,10 +30,11 @@
       </header>
 
       <h2 class="pdf-h2">5. Hydroizolačné napojenia – Schlüter®-KERDI-KEBA + KERDI-COLL</h2>
+
       <p class="pdf-sub">
-        Pri tejto skladbe plní Schlüter®-DITRA okrem separácie aj funkciu hydroizolácie. Aby bola izolácia funkčná,
-        utesňujú sa <strong>napojenia na stenu</strong> a (ak vzniknú) <strong>spoje medzi pásmi DITRA</strong>.
-        Pri ukončení na voľnej hrane odporúčame systémové napojenie podľa detailu.
+        Aby hydroizolácia fungovala dlhodobo, je dôležité utesniť všetky napojenia na okrajoch balkóna (pri stene a pri ukončovacích profiloch).
+        Ak je balkón širší ako 1 meter, rohož DITRA sa kladie z viacerých pásov a vzniknú aj prekrytia – tie sa rovnako prelepujú páskou a lepia KERDI-COLL.
+        Preto rátame spotrebu z <strong>obvodu</strong> + (ak treba) z <strong>prekrytí</strong>.
       </p>
 
       <section class="grid-top">
@@ -83,13 +84,13 @@
 
             <ul class="bullet">
               <li>
-                DITRA má šírku približne <strong>1,0 m</strong>. Ak je strana B ≤ 1,0 m, zvyčajne nevzniká spoj „DITRA vedľa DITRA“.
+                DITRA má šírku približne <strong>1,0 m</strong>. Ak je balkón široký do 1 m, zvyčajne nevzniká spoj „DITRA vedľa DITRA“.
               </li>
               <li>
-                Ak je strana B &gt; 1,0 m, vzniknú spoje medzi pásmi. Tie sa prelepujú <strong>KERDI-KEBA</strong> a lepia <strong>KERDI-COLL</strong>.
+                Pri šírke väčšej ako 1 m vzniknú prekrytia pásov. Tie sa prelepujú <strong>KERDI-KEBA</strong> a lepia <strong>KERDI-COLL</strong>.
               </li>
               <li>
-                Napojenie pri profile/ukončení (napr. Schlüter®-BARA) sa robí páskou a lepidlom podľa detailu skladby.
+                Okraje (stena + ukončenie na profile) sa tesnia vždy – je to najdôležitejší detail celej skladby.
               </li>
             </ul>
 
@@ -106,22 +107,39 @@
 
             <div class="calc">
               <div class="calc-row">
-                <div class="calc-k">KERDI-KEBA spolu (m)<br><span class="muted">(napojenia + spoje)</span></div>
-                <div class="calc-v">{{kebaMetersText}}</div>
+                <div class="calc-k">Počet prekrytí (DITRA)<br><span class="muted">(podľa šírky ~1 m)</span></div>
+                <div class="calc-v">{{ditraJointsText}}</div>
               </div>
+
               <div class="calc-row">
-                <div class="calc-k">KERDI-COLL – spotreba<br><span class="muted">(podľa detailu)</span></div>
-                <div class="calc-v">{{collConsumptionText}}</div>
+                <div class="calc-k">KERDI-KEBA na okraje<br><span class="muted">(obvod tesnenia)</span></div>
+                <div class="calc-v">{{kebaEdgeText}}</div>
               </div>
+
               <div class="calc-row">
-                <div class="calc-k">KERDI-COLL – balenie</div>
+                <div class="calc-k">KERDI-KEBA na prekrytia<br><span class="muted">(prekrytia × dĺžka)</span></div>
+                <div class="calc-v">{{kebaJointsText}}</div>
+              </div>
+
+              <div class="calc-row">
+                <div class="calc-k"><strong>KERDI-KEBA spolu (m)</strong><br><span class="muted">(okraje + prekrytia)</span></div>
+                <div class="calc-v"><strong>{{kebaMetersText}}</strong></div>
+              </div>
+
+              <div class="calc-row">
+                <div class="calc-k"><strong>KERDI-COLL – spotreba</strong><br><span class="muted">(podľa obvodu + prekrytí)</span></div>
+                <div class="calc-v"><strong>{{collConsumptionText}}</strong></div>
+              </div>
+
+              <div class="calc-row">
+                <div class="calc-k">KERDI-COLL – odporúčané balenie</div>
                 <div class="calc-v">{{collPacksText}}</div>
               </div>
             </div>
 
             <div class="note">
-              <strong>Poznámka:</strong> Presný postup a spotreby sa riadia technickým detailom pre zvolenú skladbu
-              (napojenia na stenu, spoje pásov a ukončenie na profile).
+              <strong>Poznámka:</strong> Toto je orientačný výpočet pre zákazníka – reálna spotreba závisí od detailu ukončenia a prevedenia.
+              Najdôležitejšie je mať správne utesnené okraje (stena + profil) a všetky prekrytia medzi pásmi DITRA.
             </div>
           </div>
         </article>
