@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Lištové centrum – PDF podklad – Strana 2</title>
-
   <link rel="stylesheet" href="/css/pdf_balkon_common.css">
 </head>
 
@@ -30,17 +29,18 @@
       </header>
 
       <h2 class="pdf-h2">2. Popis zvolenej skladby</h2>
-      <p class="pdf-sub">
+      <!-- menší spodný margin, aby sa vošiel prierez -->
+      <p class="pdf-sub" style="margin-bottom: 4mm;">
         Nižšie je zhrnutie zadaných parametrov a veľký orientačný technický prierez zvolenej skladby.
       </p>
 
-      <!-- HORE: skladba + náčrt -->
-      <section class="grid-top">
+      <!-- HORE: skladba + náčrt (kompaktnejšie) -->
+      <section class="grid-top" style="gap: 4mm; margin-bottom: 4mm;">
         <article class="card">
-          <div class="card-inner">
-            <div class="chip">Zvolená skladba</div>
+          <div class="card-inner" style="padding: 4.2mm 5.4mm;">
+            <div class="chip" style="margin-bottom: 2.2mm;">Zvolená skladba</div>
 
-            <div class="kv">
+            <div class="kv" style="gap: 1.8mm 5mm;">
               <div class="k">Typ</div>
               <div class="v">{{constructionType}}</div>
 
@@ -54,9 +54,9 @@
               <div class="v">{{perimeterText}}</div>
             </div>
 
-            <div class="sep"></div>
+            <div class="sep" style="margin: 2.6mm 0;"></div>
 
-            <div class="kv">
+            <div class="kv" style="gap: 1.8mm 5mm;">
               <div class="k">Konštrukčná výška</div>
               <div class="v">{{heightLabel}}</div>
 
@@ -67,38 +67,38 @@
               <div class="v">{{systemTitle}}</div>
             </div>
 
-            <div class="note">
+            <div class="note" style="margin-top: 2.6mm; padding: 2.4mm 4.2mm;">
               <strong>Poznámka:</strong> {{systemShortNote}}
             </div>
           </div>
         </article>
 
         <article class="card">
-          <div class="card-inner">
-            <div class="chip">Náčrt tvaru a rozmerov (krok 2)</div>
+          <div class="card-inner" style="padding: 4.2mm 5.4mm;">
+            <div class="chip" style="margin-bottom: 2.2mm;">Náčrt tvaru a rozmerov (krok 2)</div>
 
-            <div class="img-box" style="padding: 6mm;">
-              <!-- ✅ znížené, aby sa strana 2 vždy vošla -->
-              <div class="svg-host" style="width: 100%; height: 82mm;">
+            <div class="img-box" style="padding: 5mm;">
+              <!-- menšia výška, aby ostal priestor pre prierez -->
+              <div class="svg-host" style="width: 100%; height: 72mm;">
                 {{shapeSketchSvg}}
               </div>
             </div>
 
-            <div class="note" style="margin-top: 4mm;">
+            <div class="note" style="margin-top: 3mm; padding: 2.4mm 4.2mm;">
               <div><strong>● čísla</strong> = zadané rozmery (m)</div>
-              <div style="margin-top: 1.5mm;"><strong>— čiarkovane</strong> = strana pri stene / napojení</div>
+              <div style="margin-top: 1.2mm;"><strong>— čiarkovane</strong> = strana pri stene / napojení</div>
             </div>
           </div>
         </article>
       </section>
 
       <!-- DOLE: prierez -->
-      <section class="grid-bottom">
+      <section class="grid-bottom" style="margin-top: 0;">
         <article class="card">
           <div class="card-inner">
             <div class="chip">Technický prierez skladby</div>
 
-            <p class="p muted" style="margin-bottom: 4mm;">{{systemCutawayCaption}}</p>
+            <p class="p muted" style="margin-bottom: 3mm;">{{systemCutawayCaption}}</p>
 
             <div class="img-box">
               <img src="{{systemCutawayImageAbs}}" alt="Technický prierez skladby" />

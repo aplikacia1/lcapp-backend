@@ -65,7 +65,9 @@ function resolvePlan(payload) {
   const isLow = heightId === "low";
   const isFree = drainId === "edge-free";
   const isGutter =
-    drainId === "edge-gutter" || drainId.includes("gutter") || drainId.includes("ryn");
+    drainId === "edge-gutter" ||
+    drainId.includes("gutter") ||
+    drainId.includes("ryn");
 
   if (isLow && isFree) {
     return [
@@ -100,6 +102,15 @@ function resolvePlan(payload) {
     "pdf_balkon_page3.html",
     "pdf_balkon_page4.html",
   ];
+}
+
+function pickNumber(obj, keys) {
+  for (const k of keys) {
+    const v = obj?.[k];
+    const n = Number(v);
+    if (v !== null && v !== undefined && !Number.isNaN(n)) return n;
+  }
+  return null;
 }
 
 function buildVars(payload, pageNo, totalPages, baseOrigin) {
@@ -178,6 +189,30 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     ? toAbsPublicUrl(baseOrigin, cutawayImage)
     : "";
 
+  // ✅ PAGE 5 – doplnenie výpočtov (ak ich FE/BOM posiela)
+  const kebaMeters = pickNumber(bom, [
+    "kebaMeters",
+    "kerdiKebaMeters",
+    "kerdiKebaTotalMeters",
+    "kebaTotalMeters",
+  ]);
+  const collKg = pickNumber(bom, [
+    "collKg",
+    "kerdiCollKg",
+    "collConsumptionKg",
+    "kerdiCollConsumptionKg",
+  ]);
+  const collPacks = pickNumber(bom, [
+    "collPacks",
+    "kerdiCollPacks",
+    "collPackCount",
+    "kerdiCollPackCount",
+  ]);
+
+  const kebaMetersText = kebaMeters != null ? `${formatNumSk(kebaMeters, 1)} m` : "–";
+  const collConsumptionText = collKg != null ? `≈ ${formatNumSk(collKg, 1)} kg` : "–";
+  const collPacksText = collPacks != null ? `${formatNumSk(collPacks, 0)} ks` : "–";
+
   return {
     baseUrl: baseOrigin.replace(/\/$/, ""),
     pdfCode,
@@ -208,13 +243,20 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
 
     edgeLengthText,
     edgeProfilePiecesText,
+
+    // ✅ page5 variables
+    kebaMetersText,
+    collConsumptionText,
+    collPacksText,
   };
 }
 
 async function htmlToPdfBuffer(browser, html) {
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });
-  await page.emulateMediaType("screen");
+
+  // ✅ DÔLEŽITÉ: generuj ako PRINT, aby platilo @media print (biela verzia do PDF)
+  await page.emulateMediaType("print");
 
   const pdf = await page.pdf({
     format: "A4",
@@ -244,14 +286,16 @@ function cleanPath(p) {
   return (p || "").toString().trim();
 }
 
-/**
- * Render-friendly nájdenie Chromu + tvrdá diagnostika.
- */
 function findChromeExecutable() {
   const envPath = cleanPath(process.env.PUPPETEER_EXECUTABLE_PATH);
   if (envPath) {
     const ok = fs.existsSync(envPath);
-    console.log("[PDF] env PUPPETEER_EXECUTABLE_PATH:", JSON.stringify(envPath), "exists:", ok);
+    console.log(
+      "[PDF] env PUPPETEER_EXECUTABLE_PATH:",
+      JSON.stringify(envPath),
+      "exists:",
+      ok
+    );
     if (ok) return envPath;
   }
 
@@ -267,7 +311,6 @@ function findChromeExecutable() {
   return "";
 }
 
-// ✅ endpoint voláš z FE: /api/pdf/balkon-final-html
 router.post("/balkon-final-html", async (req, res) => {
   try {
     const payload = req.body?.payload;
