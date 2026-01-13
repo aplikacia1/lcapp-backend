@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <title>PDF – Ukončenie balkóna – Schlüter® BARA-RT</title>
 
-  <link rel="stylesheet" href="/css/pdf_balkon_common.css">
+  <!-- ✅ v2 CSS -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
 </head>
 
 <body>
@@ -29,18 +30,18 @@
       </header>
 
       <h2 class="pdf-h2">6. Ukončenie balkóna – Schlüter®-BARA-RT</h2>
-      <p class="subtitle">
-        Pri balkónoch bez odvodňovacej rýny je potrebné bezpečne a esteticky ukončiť otvorenú hranu
-        skladby. Systémový profil <strong>Schlüter®-BARA-RT</strong> zabezpečuje riadený odvod vody,
-        chráni hranu konštrukcie a vytvára čistý architektonický detail.
+
+      <p class="subtitle subtitle--p6">
+        Pri balkónoch bez odvodňovacej rýny je potrebné bezpečne a esteticky ukončiť otvorenú hranu skladby.
+        Profil <strong>Schlüter®-BARA-RT</strong> vytvára čistý detail, chráni hranu konštrukcie a pomáha riadiť odtok vody cez presah.
       </p>
 
-      <section class="grid-110-90">
+      <section class="grid-110-90 grid-110-90--p6">
         <article class="card">
-          <div class="card-inner">
-            <span class="chip">Odporúčané riešenie</span>
+          <div class="card-inner card-inner--p6">
+            <span class="chip chip--p6">Odporúčané riešenie</span>
 
-            <ul class="bullet">
+            <ul class="bullet bullet--p6">
               <li>určený pre <span class="highlight">balkóny bez rýny</span></li>
               <li>kompatibilný so skladbou <strong>DITRA + KERDI-KEBA</strong></li>
               <li>umožňuje bezpečný odtok vody cez presah</li>
@@ -48,7 +49,9 @@
               <li>vhodný pre keramickú dlažbu a prírodný kameň</li>
             </ul>
 
-            <table class="table-kv">
+            <div class="sep sep--p6"></div>
+
+            <table class="table-kv table-kv--p6">
               <tr>
                 <th>Parameter</th>
                 <th>Hodnota</th>
@@ -65,33 +68,38 @@
                 <td>Počet profilov</td>
                 <td>{{edgeProfilePiecesText}}</td>
               </tr>
+
+              <!-- ✅ pripravené na budúcu logiku (zatiaľ len “–”) -->
+              <tr>
+                <td>Výška profilu podľa hrúbky dlažby</td>
+                <td>–</td>
+              </tr>
             </table>
 
-            <div class="info-box">
-              K profilu <strong>Schlüter®-BARA-RT</strong> sú dostupné systémové doplnky
-              (rohové diely, spojky, koncovky). Ich presný počet závisí od riešenia detailov
-              a spôsobu montáže a odporúčame ho konzultovať s realizačnou firmou alebo
-              technikom <strong>LIŠTOVÉ CENTRUM EU, s.r.o.</strong>
+            <div class="info-box info-box--p6">
+              <strong>Dôležité:</strong> BARA-RT sa vyberá aj podľa hrúbky dlažby (napr. 20&nbsp;mm → RT20…,
+              30&nbsp;mm → RT30/35…). Farbu profilu zákazník volí následne, ale <strong>správna výška</strong> je kľúčová pre nacenenie.
+              Doplnky (rohy, spojky, koncovky) odporúčame určiť podľa konkrétneho detailu montáže.
             </div>
           </div>
         </article>
 
         <article class="card">
-          <div class="card-inner">
-            <div class="img-box">
+          <div class="card-inner card-inner--p6-right">
+            <div class="img-box img-box--p6">
               <img src="/img/pdf/balkon/bara-rt-profile.png" alt="Schlüter BARA-RT">
             </div>
-            <p class="img-caption">
+
+            <p class="img-caption img-caption--p6">
               <strong>Schlüter®-BARA-RT</strong> – systémový ukončovací profil pre balkóny bez rýny.
-              Ako alternatívu je možné použiť aj iné profily zo systému Schlüter®-BARA
-              (napr. BARA-RW) podľa architektonického riešenia.
+              Vrchná (viditeľná) časť profilu sa volí podľa hrúbky obkladu, aby bol okraj dlažby správne prekrytý.
             </p>
           </div>
         </article>
       </section>
     </div>
 
-    <footer class="pdf-footer only-pdf">
+    <footer class="pdf-footer">
       <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
       <span>Strana 6 / {{totalPages}}</span>
     </footer>

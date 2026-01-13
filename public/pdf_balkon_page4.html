@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 4</title>
-  <link rel="stylesheet" href="/css/pdf_balkon_common.css">
+
+  <!-- ✅ cache-bust CSS -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
 </head>
 
 <body>
@@ -29,42 +31,52 @@
       </header>
 
       <h2 class="pdf-h2">4. Vhodné lepidlá pod separačné rohože</h2>
-      <p class="pdf-sub" style="margin-bottom: 5mm;">
+      <p class="pdf-sub pdf-sub--p4">
         Na lepenie separačných rohoží (napr. Schlüter®-DITRA, DITRA-DRAIN alebo KERDI) sa používajú lepidlá triedy <strong>C2</strong>.
         Nižšie sú uvedené lepidlá, ktoré má <strong>LIŠTOVÉ CENTRUM</strong> štandardne v ponuke.
       </p>
 
       <!-- produkty -->
-      <section class="grid-2" style="gap: 6mm; margin-bottom: 5mm;">
+      <section class="grid-2 grid-2--p4">
         <article class="card">
-          <div class="card-inner">
-            <div class="chip">Produkt 1</div>
-            <div class="img-box" style="padding: 6mm;">
-              <img src="/img/pdf/balkon/adhesive-mapei-keraflex-maxi-s1-v1.png" alt="MAPEI Keraflex Maxi S1" style="max-height: 62mm;" />
+          <div class="card-inner card-inner--p4">
+            <div class="chip chip--p4">Produkt 1</div>
+
+            <!-- ✅ jednotná výška obrázku cez triedu (nie inline max-height) -->
+            <div class="img-box img-box--p4">
+              <img src="/img/pdf/balkon/adhesive-mapei-keraflex-maxi-s1-v1.png" alt="MAPEI Keraflex Maxi S1" />
             </div>
-            <p class="p" style="margin-top: 3mm; font-weight: 900;">MAPEI – Keraflex Maxi S1</p>
-            <p class="p muted" style="margin-top: 1.5mm;">C2TE S1 · interiér / exteriér · balkóny, terasy</p>
+
+            <p class="p p-title--p4">MAPEI – Keraflex Maxi S1</p>
+            <p class="p muted p-muted--p4">C2TE S1 · interiér / exteriér · balkóny, terasy</p>
+
+            <!-- sem neskôr doplníš počty/kg podľa výpočtu, ak budeš chcieť -->
+            <!-- <p class="p p-qty--p4"><strong>Odporúčané množstvo:</strong> {{mapeiQty}}</p> -->
           </div>
         </article>
 
         <article class="card">
-          <div class="card-inner">
-            <div class="chip">Produkt 2</div>
-            <div class="img-box" style="padding: 6mm;">
-              <img src="/img/pdf/balkon/adhesive-sopro-no1-s1-v1.png" alt="SOPRO Sopro’s No.1 S1" style="max-height: 62mm;" />
+          <div class="card-inner card-inner--p4">
+            <div class="chip chip--p4">Produkt 2</div>
+
+            <div class="img-box img-box--p4">
+              <img src="/img/pdf/balkon/adhesive-sopro-no1-s1-v1.png" alt="SOPRO Sopro’s No.1 S1" />
             </div>
-            <p class="p" style="margin-top: 3mm; font-weight: 900;">SOPRO – Sopro’s No.1 S1</p>
-            <p class="p muted" style="margin-top: 1.5mm;">C2FTE S1 · rýchle tuhnutie · balkóny, terasy</p>
+
+            <p class="p p-title--p4">SOPRO – Sopro’s No.1 S1</p>
+            <p class="p muted p-muted--p4">C2FTE S1 · rýchle tuhnutie · balkóny, terasy</p>
+
+            <!-- <p class="p p-qty--p4"><strong>Odporúčané množstvo:</strong> {{soproQty}}</p> -->
           </div>
         </article>
       </section>
 
       <!-- porovnanie -->
-      <article class="card">
-        <div class="card-inner">
-          <div class="chip">Rýchle porovnanie (orientačne)</div>
+      <article class="card card--p4-compare">
+        <div class="card-inner card-inner--p4-compare">
+          <div class="chip chip--p4">Rýchle porovnanie (orientačne)</div>
 
-          <table class="table-kv">
+          <table class="table-kv table-kv--p4">
             <tr>
               <th>Parameter</th>
               <th>MAPEI</th>
@@ -97,7 +109,7 @@
             </tr>
           </table>
 
-          <div class="note" style="margin-top: 4mm;">
+          <div class="note note--p4">
             <strong>Poznámka:</strong>
             Uvedené lepidlá sú odporúčané riešenia, ktoré má <strong>LIŠTOVÉ CENTRUM</strong> štandardne v ponuke
             a ku ktorým vieme spracovať spotrebu aj cenovú ponuku na základe výpočtu z kalkulačky.
@@ -108,7 +120,7 @@
       </article>
     </div>
 
-    <footer class="pdf-footer only-pdf">
+    <footer class="pdf-footer">
       <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
       <span>Strana 4 / {{totalPages}}</span>
     </footer>

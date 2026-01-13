@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <title>Lištové centrum – PDF podklad – Strana 5</title>
 
-  <link rel="stylesheet" href="/css/pdf_balkon_common.css">
+  <!-- ✅ v2 CSS -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
 </head>
 
 <body>
@@ -31,19 +32,20 @@
 
       <h2 class="pdf-h2">5. Hydroizolačné napojenia – Schlüter®-KERDI-KEBA + KERDI-COLL</h2>
 
-      <p class="pdf-sub">
+      <p class="pdf-sub pdf-sub--p5">
         Aby hydroizolácia fungovala dlhodobo, je dôležité utesniť všetky napojenia na okrajoch balkóna (pri stene a pri ukončovacích profiloch).
         Ak je balkón širší ako 1 meter, rohož DITRA sa kladie z viacerých pásov a vzniknú aj prekrytia – tie sa rovnako prelepujú páskou a lepia KERDI-COLL.
         Preto rátame spotrebu z <strong>obvodu</strong> + (ak treba) z <strong>prekrytí</strong>.
       </p>
 
-      <section class="grid-top">
+      <!-- TOP: products -->
+      <section class="grid-top grid-top--p5">
         <article class="card">
-          <div class="card-inner">
-            <div class="badge">Páska (prelepy a rohy)</div>
+          <div class="card-inner card-inner--p5-top">
+            <div class="badge badge--p5">Páska (prelepy a rohy)</div>
 
-            <div class="prod">
-              <div class="prod-img">
+            <div class="prod prod--p5">
+              <div class="prod-img prod-img--p5">
                 <img src="/img/pdf/balkon/schluter-kerdi-keba.png" alt="Schlüter KERDI-KEBA" />
               </div>
               <div class="prod-text">
@@ -58,11 +60,11 @@
         </article>
 
         <article class="card">
-          <div class="card-inner">
-            <div class="badge">Tesniace lepidlo</div>
+          <div class="card-inner card-inner--p5-top">
+            <div class="badge badge--p5">Tesniace lepidlo</div>
 
-            <div class="prod">
-              <div class="prod-img">
+            <div class="prod prod--p5">
+              <div class="prod-img prod-img--p5">
                 <img src="/img/pdf/balkon/schluter-kerdi-coll.png" alt="Schlüter KERDI-COLL" />
               </div>
               <div class="prod-text">
@@ -77,12 +79,13 @@
         </article>
       </section>
 
-      <section class="grid-mid">
+      <!-- MID: explanation + calc -->
+      <section class="grid-mid grid-mid--p5">
         <article class="card">
-          <div class="card-inner">
+          <div class="card-inner card-inner--p5-mid">
             <div class="section-title">Kedy vznikajú prelepy medzi pásmi DITRA?</div>
 
-            <ul class="bullet">
+            <ul class="bullet bullet--p5">
               <li>
                 DITRA má šírku približne <strong>1,0 m</strong>. Ak je balkón široký do 1 m, zvyčajne nevzniká spoj „DITRA vedľa DITRA“.
               </li>
@@ -94,7 +97,7 @@
               </li>
             </ul>
 
-            <div class="note">
+            <div class="note note--p5">
               <strong>Dostupnosť:</strong> KERDI-KEBA a KERDI-COLL sú dostupné v <strong>LIŠTOVOM CENTRE EU, s.r.o.</strong>.
               Pri nesystémových materiáloch nevieme garantovať kompatibilitu a správnu funkciu v detailoch.
             </div>
@@ -102,10 +105,10 @@
         </article>
 
         <article class="card">
-          <div class="card-inner">
+          <div class="card-inner card-inner--p5-mid">
             <div class="section-title">Orientačne pre tento balkón</div>
 
-            <div class="calc">
+            <div class="calc calc--p5">
               <div class="calc-row">
                 <div class="calc-k">Počet prekrytí (DITRA)<br><span class="muted">(podľa šírky ~1 m)</span></div>
                 <div class="calc-v">{{ditraJointsText}}</div>
@@ -137,8 +140,8 @@
               </div>
             </div>
 
-            <div class="note">
-              <strong>Poznámka:</strong> Toto je orientačný výpočet pre zákazníka – reálna spotreba závisí od detailu ukončenia a prevedenia.
+            <div class="note note--p5">
+              <strong>Poznámka:</strong> Toto je orientačný výpočet – reálna spotreba závisí od detailu ukončenia a prevedenia.
               Najdôležitejšie je mať správne utesnené okraje (stena + profil) a všetky prekrytia medzi pásmi DITRA.
             </div>
           </div>
@@ -146,7 +149,7 @@
       </section>
     </div>
 
-    <footer class="pdf-footer only-pdf">
+    <footer class="pdf-footer">
       <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
       <span>Strana 5 / {{totalPages}}</span>
     </footer>

@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Lištové centrum – PDF podklad – Strana 2</title>
-  <link rel="stylesheet" href="/css/pdf_balkon_common.css">
+
+  <!-- ✅ cache-bust CSS -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
 </head>
 
 <body>
@@ -29,18 +31,19 @@
       </header>
 
       <h2 class="pdf-h2">2. Popis zvolenej skladby</h2>
-      <!-- menší spodný margin, aby sa vošiel prierez -->
-      <p class="pdf-sub" style="margin-bottom: 4mm;">
+
+      <!-- ✅ menej agresívne, bez inline mm – nech to vie print upratať -->
+      <p class="pdf-sub pdf-sub--compact">
         Nižšie je zhrnutie zadaných parametrov a veľký orientačný technický prierez zvolenej skladby.
       </p>
 
-      <!-- HORE: skladba + náčrt (kompaktnejšie) -->
-      <section class="grid-top" style="gap: 4mm; margin-bottom: 4mm;">
+      <!-- HORE: skladba + náčrt -->
+      <section class="grid-top grid-top--tight">
         <article class="card">
-          <div class="card-inner" style="padding: 4.2mm 5.4mm;">
-            <div class="chip" style="margin-bottom: 2.2mm;">Zvolená skladba</div>
+          <div class="card-inner card-inner--tight">
+            <div class="chip chip--tight">Zvolená skladba</div>
 
-            <div class="kv" style="gap: 1.8mm 5mm;">
+            <div class="kv kv--tight">
               <div class="k">Typ</div>
               <div class="v">{{constructionType}}</div>
 
@@ -54,9 +57,9 @@
               <div class="v">{{perimeterText}}</div>
             </div>
 
-            <div class="sep" style="margin: 2.6mm 0;"></div>
+            <div class="sep sep--tight"></div>
 
-            <div class="kv" style="gap: 1.8mm 5mm;">
+            <div class="kv kv--tight">
               <div class="k">Konštrukčná výška</div>
               <div class="v">{{heightLabel}}</div>
 
@@ -67,38 +70,38 @@
               <div class="v">{{systemTitle}}</div>
             </div>
 
-            <div class="note" style="margin-top: 2.6mm; padding: 2.4mm 4.2mm;">
+            <div class="note note--tight">
               <strong>Poznámka:</strong> {{systemShortNote}}
             </div>
           </div>
         </article>
 
         <article class="card">
-          <div class="card-inner" style="padding: 4.2mm 5.4mm;">
-            <div class="chip" style="margin-bottom: 2.2mm;">Náčrt tvaru a rozmerov (krok 2)</div>
+          <div class="card-inner card-inner--tight">
+            <div class="chip chip--tight">Náčrt tvaru a rozmerov (krok 2)</div>
 
-            <div class="img-box" style="padding: 5mm;">
-              <!-- menšia výška, aby ostal priestor pre prierez -->
-              <div class="svg-host" style="width: 100%; height: 72mm;">
+            <div class="img-box img-box--tight">
+              <!-- ✅ znížená výška náčrtu: práve toto najčastejšie spôsobuje orez -->
+              <div class="svg-host svg-host--p2">
                 {{shapeSketchSvg}}
               </div>
             </div>
 
-            <div class="note" style="margin-top: 3mm; padding: 2.4mm 4.2mm;">
+            <div class="note note--tight note--p2">
               <div><strong>● čísla</strong> = zadané rozmery (m)</div>
-              <div style="margin-top: 1.2mm;"><strong>— čiarkovane</strong> = strana pri stene / napojení</div>
+              <div class="note-row"><strong>— čiarkovane</strong> = strana pri stene / napojení</div>
             </div>
           </div>
         </article>
       </section>
 
       <!-- DOLE: prierez -->
-      <section class="grid-bottom" style="margin-top: 0;">
+      <section class="grid-bottom grid-bottom--tight">
         <article class="card">
           <div class="card-inner">
             <div class="chip">Technický prierez skladby</div>
 
-            <p class="p muted" style="margin-bottom: 3mm;">{{systemCutawayCaption}}</p>
+            <p class="p muted p-muted--tight">{{systemCutawayCaption}}</p>
 
             <div class="img-box">
               <img src="{{systemCutawayImageAbs}}" alt="Technický prierez skladby" />
@@ -112,7 +115,7 @@
       </section>
     </div>
 
-    <footer class="pdf-footer only-pdf">
+    <footer class="pdf-footer">
       <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
       <span>Strana 2 / {{totalPages}}</span>
     </footer>

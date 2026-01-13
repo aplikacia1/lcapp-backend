@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 3</title>
 
-  <link rel="stylesheet" href="/css/pdf_balkon_common.css">
+  <!-- ✅ cache-bust CSS -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
 </head>
 
 <body>
@@ -30,16 +31,16 @@
       </header>
 
       <h2 class="pdf-h2">3. Skladba: {{systemTitle}} – vrstva 1: Schlüter®-DITRA</h2>
-      <p class="pdf-sub">
+      <p class="pdf-sub pdf-sub--p3">
         Vybraná konštrukčná výška: <strong>{{heightLabel}}</strong>. Táto strana popisuje prvú (základnú) vrstvu skladby.
         Presné napojenia (rohy, stena, hrana, dilatácie) budú na ďalších stranách PDF podľa zvoleného variantu.
       </p>
 
-      <section class="grid-2-stretch">
+      <section class="grid-2-stretch grid-2-stretch--p3">
         <!-- LEFT -->
         <article class="card">
-          <div class="card-inner">
-            <div class="chip">Vrstvy – krok 1 / 1 (základ)</div>
+          <div class="card-inner card-inner--p3">
+            <div class="chip chip--p3">Vrstvy – krok 1 / 1 (základ)</div>
 
             <p class="p">
               <strong>Schlüter®-DITRA</strong> je separačná rohož pod dlažbu. V skladbe pomáha oddeliť dlažbu od podkladu,
@@ -51,24 +52,24 @@
               Používa sa <strong>lepidlo triedy C2</strong> (orientačne zub 4×4) podľa podkladu a odporúčaní výrobcu.
             </p>
 
-            <p class="p" style="margin-top:2.6mm; font-weight:800;">
+            <p class="p p-strongline">
               Prečo je DITRA dôležitá (stručne):
             </p>
-            <ul class="bullet">
+            <ul class="bullet bullet--tight">
               <li><strong>Separačná vrstva</strong>: obmedzuje prenos pnutí do dlažby.</li>
               <li><strong>Stabilita</strong>: výlisky prenášajú zaťaženie a zlepšujú správanie skladby.</li>
               <li><strong>Riadenie vlhkosti</strong>: kanáliky podporujú odvod/zrovnanie tlaku pod krytinou.</li>
               <li><strong>Odolnosť</strong>: materiál je vhodný do náročnejších podmienok (balkón/terasa).</li>
             </ul>
 
-            <div class="warn">
+            <div class="warn warn--tight">
               <strong>Upozornenie:</strong> pri chôdzi v tvrdej obuvi môže krytina pri niektorých skladbách pôsobiť mierne „dutým“ dojmom.
               Ide o vlastnosť systému a neznamená to chybu realizácie.
             </div>
 
-            <div class="sep"></div>
+            <div class="sep sep--p3"></div>
 
-            <div class="kv">
+            <div class="kv kv--p3">
               <div class="k">Plocha z kalkulačky</div>
               <div class="v">{{areaText}}</div>
 
@@ -86,23 +87,23 @@
 
         <!-- RIGHT -->
         <article class="card">
-          <div class="card-head">
+          <div class="card-head card-head--p3">
             <div class="t">Obrázok vrstvy</div>
             <div class="s">Schlüter®-DITRA – separačná rohož (ilustračne)</div>
           </div>
 
-          <div class="card-inner">
-            <div class="imgbox">
+          <div class="card-inner card-inner--p3-right">
+            <div class="imgbox imgbox--p3">
               <img src="/img/pdf/balkon/ditra-roll-v1.png" alt="Schlüter DITRA – rohož" />
             </div>
 
-            <div class="under-img">
+            <div class="under-img under-img--p3">
               <strong>Príprava podkladu:</strong> rovina a spád sa riešia ešte pred lepením rohože.
               Lepidlo a príslušenstvo vyberieme z portfólia <strong>Lištového centra</strong> podľa konkrétneho podkladu
               a výpočtu z kalkulačky.
             </div>
 
-            <div class="under-img" style="margin-top:2.6mm;">
+            <div class="under-img under-img--p3 under-img--p3-tight">
               <strong>Objednávka:</strong> všetky uvedené komponenty je možné objednať v <strong>LIŠTOVOM CENTRE</strong>.
             </div>
           </div>
@@ -110,7 +111,7 @@
       </section>
     </div>
 
-    <footer class="pdf-footer only-pdf">
+    <footer class="pdf-footer">
       <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
       <span>Strana 3 / {{totalPages}}</span>
     </footer>

@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 7 (Komponenty)</title>
 
-  <link rel="stylesheet" href="/css/pdf_balkon_common.css">
+  <!-- ✅ v2 CSS -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
 </head>
 
 <body>
@@ -22,196 +23,113 @@
         </div>
         <div class="mini-code">
           <div class="label">Číslo PDF</div>
-          <div class="value" id="pdfCode">{{pdfCode}}</div>
+          <div class="value">{{pdfCode}}</div>
         </div>
       </header>
 
       <h2 class="pdf-h2">7. Ukončenie hrany – komponenty a varianty (BARA-RT / BARA-RW)</h2>
-      <p class="subtitle-sm">
-        Strana slúži ako rýchla pomôcka: čo je <strong>roh</strong> a čo je <strong>spojka</strong> a koľko ich môže byť potrebných.
-        Profily sa dodávajú v dĺžke <strong>2,50 m</strong>. (Počty sa vyplnia z kalkulačky alebo sa dajú orientačne dopočítať pri náhľade.)
+      <p class="subtitle-sm subtitle-sm--p7">
+        Rýchla pomôcka: čo je <strong>roh</strong> a čo je <strong>spojka</strong> a koľko ich môže byť potrebných.
+        Profily sa dodávajú v dĺžke <strong>2,50 m</strong>. Počty sa doplnia z kalkulačky alebo sa upresnia pri nacenení.
       </p>
 
-      <section class="grid-2-stretch">
+      <section class="grid-2-stretch grid-2-stretch--p7">
         <!-- RT -->
-        <article class="card col">
-          <div class="card-inner compact">
-            <span class="chip">Variant A: BARA-RT (bez rýny)</span>
+        <article class="card">
+          <div class="card-inner compact card-inner--p7">
+            <span class="chip chip--p7">Variant A: BARA-RT (bez rýny)</span>
 
-            <p class="p">
+            <p class="p p--p7">
               <strong>BARA-RT</strong> rieši ukončenie voľnej hrany a riadený odvod vody cez presah.
             </p>
 
-            <table class="table-compact">
+            <table class="table-compact table-compact--p7">
               <tr><th>Položka</th><th>Hodnota</th></tr>
-              <tr><td>Voľná hrana (m)</td><td id="rtEdge">{{edgeLengthText}}</td></tr>
-              <tr><td>Profily (2,50 m)</td><td id="rtProfiles">{{rtProfilePiecesText}}</td></tr>
-              <tr><td>Rohy 90°</td><td id="rtCorners">{{rtCornersText}}</td></tr>
-              <tr><td>Spojky</td><td id="rtConnectors">{{rtConnectorsText}}</td></tr>
-              <tr><td>Farba</td><td id="rtColor">{{rtColorCode}}</td></tr>
+              <tr><td>Voľná hrana</td><td>{{edgeLengthText}}</td></tr>
+              <tr><td>Profily (2,50 m)</td><td>{{rtProfilePiecesText}}</td></tr>
+              <tr><td>Rohy 90°</td><td>{{rtCornersText}}</td></tr>
+              <tr><td>Spojky</td><td>{{rtConnectorsText}}</td></tr>
+              <tr><td>Farba</td><td>{{rtColorCode}}</td></tr>
             </table>
 
-            <div class="mini-legend">
-              <div class="mini-item">
+            <div class="mini-legend mini-legend--p7">
+              <div class="mini-item mini-item--p7">
                 <img src="/img/pdf/balkon/bara-rt-corner-e90.png" alt="Roh 90° BARA-RT">
                 <div class="mini-label">Roh 90° (E90)</div>
               </div>
-              <div class="mini-item">
+              <div class="mini-item mini-item--p7">
                 <img src="/img/pdf/balkon/bara-rt-connector-v.png" alt="Spojka BARA-RT">
                 <div class="mini-label">Spojka (V)</div>
               </div>
             </div>
 
-            <div class="profile-img">
+            <div class="profile-img profile-img--p7">
               <img src="/img/pdf/balkon/bara-rt-profile.png" alt="Schlüter BARA-RT – profil">
             </div>
           </div>
         </article>
 
         <!-- RW -->
-        <article class="card col">
-          <div class="card-inner compact">
-            <span class="chip">Variant B: BARA-RW (alternatíva)</span>
+        <article class="card">
+          <div class="card-inner compact card-inner--p7">
+            <span class="chip chip--p7">Variant B: BARA-RW (alternatíva)</span>
 
-            <p class="p">
+            <p class="p p--p7">
               <strong>BARA-RW</strong> je alternatíva. Výška profilu (RW60 / RW100 …) sa volí podľa výšky čela (konštrukcia + dlažba).
             </p>
 
-            <table class="table-compact">
+            <table class="table-compact table-compact--p7">
               <tr><th>Položka</th><th>Hodnota</th></tr>
-              <tr><td>Voľná hrana (m)</td><td id="rwEdge">{{rwLengthText}}</td></tr>
-              <tr><td>Profily (2,50 m)</td><td id="rwProfiles">{{rwProfilePiecesText}}</td></tr>
-              <tr><td>Roh 90° (kód)</td><td id="rwCornerCode">{{rwCornerCodeAndQty}}</td></tr>
-              <tr><td>Spojka (kód)</td><td id="rwConnectorCode">{{rwConnectorCodeAndQty}}</td></tr>
-              <tr><td>Farba</td><td id="rwColor">{{rwColorCode}}</td></tr>
+              <tr><td>Voľná hrana</td><td>{{rwLengthText}}</td></tr>
+              <tr><td>Profily (2,50 m)</td><td>{{rwProfilePiecesText}}</td></tr>
+              <tr><td>Roh 90° (kód)</td><td>{{rwCornerCodeAndQty}}</td></tr>
+              <tr><td>Spojka (kód)</td><td>{{rwConnectorCodeAndQty}}</td></tr>
+              <tr><td>Farba</td><td>{{rwColorCode}}</td></tr>
             </table>
 
-            <div class="mini-legend">
-              <div class="mini-item">
+            <div class="mini-legend mini-legend--p7">
+              <div class="mini-item mini-item--p7">
                 <img src="/img/pdf/balkon/bara-rw-corner-e90.png" alt="Roh 90° BARA-RW">
                 <div class="mini-label">Roh 90° (E90/RW)</div>
               </div>
-              <div class="mini-item">
+              <div class="mini-item mini-item--p7">
                 <img src="/img/pdf/balkon/bara-rw-connector-v.png" alt="Spojka BARA-RW">
                 <div class="mini-label">Spojka (V/RW)</div>
               </div>
             </div>
 
-            <div class="profile-img">
+            <div class="profile-img profile-img--p7">
               <img src="/img/pdf/balkon/bara-rw-profile.png" alt="Schlüter BARA-RW – profil">
             </div>
           </div>
         </article>
       </section>
 
-      <section class="summary">
-        <div class="summary-inner">
-          <p class="summary-title">Rýchly sumár pre zákazníka (orientačne)</p>
-          <div class="summary-grid">
+      <section class="summary summary--p7">
+        <div class="summary-inner summary-inner--p7">
+          <p class="summary-title summary-title--p7">Rýchly sumár (orientačne)</p>
+          <div class="summary-grid summary-grid--p7">
             <div class="sum-col">
               <strong>BARA-RT:</strong>
-              profily <strong id="sumRtProfiles">{{rtProfilePiecesText}}</strong>,
-              rohy <strong id="sumRtCorners">{{rtCornersText}}</strong>,
-              spojky <strong id="sumRtConnectors">{{rtConnectorsText}}</strong>
+              profily <strong>{{rtProfilePiecesText}}</strong>,
+              rohy <strong>{{rtCornersText}}</strong>,
+              spojky <strong>{{rtConnectorsText}}</strong>
             </div>
             <div class="sum-col">
               <strong>BARA-RW:</strong>
-              profily <strong id="sumRwProfiles">{{rwProfilePiecesText}}</strong>,
-              roh <strong id="sumRwCorner">{{rwCornerCodeAndQty}}</strong>,
-              spojka <strong id="sumRwConnector">{{rwConnectorCodeAndQty}}</strong>
+              profily <strong>{{rwProfilePiecesText}}</strong>,
+              roh <strong>{{rwCornerCodeAndQty}}</strong>,
+              spojka <strong>{{rwConnectorCodeAndQty}}</strong>
             </div>
           </div>
         </div>
       </section>
     </div>
 
-    <footer class="pdf-footer only-pdf">
+    <footer class="pdf-footer">
       <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
       <span>Strana 7 / {{totalPages}}</span>
     </footer>
   </div>
-
-  <script>
-    // ✅ VOLITEĽNÉ: rýchly auto-výpočet pre náhľad
-    // /pdf_balkon_page7.html?walls=2&edges=3.2,1.6
-    // walls = 1/2/3 (počet stien)
-    // edges = čiarkami oddelené voľné hrany v metroch (pre lepší výpočet spojok)
-    // edge  = celková voľná hrana (menej presné)
-    (function(){
-      const qs = new URLSearchParams(location.search);
-      const walls = Number(qs.get('walls') || '');
-      const edgesStr = qs.get('edges');
-      const edgeTotal = Number(qs.get('edge') || '');
-      const PROFILE_LEN = 2.5;
-
-      function fmtMeters(n){ return (isFinite(n) && n>0) ? (n.toFixed(2).replace('.', ',') + ' m') : null; }
-      function fmtKs(n){ return (isFinite(n) && n>=0) ? (n + ' ks') : null; }
-
-      let corners = null;
-      if (walls === 1) corners = 2;
-      else if (walls === 2) corners = 1;
-      else if (walls === 3) corners = 0;
-
-      let totalEdge = null, pieces = null, connectors = null;
-
-      if (edgesStr) {
-        const edges = edgesStr.split(',')
-          .map(s => Number(String(s).trim().replace(',', '.')))
-          .filter(n => isFinite(n) && n > 0);
-
-        if (edges.length) {
-          totalEdge = edges.reduce((a,b)=>a+b,0);
-          let piecesSum = 0, connSum = 0;
-          edges.forEach(L => {
-            const p = Math.ceil(L / PROFILE_LEN);
-            piecesSum += p;
-            connSum += Math.max(0, p - 1);
-          });
-          pieces = piecesSum;
-          connectors = connSum;
-        }
-      } else if (isFinite(edgeTotal) && edgeTotal > 0) {
-        totalEdge = edgeTotal;
-        pieces = Math.ceil(edgeTotal / PROFILE_LEN);
-        connectors = Math.max(0, pieces - 1);
-      }
-
-      if (totalEdge === null && corners === null) return;
-
-      if (totalEdge !== null) {
-        const edgeText = fmtMeters(totalEdge);
-        if (edgeText) {
-          ['rtEdge','rwEdge'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = edgeText;
-          });
-        }
-      }
-
-      if (pieces !== null) {
-        const pcsText = fmtKs(pieces);
-        ['rtProfiles','rwProfiles','sumRtProfiles','sumRwProfiles'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el && pcsText) el.textContent = pcsText;
-        });
-      }
-
-      if (connectors !== null) {
-        const cText = fmtKs(connectors);
-        ['rtConnectors','sumRtConnectors'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el && cText) el.textContent = cText;
-        });
-      }
-
-      if (corners !== null) {
-        const rText = fmtKs(corners);
-        ['rtCorners','sumRtCorners'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el && rText) el.textContent = rText;
-        });
-      }
-    })();
-  </script>
 </body>
 </html>
