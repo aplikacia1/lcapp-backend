@@ -452,7 +452,6 @@ body {
    PRINT (white / technical)
    ========================================================= */
 @media print {
-  /* ✅ global print squeeze – pomôže “nezmestí sa” (jemne) */
   body { font-size: 96%; }
 
   html, body {
@@ -465,26 +464,22 @@ body {
   .pdf-page { background: #ffffff !important; color: #111827 !important; margin: 0 !important; }
   .pdf-watermark { opacity: 0.06 !important; filter: grayscale(100%) !important; }
 
-  /* headers */
   .mini-logo { background: #ffffff !important; border-color: rgba(17,24,39,0.18) !important; }
   .mini-title span, .mini-code .label { color: #6b7280 !important; }
   .mini-code .value { color: #111827 !important; }
 
-  /* ✅ chip/badge -> technické (bez žltej) */
   .badge, .chip {
     border-color: rgba(17,24,39,0.22) !important;
     background: rgba(17,24,39,0.04) !important;
     color: #111827 !important;
   }
 
-  /* texts */
   .pdf-sub, .subtitle, .subtitle-sm, .img-caption { color: #374151 !important; }
   .p, .bullet, .list, .cta p, .cta .contact { color: #111827 !important; }
   .muted { color: #374151 !important; }
   .kv .v { color: #111827 !important; }
   .highlight { color: #111827 !important; }
 
-  /* cards */
   .card, .note, .info-box, .img-box, .cta {
     background: #ffffff !important;
     border-color: rgba(17, 24, 39, 0.22) !important;
@@ -498,13 +493,36 @@ body {
   .table-kv td:last-child { color: #111827 !important; }
   .pdf-footer { color: #111827 !important; border-top-color: rgba(17,24,39,0.22) !important; }
 
-  /* ✅ warn box -> technické (bez žltej) */
   .warn {
     border-color: rgba(17,24,39,0.22) !important;
     background: rgba(17,24,39,0.04) !important;
     color: #111827 !important;
   }
   .warn strong { color: #111827 !important; }
+
+  /* ✅ FIX: intro page blocks must go white too (pdf-box, code-box) */
+  .pdf-box,
+  .pdf-code-box {
+    background: #ffffff !important;
+    border-color: rgba(17,24,39,0.22) !important;
+    color: #111827 !important;
+  }
+
+  .pdf-code-label,
+  .pdf-sub-note {
+    color: #374151 !important;
+  }
+
+  .pdf-code-value {
+    color: #111827 !important;
+  }
+
+  .pdf-contact-list,
+  .pdf-contact-list li,
+  .pdf-box p,
+  .pdf-note-block {
+    color: #111827 !important;
+  }
 }
 
 /* =========================================================
@@ -735,222 +753,9 @@ body {
   white-space: nowrap;
 }
 
-/* PRINT overrides for helper blocks */
 @media print {
   .prod-title, .section-title { color: #111827 !important; }
   .prod-sub, .calc-k { color: #111827 !important; }
   .calc, .prod-img { background: #ffffff !important; border-color: rgba(17,24,39,0.22) !important; }
   .calc-v { color: #111827 !important; }
 }
-
-/* =========================================================
-   Tight helpers (page2/3/4)
-   ========================================================= */
-.pdf-sub--compact { margin-bottom: 4mm; }
-.grid-top--tight { gap: 4mm; margin-bottom: 4mm; }
-.card-inner--tight { padding: 4.2mm 5.4mm; }
-.chip--tight { margin-bottom: 2.2mm; }
-.kv--tight { gap: 1.8mm 5mm; }
-.sep--tight { margin: 2.6mm 0; }
-.note--tight { margin-top: 2.6mm; padding: 2.4mm 4.2mm; }
-.img-box--tight { padding: 5mm; }
-.svg-host--p2 { width: 100%; height: 62mm; }
-.grid-bottom--tight { margin-top: 0; }
-.p-muted--tight { margin-bottom: 3mm; }
-.note--p2 .note-row { margin-top: 1.2mm; }
-
-/* Page3 */
-.pdf-sub--p3 { margin-bottom: 4.2mm; }
-.grid-2-stretch--p3 { gap: 5mm; }
-.card-inner--p3 { padding: 4.6mm 5.6mm; }
-.chip--p3 { margin-bottom: 2.2mm; }
-.p-strongline { margin-top: 2.2mm; font-weight: 800; }
-.bullet--tight { font-size: 0.74rem; line-height: 1.32; }
-.bullet--tight li { margin: 0.8mm 0; }
-.warn--tight { margin-top: 2.4mm; padding: 2.4mm 4.2mm; font-size: 0.70rem; line-height: 1.30; }
-.sep--p3 { margin: 2.6mm 0; }
-.kv--p3 { gap: 1.8mm 5mm; }
-.kv--p3 .k { font-size: 0.58rem; }
-.kv--p3 .v { font-size: 0.72rem; }
-.card-head--p3 { padding: 3.6mm 5.6mm 0; }
-.card-inner--p3-right { padding: 4.6mm 5.6mm; }
-.imgbox--p3 { padding: 6mm; }
-.imgbox--p3 img { max-height: 72mm; }
-.under-img--p3 { margin-top: 2.4mm; font-size: 0.72rem; line-height: 1.35; }
-.under-img--p3-tight { margin-top: 2.2mm; }
-
-/* Page4 */
-.pdf-sub--p4 { margin-bottom: 4.5mm; }
-.grid-2--p4 { gap: 6mm; margin-bottom: 4.5mm; }
-.card-inner--p4 { padding: 4.8mm 5.8mm; }
-.chip--p4 { margin-bottom: 2.4mm; }
-.img-box--p4 { padding: 5.5mm; }
-.img-box--p4 img { max-height: 56mm; }
-.p-title--p4 { margin-top: 2.6mm; font-weight: 900; }
-.p-muted--p4 { margin-top: 1.2mm; }
-.table-kv--p4 { margin-top: 3.4mm; font-size: 0.76rem; }
-.table-kv--p4 th, .table-kv--p4 td { padding: 2.6mm 2mm; }
-.note--p4 { margin-top: 3.2mm; padding: 2.8mm 4.6mm; }
-.card--p4-compare { margin-top: 0; }
-.card-inner--p4-compare { padding: 4.6mm 5.8mm; }
-
-/* ===== Page5 tightening helpers (v2) ===== */
-.pdf-sub--p5 { margin-bottom: 4.2mm; }
-
-.grid-top--p5 { gap: 5mm; margin-bottom: 4mm; }
-.card-inner--p5-top { padding: 4.6mm 5.6mm; }
-
-.badge--p5 { margin-bottom: 2.2mm; }
-
-.prod--p5 { grid-template-columns: 30mm 1fr; gap: 4.2mm; }
-.prod-img--p5 { padding: 3.4mm; }
-.prod-img--p5 img { max-height: 30mm; }
-
-.grid-mid--p5 { gap: 5mm; }
-
-.card-inner--p5-mid { padding: 4.6mm 5.6mm; }
-
-.bullet--p5 { font-size: 0.74rem; line-height: 1.32; }
-.bullet--p5 li { margin: 0.85mm 0; }
-
-.calc--p5 .calc-row { padding: 3.2mm 4.2mm; gap: 5mm; }
-.note--p5 { padding: 2.6mm 4.2mm; margin-top: 2.8mm; }
-
-/* ===== Page6 tightening helpers (v2) ===== */
-.subtitle--p6 { margin-bottom: 6mm; max-width: 176mm; }
-
-.grid-110-90--p6 { gap: 7mm; }
-
-.card-inner--p6 { padding: 4.8mm 5.8mm; }
-.card-inner--p6-right { padding: 4.8mm 5.8mm; }
-
-.chip--p6 { margin-bottom: 2.2mm; }
-
-.bullet--p6 { font-size: 0.74rem; line-height: 1.32; }
-.bullet--p6 li { margin: 0.85mm 0; }
-
-.sep--p6 { margin: 2.6mm 0; }
-
-.table-kv--p6 { margin-top: 0; font-size: 0.76rem; }
-.table-kv--p6 th, .table-kv--p6 td { padding: 2.6mm 2mm; }
-
-.info-box--p6 { margin-top: 3.2mm; padding: 3.2mm 5.2mm; }
-
-.img-box--p6 { padding: 5.5mm; }
-.img-box--p6 img { max-height: 70mm; }
-
-.img-caption--p6 { margin-top: 2.6mm; font-size: 0.72rem; line-height: 1.35; }
-
-/* ===== Page7 compact layout (v2) ===== */
-.subtitle-sm--p7 { margin-bottom: 5mm; }
-
-.grid-2-stretch--p7 { gap: 5mm; }
-
-.card-inner--p7 { padding: 4.4mm 5.4mm; }
-.chip--p7 { margin-bottom: 2.2mm; }
-
-.p--p7 { font-size: 0.71rem; line-height: 1.30; }
-
-.table-compact {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 2.6mm;
-  font-size: 0.72rem;
-}
-.table-compact th, .table-compact td {
-  padding: 2.1mm 2mm;
-  border-bottom: 1px solid rgba(148,163,184,0.22);
-  text-align: left;
-}
-.table-compact th {
-  color: #9ca3af;
-  text-transform: uppercase;
-  font-size: 0.60rem;
-  letter-spacing: 0.08em;
-}
-.table-compact td:last-child {
-  text-align: right;
-  font-weight: 800;
-  color: #f9fafb;
-}
-
-.mini-legend--p7 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3mm;
-  margin-top: 3mm;
-}
-.mini-item--p7 {
-  display: grid;
-  grid-template-columns: 14mm 1fr;
-  gap: 2.4mm;
-  align-items: center;
-}
-.mini-item--p7 img {
-  width: 14mm;
-  height: 14mm;
-  object-fit: contain;
-  background: #ffffff;
-  border-radius: 6px;
-  border: 1px solid rgba(148,163,184,0.25);
-  padding: 1.4mm;
-}
-.mini-label { font-size: 0.68rem; color: #e5e7eb; line-height: 1.25; }
-
-.profile-img--p7 {
-  margin-top: 3mm;
-  border: 1px solid rgba(148,163,184,0.30);
-  border-radius: 10px;
-  background: rgba(2,6,23,0.28);
-  padding: 3.8mm;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.profile-img--p7 img {
-  width: 100%;
-  max-height: 50mm;
-  object-fit: contain;
-  background: #ffffff;
-  border-radius: 8px;
-  display: block;
-}
-
-/* summary tighter */
-.summary--p7 { margin-top: 4mm; }
-.summary-inner--p7 {
-  border-radius: 10px;
-  border: 1px dashed rgba(148,163,184,0.40);
-  background: rgba(2,6,23,0.22);
-  padding: 3.4mm 5mm;
-}
-.summary-title--p7 { margin: 0 0 2mm; font-size: 0.74rem; font-weight: 900; }
-.summary-grid--p7 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; font-size: 0.74rem; color: #e5e7eb; }
-
-/* print */
-@media print {
-  .table-compact td:last-child { color: #111827 !important; }
-  .mini-label, .summary-grid--p7 { color: #111827 !important; }
-  .profile-img--p7 { background: #ffffff !important; border-color: rgba(17,24,39,0.22) !important; }
-  .summary-inner--p7 { background: #ffffff !important; border-color: rgba(17,24,39,0.22) !important; }
-}
-
-/* ===== Page8 compact layout (v2) ===== */
-.pdf-sub--p8 { margin-bottom: 4.6mm; }
-
-.grid-2-stretch--p8 { gap: 5mm; }
-.card-inner--p8 { padding: 4.6mm 5.6mm; }
-
-.chip--p8 { margin-bottom: 2.2mm; }
-
-.kv--p8 { gap: 1.8mm 5mm; }
-.sep--p8 { margin: 2.6mm 0; }
-
-.list--p8 { font-size: 0.74rem; line-height: 1.32; }
-.list--p8 li { margin: 0.85mm 0; }
-
-.note--p8 { margin-top: 2.6mm; padding: 2.6mm 4.2mm; font-size: 0.72rem; line-height: 1.33; }
-
-.cta--p8 { margin-top: 4.6mm; padding: 4.2mm 6mm; }
-.p--p8-cta { font-size: 0.74rem; line-height: 1.32; }
-.contact--p8 { margin-top: 2.4mm; font-size: 0.74rem; }
