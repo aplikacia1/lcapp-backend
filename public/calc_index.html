@@ -14,16 +14,8 @@
       --desk-footer-h: 36px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
 
     body {
       background: radial-gradient(circle at top, #1b2b68 0, #050c22 55%, #020617 100%);
@@ -32,10 +24,7 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    a { color: inherit; text-decoration: none; }
 
     /* HEADER – rovnaký štýl ako entertainment / calc_terasa */
     .app-header {
@@ -84,10 +73,7 @@
       cursor: pointer;
     }
 
-    .icon-btn svg {
-      width: 22px;
-      height: 22px;
-    }
+    .icon-btn svg { width: 22px; height: 22px; }
 
     /* LAYOUT */
     .wrap {
@@ -120,9 +106,7 @@
     }
 
     @media (min-width: 992px) {
-      .safety-stripes {
-        display: block;
-      }
+      .safety-stripes { display: block; }
 
       .safety-stripes::before,
       .safety-stripes::after {
@@ -143,13 +127,8 @@
         filter: blur(1px);
       }
 
-      .safety-stripes::before {
-        left: 0;
-      }
-
-      .safety-stripes::after {
-        right: 0;
-      }
+      .safety-stripes::before { left: 0; }
+      .safety-stripes::after { right: 0; }
     }
 
     /* Karta s kalkulačkami */
@@ -164,9 +143,7 @@
     }
 
     @media (min-width: 960px) {
-      .card-shell {
-        padding: 22px 22px 24px;
-      }
+      .card-shell { padding: 22px 22px 24px; }
     }
 
     .card-header-row {
@@ -213,9 +190,7 @@
     }
 
     @media (min-width: 640px) {
-      .calc-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+      .calc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     .calc-card {
@@ -282,14 +257,8 @@
       min-width: 120px;
     }
 
-    .btn-main span {
-      margin-right: 6px;
-    }
-
-    .btn-main:hover {
-      filter: brightness(1.05);
-    }
-
+    .btn-main span { margin-right: 6px; }
+    .btn-main:hover { filter: brightness(1.05); }
     .btn-main:active {
       transform: translateY(1px);
       box-shadow: 0 6px 18px rgba(37, 99, 235, 0.55);
@@ -309,20 +278,17 @@
     }
 
     @media (max-width: 600px) {
-      .page-title {
-        font-size: 1.15rem;
-      }
-      .page-subtitle {
-        font-size: 0.82rem;
-      }
+      .page-title { font-size: 1.15rem; }
+      .page-subtitle { font-size: 0.82rem; }
     }
   </style>
 </head>
+
 <body>
   <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-      <button class="icon-btn" id="backBtn" aria-label="Späť na timeline">
+      <button class="icon-btn" id="backBtn" aria-label="Späť">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path
             d="M15 18l-6-6 6-6"
@@ -334,8 +300,9 @@
           />
         </svg>
       </button>
+
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small" />
-      <div class="user-chip" id="userChip">Prihlásený:</div>
+      <div class="user-chip" id="userChip">Verejný vstup</div>
     </div>
   </header>
 
@@ -356,7 +323,7 @@
           Pracovné kalkulačky
         </div>
         <div class="card-caption">
-          Vyberte si, ktorú kalkulačku chcete otvoriť. Oba nástroje sú zatiaľ v testovacej fáze – budeme ich ďalej rozširovať.
+          Vyberte si, ktorú kalkulačku chcete otvoriť. Nástroje sú voľne prístupné, výsledok v PDF bude vždy orientačný.
         </div>
       </div>
 
@@ -400,27 +367,31 @@
   </main>
 
   <script>
-    // preberieme e-mail z URL
+    // ✅ Verejný aj prihlásený režim: email je len "bonus" (nie povinný)
     const params = new URLSearchParams(window.location.search);
-    const userEmail = params.get("email") || "";
+    const userEmail = (params.get("email") || "").trim();
 
     // user chip v hlavičke
     const chip = document.getElementById("userChip");
     if (chip) {
-      chip.textContent = userEmail ? `Prihlásený: ${userEmail}` : "Prihlásený:";
+      chip.textContent = userEmail ? `Prihlásený: ${userEmail}` : "Verejný vstup";
     }
 
-    // krok späť → timeline.html (mobil aj desktop), s emailom ak je
+    // späť:
+    // - prihlásený: späť na timeline s emailom
+    // - neprihlásený: späť na index.html (vstupná stránka webu)
     const backBtn = document.getElementById("backBtn");
     if (backBtn) {
       backBtn.addEventListener("click", () => {
-        const url = userEmail
-          ? `timeline.html?email=${encodeURIComponent(userEmail)}`
-          : "timeline.html";
-        window.location.href = url;
+        if (userEmail) {
+          window.location.href = `timeline.html?email=${encodeURIComponent(userEmail)}`;
+        } else {
+          window.location.href = "index.html";
+        }
       });
     }
 
+    // univerzálne prepínanie stránok – s emailom len ak existuje
     function go(page) {
       if (userEmail) {
         window.location.href = `${page}?email=${encodeURIComponent(userEmail)}`;

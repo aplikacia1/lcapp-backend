@@ -131,7 +131,7 @@ body {
 }
 
 .pdf-sub {
-  margin: 0 0 5mm; /* bolo 6mm — trochu zmenšené kvôli strane 2 */
+  margin: 0 0 5mm;
   font-size: 0.78rem;
   color: #cbd5e1;
   line-height: 1.4;
@@ -193,12 +193,11 @@ body {
   min-height: 0;
 }
 
-/* Page2 top */
 .grid-top {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 5mm;
-  margin-bottom: 4mm; /* bolo 5mm — ušetríme výšku pre stranu 2 */
+  margin-bottom: 4mm;
   align-items: stretch;
   flex: 0 0 auto;
 }
@@ -212,7 +211,6 @@ body {
   min-height: 0;
 }
 
-/* Page2 bottom */
 .grid-bottom { margin-top: 4mm; }
 
 /* =========================================================
@@ -248,7 +246,6 @@ body {
   white-space: nowrap;
 }
 
-/* lists */
 .bullet {
   margin: 0;
   padding-left: 5mm;
@@ -293,7 +290,6 @@ body {
   -webkit-box-orient: vertical;
 }
 
-/* ✅ hodnoty, ktoré nesmú byť odseknuté */
 .kv .v.v-wrap {
   display: block;
   -webkit-line-clamp: unset;
@@ -396,9 +392,8 @@ body {
   color: #f9fafb;
 }
 
-/* ✅ SAFE PRINT */
 .img-box {
-  padding: 6mm; /* bolo 7mm — o mm menej, aby sa str.2 zmestila */
+  padding: 6mm;
   border: 1px solid rgba(148,163,184,0.35);
   border-radius: 10px;
   background: rgba(2,6,23,0.35);
@@ -409,7 +404,7 @@ body {
 
 .img-box img {
   width: 100%;
-  max-height: 62mm; /* bolo 68mm — oprava strany 2 (orez) */
+  max-height: 62mm;
   object-fit: contain;
   background: #ffffff;
   border-radius: 6px;
@@ -424,7 +419,7 @@ body {
 }
 
 /* =========================================================
-   PAGE 2 – SVG host (aby sa náčrt nikdy nerozbil)
+   PAGE 2 – SVG host
    ========================================================= */
 .svg-host {
   display: flex;
@@ -439,7 +434,7 @@ body {
 }
 
 /* =========================================================
-   PAGE 4 – product cards + table (chýbalo)
+   PAGE 4 – product cards + table
    ========================================================= */
 .card.product {
   display: grid;
@@ -450,7 +445,7 @@ body {
 
 .card.product img {
   width: 100%;
-  height: 56mm;            /* jednotná výška, aby oba obrázky vyzerali rovnako */
+  height: 56mm;
   object-fit: contain;
   background: #ffffff;
   border-radius: 10px;
@@ -473,7 +468,6 @@ body {
   line-height: 1.35;
 }
 
-/* tabuľka na strane 4 */
 .pdf-table {
   width: 100%;
   border-collapse: collapse;
@@ -484,7 +478,7 @@ body {
   overflow: hidden;
 }
 .pdf-table th, .pdf-table td {
-  padding: 2.6mm 2.4mm; /* trošku kompaktnejšie aby sa zmestilo */
+  padding: 2.6mm 2.4mm;
   border-bottom: 1px solid rgba(148,163,184,0.18);
   text-align: left;
 }
@@ -516,7 +510,6 @@ body {
 }
 .pdf-footer span { white-space: nowrap; }
 
-/* avoid ugly breaks in print engines */
 .grid-top, .grid-mid, .grid-2, .grid-110-90, .grid-2-stretch,
 .card, .cta, .note, .info-box, .img-box { break-inside: avoid; page-break-inside: avoid; }
 
@@ -557,14 +550,38 @@ body {
 
   .pdf-footer { color: #111827 !important; border-top-color: rgba(17,24,39,0.22) !important; }
 
-  /* page4 product titles -> black */
   .card.product h3 { color: #111827 !important; }
   .card.product p { color: #111827 !important; }
   .pdf-table th { background: #ffffff !important; color: #111827 !important; }
+
+  /* =========================================================
+     ✅ FIX: INTRO PAGE (page 1) - tmavé boxy na bielom pri tlači
+     ========================================================= */
+  .pdf-code-box,
+  .pdf-box {
+    background: #ffffff !important;
+    border-color: rgba(17,24,39,0.22) !important;
+    color: #111827 !important;
+  }
+
+  .pdf-code-label,
+  .pdf-sub-note { color: #6b7280 !important; }
+
+  .pdf-code-value { color: #111827 !important; }
+
+  .pdf-box-title { color: #111827 !important; }
+
+  .pdf-contact-list,
+  .pdf-contact-list li,
+  .pdf-note-block {
+    color: #111827 !important;
+  }
+
+  .pdf-note-block { color: #374151 !important; }
 }
 
 /* =========================================================
-   INTRO PAGE – missing classes (page 1)
+   INTRO PAGE – classes (page 1)
    ========================================================= */
 .pdf-header{
   display:flex;
@@ -660,7 +677,7 @@ body {
 }
 
 /* =========================================================
-   PAGE 3/5 helpers – nechávam (tvoje)
+   PAGE 3/5 helpers
    ========================================================= */
 .warn {
   margin-top: 3.2mm;

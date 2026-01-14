@@ -2,7 +2,7 @@
 <html lang="sk">
 <head>
   <meta charset="UTF-8" />
-  <title>PDF – Ukončenie balkóna – Schlüter® BARA-RT</title>
+  <title>PDF – Ukončenie balkóna – Schlüter® BARA (RT / RW)</title>
 
   <!-- ✅ v2 CSS -->
   <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
@@ -29,24 +29,24 @@
         </div>
       </header>
 
-      <h2 class="pdf-h2">6. Ukončenie balkóna – Schlüter®-BARA-RT</h2>
+      <h2 class="pdf-h2">6. Ukončenie balkóna – Schlüter® BARA (RT / RW)</h2>
 
       <p class="subtitle subtitle--p6">
         Pri balkónoch bez odvodňovacej rýny je potrebné bezpečne a esteticky ukončiť otvorenú hranu skladby.
-        Profil <strong>Schlüter®-BARA-RT</strong> vytvára čistý detail, chráni hranu konštrukcie a pomáha riadiť odtok vody cez presah.
+        Najčastejšie sa používa profil <strong>Schlüter®-BARA-RT</strong>, ktorý chráni hranu dlažby.
+        Pri vyššej dlažbe (alebo ak zákazník nechce RT) odporúčame <strong>Schlüter®-BARA-RW</strong> ako alternatívu.
       </p>
 
       <section class="grid-110-90 grid-110-90--p6">
         <article class="card">
           <div class="card-inner card-inner--p6">
-            <span class="chip chip--p6">Odporúčané riešenie</span>
+            <span class="chip chip--p6">Odporúčané riešenie podľa zadania</span>
 
             <ul class="bullet bullet--p6">
-              <li>určený pre <span class="highlight">balkóny bez rýny</span></li>
-              <li>kompatibilný so skladbou <strong>DITRA + KERDI-KEBA</strong></li>
-              <li>umožňuje bezpečný odtok vody cez presah</li>
-              <li>chráni hranu pred poškodením a zatekaním</li>
-              <li>vhodný pre keramickú dlažbu a prírodný kameň</li>
+              <li>určené pre <span class="highlight">balkóny bez rýny</span></li>
+              <li>kompatibilné so skladbou <strong>DITRA + KERDI-KEBA</strong></li>
+              <li>chráni hranu a rieši odtok vody cez presah</li>
+              <li>výber profilu závisí od <strong>hrúbky dlažby</strong></li>
             </ul>
 
             <div class="sep sep--p6"></div>
@@ -57,29 +57,31 @@
                 <th>Hodnota</th>
               </tr>
               <tr>
-                <td>Typ profilu</td>
-                <td>BARA-RT</td>
+                <td>Hrúbka dlažby (zadanie)</td>
+                <td>{{tileThicknessText}}</td>
+              </tr>
+              <tr>
+                <td>Odporúčaný typ profilu</td>
+                <td>{{baraProfileTypeText}}</td>
               </tr>
               <tr>
                 <td>Ukončená hrana balkóna</td>
                 <td>{{edgeLengthText}}</td>
               </tr>
               <tr>
-                <td>Počet profilov</td>
+                <td>Počet profilov (2,50 m)</td>
                 <td>{{edgeProfilePiecesText}}</td>
               </tr>
-
-              <!-- ✅ pripravené na budúcu logiku (zatiaľ len “–”) -->
               <tr>
-                <td>Výška profilu podľa hrúbky dlažby</td>
-                <td>–</td>
+                <td><strong>Výber profilu podľa dlažby</strong></td>
+                <td><strong>{{baraHeightChoiceText}}</strong></td>
               </tr>
             </table>
 
             <div class="info-box info-box--p6">
-              <strong>Dôležité:</strong> BARA-RT sa vyberá aj podľa hrúbky dlažby (napr. 20&nbsp;mm → RT20…,
-              30&nbsp;mm → RT30/35…). Farbu profilu zákazník volí následne, ale <strong>správna výška</strong> je kľúčová pre nacenenie.
-              Doplnky (rohy, spojky, koncovky) odporúčame určiť podľa konkrétneho detailu montáže.
+              <strong>Vysvetlenie:</strong> {{baraHeightNoteText}}
+              <br><br>
+              <strong>Ak vyšlo RW:</strong> {{baraRwOptionsText}}
             </div>
           </div>
         </article>
@@ -87,12 +89,12 @@
         <article class="card">
           <div class="card-inner card-inner--p6-right">
             <div class="img-box img-box--p6">
-              <img src="/img/pdf/balkon/bara-rt-profile.png" alt="Schlüter BARA-RT">
+              <img src="/img/pdf/balkon/bara-rt-profile.png" alt="Schlüter BARA – profil">
             </div>
 
             <p class="img-caption img-caption--p6">
-              <strong>Schlüter®-BARA-RT</strong> – systémový ukončovací profil pre balkóny bez rýny.
-              Vrchná (viditeľná) časť profilu sa volí podľa hrúbky obkladu, aby bol okraj dlažby správne prekrytý.
+              <strong>Tip:</strong> Pri RT sa horná časť volí podľa hrúbky dlažby (ochrana hrany).
+              Pri RW sa rieši len spodné prekrytie (dekoratívny „jazyk“ na odtok vody).
             </p>
           </div>
         </article>

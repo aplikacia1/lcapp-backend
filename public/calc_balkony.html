@@ -612,6 +612,74 @@
     }
 
     .btn-secondary:disabled { opacity: 0.5; cursor: default; }
+
+    /* ✅ ÚDAJE PRE PDF – jednoduchý, stabilný box */
+    .pdf-fields {
+      margin-top: 12px;
+      border-radius: 16px;
+      padding: 10px 10px 12px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      font-size: 0.8rem;
+    }
+    .pdf-fields .t {
+      font-size: 0.84rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .pdf-fields .desc {
+      margin: 0 0 10px;
+      font-size: 0.76rem;
+      color: #d1d5db;
+      line-height: 1.35;
+    }
+    .pdf-fields .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 640px) {
+      .pdf-fields .row { grid-template-columns: 1fr; }
+    }
+    .pdf-fields label {
+      display: block;
+      font-size: 0.75rem;
+      color: #e5e7eb;
+      margin-bottom: 4px;
+    }
+    .pdf-fields input[type="text"],
+    .pdf-fields input[type="email"]{
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      padding: 7px 10px;
+      font-size: 0.84rem;
+      background: rgba(2, 6, 23, 0.96);
+      color: #e5e7eb;
+      outline: none;
+    }
+    .pdf-fields input:focus { border-color: rgba(251, 191, 36, 0.9); box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.4); }
+    .pdf-fields .check {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.76rem;
+      color: #d1d5db;
+    }
+    .pdf-fields .check input { transform: translateY(1px); }
+    .pdf-fields .hint {
+      margin-top: 6px;
+      font-size: 0.72rem;
+      color: #9ca3af;
+      line-height: 1.35;
+    }
+    .pdf-fields .muted-value {
+      margin-top: 6px;
+      font-size: 0.74rem;
+      color: #9ca3af;
+    }
+    .pdf-fields .muted-value strong { color: #e5e7eb; }
   </style>
 </head>
 
@@ -626,7 +694,7 @@
       </button>
 
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small" />
-      <div class="user-chip" id="userChip">Prihlásený:</div>
+      <div class="user-chip" id="userChip">Prihlásený: –</div>
     </div>
   </header>
 
@@ -928,7 +996,7 @@
             <div class="recommended-name" id="recommendedName">Zatiaľ nevybraná – zvoľte výšku a odtok vody.</div>
             <div class="recommended-note" id="recommendedNote">
               Po výbere konštrukčnej výšky a odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón.
-              Podrobný technický popis a prierezy dostanete v PDF priamo v Lištobooku.
+              Podrobný technický popis a prierezy dostanete v PDF podklade priamo v Lištobooku.
             </div>
           </div>
 
@@ -987,6 +1055,47 @@
               Lepidlo (Sopro / Mapei): cca <strong><span id="k4BomAdhesiveBags">–</span> vriec</strong>
             </div>
           </div>
+
+          <!-- ✅ Údaje do PDF (voliteľné) -->
+          <div class="pdf-fields" id="pdfFieldsBox">
+            <div class="t">Údaje pre PDF (voliteľné)</div>
+            <p class="desc">
+              Kalkulačka je verejná. Preto e-mail <strong>nezobrazujeme automaticky</strong>.
+              Ak ste prihlásený, meno/firma si predvyplníme z profilu. Ak nie ste prihlásený, môžete údaje nechať prázdne.
+            </p>
+
+            <div class="row">
+              <div>
+                <label for="pdfCustomerName">Meno a priezvisko</label>
+                <input type="text" id="pdfCustomerName" placeholder="napr. Ján Novák" />
+              </div>
+              <div>
+                <label for="pdfCustomerCompany">Firma</label>
+                <input type="text" id="pdfCustomerCompany" placeholder="napr. Novák Stavby s.r.o." />
+              </div>
+            </div>
+
+            <div class="check">
+              <input type="checkbox" id="pdfShowEmail" />
+              <label for="pdfShowEmail" style="margin:0;">Zobraziť e-mail v PDF (iba ak si to prajete)</label>
+            </div>
+
+            <div class="row" style="margin-top:8px;">
+              <div style="grid-column: 1 / -1;">
+                <label for="pdfCustomerEmail">E-mail (zobrazí sa len ak je checkbox zapnutý)</label>
+                <input type="email" id="pdfCustomerEmail" placeholder="napr. zakaznik@email.sk" />
+              </div>
+            </div>
+
+            <div class="muted-value" id="pdfAutoNameInfo" style="display:none;">
+              Predvyplnené z profilu: <strong id="pdfAutoNameText">—</strong>
+            </div>
+
+            <div class="hint">
+              Pravidlo v PDF: použijeme <strong>Meno</strong>, ak nie je, tak <strong>Firmu</strong>, ak nie je, tak <strong>Prezývku</strong>.
+              E-mail len keď ho výslovne povolíte.
+            </div>
+          </div>
         </div>
 
         <div>
@@ -1024,7 +1133,7 @@
       </div>
     </div>
 
-    <!-- MODAL – hrúbka dlažby / obkladu (nechávame, ak ho používaš inde) -->
+    <!-- MODAL – hrúbka dlažby / obkladu -->
     <div id="tileModal" class="preview-modal" aria-hidden="true">
       <div class="preview-backdrop"></div>
       <div class="preview-dialog" role="dialog" aria-modal="true">

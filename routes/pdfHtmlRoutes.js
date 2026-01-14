@@ -121,35 +121,35 @@ function ceilPositive(n) {
 }
 
 /**
- * Page 5 logic:
+ * Page 5 logic (server):
  * - DITRA width is ~ 1.0 m
  * - number of joints = max(0, ceil(B / 1.0) - 1)
- * - KEBA meters = perimeter + joints * A
+ * - KEBA meters = perimeterFull + joints * A
  * - COLL kg:
- *    perimeter * 0.35  (DITRA + BARA napojenie ~350 g/m)
+ *    perimeterFull * 0.35  (DITRA + BARA napojenie ~350 g/m)
  *  + joints*A * 0.36   (DITRA spoj ~360 g/m)
  * - packaging: 4.25 kg (large), 1.85 kg (small)
  */
 function buildPage5Consumption(calc) {
-  const perimeter = pickNumber(calc, ["perimeter"]);
-  // A = length, B = width (we try several key names, to survive current FE naming)
+  const perimeterFull =
+    pickNumber(calc, ["perimeterFull"]) ??
+    pickNumber(calc, ["perimeter_total", "perimeterTotal"]) ??
+    pickNumber(calc, ["perimeter"]);
+
   const A = pickNumber(calc, ["a", "A", "lengthA", "lenA", "length", "longSide", "sideA"]);
   const B = pickNumber(calc, ["b", "B", "widthB", "lenB", "width", "shortSide", "sideB"]);
 
-  // If we don't have A/B, we can still show edge consumption (perimeter).
   const widthForJoints = B;
-  const joints = widthForJoints != null ? Math.max(0, ceilPositive(widthForJoints / 1.0) - 1) : null;
+  const joints =
+    widthForJoints != null ? Math.max(0, ceilPositive(widthForJoints / 1.0) - 1) : null;
 
-  const kebaEdge = perimeter != null ? perimeter : null;
-  const kebaJoints = (joints != null && A != null) ? (joints * A) : 0;
-  const kebaTotal = (kebaEdge != null) ? (kebaEdge + kebaJoints) : null;
+  const kebaEdge = perimeterFull != null ? perimeterFull : null;
+  const kebaJoints = joints != null && A != null ? joints * A : 0;
+  const kebaTotal = kebaEdge != null ? kebaEdge + kebaJoints : null;
 
-  // COLL kg based on tech sheet:
-  // - edge (DITRA + BARA): 0.35 kg/m
-  // - joints (DITRA joints): 0.36 kg/m
-  const collEdgeKg = (perimeter != null) ? (perimeter * 0.35) : null;
-  const collJointsKg = (joints != null && A != null) ? (joints * A * 0.36) : 0;
-  const collTotalKg = (collEdgeKg != null) ? (collEdgeKg + collJointsKg) : null;
+  const collEdgeKg = perimeterFull != null ? perimeterFull * 0.35 : null;
+  const collJointsKg = joints != null && A != null ? joints * A * 0.36 : 0;
+  const collTotalKg = collEdgeKg != null ? collEdgeKg + collJointsKg : null;
 
   const PACK_L = 4.25;
   const PACK_S = 1.85;
@@ -159,15 +159,10 @@ function buildPage5Consumption(calc) {
     const big = Math.ceil(collTotalKg / PACK_L);
     const rem = collTotalKg - big * PACK_L;
 
-    // Simple, customer-friendly:
-    // - if <= 4.25 kg -> 1x veľké, else big x veľké
-    // - if small top-up makes sense (rem > 0), offer small as alternative (optional)
     if (collTotalKg <= PACK_L) {
       packsText = `1× 4,25 kg (alebo 1× 1,85 kg pri menšej spotrebe)`;
     } else {
-      // Optional small top-up suggestion if remainder is more than ~0.3kg
       if (rem > 0.3) {
-        // Offer either one more big, or one small (depending on rem)
         if (rem <= PACK_S) {
           packsText = `${big}× 4,25 kg + 1× 1,85 kg`;
         } else {
@@ -188,7 +183,7 @@ function buildPage5Consumption(calc) {
 
   const kebaEdgeText = kebaEdge != null ? `${formatNumSk(kebaEdge, 1)} m` : "–";
   const kebaJointsText =
-    (joints != null && A != null)
+    joints != null && A != null
       ? joints === 0
         ? "0,0 m"
         : `${formatNumSk(kebaJoints, 1)} m (≈ ${joints}× ${formatNumSk(A, 1)} m)`
@@ -207,6 +202,124 @@ function buildPage5Consumption(calc) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// ✅ Page 6/7: BARA-RT / BARA-RW helpery (len logika textov a kódov)
+// ---------------------------------------------------------------------------
+function normalizeRtVariantFromText(recoTextRaw) {
+  const t = safeText(recoTextRaw).toUpperCase().replace(/\s+/g, " ").trim();
+  // preferuj presnejší variant (ak je v texte viac možností)
+  if (t.includes("RT12/65")) return "RT12/65";
+  if (t.includes("RT12/15") || t.includes("RT12/16")) return "RT12/15";
+  if (t.includes("RT9/60")) return "RT9/60";
+  if (t.includes("RT20/50")) return "RT20/50";
+  if (t.includes("RT25/40")) return "RT25/40";
+  if (t.includes("RT30/35")) return "RT30/35";
+  // fallback – nič spoľahlivé
+  return "";
+}
+
+function buildBaraVars(calc, perimeterProfiles, profilePieces) {
+  const tileMm = pickNumber(calc, ["tileThicknessMm"]) ?? null;
+  const family = safeText(calc?.baraFamily).toUpperCase(); // "RT" | "RW" | ""
+  const recoText = safeText(calc?.baraRecommendationText);
+  const rwOptionsText = safeText(calc?.baraRwOptionsText);
+
+  const tileThicknessText = tileMm != null ? `${Math.round(tileMm)} mm` : "–";
+
+  // Farba teraz neriešime => default text
+  const colorBaseText = "základná (bez RAL)";
+
+  // orientačne: spojky ~ počet kusov - 1, rohy ~ 2 (koniec profilu pri dvoch koncoch)
+  const pcs = Number.isFinite(Number(profilePieces)) ? Number(profilePieces) : null;
+  const connectorsQty = pcs != null ? Math.max(0, pcs - 1) : null;
+  const cornersQty = perimeterProfiles != null && perimeterProfiles > 0 ? 2 : 0;
+
+  // RT kód (bez farby)
+  const rtVariant = normalizeRtVariantFromText(recoText) || "RT";
+  const rtCornerCode = rtVariant && rtVariant !== "RT" ? `E90${rtVariant}` : "E90RT…";
+  const rtConnectorCode = rtVariant && rtVariant !== "RT" ? `V/${rtVariant}` : "V/RT…";
+
+  // RW kód
+  const rwCornerCode = "E90/RW…";
+  const rwConnectorCode = "V/RW…";
+
+  // Čo zobrazíme na strane 6 ako „Typ profilu“
+  const baraProfileTypeText =
+    family === "RW" ? "BARA-RW (alternatíva)" : "BARA-RT";
+
+  // „Výška profilu podľa hrúbky dlažby“ (strana 6)
+  let baraHeightChoiceText = "–";
+  let baraHeightNoteText = "";
+  if (family === "RT") {
+    baraHeightChoiceText = recoText ? recoText : "BARA-RT (podľa hrúbky dlažby)";
+    baraHeightNoteText =
+      "RT: horné číslo profilu kryje a chráni hranu dlažby; spodné číslo je len prekrytie betónu (dekor).";
+  } else if (family === "RW") {
+    baraHeightChoiceText = "BARA-RW (odporúčané pri dlažbách nad 30 mm alebo ako alternatíva)";
+    baraHeightNoteText =
+      "RW je dekoračný profil – rieši len spodné prekrytie betónu (odkvapový „jazyk“). Krytie dlažby sa pri RW nepočíta.";
+  } else {
+    // ak chýba family
+    baraHeightChoiceText = recoText ? recoText : "–";
+  }
+
+  // Strana 7 – hodnoty do tabuliek
+  const rtProfilePiecesText = family === "RT" ? (pcs != null ? `${pcs} ks` : "–") : "–";
+  const rtCornersText = family === "RT" ? `${cornersQty} ks` : "–";
+  const rtConnectorsText = family === "RT" ? (connectorsQty != null ? `${connectorsQty} ks` : "–") : "–";
+  const rtColorCode = family === "RT" ? colorBaseText : "–";
+
+  const rwLengthText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
+  const rwProfilePiecesText = family === "RW" ? (pcs != null ? `${pcs} ks` : "–") : "–";
+  const rwCornerCodeAndQty =
+    family === "RW" ? `${rwCornerCode} (${cornersQty} ks)` : "–";
+  const rwConnectorCodeAndQty =
+    family === "RW"
+      ? `${rwConnectorCode} (${connectorsQty != null ? connectorsQty : 0} ks)`
+      : "–";
+  const rwColorCode = family === "RW" ? colorBaseText : "–";
+
+  // doplnok textov (RW možnosti)
+  const rwOptionsLine =
+    family === "RW" && rwOptionsText
+      ? rwOptionsText
+      : family === "RW"
+      ? "Možnosti RW spodok (mm): 15, 25, 30, 45, 55, 75, 95, 120, 150"
+      : "";
+
+  // RT – ak chceme ukázať „kód“ aj bez farby
+  const rtCodeShortText = family === "RT" ? (rtVariant || "RT…") : "–";
+  const rtCornerCodeText = family === "RT" ? rtCornerCode : "–";
+  const rtConnectorCodeText = family === "RT" ? rtConnectorCode : "–";
+
+  return {
+    tileThicknessText,
+    baraFamilyText: family || "–",
+    baraRecommendationText: recoText || "–",
+    baraRwOptionsText: rwOptionsLine,
+
+    baraProfileTypeText,
+    baraHeightChoiceText,
+    baraHeightNoteText,
+
+    // page7 RT
+    rtProfilePiecesText,
+    rtCornersText,
+    rtConnectorsText,
+    rtColorCode,
+    rtCodeShortText,
+    rtCornerCodeText,
+    rtConnectorCodeText,
+
+    // page7 RW
+    rwLengthText,
+    rwProfilePiecesText,
+    rwCornerCodeAndQty,
+    rwConnectorCodeAndQty,
+    rwColorCode,
+  };
+}
+
 function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const email = safeText(payload?.meta?.email || "");
   const calc = payload?.calc || {};
@@ -215,14 +328,25 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const pdfCode = safeText(payload?.meta?.pdfCode) || `LC-${Date.now()}`;
 
   const area = calc?.area;
-  const perimeter = calc?.perimeter;
+
+  // ✅ obvod pre profily (voľné hrany)
+  const perimeterProfiles =
+    pickNumber(calc, ["perimeterProfiles"]) ??
+    pickNumber(calc, ["perimeter_profiles", "perimeterProfiles"]) ??
+    pickNumber(calc, ["perimeter"]);
+
+  // ✅ celý obvod (aj pri stene) – pre KEBA/COLL
+  const perimeterFull =
+    pickNumber(calc, ["perimeterFull"]) ??
+    pickNumber(calc, ["perimeter_total", "perimeterTotal"]) ??
+    pickNumber(calc, ["perimeter"]);
 
   const shapeLabel = safeText(calc?.shapeLabel || "–");
   const heightLabel = safeText(calc?.heightLabel || "–");
   const drainLabel = safeText(calc?.drainLabel || "–");
 
   const areaText = area != null ? `${formatNumSk(area, 1)} m²` : "–";
-  const perimeterText = perimeter != null ? `${formatNumSk(perimeter, 1)} bm` : "–";
+  const perimeterText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} bm` : "–";
 
   const ditraAreaText =
     bom?.membraneArea != null
@@ -239,7 +363,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
       ? `≈ ${formatNumSk((bom.adhesiveBags * 25) / area, 1)} kg/m²`
       : "–";
 
-  const edgeLengthText = perimeter != null ? `${formatNumSk(perimeter, 1)} m` : "–";
+  // ✅ profily: len voľné hrany
+  const edgeLengthText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
   const edgeProfilePiecesText =
     bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
 
@@ -283,8 +408,17 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     ? toAbsPublicUrl(baseOrigin, cutawayImage)
     : "";
 
-  // ✅ PAGE 5 – compute on server (no need FE/BOM)
-  const page5 = buildPage5Consumption(calc);
+  // ✅ PAGE 5 – compute on server
+  const page5 = buildPage5Consumption({
+    ...calc,
+    perimeterFull,
+  });
+
+  // ✅ PAGE 6/7 – BARA RT/RW vars
+  const profilePiecesNum =
+    bom?.profilesCount != null ? Number(bom.profilesCount) : null;
+
+  const baraVars = buildBaraVars(calc, perimeterProfiles, profilePiecesNum);
 
   return {
     baseUrl: baseOrigin.replace(/\/$/, ""),
@@ -324,6 +458,9 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     kebaMetersText: page5.kebaMetersText,
     collConsumptionText: page5.collConsumptionText,
     collPacksText: page5.collPacksText,
+
+    // ✅ page6/7 variables
+    ...baraVars,
   };
 }
 
@@ -331,7 +468,6 @@ async function htmlToPdfBuffer(browser, html) {
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });
 
-  // ✅ DÔLEŽITÉ: generuj ako PRINT, aby platilo @media print (biela verzia do PDF)
   await page.emulateMediaType("print");
 
   const pdf = await page.pdf({

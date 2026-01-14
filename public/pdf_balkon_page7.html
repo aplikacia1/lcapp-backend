@@ -18,7 +18,7 @@
           <div class="mini-logo"><img src="/logo_lc.jpg" alt="Lištové centrum"></div>
           <div class="mini-title">
             <strong>Technický podklad – balkónová skladba</strong>
-            <span>Komponenty ukončenia hrany + alternatíva profilu</span>
+            <span>Komponenty ukončenia hrany (BARA-RT / BARA-RW)</span>
           </div>
         </div>
         <div class="mini-code">
@@ -27,44 +27,49 @@
         </div>
       </header>
 
-      <h2 class="pdf-h2">7. Ukončenie hrany – komponenty a varianty (BARA-RT / BARA-RW)</h2>
+      <h2 class="pdf-h2">7. Ukončenie hrany – komponenty (BARA-RT / BARA-RW)</h2>
       <p class="subtitle-sm subtitle-sm--p7">
-        Rýchla pomôcka: čo je <strong>roh</strong> a čo je <strong>spojka</strong> a koľko ich môže byť potrebných.
-        Profily sa dodávajú v dĺžke <strong>2,50 m</strong>. Počty sa doplnia z kalkulačky alebo sa upresnia pri nacenení.
+        Profily sa dodávajú v dĺžke <strong>2,50 m</strong>. Rohy a spojky sú orientačné – pri nacenení to upresní technik podľa detailu.
       </p>
 
       <section class="grid-2-stretch grid-2-stretch--p7">
         <!-- RT -->
         <article class="card">
           <div class="card-inner compact card-inner--p7">
-            <span class="chip chip--p7">Variant A: BARA-RT (bez rýny)</span>
+            <span class="chip chip--p7">Variant A: BARA-RT (ochrana hrany dlažby)</span>
 
             <p class="p p--p7">
-              <strong>BARA-RT</strong> rieši ukončenie voľnej hrany a riadený odvod vody cez presah.
+              <strong>BARA-RT</strong> sa volí podľa hrúbky dlažby. Kód RT (napr. <strong>{{rtCodeShortText}}</strong>) určuje prekrytie dlažby (horné číslo) a prekrytie betónu (spodné číslo).
             </p>
 
             <table class="table-compact table-compact--p7">
               <tr><th>Položka</th><th>Hodnota</th></tr>
               <tr><td>Voľná hrana</td><td>{{edgeLengthText}}</td></tr>
               <tr><td>Profily (2,50 m)</td><td>{{rtProfilePiecesText}}</td></tr>
-              <tr><td>Rohy 90°</td><td>{{rtCornersText}}</td></tr>
-              <tr><td>Spojky</td><td>{{rtConnectorsText}}</td></tr>
+              <tr><td>Rohy 90°</td><td>{{rtCornersText}} ({{rtCornerCodeText}})</td></tr>
+              <tr><td>Spojky</td><td>{{rtConnectorsText}} ({{rtConnectorCodeText}})</td></tr>
               <tr><td>Farba</td><td>{{rtColorCode}}</td></tr>
             </table>
 
-            <div class="mini-legend mini-legend--p7">
-              <div class="mini-item mini-item--p7">
-                <img src="/img/pdf/balkon/bara-rt-corner-e90.png" alt="Roh 90° BARA-RT">
-                <div class="mini-label">Roh 90° (E90)</div>
+            <!-- ✅ NOVÉ: BARA -> ROH -> SPOJKA (pod sebou) -->
+            <div class="components-stack components-stack--p7">
+              <div class="component-item--p7 component-profile">
+                <div class="component-title--p7">BARA profil</div>
+                <img src="/img/pdf/balkon/bara-rt-profile.png" alt="Schlüter BARA-RT – profil">
+                <div class="component-code--p7">{{rtCodeShortText}}</div>
               </div>
-              <div class="mini-item mini-item--p7">
-                <img src="/img/pdf/balkon/bara-rt-connector-v.png" alt="Spojka BARA-RT">
-                <div class="mini-label">Spojka (V)</div>
-              </div>
-            </div>
 
-            <div class="profile-img profile-img--p7">
-              <img src="/img/pdf/balkon/bara-rt-profile.png" alt="Schlüter BARA-RT – profil">
+              <div class="component-item--p7">
+                <div class="component-title--p7">Roh 90°</div>
+                <img src="/img/pdf/balkon/bara-rt-corner-e90.png" alt="Roh 90° BARA-RT">
+                <div class="component-code--p7">{{rtCornerCodeText}}</div>
+              </div>
+
+              <div class="component-item--p7">
+                <div class="component-title--p7">Spojka</div>
+                <img src="/img/pdf/balkon/bara-rt-connector-v.png" alt="Spojka BARA-RT">
+                <div class="component-code--p7">{{rtConnectorCodeText}}</div>
+              </div>
             </div>
           </div>
         </article>
@@ -72,57 +77,45 @@
         <!-- RW -->
         <article class="card">
           <div class="card-inner compact card-inner--p7">
-            <span class="chip chip--p7">Variant B: BARA-RW (alternatíva)</span>
+            <span class="chip chip--p7">Variant B: BARA-RW (alternatíva / vyššia dlažba)</span>
 
             <p class="p p--p7">
-              <strong>BARA-RW</strong> je alternatíva. Výška profilu (RW60 / RW100 …) sa volí podľa výšky čela (konštrukcia + dlažba).
+              <strong>BARA-RW</strong> je dekoračný profil – rieši len spodné prekrytie (odkvapový „jazyk“).
+              Hodí sa na všetky typy dlažby, pretože do krytiny nezasahuje.
             </p>
 
             <table class="table-compact table-compact--p7">
               <tr><th>Položka</th><th>Hodnota</th></tr>
               <tr><td>Voľná hrana</td><td>{{rwLengthText}}</td></tr>
               <tr><td>Profily (2,50 m)</td><td>{{rwProfilePiecesText}}</td></tr>
-              <tr><td>Roh 90° (kód)</td><td>{{rwCornerCodeAndQty}}</td></tr>
-              <tr><td>Spojka (kód)</td><td>{{rwConnectorCodeAndQty}}</td></tr>
+              <tr><td>Roh 90°</td><td>{{rwCornerCodeAndQty}}</td></tr>
+              <tr><td>Spojka</td><td>{{rwConnectorCodeAndQty}}</td></tr>
+              <tr><td>Možnosti RW</td><td>{{baraRwOptionsText}}</td></tr>
               <tr><td>Farba</td><td>{{rwColorCode}}</td></tr>
             </table>
 
-            <div class="mini-legend mini-legend--p7">
-              <div class="mini-item mini-item--p7">
-                <img src="/img/pdf/balkon/bara-rw-corner-e90.png" alt="Roh 90° BARA-RW">
-                <div class="mini-label">Roh 90° (E90/RW)</div>
+            <!-- ✅ NOVÉ: BARA -> ROH -> SPOJKA (pod sebou) -->
+            <div class="components-stack components-stack--p7">
+              <div class="component-item--p7 component-profile">
+                <div class="component-title--p7">BARA profil</div>
+                <img src="/img/pdf/balkon/bara-rw-profile.png" alt="Schlüter BARA-RW – profil">
+                <div class="component-code--p7">BARA-RW</div>
               </div>
-              <div class="mini-item mini-item--p7">
-                <img src="/img/pdf/balkon/bara-rw-connector-v.png" alt="Spojka BARA-RW">
-                <div class="mini-label">Spojka (V/RW)</div>
-              </div>
-            </div>
 
-            <div class="profile-img profile-img--p7">
-              <img src="/img/pdf/balkon/bara-rw-profile.png" alt="Schlüter BARA-RW – profil">
+              <div class="component-item--p7">
+                <div class="component-title--p7">Roh 90°</div>
+                <img src="/img/pdf/balkon/bara-rw-corner-e90.png" alt="Roh 90° BARA-RW">
+                <div class="component-code--p7">{{rwCornerCodeAndQty}}</div>
+              </div>
+
+              <div class="component-item--p7">
+                <div class="component-title--p7">Spojka</div>
+                <img src="/img/pdf/balkon/bara-rw-connector-v.png" alt="Spojka BARA-RW">
+                <div class="component-code--p7">{{rwConnectorCodeAndQty}}</div>
+              </div>
             </div>
           </div>
         </article>
-      </section>
-
-      <section class="summary summary--p7">
-        <div class="summary-inner summary-inner--p7">
-          <p class="summary-title summary-title--p7">Rýchly sumár (orientačne)</p>
-          <div class="summary-grid summary-grid--p7">
-            <div class="sum-col">
-              <strong>BARA-RT:</strong>
-              profily <strong>{{rtProfilePiecesText}}</strong>,
-              rohy <strong>{{rtCornersText}}</strong>,
-              spojky <strong>{{rtConnectorsText}}</strong>
-            </div>
-            <div class="sum-col">
-              <strong>BARA-RW:</strong>
-              profily <strong>{{rwProfilePiecesText}}</strong>,
-              roh <strong>{{rwCornerCodeAndQty}}</strong>,
-              spojka <strong>{{rwConnectorCodeAndQty}}</strong>
-            </div>
-          </div>
-        </div>
       </section>
     </div>
 
