@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const backBtn = document.getElementById("backBtn");
   if (backBtn) {
     backBtn.addEventListener("click", () => {
-      const target = "calc_index.html";
+      const target = "kalkulacky.html";
       if (email) {
         window.location.href = `${target}?email=${encodeURIComponent(email)}`;
       } else {

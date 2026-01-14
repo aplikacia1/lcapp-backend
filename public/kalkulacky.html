@@ -3,7 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kalkulačky – Lištobook</title>
+
+  <!-- SEO: Title + Description -->
+  <title>Kalkulačky Lištového centra – orientačný výpočet do PDF | Lištobook</title>
+  <meta
+    name="description"
+    content="Verejné pracovné kalkulačky Lištového centra: orientačný prepočet podkladov pre balkón/terasu a ďalšie projekty. Výsledok pripravíme v PDF."
+  />
+
+  <!-- Robots -->
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+
+  <!-- Canonical (zabráni duplicite, ak by existovalo viac URL variantov) -->
+  <link rel="canonical" href="https://www.listobook.sk/kalkulacky.html" />
+
+  <!-- Favicon / Icons (dôležité aj pre Google výsledky) -->
+  <link rel="icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="img/icons/apple-touch-icon.png" />
+
+  <!-- Open Graph (Facebook/Messenger/WhatsApp/LinkedIn) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Lištové centrum – Lištobook" />
+  <meta property="og:locale" content="sk_SK" />
+  <meta property="og:title" content="Kalkulačky Lištového centra – orientačný výpočet do PDF" />
+  <meta
+    property="og:description"
+    content="Verejné pracovné kalkulačky Lištového centra. Vygenerujte orientačný prepočet a získajte podklady v PDF."
+  />
+  <meta property="og:url" content="https://www.listobook.sk/kalkulacky.html" />
+  <!-- OG image: ideálne 1200×630 -->
+  <meta property="og:image" content="https://www.listobook.sk/img/og/kalkulacky-1200x630.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Kalkulačky Lištového centra – orientačný výpočet do PDF" />
+  <meta
+    name="twitter:description"
+    content="Verejné pracovné kalkulačky Lištového centra. Výsledok orientačne pripravíme v PDF."
+  />
+  <meta name="twitter:image" content="https://www.listobook.sk/img/og/kalkulacky-1200x630.jpg" />
+
+  <!-- JSON-LD (pomáha Googlu pochopiť stránku + logo značky) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "Lištové centrum",
+        "url": "https://www.listobook.sk/",
+        "logo": "https://www.listobook.sk/img/og/logo-listove-centrum.png"
+      },
+      {
+        "@type": "WebPage",
+        "name": "Kalkulačky Lištového centra",
+        "url": "https://www.listobook.sk/kalkulacky.html",
+        "description": "Verejné pracovné kalkulačky Lištového centra – orientačný prepočet podkladov pre projekt a výstup do PDF.",
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "Lištobook",
+          "url": "https://www.listobook.sk/"
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="stylesheet" href="style.css" />
   <style>
     :root {
@@ -26,7 +93,6 @@
 
     a { color: inherit; text-decoration: none; }
 
-    /* HEADER – rovnaký štýl ako entertainment / calc_terasa */
     .app-header {
       position: fixed;
       inset: 0 0 auto 0;
@@ -75,7 +141,6 @@
 
     .icon-btn svg { width: 22px; height: 22px; }
 
-    /* LAYOUT */
     .wrap {
       max-width: var(--max-w);
       margin: 0 auto;
@@ -96,7 +161,6 @@
       color: #e5e7eb;
     }
 
-    /* Žlto-čierne „bezpečnostné“ pásy – len na PC */
     .safety-stripes {
       position: fixed;
       inset: var(--hdr-h) 0 0 0;
@@ -131,7 +195,6 @@
       .safety-stripes::after { right: 0; }
     }
 
-    /* Karta s kalkulačkami */
     .card-shell {
       background: radial-gradient(circle at top, #0f172a 0, #020617 55%);
       border-radius: 22px;
@@ -285,7 +348,6 @@
 </head>
 
 <body>
-  <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <button class="icon-btn" id="backBtn" aria-label="Späť">
@@ -306,10 +368,8 @@
     </div>
   </header>
 
-  <!-- Bezpečnostné pásy po bokoch (len PC) -->
   <div class="safety-stripes" aria-hidden="true"></div>
 
-  <!-- MAIN -->
   <main class="wrap">
     <h1 class="page-title">Kalkulačky</h1>
     <p class="page-subtitle">
@@ -328,7 +388,6 @@
       </div>
 
       <div class="calc-grid">
-        <!-- Kalkulačka líšt -->
         <article class="calc-card">
           <div class="badge-prep">PRIPRAVUJEME</div>
           <h2 class="calc-title">📐 Kalkulačka líšt</h2>
@@ -342,7 +401,6 @@
           </div>
         </article>
 
-        <!-- Kalkulačka terás -->
         <article class="calc-card">
           <div class="badge-prep">PRIPRAVUJEME</div>
           <h2 class="calc-title">🏡 Kalkulačka terás Schlüter®</h2>
@@ -371,15 +429,11 @@
     const params = new URLSearchParams(window.location.search);
     const userEmail = (params.get("email") || "").trim();
 
-    // user chip v hlavičke
     const chip = document.getElementById("userChip");
     if (chip) {
       chip.textContent = userEmail ? `Prihlásený: ${userEmail}` : "Verejný vstup";
     }
 
-    // späť:
-    // - prihlásený: späť na timeline s emailom
-    // - neprihlásený: späť na index.html (vstupná stránka webu)
     const backBtn = document.getElementById("backBtn");
     if (backBtn) {
       backBtn.addEventListener("click", () => {
@@ -391,7 +445,6 @@
       });
     }
 
-    // univerzálne prepínanie stránok – s emailom len ak existuje
     function go(page) {
       if (userEmail) {
         window.location.href = `${page}?email=${encodeURIComponent(userEmail)}`;

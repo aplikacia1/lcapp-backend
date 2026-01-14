@@ -1,1028 +1,1489 @@
-/* calc_balkony.js
-   Schlüter® vysunutý balkón – kalkulačka (kroky 2–4)
-   - výpočty plochy + obvodu pre lišty (s možnosťou "pri stene")
-   - výber konštrukčnej výšky + odtoku vody
-   - sumár pre PDF + odosielanie dát na backend
-*/
+// public/calc_balkony.js
+document.addEventListener("DOMContentLoaded", () => {
+  // ---------------------------------------------------------------------------
+  // EMAIL v hlavičke + späť
+  // ---------------------------------------------------------------------------
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get("email"); // prihlásený používateľ (owner)
 
-(() => {
-  "use strict";
+  const userChip = document.getElementById("userChip");
+  if (userChip) {
+    userChip.textContent = email ? `Prihlásený: ${email}` : "Prihlásený: –";
+  }
 
-  // ---------------------------
-  // Helpers
-  // ---------------------------
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      const target = "calc_terasa_base.html";
+      window.location.href = email
+        ? `${target}?email=${encodeURIComponent(email)}`
+        : target;
+    });
+  }
 
-  const round1 = (n) => {
-    if (!Number.isFinite(n)) return null;
-    return Math.round(n * 10) / 10;
+  // ---------------------------------------------------------------------------
+  // MAPPING: výška + odtok z DOM -> config_balkony.js
+  // ---------------------------------------------------------------------------
+  const HEIGHT_DOM_TO_CONFIG = { low: "LOW", medium: "MEDIUM", high: "HIGH" };
+  const DRAIN_DOM_TO_CONFIG = {
+    "edge-free": "EDGE_FREE",
+    "edge-gutter": "EDGE_GUTTER",
+    "internal-drain": "FLOOR_DRAIN",
   };
 
-  const toNum = (v) => {
-    if (v === null || v === undefined) return null;
-    const s = String(v).trim().replace(",", ".");
-    if (!s) return null;
-    const n = Number(s);
-    return Number.isFinite(n) ? n : null;
-  };
+  function hasConfigSystems() {
+    return Array.isArray(window.BALCONY_SYSTEMS);
+  }
 
-  const isEmail = (s) => {
-    const v = String(s || "").trim();
-    if (!v) return false;
-    // jednoduchá, praktická validácia
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  };
+  function findBalconySystem(heightDom, drainDom) {
+    if (!hasConfigSystems() || !heightDom || !drainDom) return null;
+    const hCfg = HEIGHT_DOM_TO_CONFIG[heightDom];
+    const dCfg = DRAIN_DOM_TO_CONFIG[drainDom];
+    if (!hCfg || !dCfg) return null;
 
-  const clampMin0 = (n) => (Number.isFinite(n) && n >= 0 ? n : null);
-
-  const getUrlEmail = () => {
-    const u = new URL(window.location.href);
-    const e = (u.searchParams.get("email") || "").trim();
-    return e || null;
-  };
-
-  const getApiBase = () => {
-    // ak niekde používaš config.js / config_balkony.js, nechytáme sa na konkrétny názov
-    // a fungujeme aj keď je to prázdne.
     return (
-      window.API_BASE_URL ||
-      window.API_BASE ||
-      window.BACKEND_URL ||
-      window.CONFIG?.API_BASE ||
-      ""
+      window.BALCONY_SYSTEMS.find(
+        (sys) => sys.heightCategory === hCfg && sys.drainType === dCfg
+      ) || null
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // PREVIEW obrázky – 9 kombinácií (3 výšky × 3 typy odtoku)
+  // ---------------------------------------------------------------------------
+  const SYSTEM_PREVIEWS = {
+    LOW_EDGE_FREE: {
+      src: "img/systems/balkon-low-edge-free.png",
+      caption:
+        "Nízka konštrukčná výška – voda steká cez voľnú hranu, orientačný prierez skladby Schlüter®-DITRA.",
+    },
+    LOW_EDGE_GUTTER: {
+      src: "img/systems/balkon-low-edge-gutter.png",
+      caption:
+        "Nízka konštrukčná výška – žľab pri hrane (Schlüter®-BARIN) s ukončovacím profilom BARA-RTKE / BARA-RTK.",
+    },
+    LOW_FLOOR_DRAIN: {
+      src: "img/systems/balkon-low-internal-drain.png",
+      caption:
+        "Nízka konštrukčná výška – vnútorný vpust (Schlüter®-KERDI-DRAIN) napojený na rohož Schlüter®-DITRA.",
+    },
+
+    MEDIUM_EDGE_FREE: {
+      src: "img/systems/balkon-edge-free.png",
+      caption:
+        "Stredná konštrukčná výška – voda steká cez voľnú hranu, orientačný prierez skladby Schlüter®-DITRA-DRAIN.",
+    },
+    MEDIUM_EDGE_GUTTER: {
+      src: "img/systems/balkon-edge-gutter.png",
+      caption:
+        "Stredná konštrukčná výška – žľab pri hrane (Schlüter®-BARIN) s profilmi BARA-RTKE / BARA-RTK.",
+    },
+    MEDIUM_FLOOR_DRAIN: {
+      src: "img/systems/balkon-internal-drain.png",
+      caption:
+        "Stredná konštrukčná výška – vnútorný vpust (Schlüter®-KERDI-DRAIN) v kombinácii s rohožou DITRA-DRAIN.",
+    },
+
+    // HIGH_EDGE_FREE neexistuje
+    HIGH_EDGE_GUTTER: {
+      src: "img/systems/balkon-high-edge-gutter.png",
+      caption:
+        "Vyššia konštrukčná výška – systém Schlüter®-BEKOTEC-DRAIN so žľabom pri hrane (Schlüter®-BARIN).",
+    },
+    HIGH_FLOOR_DRAIN: {
+      src: "img/systems/balkon-high-internal-drain.png",
+      caption:
+        "Vyššia konštrukčná výška – BEKOTEC-DRAIN s vnútorným vpustom (KERDI-DRAIN) a kontaktnou drenážou DITRA-DRAIN.",
+    },
   };
 
-  const apiFetch = async (path, options = {}) => {
-    const base = getApiBase();
-    const url = base ? `${base}${path}` : path;
-    const res = await fetch(url, options);
-    return res;
-  };
+  function getPreviewConfigForSystem(sys) {
+    if (!sys) return null;
+    return SYSTEM_PREVIEWS[sys.id] || null;
+  }
 
-  const safeJson = async (res) => {
-    try {
-      return await res.json();
-    } catch {
-      return null;
+  // ---------------------------------------------------------------------------
+  // ✅ BARA podľa hrúbky dlažby (mm)
+  // ---------------------------------------------------------------------------
+  function recommendBaraProfile(tileMm) {
+    const t = Number(tileMm);
+    if (!Number.isFinite(t) || t <= 0) {
+      return {
+        tileMm: null,
+        family: null,
+        recommendationText: "–",
+        note:
+          "Hrúbka dlažby nie je zadaná. Pre presnú cenovú ponuku doplníme vhodný profil podľa zvolenej krytiny.",
+      };
     }
-  };
 
-  // ---------------------------
-  // State
-  // ---------------------------
+    if (t <= 9) {
+      return {
+        tileMm: t,
+        family: "RT",
+        recommendationText: "BARA RT9/60",
+        note:
+          "RT: horné číslo kryje a chráni hranu dlažby; spodné číslo je dekor/prekrytie betónu.",
+      };
+    }
+    if (t <= 12) {
+      return {
+        tileMm: t,
+        family: "RT",
+        recommendationText: "BARA RT12/15 alebo RT12/65",
+        note:
+          "RT12 chráni hranu dlažby (12 mm). Rozdiel 15 vs 65 je len spodné prekrytie betónu (dekor).",
+      };
+    }
+    if (t <= 20) {
+      return {
+        tileMm: t,
+        family: "RT",
+        recommendationText: "BARA RT20/50",
+        note:
+          "RT: horné číslo kryje a chráni hranu dlažby; spodné číslo je dekor/prekrytie betónu.",
+      };
+    }
+    if (t <= 25) {
+      return {
+        tileMm: t,
+        family: "RT",
+        recommendationText: "BARA RT25/40",
+        note:
+          "RT: horné číslo kryje a chráni hranu dlažby; spodné číslo je dekor/prekrytie betónu.",
+      };
+    }
+    if (t <= 30) {
+      return {
+        tileMm: t,
+        family: "RT",
+        recommendationText: "BARA RT30/35",
+        note:
+          "RT: horné číslo kryje a chráni hranu dlažby; spodné číslo je dekor/prekrytie betónu.",
+      };
+    }
+
+    return {
+      tileMm: t,
+      family: "RW",
+      recommendationText: "BARA RW (podľa spodného prekrytia betónu)",
+      note:
+        "Pri vyššej dlažbe odporúčame RW. Pri RW riešime len spodné prekrytie betónu (dekor), krytie dlažby sa tu nepočíta.",
+      rwOptionsText: "Možnosti RW spodok (mm): 15, 25, 30, 40, 55, 75, 95, 120, 150",
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // SPOLOČNÝ STAV
+  // ---------------------------------------------------------------------------
   const state = {
-    // step2
-    shape: "square", // square | rectangle | l-shape
-    dims: { A: null, B: null, C: null, D: null, E: null, F: null },
-    wall: new Set(), // sides at wall
+    currentStep: 2,
+    fromStep1TypeKey: params.get("type") || "balcony-cantilever",
+    fromStep1TypeLabel: params.get("label") || "Vysunutý balkón (konzola)",
 
+    shapeKey: "square",
+    dims: {},
     area: null,
-    perimeterForProfiles: null,
+    perimeter: null,
+    geometryError: null,
 
-    // step3
-    height: null, // low | medium | high
-    drain: null, // edge-free | edge-gutter | internal-drain
+    wallSides: { A: false, B: false, C: false, D: false, E: false, F: false },
 
-    system: {
-      title: null,
-      note: null,
-      previewImg: null,
-      previewCaption: null,
-    },
+    heightDomId: null,
+    drainDomId: null,
+    system: null,
 
-    // bom (oriented)
-    bom: {
-      membraneArea: null,
-      profilesCount: null,
-      adhesiveBags: null,
-    },
+    tileThicknessMm: null,
+    pendingAction: null, // "download" | "email" | "offer" | null
 
-    // customer (step4)
-    customer: {
-      name: "",
-      company: "",
-      email: "",
-      showEmailInPdf: false,
-      nickname: "", // ak sa raz bude dať dotiahnuť
-      loggedEmail: null,
-    },
-
-    tileThicknessMm: 15, // default (aby PDF strany fungovali, kým sa zapojí modal logika)
+    // ✅ PDF údaje (verejné + prihlásený)
+    pdfCustomerName: "",
+    pdfCustomerCompany: "",
+    pdfCustomerEmail: "",
+    pdfShowEmailInPdf: false,
+    userAutoName: "", // z profilu, ak sa podarí
+    userAutoCompany: "", // z profilu, ak sa podarí
   };
 
-  // ---------------------------
-  // DOM refs
-  // ---------------------------
-  const el = {
-    // header
-    backBtn: $("#backBtn"),
-    userChip: $("#userChip"),
-
-    // steps
-    step2: $("#step2"),
-    step3: $("#step3"),
-    step4: $("#step4"),
-
-    // step2 controls
-    shapeCards: $$("#shapeGrid .shape-card"),
-    dimShapeInfo: $("#dimShapeInfo"),
-    sideA: $("#sideA"),
-    sideB: $("#sideB"),
-    sideC: $("#sideC"),
-    sideD: $("#sideD"),
-    sideE: $("#sideE"),
-    sideF: $("#sideF"),
-
-    fieldSideA: $("#fieldSideA"),
-    fieldSideB: $("#fieldSideB"),
-    fieldSideC: $("#fieldSideC"),
-    fieldSideD: $("#fieldSideD"),
-    fieldSideE: $("#fieldSideE"),
-    fieldSideF: $("#fieldSideF"),
-
-    wallBox: $("#wallBox"),
-    wallCheckboxes: $$(".wall-side-checkbox"),
-    wallLabels: $$("#wallCheckboxRow .wall-box-label"),
-    previewSideLabels: $$("[data-preview-side]"),
-
-    summaryArea: $("#summaryArea"),
-    summaryPerimeter: $("#summaryPerimeter"),
-
-    backToStep1Btn: $("#backToStep1Btn"),
-    goToStep3Btn: $("#goToStep3Btn"),
-
-    // step3 summary
-    k3Shape: $("#k3Shape"),
-    k3Area: $("#k3Area"),
-    k3Perimeter: $("#k3Perimeter"),
-
-    // step3 questions
-    heightRadios: $$('input[name="heightOption"]'),
-    drainOptions: $$(".drain-option"),
-    recommendedName: $("#recommendedName"),
-    recommendedNote: $("#recommendedNote"),
-
-    bomArea: $("#bomArea"),
-    bomMembraneArea: $("#bomMembraneArea"),
-    bomPerimeter: $("#bomPerimeter"),
-    bomProfilesCount: $("#bomProfilesCount"),
-    bomAdhesiveBags: $("#bomAdhesiveBags"),
-
-    backToStep2Btn: $("#backToStep2Btn"),
-    goToStep4Btn: $("#goToStep4Btn"),
-
-    // step4 summary
-    k4Type: $("#k4Type"),
-    k4Shape: $("#k4Shape"),
-    k4Area: $("#k4Area"),
-    k4Perimeter: $("#k4Perimeter"),
-    k4HeightLabel: $("#k4HeightLabel"),
-    k4DrainLabel: $("#k4DrainLabel"),
-    k4SystemName: $("#k4SystemName"),
-
-    k4BomArea: $("#k4BomArea"),
-    k4BomMembraneArea: $("#k4BomMembraneArea"),
-    k4BomPerimeter: $("#k4BomPerimeter"),
-    k4BomProfilesCount: $("#k4BomProfilesCount"),
-    k4BomAdhesiveBags: $("#k4BomAdhesiveBags"),
-
-    // step4 preview + buttons
-    k4PreviewTitle: $("#k4PreviewTitle"),
-    k4PreviewImage: $("#k4PreviewImage"),
-    k4PreviewCaption: $("#k4PreviewCaption"),
-
-    btnPdfDownload: $("#btnPdfDownload"),
-    btnPdfToEmail: $("#btnPdfToEmail"),
-    btnPdfRequestOffer: $("#btnPdfRequestOffer"),
-
-    // step4 pdf fields
-    pdfCustomerName: $("#pdfCustomerName"),
-    pdfCustomerCompany: $("#pdfCustomerCompany"),
-    pdfCustomerEmail: $("#pdfCustomerEmail"),
-    pdfShowEmail: $("#pdfShowEmail"),
-    pdfAutoNameInfo: $("#pdfAutoNameInfo"),
-    pdfAutoNameText: $("#pdfAutoNameText"),
-
-    // preview modal
-    previewModal: $("#previewModal"),
-    previewBackdrop: $("#previewModal .preview-backdrop"),
-    previewCloseBtn: $("#previewCloseBtn"),
-    previewImage: $("#previewImage"),
-    previewCaption: $("#previewCaption"),
-    previewTitle: $("#previewTitle"),
-
-    // tile modal (zatiaľ len pripravené)
-    tileModal: $("#tileModal"),
-    tileCloseBtn: $("#tileCloseBtn"),
-    tileConfirmBtn: $("#tileConfirmBtn"),
-    tileThicknessInput: $("#tileThicknessInput"),
-  };
-
-  // ---------------------------
-  // UI: step switching
-  // ---------------------------
-  const setActiveStep = (stepId) => {
-    $$(".step-section").forEach((s) => s.classList.remove("active"));
-    const target = $(`#${stepId}`);
-    if (target) target.classList.add("active");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // ---------------------------
-  // Shapes + fields visibility
-  // ---------------------------
-  const applyShapeUI = () => {
-    // selected cards
-    el.shapeCards.forEach((c) => {
-      c.classList.toggle("selected", c.dataset.shape === state.shape);
+  // ---------------------------------------------------------------------------
+  // ELEMENTY – kroky
+  // ---------------------------------------------------------------------------
+  const stepSections = Array.from(document.querySelectorAll(".step-section"));
+  function showStep(stepNo) {
+    state.currentStep = stepNo;
+    stepSections.forEach((sec) => {
+      sec.classList.toggle("active", sec.id === `step${stepNo}`);
     });
+    const stepEl = document.getElementById(`step${stepNo}`);
+    if (stepEl) stepEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
-    // show/hide fields
-    const show = (fieldEl, yes) => fieldEl.classList.toggle("hidden", !yes);
+  // --- KROK 2 ---
+  const shapeGrid = document.getElementById("shapeGrid");
+  const dimShapeInfo = document.getElementById("dimShapeInfo");
 
-    if (state.shape === "square") {
-      el.dimShapeInfo.textContent = "Štvorec – všetky strany A sú rovnaké.";
-      show(el.fieldSideA, true);
-      show(el.fieldSideB, false);
-      show(el.fieldSideC, false);
-      show(el.fieldSideD, false);
-      show(el.fieldSideE, false);
-      show(el.fieldSideF, false);
-      // wall checkboxes len pre A (zmysel)
-      toggleWallCheckboxVisibility({ A: true, B: false, C: false, D: false, E: false, F: false });
-    } else if (state.shape === "rectangle") {
-      el.dimShapeInfo.textContent = "Obdĺžnik / „kosoštvorec“ – zadáte strany A a B (aj pri mierne šikmom pôdoryse).";
-      show(el.fieldSideA, true);
-      show(el.fieldSideB, true);
-      show(el.fieldSideC, false);
-      show(el.fieldSideD, false);
-      show(el.fieldSideE, false);
-      show(el.fieldSideF, false);
-      toggleWallCheckboxVisibility({ A: true, B: true, C: false, D: false, E: false, F: false });
-    } else {
-      el.dimShapeInfo.textContent = "L-tvar – zadáte 6 strán A–F podľa náčrtu (po obvode v smere hodinových ručičiek).";
-      show(el.fieldSideA, true);
-      show(el.fieldSideB, true);
-      show(el.fieldSideC, true);
-      show(el.fieldSideD, true);
-      show(el.fieldSideE, true);
-      show(el.fieldSideF, true);
-      toggleWallCheckboxVisibility({ A: true, B: true, C: true, D: true, E: true, F: true });
+  const dimInputs = {
+    A: document.getElementById("sideA"),
+    B: document.getElementById("sideB"),
+    C: document.getElementById("sideC"),
+    D: document.getElementById("sideD"),
+    E: document.getElementById("sideE"),
+    F: document.getElementById("sideF"),
+  };
+
+  const fieldElems = {
+    A: document.getElementById("fieldSideA"),
+    B: document.getElementById("fieldSideB"),
+    C: document.getElementById("fieldSideC"),
+    D: document.getElementById("fieldSideD"),
+    E: document.getElementById("fieldSideE"),
+    F: document.getElementById("fieldSideF"),
+  };
+
+  const summaryAreaEl = document.getElementById("summaryArea");
+  const summaryPerimeterEl = document.getElementById("summaryPerimeter");
+
+  const backToStep1Btn = document.getElementById("backToStep1Btn");
+  const goToStep3Btn = document.getElementById("goToStep3Btn");
+
+  // --- KROK 3 ---
+  const k3TypeEl = document.getElementById("k3Type");
+  const k3ShapeEl = document.getElementById("k3Shape");
+  const k3AreaEl = document.getElementById("k3Area");
+  const k3PerimeterEl = document.getElementById("k3Perimeter");
+
+  const heightRadios = Array.from(
+    document.querySelectorAll('input[name="heightOption"]')
+  );
+  const drainOptions = Array.from(document.querySelectorAll(".drain-option"));
+
+  const recommendedName = document.getElementById("recommendedName");
+  const recommendedNote = document.getElementById("recommendedNote");
+
+  const bomAreaEl = document.getElementById("bomArea");
+  const bomMembraneAreaEl = document.getElementById("bomMembraneArea");
+  const bomPerimeterEl = document.getElementById("bomPerimeter");
+  const bomProfilesCountEl = document.getElementById("bomProfilesCount");
+  const bomAdhesiveBagsEl = document.getElementById("bomAdhesiveBags");
+  const bomNoteEl = document.getElementById("bomNote");
+
+  const goToStep4Btn = document.getElementById("goToStep4Btn");
+  const backToStep2Btn = document.getElementById("backToStep2Btn");
+
+  // --- KROK 4 ---
+  const k4TypeEl = document.getElementById("k4Type");
+  const k4ShapeEl = document.getElementById("k4Shape");
+  const k4AreaEl = document.getElementById("k4Area");
+  const k4PerimeterEl = document.getElementById("k4Perimeter");
+  const k4HeightLabelEl = document.getElementById("k4HeightLabel");
+  const k4DrainLabelEl = document.getElementById("k4DrainLabel");
+  const k4SystemNameEl = document.getElementById("k4SystemName");
+
+  const k4BomAreaEl = document.getElementById("k4BomArea");
+  const k4BomMembraneAreaEl = document.getElementById("k4BomMembraneArea");
+  const k4BomPerimeterEl = document.getElementById("k4BomPerimeter");
+  const k4BomProfilesCountEl = document.getElementById("k4BomProfilesCount");
+  const k4BomAdhesiveBagsEl = document.getElementById("k4BomAdhesiveBags");
+
+  const backToStep3Btn = document.getElementById("backToStep3Btn");
+
+  const previewBtn = document.getElementById("previewBtn");
+  const previewModal = document.getElementById("previewModal");
+  const previewCloseBtn = document.getElementById("previewCloseBtn");
+
+  const k4PreviewTitleEl = document.getElementById("k4PreviewTitle");
+  const k4PreviewImageEl = document.getElementById("k4PreviewImage");
+  const k4PreviewCaptionEl = document.getElementById("k4PreviewCaption");
+
+  // ✅ PDF tlačidlá
+  const btnPdfDownload = document.getElementById("btnPdfDownload");
+  const btnPdfToEmail = document.getElementById("btnPdfToEmail");
+  const btnPdfRequestOffer = document.getElementById("btnPdfRequestOffer");
+
+  // ✅ tile modal
+  const tileModal = document.getElementById("tileModal");
+  const tileThicknessInput = document.getElementById("tileThicknessInput");
+  const tileConfirmBtn = document.getElementById("tileConfirmBtn");
+  const tileCloseBtn = document.getElementById("tileCloseBtn");
+
+  // ✅ PDF UI polia (tvoje IDčka)
+  const pdfCustomerNameEl = document.getElementById("pdfCustomerName");
+  const pdfCustomerCompanyEl = document.getElementById("pdfCustomerCompany");
+  const pdfCustomerEmailEl = document.getElementById("pdfCustomerEmail");
+  const pdfShowEmailEl = document.getElementById("pdfShowEmail");
+
+  const pdfAutoNameInfoEl = document.getElementById("pdfAutoNameInfo");
+  const pdfAutoNameTextEl = document.getElementById("pdfAutoNameText");
+
+  // ---------------------------------------------------------------------------
+  // TVARY + ✅ wallOptions presne ako chceš
+  // ---------------------------------------------------------------------------
+  const shapeConfigs = {
+    square: {
+      label: "Štvorec",
+      sides: ["A"],
+      info: "Štvorec – všetky strany A sú rovnaké.",
+      wallOptions: ["A"],
+    },
+    rectangle: {
+      label: "Obdĺžnik / „kosoštvorec“",
+      sides: ["A", "B"],
+      info: "Obdĺžnik – dve rôzne strany A a B. Mierna šikmina nevadí.",
+      wallOptions: ["A", "B"],
+    },
+    "l-shape": {
+      label: "Balkón v tvare L",
+      sides: ["A", "B", "C", "D", "E", "F"],
+      info:
+        "Balkón v tvare L – doplňte všetkých 6 strán A–F v smere hodinových ručičiek (pravé uhly).",
+      wallOptions: ["A", "B", "C", "D", "E", "F"],
+    },
+  };
+
+  const HEIGHT_LABELS = {
+    low: "Nízka konštrukčná výška (do cca 60 mm)",
+    medium: "Stredná konštrukčná výška (cca 60–100 mm)",
+    high: "Vysoká konštrukčná výška (cca 100–150+ mm)",
+  };
+
+  const DRAIN_LABELS = {
+    "edge-free": "Voda steká cez voľnú hranu",
+    "edge-gutter": "Voda ide do žľabu pri hrane",
+    "internal-drain": "Voda odteká do vpustu v podlahe",
+  };
+
+  function getHeightLabel(id) {
+    return id ? HEIGHT_LABELS[id] || null : null;
+  }
+  function getDrainLabel(id) {
+    return id ? DRAIN_LABELS[id] || null : null;
+  }
+
+  // ---------------------------------------------------------------------------
+  // POMOCNÉ
+  // ---------------------------------------------------------------------------
+  function parseVal(v) {
+    if (v === null || v === undefined || v === "") return null;
+    const num = parseFloat(String(v).replace(",", "."));
+    if (Number.isNaN(num) || num <= 0) return null;
+    return num;
+  }
+
+  function approxEqual(a, b, tol = 0.01) {
+    return Math.abs(a - b) <= tol;
+  }
+
+  function canGoToStep3() {
+    const d = state.dims;
+    if (state.shapeKey === "square") return d.A != null;
+    if (state.shapeKey === "rectangle") return d.A != null && d.B != null;
+    if (state.shapeKey === "l-shape") {
+      const all = ["A", "B", "C", "D", "E", "F"].every((k) => d[k] != null);
+      return all && state.area != null && !state.geometryError;
     }
+    return false;
+  }
 
-    // zvýraznenie „pri stene“ vizuálne na náčrtoch
-    updatePreviewWallHighlights();
-  };
+  function canGoToStep4() {
+    if (!state.system) return false;
+    if (state.perimeter == null) return false;
+    if (state.area == null) return false;
+    if (state.geometryError) return false;
+    return true;
+  }
 
-  const toggleWallCheckboxVisibility = (map) => {
-    // map: {A: true/false, ...}
-    el.wallLabels.forEach((lab) => {
-      const cb = $("input.wall-side-checkbox", lab);
-      const side = cb?.dataset?.side;
-      const visible = !!map[side];
-      lab.classList.toggle("hidden", !visible);
-      if (!visible) {
-        cb.checked = false;
-        state.wall.delete(side);
-      }
-    });
-  };
+  function hasRecipientEmailForMailOrOffer() {
+    if (email) return true; // prihlásený
+    return !!(state.pdfCustomerEmail || "").trim(); // verejný musí zadať
+  }
 
-  const updatePreviewWallHighlights = () => {
-    // všetky preview-side labely (span aj svg text)
-    el.previewSideLabels.forEach((node) => {
-      const side = node.getAttribute("data-preview-side");
-      const atWall = state.wall.has(side);
-      node.classList.toggle("at-wall", atWall);
-    });
-  };
+  function updateStep2ContinueButton() {
+    if (goToStep3Btn) goToStep3Btn.disabled = !canGoToStep3();
+  }
 
-  // ---------------------------
-  // Calculations (area + perimeter for profiles)
-  // ---------------------------
-  const computeAreaPerimeter = () => {
-    const A = clampMin0(state.dims.A);
-    const B = clampMin0(state.dims.B);
-    const C = clampMin0(state.dims.C);
-    const D = clampMin0(state.dims.D);
-    const E = clampMin0(state.dims.E);
-    const F = clampMin0(state.dims.F);
+  function updateStep3ContinueButton() {
+    if (goToStep4Btn) goToStep4Btn.disabled = !canGoToStep4();
+  }
 
+  function updatePdfButtons() {
+    const ok = canGoToStep4();
+    if (btnPdfDownload) btnPdfDownload.disabled = !ok;
+    if (btnPdfToEmail)
+      btnPdfToEmail.disabled = !(ok && hasRecipientEmailForMailOrOffer());
+    if (btnPdfRequestOffer)
+      btnPdfRequestOffer.disabled = !(ok && hasRecipientEmailForMailOrOffer());
+  }
+
+  function computeAreaPerimeter(shapeKey, d) {
     let area = null;
     let per = null;
+    let geometryError = null;
 
-    if (state.shape === "square") {
-      if (A && A > 0) {
+    if (shapeKey === "square") {
+      const A = d.A;
+      if (A != null) {
         area = A * A;
         per = 4 * A;
       }
-    } else if (state.shape === "rectangle") {
-      const a = A && A > 0 ? A : null;
-      const b = B && B > 0 ? B : null;
-      if (a && b) {
-        area = a * b;
-        per = 2 * (a + b);
+    } else if (shapeKey === "rectangle") {
+      const A = d.A,
+        B = d.B;
+      if (A != null && B != null) {
+        area = A * B;
+        per = 2 * (A + B);
       }
-    } else if (state.shape === "l-shape") {
-      // L-tvar – zatiaľ „prvá verzia“:
-      // Aby si vedel pokračovať, rátame:
-      // - obvod = súčet A..F
-      // - plocha = jednoduchá aproximácia (rozdelíme na 2 obdĺžniky),
-      //   ale ak je neisté, necháme plochu prázdnu a stále dovolíme krok 3 po vyplnení strán.
-      //
-      const all = [A, B, C, D, E, F];
-      const okAll = all.every((x) => Number.isFinite(x) && x > 0);
-      if (okAll) {
-        per = all.reduce((s, x) => s + x, 0);
+    } else if (shapeKey === "l-shape") {
+      const A = d.A,
+        B = d.B,
+        C = d.C,
+        D = d.D,
+        E = d.E,
+        F = d.F;
+      const all = [A, B, C, D, E, F].every((v) => v != null);
+      if (all) {
+        per = A + B + C + D + E + F;
+        const expectE = A - C;
+        const expectB = F - D;
 
-        // aproximácia: veľký obdĺžnik (A x F) mínus výrez (C x D) – podľa tvojho svg náčrtu
-        // Pozn.: nie je to univerzálne, ale aspoň dá číselný základ pre orientačný BOM.
-        const approx = A * F - C * D;
-        area = approx > 0 ? approx : null;
-      } else {
-        per = null;
-        area = null;
+        if (expectE <= 0 || expectB <= 0) {
+          geometryError =
+            "Rozmery L-tvaru nedávajú zmysel. Skontrolujte, že A > C a F > D.";
+        } else if (
+          !approxEqual(E, expectE, 0.02) ||
+          !approxEqual(B, expectB, 0.02)
+        ) {
+          geometryError =
+            "Rozmery nesedia pre pravé uhly. Musí platiť E = A − C a B = F − D (v smere hodinových ručičiek).";
+        } else {
+          area = A * F - C * D;
+          if (!(area > 0)) {
+            geometryError =
+              "Plocha vyšla neplatná. Skontrolujte prosím zadanie strán A–F.";
+            area = null;
+          }
+        }
       }
     }
 
-    // odpočítanie strán pri stene z „obvodu pre lišty“
-    if (per !== null) {
-      let subtract = 0;
-      // pri štvorci je len A, ale v UI strana A sa môže týkať viacerých strán – tu to berieme jednoducho:
-      // ak je zaškrtnutá A pri stene:
-      // - pri štvorci odpočítame A (1 stranu) – je to konzervatívne
-      // - pri obdĺžniku odpočítame A alebo B podľa checkboxov (jedna strana)
-      // - pri L tvare odpočítame konkrétne zadané strany
-      if (state.shape === "square") {
-        if (state.wall.has("A") && A) subtract += A;
-      } else if (state.shape === "rectangle") {
-        if (state.wall.has("A") && A) subtract += A;
-        if (state.wall.has("B") && B) subtract += B;
-      } else {
-        if (state.wall.has("A") && A) subtract += A;
-        if (state.wall.has("B") && B) subtract += B;
-        if (state.wall.has("C") && C) subtract += C;
-        if (state.wall.has("D") && D) subtract += D;
-        if (state.wall.has("E") && E) subtract += E;
-        if (state.wall.has("F") && F) subtract += F;
-      }
-      const perProfiles = Math.max(0, per - subtract);
-      state.area = area !== null ? round1(area) : null;
-      state.perimeterForProfiles = round1(perProfiles);
-    } else {
-      state.area = null;
-      state.perimeterForProfiles = null;
+    return { area, perimeter: per, geometryError };
+  }
+
+  function getWallDeduction(dims) {
+    let deduction = 0;
+    for (const [side, isWall] of Object.entries(state.wallSides)) {
+      if (!isWall) continue;
+      const len = dims[side];
+      if (len != null) deduction += len;
     }
-  };
+    return deduction;
+  }
 
-  const updateStep2SummaryUI = () => {
-    el.summaryArea.textContent = state.area !== null ? String(state.area).replace(".", ",") : "–";
-    el.summaryPerimeter.textContent =
-      state.perimeterForProfiles !== null ? String(state.perimeterForProfiles).replace(".", ",") : "–";
+  // ---------------------------------------------------------------------------
+  // “kótovanie” (UI) – zvýraznenie side-label a svg label
+  // ---------------------------------------------------------------------------
+  function formatLen(val) {
+    return val.toFixed(1).replace(".", ",");
+  }
 
-    // povolenie krok 3:
-    // - square: A > 0
-    // - rectangle: A,B > 0
-    // - L: všetky A..F > 0 (plochu možno aj nezrátať, ale aspoň obvod)
-    const A = clampMin0(state.dims.A);
-    const B = clampMin0(state.dims.B);
-    const C = clampMin0(state.dims.C);
-    const D = clampMin0(state.dims.D);
-    const E = clampMin0(state.dims.E);
-    const F = clampMin0(state.dims.F);
+  function updateShapePreviewLabels() {
+    const nodes = Array.from(document.querySelectorAll("[data-preview-side]"));
+    if (!nodes.length) return;
 
-    let ok = false;
-    if (state.shape === "square") ok = !!(A && A > 0);
-    if (state.shape === "rectangle") ok = !!(A && A > 0 && B && B > 0);
-    if (state.shape === "l-shape") ok = [A, B, C, D, E, F].every((x) => x && x > 0);
+    nodes.forEach((el) => {
+      const side = String(el.dataset.previewSide || "").toUpperCase();
+      if (!side) return;
 
-    el.goToStep3Btn.disabled = !ok;
-  };
+      const val = state.dims[side];
+      const text = val != null ? formatLen(val) : side;
+      el.textContent = text;
 
-  // ---------------------------
-  // Step 3: system recommendation + BOM + enabling Step4
-  // ---------------------------
-  const heightLabel = (v) => {
-    if (v === "low") return "Nízka konštrukčná výška (do cca 60 mm)";
-    if (v === "medium") return "Stredná konštrukčná výška (cca 60–100 mm)";
-    if (v === "high") return "Vysoká konštrukčná výška (cca 100–150+ mm)";
-    return "–";
-  };
+      const isWall = !!state.wallSides[side];
+      el.classList.toggle("at-wall", isWall);
+    });
+  }
 
-  const drainLabel = (v) => {
-    if (v === "edge-free") return "Voda steká cez voľnú hranu";
-    if (v === "edge-gutter") return "Voda ide do žľabu pri hrane";
-    if (v === "internal-drain") return "Voda odteká do vpustu v podlahe";
-    return "–";
-  };
+  // ---------------------------------------------------------------------------
+  // ✅ NORMALIZÁCIA STRÁN (kvôli PDF)
+  // ---------------------------------------------------------------------------
+  function buildNormalizedDims() {
+    const d = state.dims || {};
+    if (state.shapeKey === "square") {
+      if (d.A == null) return { A: null, B: null, C: null, D: null };
+      return { A: d.A, B: d.A, C: d.A, D: d.A };
+    }
+    if (state.shapeKey === "rectangle") {
+      if (d.A == null || d.B == null)
+        return { A: null, B: null, C: null, D: null };
+      return { A: d.A, B: d.B, C: d.A, D: d.B };
+    }
+    if (state.shapeKey === "l-shape") return { ...d };
+    return { ...d };
+  }
 
-  const buildSystem = () => {
-    if (!state.height || !state.drain) {
-      state.system.title = null;
-      state.system.note = null;
-      state.system.previewImg = null;
-      state.system.previewCaption = null;
+  function buildNormalizedWallSides() {
+    const w = state.wallSides || {};
+    if (state.shapeKey === "square")
+      return { A: !!w.A, B: !!w.B, C: !!w.C, D: !!w.D };
+    if (state.shapeKey === "rectangle")
+      return { A: !!w.A, B: !!w.B, C: !!w.C, D: !!w.D };
+    if (state.shapeKey === "l-shape") return { ...w };
+    return { ...w };
+  }
+
+  // ---------------------------------------------------------------------------
+  // ✅ STRANY PRI STENE – podľa HTML:
+  // - checkbox má data-side
+  // - wrapper je label.wall-box-label
+  // - skrýva sa triedou .hidden
+  // ---------------------------------------------------------------------------
+  const wallCheckboxNodeList = Array.from(
+    document.querySelectorAll('input[type="checkbox"][data-side]')
+  );
+
+  const wallCheckboxes = {};
+  wallCheckboxNodeList.forEach((cb) => {
+    const side = (cb.dataset.side || "").toUpperCase();
+    if (!side) return;
+    wallCheckboxes[side] = cb;
+  });
+
+  function getWallLabelForCheckbox(cb) {
+    if (!cb) return null;
+    return cb.closest("label.wall-box-label") || null;
+  }
+
+  function applyWallOptionsForCurrentShape() {
+    const cfg = shapeConfigs[state.shapeKey];
+    const allowed = new Set(
+      (cfg && cfg.wallOptions) || ["A", "B", "C", "D", "E", "F"]
+    );
+
+    Object.entries(wallCheckboxes).forEach(([side, cb]) => {
+      const label = getWallLabelForCheckbox(cb);
+      const isAllowed = allowed.has(side);
+
+      if (label) label.classList.toggle("hidden", !isAllowed);
+
+      if (!isAllowed) {
+        cb.checked = false;
+        state.wallSides[side] = false;
+      }
+    });
+
+    // po zmene povolených strán hneď prepočítať obvod
+    recomputeFromInputs();
+  }
+
+  // ---------------------------------------------------------------------------
+  // ✅ PDF UI sync (tvoje ID)
+  // ---------------------------------------------------------------------------
+  function syncPdfUiToState() {
+    state.pdfCustomerName = pdfCustomerNameEl
+      ? String(pdfCustomerNameEl.value || "").trim()
+      : state.pdfCustomerName;
+
+    state.pdfCustomerCompany = pdfCustomerCompanyEl
+      ? String(pdfCustomerCompanyEl.value || "").trim()
+      : state.pdfCustomerCompany;
+
+    state.pdfCustomerEmail = pdfCustomerEmailEl
+      ? String(pdfCustomerEmailEl.value || "").trim()
+      : state.pdfCustomerEmail;
+
+    state.pdfShowEmailInPdf = pdfShowEmailEl ? !!pdfShowEmailEl.checked : false;
+
+    updatePdfButtons();
+  }
+
+  function updatePdfUiEnabled() {
+    if (!pdfCustomerEmailEl || !pdfShowEmailEl) {
+      syncPdfUiToState();
       return;
     }
 
-    // Default map (vieš upraviť názvy / obrázky podľa toho, čo máš v public/img)
-    // Ak už config_balkony.js nastavuje window.BALKON_SYSTEMS, použijeme ho.
-    const map = window.BALKON_SYSTEMS || {
-      low: {
-        "edge-free": {
-          title: "Základná skladba balkóna – nízka výška, voľná hrana",
-          note: "Orientačne: DITRA + KERDI-KEBA/Coll + BARA (RT/RW podľa dlažby). Detaily napojenia doplníme v PDF.",
-          previewImg: "/img/balkon/low-edge-free.png",
-          caption: "Nízka výška – voda steká cez voľnú hranu, orientačný prierez skladby Schlüter® – DITRA."
-        },
-        "edge-gutter": {
-          title: "Základná skladba balkóna – nízka výška, žľab pri hrane",
-          note: "Orientačne: DITRA + systémové tesnenia + ukončenie do žľabu. Detaily doplníme v PDF.",
-          previewImg: "/img/balkon/low-edge-gutter.png",
-          caption: "Nízka výška – odvodnenie do žľabu pri hrane (orientačný prierez)."
-        },
-        "internal-drain": {
-          title: "Základná skladba balkóna – nízka výška, podlahový vpust",
-          note: "Orientačne: DITRA + systémové tesnenia + riešenie okolo vpustu. Detaily doplníme v PDF.",
-          previewImg: "/img/balkon/low-internal-drain.png",
-          caption: "Nízka výška – odvodnenie do vnútorného vpustu (orientačný prierez)."
-        }
-      },
-      medium: {
-        "edge-free": {
-          title: "Základná skladba balkóna – stredná výška, voľná hrana",
-          note: "Orientačne: vyššia skladba so spádom/drenážou podľa detailu. Detaily doplníme v PDF.",
-          previewImg: "/img/balkon/medium-edge-free.png",
-          caption: "Stredná výška – voľná hrana (orientačný prierez)."
-        },
-        "edge-gutter": {
-          title: "Základná skladba balkóna – stredná výška, žľab pri hrane",
-          note: "Orientačne: skladba so spádom + odvodnenie do žľabu. Detaily doplníme v PDF.",
-          previewImg: "/img/balkon/medium-edge-gutter.png",
-          caption: "Stredná výška – žľab pri hrane (orientačný prierez)."
-        },
-        "internal-drain": {
-          title: "Základná skladba balkóna – stredná výška, podlahový vpust",
-          note: "Orientačne: skladba so spádom + riešenie vpustu. Detaily doplníme v PDF.",
-          previewImg: "/img/balkon/medium-internal-drain.png",
-          caption: "Stredná výška – podlahový vpust (orientačný prierez)."
-        }
-      },
-      high: {
-        "edge-free": {
-          title: "Základná skladba balkóna – vysoká výška, voľná hrana",
-          note: "Orientačne: vysoká skladba so spádom/drenážou. Detaily doplníme v PDF.",
-          previewImg: "/img/balkon/high-edge-free.png",
-          caption: "Vysoká výška – voľná hrana (orientačný prierez)."
-        },
-        "edge-gutter": {
-          title: "Základná skladba balkóna – vysoká výška, žľab pri hrane",
-          note: "Orientačne: vysoká skladba + žľab. Detaily doplníme v PDF.",
-          previewImg: "/img/balkon/high-edge-gutter.png",
-          caption: "Vysoká výška – žľab pri hrane (orientačný prierez)."
-        },
-        "internal-drain": {
-          title: "Základná skladba balkóna – vysoká výška, podlahový vpust",
-          note: "Orientačne: vysoká skladba + riešenie vpustu. Detaily doplníme v PDF.",
-          previewImg: "/img/balkon/high-internal-drain.png",
-          caption: "Vysoká výška – podlahový vpust (orientačný prierez)."
+    pdfCustomerEmailEl.disabled = !pdfShowEmailEl.checked;
+    if (!pdfShowEmailEl.checked) pdfCustomerEmailEl.value = "";
+    syncPdfUiToState();
+  }
+
+  if (pdfCustomerNameEl)
+    pdfCustomerNameEl.addEventListener("input", syncPdfUiToState);
+  if (pdfCustomerCompanyEl)
+    pdfCustomerCompanyEl.addEventListener("input", syncPdfUiToState);
+  if (pdfCustomerEmailEl)
+    pdfCustomerEmailEl.addEventListener("input", syncPdfUiToState);
+  if (pdfShowEmailEl)
+    pdfShowEmailEl.addEventListener("change", updatePdfUiEnabled);
+
+  // ---------------------------------------------------------------------------
+  // ✅ načítanie mena/prezývky prihláseného používateľa (dashboard endpoint)
+  // ---------------------------------------------------------------------------
+  async function tryLoadLoggedUserName() {
+    if (!email) return;
+
+    try {
+      const res = await fetch(`/api/users/${encodeURIComponent(email)}`);
+      if (!res.ok) return;
+
+      const u = await res.json().catch(() => null);
+      if (!u) return;
+
+      const nick = (u?.name || "").toString().trim(); // prezývka/meno v app
+      const fullName = (u?.fullName || "").toString().trim(); // celé meno
+      const company = (u?.companyName || "").toString().trim();
+
+      const bestName = fullName || nick;
+
+      state.userAutoName = bestName || nick || "";
+      state.userAutoCompany = company || "";
+
+      if (
+        pdfCustomerNameEl &&
+        !String(pdfCustomerNameEl.value || "").trim() &&
+        bestName
+      ) {
+        pdfCustomerNameEl.value = bestName;
+      }
+      if (
+        pdfCustomerCompanyEl &&
+        !String(pdfCustomerCompanyEl.value || "").trim() &&
+        company
+      ) {
+        pdfCustomerCompanyEl.value = company;
+      }
+
+      if (pdfAutoNameInfoEl && pdfAutoNameTextEl) {
+        const infoText = [bestName || nick, company].filter(Boolean).join(" • ");
+        if (infoText) {
+          pdfAutoNameTextEl.textContent = infoText;
+          pdfAutoNameInfoEl.style.display = "";
         }
       }
+
+      syncPdfUiToState();
+    } catch (e) {
+      // ticho ignorujeme
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // SUMMARY helpery
+  // ---------------------------------------------------------------------------
+  function updateStep3Summary() {
+    if (k3TypeEl)
+      k3TypeEl.textContent =
+        state.fromStep1TypeLabel || "Vysunutý balkón";
+    if (k3ShapeEl)
+      k3ShapeEl.textContent = shapeConfigs[state.shapeKey]?.label || "–";
+
+    if (k3AreaEl) {
+      if (state.area != null)
+        k3AreaEl.textContent = state.area.toFixed(1).replace(".", ",");
+      else if (state.geometryError) k3AreaEl.textContent = "skontrolujte rozmery";
+      else k3AreaEl.textContent = "–";
+    }
+
+    if (k3PerimeterEl) {
+      k3PerimeterEl.textContent =
+        state.perimeter != null
+          ? state.perimeter.toFixed(1).replace(".", ",")
+          : "–";
+    }
+  }
+
+  function updateStep4Summary() {
+    if (!document.getElementById("step4")) return;
+
+    if (k4TypeEl)
+      k4TypeEl.textContent =
+        state.fromStep1TypeLabel || "Vysunutý balkón";
+    if (k4ShapeEl)
+      k4ShapeEl.textContent = shapeConfigs[state.shapeKey]?.label || "–";
+
+    if (k4AreaEl) {
+      if (state.area != null)
+        k4AreaEl.textContent = state.area.toFixed(1).replace(".", ",");
+      else if (state.geometryError) k4AreaEl.textContent = "skontrolujte rozmery";
+      else k4AreaEl.textContent = "–";
+    }
+
+    if (k4PerimeterEl) {
+      k4PerimeterEl.textContent =
+        state.perimeter != null
+          ? state.perimeter.toFixed(1).replace(".", ",")
+          : "–";
+    }
+
+    if (k4HeightLabelEl)
+      k4HeightLabelEl.textContent = getHeightLabel(state.heightDomId) || "–";
+    if (k4DrainLabelEl)
+      k4DrainLabelEl.textContent = getDrainLabel(state.drainDomId) || "–";
+    if (k4SystemNameEl)
+      k4SystemNameEl.textContent = state.system
+        ? state.system.uiTitle || "Vybraný systém"
+        : "–";
+  }
+
+  function updateStep4Preview() {
+    if (!k4PreviewImageEl || !k4PreviewTitleEl || !k4PreviewCaptionEl) return;
+
+    if (!state.system) {
+      k4PreviewTitleEl.textContent =
+        "Zatiaľ nevybraný – doplňte výšku a odtok vo kroku 3.";
+      k4PreviewImageEl.src = "";
+      k4PreviewCaptionEl.textContent =
+        "Po výbere systému zobrazíme orientačný prierez so skladbou Schlüter® pre váš balkón.";
+      return;
+    }
+
+    const cfg = getPreviewConfigForSystem(state.system);
+    k4PreviewTitleEl.textContent =
+      state.system.uiTitle || "Technický náhľad skladby balkóna";
+
+    if (cfg) {
+      k4PreviewImageEl.src = cfg.src;
+      k4PreviewCaptionEl.textContent =
+        cfg.caption ||
+        "Orientačný prierez skladby Schlüter® pre zvolený systém.";
+    } else {
+      k4PreviewImageEl.src = "";
+      k4PreviewCaptionEl.textContent =
+        "Technický náhľad pre túto kombináciu pripravíme v PDF podklade.";
+    }
+  }
+
+  function syncBomToStep4() {
+    if (
+      !k4BomAreaEl ||
+      !k4BomMembraneAreaEl ||
+      !k4BomPerimeterEl ||
+      !k4BomProfilesCountEl ||
+      !k4BomAdhesiveBagsEl
+    )
+      return;
+    k4BomAreaEl.textContent = bomAreaEl ? bomAreaEl.textContent : "–";
+    k4BomMembraneAreaEl.textContent = bomMembraneAreaEl
+      ? bomMembraneAreaEl.textContent
+      : "–";
+    k4BomPerimeterEl.textContent = bomPerimeterEl
+      ? bomPerimeterEl.textContent
+      : "–";
+    k4BomProfilesCountEl.textContent = bomProfilesCountEl
+      ? bomProfilesCountEl.textContent
+      : "–";
+    k4BomAdhesiveBagsEl.textContent = bomAdhesiveBagsEl
+      ? bomAdhesiveBagsEl.textContent
+      : "–";
+  }
+
+  function updateRecommendedBox() {
+    if (!recommendedName || !recommendedNote) return;
+
+    if (!state.heightDomId || !state.drainDomId) {
+      if (state.heightDomId === "high") {
+        recommendedName.textContent =
+          "Zatiaľ nevybraná – zvoľte spôsob odtoku vody.";
+        recommendedNote.textContent =
+          "Pri vyššej konštrukčnej výške Schlüter® neponúka systém s voľnou hranou. Vyberte prosím variant so žľabom pri hrane alebo s podlahovou vpustou.";
+      } else {
+        recommendedName.textContent =
+          "Zatiaľ nevybraná – zvoľte výšku a odtok vody.";
+        recommendedNote.textContent =
+          "Po výbere konštrukčnej výšky aj spôsobu odtoku vody vám zobrazíme návrh skladby. Detailný popis a prierezy dostanete v PDF priamo v Lištobooku.";
+      }
+      return;
+    }
+
+    if (!state.system) {
+      recommendedName.textContent =
+        "Zatiaľ nevybraná – skladbu pre túto kombináciu ešte nemáme.";
+      recommendedNote.textContent =
+        "Pre zvolenú kombináciu výšky a odtoku zatiaľ nemáme definovanú skladbu. Skúste inú kombináciu alebo nás kontaktujte.";
+      return;
+    }
+
+    recommendedName.textContent = state.system.uiTitle || "Navrhovaná skladba";
+    recommendedNote.textContent =
+      state.system.description ||
+      "Detailný popis skladby doplníme v PDF podklade z Lištobooku.";
+  }
+
+  function updateBom() {
+    if (
+      !bomAreaEl ||
+      !bomMembraneAreaEl ||
+      !bomPerimeterEl ||
+      !bomProfilesCountEl ||
+      !bomAdhesiveBagsEl ||
+      !bomNoteEl
+    )
+      return;
+
+    const area = state.area;
+    const per = state.perimeter;
+
+    function resetBom(note) {
+      bomAreaEl.textContent = "–";
+      bomMembraneAreaEl.textContent = "–";
+      bomPerimeterEl.textContent = "–";
+      bomProfilesCountEl.textContent = "–";
+      bomAdhesiveBagsEl.textContent = "–";
+      bomNoteEl.textContent =
+        note ||
+        "Hodnoty sú orientačné. Presný výpočet doplníme po konzultácii s technikom Lištového centra.";
+    }
+
+    if (!state.heightDomId || !state.drainDomId) {
+      resetBom(
+        "Najprv v kroku 3 zvoľte konštrukčnú výšku a spôsob odtoku vody. Potom pripravíme orientačný prepočet materiálu."
+      );
+      syncBomToStep4();
+      return;
+    }
+
+    if (!state.system) {
+      resetBom(
+        "Pre túto kombináciu výšky a odtoku vody zatiaľ nemáme definovanú skladbu. Skúste inú kombináciu alebo nás kontaktujte."
+      );
+      syncBomToStep4();
+      return;
+    }
+
+    if (state.geometryError) {
+      resetBom(
+        "Najprv opravte rozmery balkóna v kroku 2 (L-tvar musí sedieť geometricky)."
+      );
+      syncBomToStep4();
+      return;
+    }
+
+    if (area == null || per == null) {
+      resetBom(
+        "Na výpočet materiálu potrebujeme mať doplnené rozmery tak, aby sme vedeli plochu aj obvod balkóna."
+      );
+      syncBomToStep4();
+      return;
+    }
+
+    const profilePieces = Math.max(1, Math.ceil(per / 2.5));
+    const adhesiveBags = Math.max(1, Math.ceil(area / 5));
+
+    bomAreaEl.textContent = area.toFixed(1).replace(".", ",");
+    bomMembraneAreaEl.textContent = area.toFixed(1).replace(".", ",");
+    bomPerimeterEl.textContent = per.toFixed(1).replace(".", ",");
+    bomProfilesCountEl.textContent = String(profilePieces);
+    bomAdhesiveBagsEl.textContent = String(adhesiveBags);
+
+    const drainDom = state.drainDomId;
+    if (drainDom === "edge-free") {
+      bomNoteEl.textContent =
+        "Výpočet vychádza z plochy balkóna a obvodu voľnej hrany (bez stien). Ukončovacie profily rátame len po voľných hranách.";
+    } else if (drainDom === "edge-gutter") {
+      bomNoteEl.textContent =
+        "Výpočet je prispôsobený balkónu so žľabom pri hrane. Profily rátame po voľných hranách podľa zadania.";
+    } else if (drainDom === "internal-drain") {
+      bomNoteEl.textContent =
+        "Pre balkón s vnútorným vpustom rátame plochu pre izoláciu/drenáž a orientačné množstvo lepidla. Detaily doplníme v PDF.";
+    } else {
+      bomNoteEl.textContent =
+        "Hodnoty sú orientačné. Presný výpočet doplníme po konzultácii s technikom Lištového centra.";
+    }
+
+    syncBomToStep4();
+  }
+
+  // ---------------------------------------------------------------------------
+  // PREPOČET
+  // ---------------------------------------------------------------------------
+  function recomputeFromInputs() {
+    const dims = {};
+    for (const [side, input] of Object.entries(dimInputs)) {
+      if (!input) {
+        dims[side] = null;
+        continue;
+      }
+      const field = fieldElems[side];
+      if (field && field.classList.contains("hidden")) dims[side] = null;
+      else dims[side] = parseVal(input.value);
+    }
+
+    state.dims = dims;
+
+    const base = computeAreaPerimeter(state.shapeKey, dims);
+    state.area = base.area;
+    state.geometryError = base.geometryError || null;
+
+    let per = base.perimeter;
+    if (per != null) {
+      const deduction = getWallDeduction(dims);
+      per = Math.max(0, per - deduction);
+    }
+    state.perimeter = per;
+
+    if (summaryAreaEl) {
+      if (state.area != null)
+        summaryAreaEl.textContent = state.area.toFixed(1).replace(".", ",");
+      else if (state.geometryError)
+        summaryAreaEl.textContent = state.geometryError;
+      else summaryAreaEl.textContent = "–";
+    }
+
+    if (summaryPerimeterEl) {
+      summaryPerimeterEl.textContent =
+        state.perimeter != null
+          ? state.perimeter.toFixed(1).replace(".", ",")
+          : "–";
+    }
+
+    updateShapePreviewLabels();
+    updateStep2ContinueButton();
+    updateStep3Summary();
+    updateRecommendedBox();
+    updateBom();
+    updateStep3ContinueButton();
+    updateStep4Summary();
+    updateStep4Preview();
+    updatePdfButtons();
+  }
+
+  function setShape(shapeKey) {
+    if (!shapeConfigs[shapeKey]) return;
+    state.shapeKey = shapeKey;
+
+    document.querySelectorAll(".shape-card").forEach((card) => {
+      card.classList.toggle("selected", card.dataset.shape === shapeKey);
+    });
+
+    const cfg = shapeConfigs[shapeKey];
+    if (dimShapeInfo && cfg) dimShapeInfo.textContent = cfg.info;
+
+    const activeSides = new Set(cfg.sides);
+    Object.keys(fieldElems).forEach((side) => {
+      const field = fieldElems[side];
+      if (!field) return;
+      field.classList.toggle("hidden", !activeSides.has(side));
+    });
+
+    state.geometryError = null;
+
+    // ✅ kľúčové: wall checkboxy podľa tvaru
+    applyWallOptionsForCurrentShape();
+    recomputeFromInputs();
+  }
+
+  // ---------------------------------------------------------------------------
+  // DRAIN availability
+  // ---------------------------------------------------------------------------
+  function updateDrainButtonsAvailability() {
+    const isHigh = state.heightDomId === "high";
+    drainOptions.forEach((btn) => {
+      const opt = btn.dataset.drainOption;
+      if (isHigh && opt === "edge-free") {
+        btn.disabled = true;
+        btn.classList.add("drain-disabled");
+        if (state.drainDomId === "edge-free") state.drainDomId = null;
+      } else {
+        btn.disabled = false;
+        btn.classList.remove("drain-disabled");
+      }
+    });
+  }
+
+  function recalcSystemFromSelections() {
+    state.system = findBalconySystem(state.heightDomId, state.drainDomId);
+    updateRecommendedBox();
+    updateBom();
+    updateStep3ContinueButton();
+    updateStep4Summary();
+    updateStep4Preview();
+    updatePdfButtons();
+  }
+
+  // ---------------------------------------------------------------------------
+  // TILE MODAL
+  // ---------------------------------------------------------------------------
+  function openTileModal() {
+    if (!tileModal) return;
+    if (tileThicknessInput) {
+      tileThicknessInput.value =
+        state.tileThicknessMm != null ? String(state.tileThicknessMm) : "";
+      tileThicknessInput.focus();
+    }
+    tileModal.classList.add("visible");
+  }
+
+  function closeTileModal() {
+    if (!tileModal) return;
+    tileModal.classList.remove("visible");
+  }
+
+  function ensureTileThicknessBefore(actionName) {
+    if (
+      state.tileThicknessMm != null &&
+      Number.isFinite(state.tileThicknessMm) &&
+      state.tileThicknessMm > 0
+    ) {
+      return true;
+    }
+    state.pendingAction = actionName;
+    openTileModal();
+    return false;
+  }
+
+  async function runPendingActionIfAny() {
+    const a = state.pendingAction;
+    state.pendingAction = null;
+
+    if (a === "download") return postPdfDownload(true);
+    if (a === "email") return postPdfEmail(true);
+    if (a === "offer") return;
+  }
+
+  function confirmTileThickness() {
+    if (!tileThicknessInput) return;
+    const v = parseFloat(String(tileThicknessInput.value || "").replace(",", "."));
+    if (!Number.isFinite(v) || v <= 0) {
+      alert("Prosím zadajte platnú hrúbku dlažby v mm (napr. 10, 20, 30).");
+      return;
+    }
+    state.tileThicknessMm = Math.round(v);
+    closeTileModal();
+    runPendingActionIfAny();
+  }
+
+  if (tileConfirmBtn) tileConfirmBtn.addEventListener("click", confirmTileThickness);
+  if (tileCloseBtn)
+    tileCloseBtn.addEventListener("click", () => {
+      state.pendingAction = null;
+      closeTileModal();
+    });
+  if (tileModal) {
+    const bd = tileModal.querySelector(".preview-backdrop");
+    if (bd)
+      bd.addEventListener("click", () => {
+        state.pendingAction = null;
+        closeTileModal();
+      });
+    if (tileThicknessInput) {
+      tileThicknessInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") confirmTileThickness();
+      });
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // ✅ PAYLOAD + PDF akcie
+  // ---------------------------------------------------------------------------
+  function buildBridgePayload() {
+    syncPdfUiToState();
+
+    const sys = state.system;
+    const preview = sys ? getPreviewConfigForSystem(sys) : null;
+
+    const bom = {
+      area: bomAreaEl
+        ? parseFloat(String(bomAreaEl.textContent).replace(",", "."))
+        : null,
+      membraneArea: bomMembraneAreaEl
+        ? parseFloat(String(bomMembraneAreaEl.textContent).replace(",", "."))
+        : null,
+      perimeter: bomPerimeterEl
+        ? parseFloat(String(bomPerimeterEl.textContent).replace(",", "."))
+        : null,
+      profilesCount: bomProfilesCountEl
+        ? parseInt(String(bomProfilesCountEl.textContent || "0"), 10)
+        : null,
+      adhesiveBags: bomAdhesiveBagsEl
+        ? parseInt(String(bomAdhesiveBagsEl.textContent || "0"), 10)
+        : null,
     };
 
-    const chosen = map?.[state.height]?.[state.drain] || null;
-    if (!chosen) {
-      state.system.title = "Zatiaľ nevybraná – doplňte výšku a odtok.";
-      state.system.note = "Nepodarilo sa načítať mapovanie skladby. Skontrolujte config_balkony.js alebo cesty k obrázkom.";
-      state.system.previewImg = "";
-      state.system.previewCaption = "";
-      return;
-    }
+    const dimsNormalized = buildNormalizedDims();
+    const wallSidesNormalized = buildNormalizedWallSides();
 
-    state.system.title = chosen.title;
-    state.system.note = chosen.note;
-    state.system.previewImg = chosen.previewImg || "";
-    state.system.previewCaption = chosen.caption || "";
-  };
+    const bara = recommendBaraProfile(state.tileThicknessMm);
 
-  const computeBom = () => {
-    const area = state.area;
-    const per = state.perimeterForProfiles;
+    // ✅ pravidlo:
+    // Meno -> Firma -> Prezývka (autoName)
+    const bestCustomerLabel =
+      (state.pdfCustomerName || "").trim() ||
+      (state.pdfCustomerCompany || "").trim() ||
+      (state.userAutoName || "").trim() ||
+      "";
 
-    // membrane area = plocha
-    state.bom.membraneArea = area !== null ? area : null;
-
-    // profily 2.50m -> kusy = ceil(per / 2.5)
-    if (per !== null) {
-      state.bom.profilesCount = Math.ceil(per / 2.5);
-    } else {
-      state.bom.profilesCount = null;
-    }
-
-    // lepidlo - orientačne:
-    // tvoja PDF strana (napr. DITRA) používa cca 5,2 kg/m², 25kg vrece.
-    if (area !== null) {
-      const kg = area * 5.2;
-      state.bom.adhesiveBags = Math.max(1, Math.ceil(kg / 25));
-    } else {
-      state.bom.adhesiveBags = null;
-    }
-  };
-
-  const updateStep3UI = () => {
-    // ľavý sumár
-    const shapeText =
-      state.shape === "square" ? "Štvorec" :
-      state.shape === "rectangle" ? "Obdĺžnik / „kosoštvorec“" :
-      "L-tvar";
-
-    el.k3Shape.textContent = shapeText;
-    el.k3Area.textContent = state.area !== null ? String(state.area).replace(".", ",") : "–";
-    el.k3Perimeter.textContent = state.perimeterForProfiles !== null ? String(state.perimeterForProfiles).replace(".", ",") : "–";
-
-    // odporúčanie
-    buildSystem();
-    computeBom();
-
-    const readySystem = !!(state.system.title && state.height && state.drain);
-
-    el.recommendedName.textContent = readySystem
-      ? state.system.title
-      : "Zatiaľ nevybraná – zvoľte výšku a odtok vody.";
-    el.recommendedNote.textContent = readySystem
-      ? state.system.note
-      : "Po výbere konštrukčnej výšky a odtoku vody vám zobrazíme „zlatú strednú cestu“ pre vysunutý balkón.";
-
-    // BOM
-    const areaText = state.area !== null ? String(state.area).replace(".", ",") : "–";
-    const memText = state.bom.membraneArea !== null ? String(state.bom.membraneArea).replace(".", ",") : "–";
-    const perText = state.perimeterForProfiles !== null ? String(state.perimeterForProfiles).replace(".", ",") : "–";
-    const pcsText = state.bom.profilesCount !== null ? String(state.bom.profilesCount) : "–";
-    const bagsText = state.bom.adhesiveBags !== null ? String(state.bom.adhesiveBags) : "–";
-
-    el.bomArea.textContent = areaText;
-    el.bomMembraneArea.textContent = memText;
-    el.bomPerimeter.textContent = perText;
-    el.bomProfilesCount.textContent = pcsText;
-    el.bomAdhesiveBags.textContent = bagsText;
-
-    // povoliť krok 4 keď je vybraná výška aj odtok
-    el.goToStep4Btn.disabled = !(state.height && state.drain);
-  };
-
-  // ---------------------------
-  // Step4 UI + enabling buttons
-  // ---------------------------
-  const updateStep4UI = () => {
-    const shapeText =
-      state.shape === "square" ? "Štvorec" :
-      state.shape === "rectangle" ? "Obdĺžnik / „kosoštvorec“" :
-      "L-tvar";
-
-    el.k4Type.textContent = "Vysunutý balkón (konzola)";
-    el.k4Shape.textContent = shapeText;
-    el.k4Area.textContent = state.area !== null ? String(state.area).replace(".", ",") : "–";
-    el.k4Perimeter.textContent = state.perimeterForProfiles !== null ? String(state.perimeterForProfiles).replace(".", ",") : "–";
-    el.k4HeightLabel.textContent = heightLabel(state.height);
-    el.k4DrainLabel.textContent = drainLabel(state.drain);
-    el.k4SystemName.textContent = state.system.title || "–";
-
-    // BOM
-    el.k4BomArea.textContent = state.area !== null ? String(state.area).replace(".", ",") : "–";
-    el.k4BomMembraneArea.textContent = state.bom.membraneArea !== null ? String(state.bom.membraneArea).replace(".", ",") : "–";
-    el.k4BomPerimeter.textContent = state.perimeterForProfiles !== null ? String(state.perimeterForProfiles).replace(".", ",") : "–";
-    el.k4BomProfilesCount.textContent = state.bom.profilesCount !== null ? String(state.bom.profilesCount) : "–";
-    el.k4BomAdhesiveBags.textContent = state.bom.adhesiveBags !== null ? String(state.bom.adhesiveBags) : "–";
-
-    // preview
-    if (state.system.title) el.k4PreviewTitle.textContent = state.system.title;
-    if (state.system.previewCaption) el.k4PreviewCaption.textContent = state.system.previewCaption;
-
-    // obrázok: ak je prázdny alebo 404, necháme bez pádu
-    if (state.system.previewImg) {
-      el.k4PreviewImage.src = state.system.previewImg;
-      el.k4PreviewImage.style.display = "block";
-    } else {
-      el.k4PreviewImage.removeAttribute("src");
-      el.k4PreviewImage.style.display = "none";
-    }
-
-    // Enable PDF actions:
-    // - Download: stačí mať dokončený krok 3 (height + drain) a aspoň perimeter
-    const canPdf = !!(state.height && state.drain);
-
-    // Email send: potrebuje cieľový email (URL email alebo input email)
-    const targetEmail = getTargetEmailForSending();
-    const canEmail = canPdf && isEmail(targetEmail);
-
-    el.btnPdfDownload.disabled = !canPdf;
-    el.btnPdfRequestOffer.disabled = !canPdf;
-    el.btnPdfToEmail.disabled = !canEmail;
-  };
-
-  const getCustomerDisplayName = () => {
-    const name = (state.customer.name || "").trim();
-    const company = (state.customer.company || "").trim();
-    const nick = (state.customer.nickname || "").trim();
-    if (name) return name;
-    if (company) return company;
-    if (nick) return nick;
-    return "Zákazník";
-  };
-
-  const getTargetEmailForSending = () => {
-    // 1) prihlásený email v URL (?email=)
-    if (state.customer.loggedEmail && isEmail(state.customer.loggedEmail)) return state.customer.loggedEmail;
-    // 2) ručný email v poli
-    const inputEmail = (state.customer.email || "").trim();
-    if (isEmail(inputEmail)) return inputEmail;
-    return "";
-  };
-
-  // ---------------------------
-  // PDF calls (frontend -> backend)
-  // ---------------------------
-  const buildPdfPayload = (mode) => {
-    // mode: "download" | "email" | "offer"
-    const showEmail = !!state.customer.showEmailInPdf;
-    const emailForPdf = showEmail ? (state.customer.email || state.customer.loggedEmail || "").trim() : "";
+    // recipient pre mail/ponuku: prihlásený email alebo ručne zadaný
+    const recipientEmail = email || (state.pdfCustomerEmail || "").trim();
 
     return {
-      mode,
-      // zákazník
-      customerName: getCustomerDisplayName(),
-      customerCompany: (state.customer.company || "").trim(),
-      customerEmail: emailForPdf,
-      showEmailInPdf: showEmail,
+      meta: { app: "calc_balkony", version: 6, email: email || "" },
+      pdfMeta: {
+        customerLabel: bestCustomerLabel,
+        customerEmail: recipientEmail || "",
+        showEmailInPdf: !!state.pdfShowEmailInPdf,
+        ownerEmail: email || "",
+      },
+      calc: {
+        typeKey: state.fromStep1TypeKey,
+        typeLabel: state.fromStep1TypeLabel,
+        shapeKey: state.shapeKey,
+        shapeLabel: shapeConfigs[state.shapeKey]?.label || "",
+        dimsRaw: { ...state.dims },
+        wallSidesRaw: { ...state.wallSides },
+        dims: dimsNormalized,
+        wallSides: wallSidesNormalized,
+        area: state.area,
+        perimeter: state.perimeter,
 
-      // identita (na backend môžeš použiť pre audit/log)
-      loggedEmail: (state.customer.loggedEmail || "").trim(),
+        tileThicknessMm: bara.tileMm,
+        baraFamily: bara.family,
+        baraRecommendationText: bara.recommendationText,
+        baraNote: bara.note,
+        baraRwOptionsText: bara.rwOptionsText || "",
 
-      // kalkulačka dáta
-      constructionType: "Vysunutý balkón (konzola)",
-      shape: state.shape,
-      dims: { ...state.dims },
-      wallSides: Array.from(state.wall),
-      area: state.area,
-      perimeterForProfiles: state.perimeterForProfiles,
+        heightId: state.heightDomId,
+        heightLabel: getHeightLabel(state.heightDomId),
+        drainId: state.drainDomId,
+        drainLabel: getDrainLabel(state.drainDomId),
 
-      height: state.height,
-      heightLabel: heightLabel(state.height),
-      drain: state.drain,
-      drainLabel: drainLabel(state.drain),
+        systemId: sys ? sys.id : null,
+        systemTitle: sys ? sys.uiTitle || "" : null,
 
-      systemTitle: state.system.title,
-      systemNote: state.system.note,
-
-      bom: { ...state.bom },
-
-      tileThicknessMm: state.tileThicknessMm || 15
+        previewId: sys ? sys.id : null,
+        previewSrc: preview ? preview.src : null,
+      },
+      bom,
     };
-  };
+  }
 
-  const setBusyButtons = (busy, text) => {
-    const set = (btn, on) => {
-      if (!btn) return;
-      btn.disabled = on ? true : btn.disabled;
-      btn.dataset._oldText = btn.dataset._oldText || btn.textContent;
-      if (on && text) btn.textContent = text;
-      if (!on && btn.dataset._oldText) btn.textContent = btn.dataset._oldText;
-    };
-    set(el.btnPdfDownload, busy);
-    set(el.btnPdfToEmail, busy);
-    set(el.btnPdfRequestOffer, busy);
-  };
+  async function tryPdfDownloadEndpoints(payload) {
+    const candidates = [
+      "/api/pdf/balkon-final-html",
+      "/api/pdf/balkon-final",
+      "/api/pdf/balkon-download",
+      "/api/pdf/generate-balkon",
+      "/api/pdf/html/balkon",
+      "/api/pdf/balkon",
+      "/api/pdf/balkony",
+    ];
 
-  const tryDownloadPdf = async () => {
-    setBusyButtons(true, "⏳ Generujem PDF…");
-    try {
-      const payload = buildPdfPayload("download");
+    let lastErr = null;
 
-      // Skúšame najprv „preferované“ endpointy, potom fallback.
-      const candidates = [
-        { path: "/api/pdf/balkon", expects: "blob" },
-        { path: "/api/pdf/balkony", expects: "blob" },
-        { path: "/api/pdf/balcony", expects: "blob" },
-        { path: "/api/pdf/test-mail", expects: "json" } // fallback (ak máš len test endpoint)
-      ];
-
-      let res = null;
-      let used = null;
-      for (const c of candidates) {
-        res = await apiFetch(c.path, {
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ payload }),
         });
-        if (res && res.ok) {
-          used = c;
-          break;
+
+        if (!res.ok) {
+          const txt = await res.text().catch(() => "");
+          lastErr = new Error(
+            `${url}: HTTP ${res.status} ${txt ? "- " + txt : ""}`
+          );
+          continue;
         }
-      }
 
-      if (!res || !res.ok) {
-        const err = await safeJson(res);
-        alert(`PDF sa nepodarilo vygenerovať. ${err?.error || ""}`.trim());
-        return;
-      }
+        const ct = (res.headers.get("content-type") || "").toLowerCase();
+        if (!ct.includes("pdf") && !ct.includes("octet-stream")) {
+          const txt = await res.text().catch(() => "");
+          lastErr = new Error(
+            `${url}: Nečakaný content-type (${ct || "?"}) ${txt ? "- " + txt : ""}`
+          );
+          continue;
+        }
 
-      // blob download (ak endpoint vracia PDF)
-      const ct = (res.headers.get("content-type") || "").toLowerCase();
-      if (ct.includes("application/pdf")) {
         const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "technicky-podklad-balkon.pdf";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        return;
-      }
+        if (!blob || blob.size < 50) {
+          lastErr = new Error(`${url}: PDF blob je prázdny/poškodený`);
+          continue;
+        }
 
-      // json (fallback)
-      const data = await safeJson(res);
-      if (data?.downloadUrl) {
-        window.open(data.downloadUrl, "_blank");
-        return;
+        return { ok: true, usedUrl: url, blob };
+      } catch (e) {
+        lastErr = new Error(`${url}: ${e?.message || e}`);
       }
-
-      // ak nič, aspoň oznámime
-      alert("PDF bolo vygenerované, ale server nevrátil súbor ani downloadUrl.");
-    } catch (e) {
-      console.error(e);
-      alert("Chyba pri generovaní PDF.");
-    } finally {
-      setBusyButtons(false);
-      updateStep4UI();
     }
-  };
 
-  const trySendPdfToEmail = async () => {
-    const targetEmail = getTargetEmailForSending();
-    if (!isEmail(targetEmail)) {
-      alert("Zadajte e-mail (alebo otvorte kalkulačku s ?email=...).");
+    return {
+      ok: false,
+      error:
+        lastErr || new Error("Nepodarilo sa nájsť funkčný PDF endpoint."),
+    };
+  }
+
+  async function tryPdfMailEndpoints(payload) {
+    const candidates = [
+      "/api/pdf/balkon-final-mail",
+      "/api/pdf/test-mail",
+      "/api/pdf/balkon-mail",
+      "/api/pdf/mail/balkon",
+    ];
+
+    let lastErr = null;
+
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ payload }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          lastErr = new Error(
+            `${url}: ${data.message || `HTTP ${res.status}`}`
+          );
+          continue;
+        }
+
+        return { ok: true, usedUrl: url, data };
+      } catch (e) {
+        lastErr = new Error(`${url}: ${e?.message || e}`);
+      }
+    }
+
+    return {
+      ok: false,
+      error: lastErr || new Error("Nepodarilo sa nájsť funkčný mail endpoint."),
+    };
+  }
+
+  async function postPdfDownload(skipTileCheck = false) {
+    if (!canGoToStep4()) return;
+
+    if (!skipTileCheck) {
+      const ok = ensureTileThicknessBefore("download");
+      if (!ok) return;
+    }
+
+    const btn = btnPdfDownload;
+    const oldText = btn ? btn.textContent : "";
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "⏳ Generujem PDF...";
+      }
+
+      const payload = buildBridgePayload();
+      const out = await tryPdfDownloadEndpoints(payload);
+
+      if (!out.ok) throw out.error;
+
+      const url = URL.createObjectURL(out.blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "balkon-final.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(`Chyba pri generovaní PDF: ${e?.message || e}`);
+    } finally {
+      if (btn) {
+        btn.textContent = oldText;
+        updatePdfButtons();
+      }
+    }
+  }
+
+  async function postPdfEmail(skipTileCheck = false) {
+    if (!canGoToStep4()) return;
+
+    if (!hasRecipientEmailForMailOrOffer()) {
+      alert(
+        "Chýba e-mail pre odoslanie. Prihláste sa, alebo zadajte e-mail v údajoch do PDF."
+      );
       return;
     }
 
-    setBusyButtons(true, "⏳ Posielam PDF…");
+    if (!skipTileCheck) {
+      const ok = ensureTileThicknessBefore("email");
+      if (!ok) return;
+    }
+
+    const btn = btnPdfToEmail;
+    const oldText = btn ? btn.textContent : "";
     try {
-      const payload = buildPdfPayload("email");
-      payload.targetEmail = targetEmail;
-
-      const candidates = [
-        "/api/pdf/balkon-email",
-        "/api/pdf/balkony-email",
-        "/api/pdf/balcony-email",
-        "/api/pdf/send-balkon",
-        "/api/pdf/test-mail" // fallback
-      ];
-
-      let res = null;
-      for (const path of candidates) {
-        res = await apiFetch(path, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        if (res && res.ok) break;
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "⏳ Odosielam e-mail...";
       }
 
-      if (!res || !res.ok) {
-        const err = await safeJson(res);
-        alert(`Nepodarilo sa poslať e-mail. ${err?.error || ""}`.trim());
+      const payload = buildBridgePayload();
+      const out = await tryPdfMailEndpoints(payload);
+
+      if (!out.ok) throw out.error;
+
+      alert(out.data?.message || "PDF bolo odoslané.");
+    } catch (e) {
+      alert(`Chyba pri odosielaní PDF: ${e?.message || e}`);
+    } finally {
+      if (btn) {
+        btn.textContent = oldText;
+        updatePdfButtons();
+      }
+    }
+  }
+
+  if (btnPdfDownload)
+    btnPdfDownload.addEventListener("click", () => postPdfDownload(false));
+  if (btnPdfToEmail)
+    btnPdfToEmail.addEventListener("click", () => postPdfEmail(false));
+
+  if (btnPdfRequestOffer) {
+    btnPdfRequestOffer.addEventListener("click", () => {
+      if (!canGoToStep4()) return;
+
+      if (!hasRecipientEmailForMailOrOffer()) {
+        alert(
+          "Chýba e-mail pre ponuku. Prihláste sa, alebo zadajte e-mail v údajoch do PDF."
+        );
         return;
       }
 
-      alert(`PDF bolo odoslané na: ${targetEmail}`);
-    } catch (e) {
-      console.error(e);
-      alert("Chyba pri odosielaní e-mailu.");
-    } finally {
-      setBusyButtons(false);
-      updateStep4UI();
-    }
-  };
+      ensureTileThicknessBefore("offer");
+      alert(
+        "Ponuka: zatiaľ len pripravujeme. Neskôr dopojíme odoslanie požiadavky technikovi."
+      );
+    });
+  }
 
-  const tryRequestOffer = async () => {
-    // zatiaľ len placeholder – backend si dopojíš neskôr
-    alert("Žiadosť o ponuku: zatiaľ len UI (ďalší krok vývoja).");
-  };
+  // ---------------------------------------------------------------------------
+  // LISTENERY – KROK 2
+  // ---------------------------------------------------------------------------
+  if (shapeGrid) {
+    shapeGrid.addEventListener("click", (e) => {
+      const card = e.target.closest(".shape-card");
+      if (!card) return;
+      setShape(card.dataset.shape);
 
-  // ---------------------------
-  // Events wiring
-  // ---------------------------
-  const bindStep2 = () => {
-    // shape click
-    el.shapeCards.forEach((card) => {
-      card.addEventListener("click", () => {
-        state.shape = card.dataset.shape;
-        // reset wall selection (aby nevznikali skryté zvyšky)
-        state.wall.clear();
-        el.wallCheckboxes.forEach((cb) => (cb.checked = false));
-        applyShapeUI();
-        computeAreaPerimeter();
-        updateStep2SummaryUI();
+      if (window.innerWidth <= 768) {
+        const sideAInput = dimInputs.A;
+        if (sideAInput)
+          sideAInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+  }
+
+  Object.values(dimInputs).forEach((input) => {
+    if (!input) return;
+    ["input", "change", "blur"].forEach((evt) =>
+      input.addEventListener(evt, recomputeFromInputs)
+    );
+  });
+
+  Object.entries(wallCheckboxes).forEach(([side, checkbox]) => {
+    checkbox.addEventListener("change", () => {
+      state.wallSides[side] = checkbox.checked;
+      recomputeFromInputs();
+    });
+  });
+
+  if (backToStep1Btn) {
+    backToStep1Btn.addEventListener("click", () => {
+      const target = "calc_terasa_base.html";
+      window.location.href = email
+        ? `${target}?email=${encodeURIComponent(email)}`
+        : target;
+    });
+  }
+
+  if (goToStep3Btn) {
+    goToStep3Btn.addEventListener("click", () => {
+      recomputeFromInputs();
+      if (!canGoToStep3()) return;
+      showStep(3);
+      updateStep3Summary();
+      updateBom();
+      updateStep3ContinueButton();
+      updatePdfButtons();
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // LISTENERY – KROK 3
+  // ---------------------------------------------------------------------------
+  if (heightRadios.length) {
+    heightRadios.forEach((radio) => {
+      radio.addEventListener("change", () => {
+        if (!radio.checked) return;
+        state.heightDomId = radio.value;
+        updateDrainButtonsAvailability();
+        recalcSystemFromSelections();
       });
     });
+  }
 
-    // dim inputs
-    const bindDim = (input, key) => {
-      input.addEventListener("input", () => {
-        state.dims[key] = toNum(input.value);
-        computeAreaPerimeter();
-        updateStep2SummaryUI();
-      });
-    };
-
-    bindDim(el.sideA, "A");
-    bindDim(el.sideB, "B");
-    bindDim(el.sideC, "C");
-    bindDim(el.sideD, "D");
-    bindDim(el.sideE, "E");
-    bindDim(el.sideF, "F");
-
-    // wall checkboxes
-    el.wallCheckboxes.forEach((cb) => {
-      cb.addEventListener("change", () => {
-        const side = cb.dataset.side;
-        if (cb.checked) state.wall.add(side);
-        else state.wall.delete(side);
-        updatePreviewWallHighlights();
-        computeAreaPerimeter();
-        updateStep2SummaryUI();
-      });
-    });
-
-    // navigation
-    el.goToStep3Btn.addEventListener("click", () => {
-      // naplni step3 sumár
-      updateStep3UI();
-      setActiveStep("step3");
-    });
-
-    el.backToStep1Btn.addEventListener("click", () => {
-      // v tvojej appke môže byť krok 1 inde – držíme fallback:
-      // 1) ak je v URL ref, vráť sa
-      // 2) inak history back
-      window.history.back();
-    });
-
-    el.backBtn?.addEventListener("click", () => window.history.back());
-  };
-
-  const bindStep3 = () => {
-    // height radios
-    el.heightRadios.forEach((r) => {
-      r.addEventListener("change", () => {
-        state.height = r.checked ? r.value : state.height;
-        updateStep3UI();
-      });
-    });
-
-    // drain options
-    el.drainOptions.forEach((btn) => {
+  if (drainOptions.length) {
+    drainOptions.forEach((btn) => {
       btn.addEventListener("click", () => {
-        const v = btn.dataset.drainOption;
-        state.drain = v;
+        if (btn.disabled) return;
+        state.drainDomId = btn.dataset.drainOption;
 
-        el.drainOptions.forEach((b) => b.classList.toggle("selected", b === btn));
-        updateStep3UI();
+        drainOptions.forEach((other) =>
+          other.classList.toggle("selected", other === btn)
+        );
+        recalcSystemFromSelections();
       });
     });
+  }
 
-    el.backToStep2Btn.addEventListener("click", () => setActiveStep("step2"));
+  if (backToStep2Btn)
+    backToStep2Btn.addEventListener("click", () => showStep(2));
 
-    el.goToStep4Btn.addEventListener("click", () => {
-      updateStep4UI();
-      setActiveStep("step4");
+  if (goToStep4Btn) {
+    goToStep4Btn.addEventListener("click", () => {
+      recomputeFromInputs();
+      updateStep3ContinueButton();
+      if (!canGoToStep4()) return;
+
+      showStep(4);
+      updateStep4Summary();
+      updateStep4Preview();
+      syncBomToStep4();
+      updatePdfUiEnabled();
+      updatePdfButtons();
     });
-  };
+  }
 
-  const bindStep4 = () => {
-    // pdf fields
-    el.pdfCustomerName.addEventListener("input", () => {
-      state.customer.name = el.pdfCustomerName.value || "";
-      updateStep4UI();
+  // ---------------------------------------------------------------------------
+  // LISTENERY – KROK 4
+  // ---------------------------------------------------------------------------
+  if (backToStep3Btn)
+    backToStep3Btn.addEventListener("click", () => showStep(3));
+
+  if (previewBtn && previewModal) {
+    previewBtn.addEventListener("click", () => {
+      // (ponechané – ak používaš previewBtn, inak nevadí)
     });
+    if (previewCloseBtn) previewCloseBtn.addEventListener("click", () => {});
+  }
 
-    el.pdfCustomerCompany.addEventListener("input", () => {
-      state.customer.company = el.pdfCustomerCompany.value || "";
-      updateStep4UI();
-    });
+  // ---------------------------------------------------------------------------
+  // INITIALIZÁCIA
+  // ---------------------------------------------------------------------------
+  showStep(2);
+  setShape("square"); // default
 
-    el.pdfCustomerEmail.addEventListener("input", () => {
-      state.customer.email = el.pdfCustomerEmail.value || "";
-      updateStep4UI();
-    });
+  // ✅ wall možnosti hneď po štarte
+  applyWallOptionsForCurrentShape();
 
-    el.pdfShowEmail.addEventListener("change", () => {
-      state.customer.showEmailInPdf = !!el.pdfShowEmail.checked;
-      updateStep4UI();
-    });
+  updateStep2ContinueButton();
+  updateStep3Summary();
+  updateDrainButtonsAvailability();
+  updateBom();
+  updateRecommendedBox();
+  updateStep3ContinueButton();
+  updateStep4Summary();
+  updateStep4Preview();
+  syncBomToStep4();
+  updateShapePreviewLabels();
+  updatePdfUiEnabled();
+  updatePdfButtons();
 
-    // buttons
-    el.btnPdfDownload.addEventListener("click", tryDownloadPdf);
-    el.btnPdfToEmail.addEventListener("click", trySendPdfToEmail);
-    el.btnPdfRequestOffer.addEventListener("click", tryRequestOffer);
-
-    // modal close handlers (preview modal – ak sa neskôr použije)
-    el.previewCloseBtn?.addEventListener("click", () => el.previewModal.classList.remove("visible"));
-    el.previewBackdrop?.addEventListener("click", () => el.previewModal.classList.remove("visible"));
-
-    // tile modal handlers (zatiaľ nepoužité, ale nech je pripravené)
-    el.tileCloseBtn?.addEventListener("click", () => el.tileModal.classList.remove("visible"));
-    el.tileConfirmBtn?.addEventListener("click", () => {
-      const v = toNum(el.tileThicknessInput.value);
-      if (v && v >= 5 && v <= 50) {
-        state.tileThicknessMm = Math.round(v);
-        el.tileModal.classList.remove("visible");
-      } else {
-        alert("Zadajte hrúbku dlažby v rozsahu 5–50 mm.");
-      }
-    });
-  };
-
-  // ---------------------------
-  // “Logged-in” prefill (bez local/session storage)
-  // ---------------------------
-  const initUserIdentity = async () => {
-    const urlEmail = getUrlEmail();
-    state.customer.loggedEmail = urlEmail;
-
-    // user chip (vizuálne)
-    if (el.userChip) {
-      el.userChip.textContent = `Prihlásený: ${urlEmail ? urlEmail : "–"}`;
-    }
-
-    // keď je prihlásený cez URL, umožníme posielanie PDF aj bez checkboxu a bez vypĺňania emailu v poli
-    // (checkbox rieši iba "zobraziť email v PDF", nie kam poslať)
-    if (urlEmail) {
-      // predvyplniť email input (len ako hint, stále rešpektujeme "nezobrazovať automaticky")
-      // nechávame prázdne pole, aby si email nevypísal bez vedomého kroku užívateľa.
-      // Ak chceš opačne, stačí odkomentovať:
-      // el.pdfCustomerEmail.value = urlEmail; state.customer.email = urlEmail;
-
-      // jemný hint že vieme meno dotiahnuť (ak máš endpoint)
-      // Skúsime získať profil – ak nevyjde, nič sa nedeje.
-      try {
-        // 1) preferovaný query endpoint
-        let res = await apiFetch(`/api/users/by-email?email=${encodeURIComponent(urlEmail)}`);
-        if (!res.ok) {
-          // 2) fallback path endpoint
-          res = await apiFetch(`/api/users/by-email/${encodeURIComponent(urlEmail)}`);
-        }
-
-        if (res.ok) {
-          const data = await safeJson(res);
-          // očakávané polia: name / nickname / company / note...
-          const nick = (data?.name || data?.nickname || "").trim();
-          const company = (data?.company || data?.firma || "").trim();
-
-          if (nick) {
-            state.customer.nickname = nick;
-            // predvyplníme do PDF polí len keď užívateľ nič nenapísal
-            if (!el.pdfCustomerName.value.trim() && !el.pdfCustomerCompany.value.trim()) {
-              el.pdfCustomerName.value = nick;
-              state.customer.name = nick;
-              el.pdfAutoNameInfo.style.display = "block";
-              el.pdfAutoNameText.textContent = nick;
-            }
-          }
-          if (company && !el.pdfCustomerCompany.value.trim()) {
-            el.pdfCustomerCompany.value = company;
-            state.customer.company = company;
-          }
-        }
-      } catch (e) {
-        // ticho – endpoint možno ešte neexistuje
-        console.debug("Prefill profile skipped:", e);
-      }
-    }
-  };
-
-  // ---------------------------
-  // Init
-  // ---------------------------
-  const init = async () => {
-    // základné UI
-    applyShapeUI();
-    computeAreaPerimeter();
-    updateStep2SummaryUI();
-
-    bindStep2();
-    bindStep3();
-    bindStep4();
-
-    await initUserIdentity();
-
-    // pri prvom načítaní udržuj správny stav tlačidiel v kroku 4, aj keď tam ešte nie sme
-    updateStep4UI();
-  };
-
-  // Run
-  document.addEventListener("DOMContentLoaded", init);
-})();
+  // ✅ skús načítať meno/prezývku prihláseného
+  tryLoadLoggedUserName();
+});
