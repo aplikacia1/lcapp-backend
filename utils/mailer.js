@@ -12,8 +12,8 @@ const {
   APP_NAME = 'Lištobook',
   APP_URL = 'https://listobook.sk',
   EMAIL_DEBUG = 'false',
-  SMTP_AUTH_METHOD = '', // voliteľné: LOGIN alebo PLAIN
-  ADMIN_EMAIL = '', // kam pôjde ponuka (interný mail)
+  SMTP_AUTH_METHOD = '',
+  ADMIN_EMAIL = '',
 } = process.env;
 
 // --- očistenie a defaulty ---
@@ -26,9 +26,7 @@ const pass = String(SMTP_PASS || '').trim();
 const debug = String(EMAIL_DEBUG || 'false').trim().toLowerCase() === 'true';
 const authMethod = String(SMTP_AUTH_METHOD || '').trim().toUpperCase() || null;
 
-if (!user || !pass) {
-  console.error('❌ SMTP_USER alebo SMTP_PASS chýba.');
-}
+if (!user || !pass) console.error('❌ SMTP_USER alebo SMTP_PASS chýba.');
 
 const transporter = nodemailer.createTransport({
   host,
@@ -60,11 +58,7 @@ function stripHtml(s = '') {
 }
 function escapeHtml(s = '') {
   return String(s).replace(/[&<>"']/g, c => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 }
 function escapeAttr(s = '') { return escapeHtml(s).replace(/"/g, '&quot;'); }
@@ -74,10 +68,7 @@ function isValidEmail(email) {
 }
 
 /**
- * ✅ Normalizácia PDF na Buffer (fix na “zlá príloha”):
- * - Buffer -> ok
- * - Uint8Array -> Buffer.from()
- * - JSON Buffer {type:"Buffer",data:[...]} -> Buffer.from(data)
+ * ✅ Normalizácia PDF na Buffer (fix na “zlá príloha”)
  */
 function normalizeToBuffer(input) {
   if (!input) return null;
@@ -95,10 +86,9 @@ function normalizeToBuffer(input) {
 async function sendMail({ to, subject, html, text, attachments, cc, bcc, replyTo }) {
   if (!to) throw new Error('sendMail: "to" je povinné');
   await verifyOnce();
-  const fromPretty = `${APP_NAME} <${user}>`; // musí = SMTP_USER kvôli SPF/DMARC
 
   const info = await transporter.sendMail({
-    from: fromPretty,
+    from: `${APP_NAME} <${user}>`,
     to,
     cc,
     bcc,
@@ -113,13 +103,35 @@ async function sendMail({ to, subject, html, text, attachments, cc, bcc, replyTo
   return info;
 }
 
+/**
+ * ✅ BACKWARD COMPAT: sendPdfEmail (aby pdfTestRoutes nezlyhal)
+ */
+async function sendPdfEmail({ to, subject, html, text, pdfBuffer, filename = 'kalkulacia.pdf', cc, bcc }) {
+  if (!to) throw new Error('sendPdfEmail: "to" je povinné');
+  const pdf = normalizeToBuffer(pdfBuffer);
+  if (!pdf || pdf.length < 1000) throw new Error('sendPdfEmail: PDF buffer je neplatný/príliš malý');
+
+  return sendMail({
+    to,
+    cc,
+    bcc,
+    subject: subject || `${APP_NAME} – PDF`,
+    html,
+    text,
+    attachments: [{
+      filename,
+      content: pdf,
+      contentType: 'application/pdf',
+    }],
+  });
+}
+
 /* ===================== ŠABLÓNY (WELCOME) ===================== */
 
 function signupTemplate() {
   const app = String(APP_URL || '').replace(/\/+$/, '');
   const logoUrl = `${app}/icons/icon-512.png`;
-
-  const subject   = `Vitaj v ${APP_NAME}!`;
+  const subject = `Vitaj v ${APP_NAME}!`;
   const preheader = 'Po prihlásení si zvoľ prezývku a máš hotovo.';
 
   const html = `
@@ -136,15 +148,6 @@ function signupTemplate() {
           Lištobook je <strong>komunitná mini-sieť</strong> pre majstrov a kutilov z Lištového centra.
           Zdieľaj fotky svojej práce, pýtaj sa na rady, <strong>hodnoť materiály a výrobky</strong> a píš krátke recenzie.
         </p>
-        <p style="margin:16px 0 8px;"><strong>Po prihlásení odporúčame:</strong></p>
-        <ol style="margin:0 0 16px;padding-left:18px">
-          <li>V časti <strong>Lištový dashboard</strong> si zvoľ <strong>prezývku</strong> a doplň mesto.</li>
-          <li>V hornej lište nájdeš sekcie:
-            <strong>„Lištobook“</strong> (časová os),
-            <strong>„⭐ Hodnotenie tovarov ⭐“</strong> (katalóg na recenzie)
-            a <strong>„Voľný čas“</strong> (videá a oddych).</li>
-          <li>Keď máš prezývku, môžeš pridávať príspevky, komentovať a hodnotiť tovary.</li>
-        </ol>
         <p style="margin:16px 0 0;font-size:13px;color:#9ab6e8">
           <strong>Kontakt na Lištové centrum:</strong>
           <a href="mailto:bratislava@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">
@@ -165,48 +168,29 @@ function signupTemplate() {
   return { subject, html };
 }
 
-/* ===================== PDF (kompatibilita) ===================== */
-
-/**
- * ✅ sendPdfEmail – kompatibilný helper, ktorý používa tvoj pdfTestRoutes.js
- * TOTO ti opraví chybu: "sendPdfEmail is not a function"
- */
-async function sendPdfEmail({ to, subject, html, text, pdfBuffer, filename = 'kalkulacia.pdf', cc, bcc }) {
-  if (!to) throw new Error('sendPdfEmail: "to" je povinné');
-  const pdf = normalizeToBuffer(pdfBuffer);
-  if (!pdf) throw new Error('sendPdfEmail: "pdfBuffer" je neplatný (nie Buffer/Uint8Array)');
-  return sendMail({
-    to,
-    cc,
-    bcc,
-    subject: subject || `${APP_NAME} – PDF`,
-    html,
-    text,
-    attachments: [{
-      filename,
-      content: pdf,
-      contentType: 'application/pdf',
-    }],
-  });
+async function sendSignupEmail(toEmail) {
+  const { subject, html } = signupTemplate();
+  return sendMail({ to: toEmail, subject, html });
+}
+async function sendWelcomeEmail(toEmail) {
+  return sendSignupEmail(toEmail);
 }
 
 /* ===================== BALKÓN – TECH LISTY ===================== */
 
 /**
- * Načíta technické listy z: public/img/pdf/tech/
- * (podľa tvojho git statusu, kde ich reálne máš)
+ * ✅ TECH listy sú v gite tu:
+ * public/img/pdf/tech/*.pdf
  */
 function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
-  // zatiaľ iba: LOW + EDGE_FREE
   const h = String(heightId || '').toLowerCase();
   const d = String(drainId || '').toLowerCase();
 
+  // zatiaľ iba: LOW + EDGE_FREE
   const isLow = h === 'low';
   const isEdgeFree = d === 'edge-free';
-
   if (!(isLow && isEdgeFree)) return [];
 
-  // ✅ opravná cesta: public/img/pdf/tech/  (nie /balkon/tech/)
   const baseDir = path.join(process.cwd(), 'public', 'img', 'pdf', 'tech');
 
   const files = [
@@ -233,10 +217,6 @@ function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
   return out;
 }
 
-/**
- * sendBalconyDocsEmail
- * - pošle zákazníkovi PDF + technické listy (podľa variantu)
- */
 async function sendBalconyDocsEmail({
   to,
   subject,
@@ -266,18 +246,10 @@ async function sendBalconyDocsEmail({
   });
 }
 
-/**
- * sendBalconyOfferCustomerEmail
- * - zákazníkovi príde potvrdzovací mail + rovnaké prílohy ako “Poslať PDF”
- */
 async function sendBalconyOfferCustomerEmail(args) {
   return sendBalconyDocsEmail(args);
 }
 
-/**
- * sendBalconyOfferAdminEmail
- * - ADMIN_EMAIL dostane iba 1 prílohu: PDF + text požiadavky
- */
 async function sendBalconyOfferAdminEmail({
   subject,
   html,
@@ -299,30 +271,11 @@ async function sendBalconyOfferAdminEmail({
   });
 }
 
-/* ===================== VEREJNÉ API (WELCOME) ===================== */
-
-async function sendSignupEmail(toEmail) {
-  const { subject, html } = signupTemplate();
-  return sendMail({ to: toEmail, subject, html });
-}
-
-// alias kvôli kompatibilite so starými volaniami
-async function sendWelcomeEmail(toEmail) {
-  return sendSignupEmail(toEmail);
-}
-
 module.exports = {
-  // základ
   sendMail,
-
-  // ✅ kompatibilita pre pdfTestRoutes.js (fixne tvoj crash)
-  sendPdfEmail,
-
-  // welcome
+  sendPdfEmail, // ✅ dôležité pre existujúce routy
   sendSignupEmail,
   sendWelcomeEmail,
-
-  // balkón – nové API
   sendBalconyDocsEmail,
   sendBalconyOfferCustomerEmail,
   sendBalconyOfferAdminEmail,
