@@ -1,0 +1,37 @@
+/* LC Typography – safe layer (append-only) */
+/* Cieľ: zjednotiť fonty a veľkosti bez rozbíjania layoutu */
+
+:root{
+  --lc-font: system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --lc-base: 16px;
+  --lc-lh: 1.45;
+
+  --lc-h1: 1.35rem;
+  --lc-h2: 1.10rem;
+  --lc-h3: 0.95rem;
+
+  --lc-text: #eaf1ff;
+  --lc-muted: rgba(234,241,255,.78);
+}
+
+/* 1) Jednotný základ */
+html{ font-size: var(--lc-base); }
+body{
+  font-family: var(--lc-font);
+  line-height: var(--lc-lh);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 2) Jednotné nadpisy */
+h1{ font-size: var(--lc-h1); line-height: 1.2; margin: .35rem 0 .6rem; }
+h2{ font-size: var(--lc-h2); line-height: 1.25; margin: .25rem 0 .5rem; }
+h3{ font-size: var(--lc-h3); line-height: 1.3; margin: .2rem 0 .4rem; }
+
+/* 3) Jednotný text v bežných prvkoch */
+p, li, td, th, label, input, button{ font-size: .95rem; }
+small{ font-size: .80rem; color: var(--lc-muted); }
+
+/* 4) Tabuľky – aby čísla “nelietali” */
+table{ font-variant-numeric: tabular-nums; }
+.summary-table th{ font-weight: 500; }

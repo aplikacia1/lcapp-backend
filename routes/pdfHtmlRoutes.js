@@ -136,12 +136,30 @@ function buildPage5Consumption(calc) {
     pickNumber(calc, ["perimeter_total", "perimeterTotal"]) ??
     pickNumber(calc, ["perimeter"]);
 
-  const A = pickNumber(calc, ["a", "A", "lengthA", "lenA", "length", "longSide", "sideA"]);
-  const B = pickNumber(calc, ["b", "B", "widthB", "lenB", "width", "shortSide", "sideB"]);
+  const A = pickNumber(calc, [
+    "a",
+    "A",
+    "lengthA",
+    "lenA",
+    "length",
+    "longSide",
+    "sideA",
+  ]);
+  const B = pickNumber(calc, [
+    "b",
+    "B",
+    "widthB",
+    "lenB",
+    "width",
+    "shortSide",
+    "sideB",
+  ]);
 
   const widthForJoints = B;
   const joints =
-    widthForJoints != null ? Math.max(0, ceilPositive(widthForJoints / 1.0) - 1) : null;
+    widthForJoints != null
+      ? Math.max(0, ceilPositive(widthForJoints / 1.0) - 1)
+      : null;
 
   const kebaEdge = perimeterFull != null ? perimeterFull : null;
   const kebaJoints = joints != null && A != null ? joints * A : 0;
@@ -190,7 +208,8 @@ function buildPage5Consumption(calc) {
       : "0,0 m";
 
   const kebaMetersText = kebaTotal != null ? `${formatNumSk(kebaTotal, 1)} m` : "–";
-  const collConsumptionText = collTotalKg != null ? `≈ ${formatNumSk(collTotalKg, 2)} kg` : "–";
+  const collConsumptionText =
+    collTotalKg != null ? `≈ ${formatNumSk(collTotalKg, 2)} kg` : "–";
 
   return {
     ditraJointsText,
@@ -207,14 +226,12 @@ function buildPage5Consumption(calc) {
 // ---------------------------------------------------------------------------
 function normalizeRtVariantFromText(recoTextRaw) {
   const t = safeText(recoTextRaw).toUpperCase().replace(/\s+/g, " ").trim();
-  // preferuj presnejší variant (ak je v texte viac možností)
   if (t.includes("RT12/65")) return "RT12/65";
   if (t.includes("RT12/15") || t.includes("RT12/16")) return "RT12/15";
   if (t.includes("RT9/60")) return "RT9/60";
   if (t.includes("RT20/50")) return "RT20/50";
   if (t.includes("RT25/40")) return "RT25/40";
   if (t.includes("RT30/35")) return "RT30/35";
-  // fallback – nič spoľahlivé
   return "";
 }
 
@@ -225,29 +242,21 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
   const rwOptionsText = safeText(calc?.baraRwOptionsText);
 
   const tileThicknessText = tileMm != null ? `${Math.round(tileMm)} mm` : "–";
-
-  // Farba teraz neriešime => default text
   const colorBaseText = "základná (bez RAL)";
 
-  // orientačne: spojky ~ počet kusov - 1, rohy ~ 2 (koniec profilu pri dvoch koncoch)
   const pcs = Number.isFinite(Number(profilePieces)) ? Number(profilePieces) : null;
   const connectorsQty = pcs != null ? Math.max(0, pcs - 1) : null;
   const cornersQty = perimeterProfiles != null && perimeterProfiles > 0 ? 2 : 0;
 
-  // RT kód (bez farby)
   const rtVariant = normalizeRtVariantFromText(recoText) || "RT";
   const rtCornerCode = rtVariant && rtVariant !== "RT" ? `E90${rtVariant}` : "E90RT…";
   const rtConnectorCode = rtVariant && rtVariant !== "RT" ? `V/${rtVariant}` : "V/RT…";
 
-  // RW kód
   const rwCornerCode = "E90/RW…";
   const rwConnectorCode = "V/RW…";
 
-  // Čo zobrazíme na strane 6 ako „Typ profilu“
-  const baraProfileTypeText =
-    family === "RW" ? "BARA-RW (alternatíva)" : "BARA-RT";
+  const baraProfileTypeText = family === "RW" ? "BARA-RW (alternatíva)" : "BARA-RT";
 
-  // „Výška profilu podľa hrúbky dlažby“ (strana 6)
   let baraHeightChoiceText = "–";
   let baraHeightNoteText = "";
   if (family === "RT") {
@@ -255,31 +264,30 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     baraHeightNoteText =
       "RT: horné číslo profilu kryje a chráni hranu dlažby; spodné číslo je len prekrytie betónu (dekor).";
   } else if (family === "RW") {
-    baraHeightChoiceText = "BARA-RW (odporúčané pri dlažbách nad 30 mm alebo ako alternatíva)";
+    baraHeightChoiceText =
+      "BARA-RW (odporúčané pri dlažbách nad 30 mm alebo ako alternatíva)";
     baraHeightNoteText =
       "RW je dekoračný profil – rieši len spodné prekrytie betónu (odkvapový „jazyk“). Krytie dlažby sa pri RW nepočíta.";
   } else {
-    // ak chýba family
     baraHeightChoiceText = recoText ? recoText : "–";
   }
 
-  // Strana 7 – hodnoty do tabuliek
   const rtProfilePiecesText = family === "RT" ? (pcs != null ? `${pcs} ks` : "–") : "–";
   const rtCornersText = family === "RT" ? `${cornersQty} ks` : "–";
-  const rtConnectorsText = family === "RT" ? (connectorsQty != null ? `${connectorsQty} ks` : "–") : "–";
+  const rtConnectorsText =
+    family === "RT" ? (connectorsQty != null ? `${connectorsQty} ks` : "–") : "–";
   const rtColorCode = family === "RT" ? colorBaseText : "–";
 
-  const rwLengthText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
+  const rwLengthText =
+    perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
   const rwProfilePiecesText = family === "RW" ? (pcs != null ? `${pcs} ks` : "–") : "–";
-  const rwCornerCodeAndQty =
-    family === "RW" ? `${rwCornerCode} (${cornersQty} ks)` : "–";
+  const rwCornerCodeAndQty = family === "RW" ? `${rwCornerCode} (${cornersQty} ks)` : "–";
   const rwConnectorCodeAndQty =
     family === "RW"
       ? `${rwConnectorCode} (${connectorsQty != null ? connectorsQty : 0} ks)`
       : "–";
   const rwColorCode = family === "RW" ? colorBaseText : "–";
 
-  // doplnok textov (RW možnosti)
   const rwOptionsLine =
     family === "RW" && rwOptionsText
       ? rwOptionsText
@@ -287,7 +295,6 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
       ? "Možnosti RW spodok (mm): 15, 25, 30, 45, 55, 75, 95, 120, 150"
       : "";
 
-  // RT – ak chceme ukázať „kód“ aj bez farby
   const rtCodeShortText = family === "RT" ? (rtVariant || "RT…") : "–";
   const rtCornerCodeText = family === "RT" ? rtCornerCode : "–";
   const rtConnectorCodeText = family === "RT" ? rtConnectorCode : "–";
@@ -302,7 +309,6 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     baraHeightChoiceText,
     baraHeightNoteText,
 
-    // page7 RT
     rtProfilePiecesText,
     rtCornersText,
     rtConnectorsText,
@@ -311,7 +317,6 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     rtCornerCodeText,
     rtConnectorCodeText,
 
-    // page7 RW
     rwLengthText,
     rwProfilePiecesText,
     rwCornerCodeAndQty,
@@ -320,10 +325,150 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// ✅ Server fallback – vygeneruje SVG náčrt, ak neprišiel z frontendu
+// ---------------------------------------------------------------------------
+function buildShapeSketchSvg(calc) {
+  const shapeKey = safeText(calc?.shapeKey || "").toLowerCase();
+  const dims = calc?.dims || calc?.dimsRaw || {};
+  const wall = calc?.wallSides || calc?.wallSidesRaw || {};
+
+  const A = pickNumber(dims, ["A", "a", "sideA"]) ?? null;
+  const B = pickNumber(dims, ["B", "b", "sideB"]) ?? null;
+  const C = pickNumber(dims, ["C", "c", "sideC"]) ?? null;
+  const D = pickNumber(dims, ["D", "d", "sideD"]) ?? null;
+  const E = pickNumber(dims, ["E", "e", "sideE"]) ?? null;
+  const F = pickNumber(dims, ["F", "f", "sideF"]) ?? null;
+
+  const isWall = (k) => !!wall?.[k];
+
+  const bubble = (x, y, text, dashed = false) => `
+    <g>
+      <circle cx="${x}" cy="${y}" r="14" fill="#0b1f50" />
+      <circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#ffffff" stroke-width="1.5" ${
+        dashed ? 'stroke-dasharray="3 3"' : ""
+      }/>
+      <text x="${x}" y="${y + 4}" text-anchor="middle" font-size="12" fill="#ffffff" font-family="Arial" font-weight="700">${text}</text>
+    </g>
+  `;
+
+  const edge = (x1, y1, x2, y2, dashed) => `
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+      stroke="#111827" stroke-width="4" stroke-linecap="round"
+      ${dashed ? 'stroke-dasharray="8 6" stroke="#6b7280"' : ""}/>
+  `;
+
+  const W = 420,
+    H = 240;
+
+  if (shapeKey === "square") {
+    const label = A != null ? formatNumSk(A, 1) : "A";
+    const wallTop = isWall("A");
+
+    const x1 = 90,
+      y1 = 40,
+      x2 = 330,
+      y2 = 200;
+
+    return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%">
+  <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
+  ${edge(x1, y1, x2, y1, wallTop)}
+  ${edge(x2, y1, x2, y2, false)}
+  ${edge(x2, y2, x1, y2, false)}
+  ${edge(x1, y2, x1, y1, false)}
+  ${bubble((x1 + x2) / 2, y1 - 10, label, wallTop)}
+  ${bubble(x2 + 18, (y1 + y2) / 2, label, false)}
+  ${bubble((x1 + x2) / 2, y2 + 18, label, false)}
+  ${bubble(x1 - 18, (y1 + y2) / 2, label, false)}
+</svg>`;
+  }
+
+  if (shapeKey === "rectangle") {
+    const labelA = A != null ? formatNumSk(A, 1) : "A";
+    const labelB = B != null ? formatNumSk(B, 1) : "B";
+    const wallA = isWall("A");
+    const wallB = isWall("B");
+
+    const x1 = 70,
+      y1 = 45,
+      x2 = 350,
+      y2 = 195;
+
+    return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%">
+  <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
+  ${edge(x1, y1, x2, y1, wallA)}
+  ${edge(x2, y1, x2, y2, false)}
+  ${edge(x2, y2, x1, y2, false)}
+  ${edge(x1, y2, x1, y1, wallB)}
+  ${bubble((x1 + x2) / 2, y1 - 10, labelA, wallA)}
+  ${bubble(x2 + 18, (y1 + y2) / 2, labelB, false)}
+  ${bubble((x1 + x2) / 2, y2 + 18, labelA, false)}
+  ${bubble(x1 - 18, (y1 + y2) / 2, labelB, wallB)}
+</svg>`;
+  }
+
+  if (shapeKey === "l-shape") {
+    const lA = A != null ? formatNumSk(A, 1) : "A";
+    const lB = B != null ? formatNumSk(B, 1) : "B";
+    const lC = C != null ? formatNumSk(C, 1) : "C";
+    const lD = D != null ? formatNumSk(D, 1) : "D";
+    const lE = E != null ? formatNumSk(E, 1) : "E";
+    const lF = F != null ? formatNumSk(F, 1) : "F";
+
+    const p1 = [90, 45];
+    const p2 = [330, 45]; // A
+    const p3 = [330, 110]; // B
+    const p4 = [230, 110]; // C
+    const p5 = [230, 195]; // D
+    const p6 = [90, 195]; // E
+    // späť na p1 = F
+
+    const seg = (a, b, key) => edge(a[0], a[1], b[0], b[1], isWall(key));
+
+    return `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%">
+  <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
+  ${seg(p1, p2, "A")}
+  ${seg(p2, p3, "B")}
+  ${seg(p3, p4, "C")}
+  ${seg(p4, p5, "D")}
+  ${seg(p5, p6, "E")}
+  ${seg(p6, p1, "F")}
+
+  ${bubble((p1[0] + p2[0]) / 2, p1[1] - 10, lA, isWall("A"))}
+  ${bubble(p2[0] + 18, (p2[1] + p3[1]) / 2, lB, isWall("B"))}
+  ${bubble((p3[0] + p4[0]) / 2, p3[1] - 10, lC, isWall("C"))}
+  ${bubble(p4[0] + 18, (p4[1] + p5[1]) / 2, lD, isWall("D"))}
+  ${bubble((p5[0] + p6[0]) / 2, p5[1] + 18, lE, isWall("E"))}
+  ${bubble(p6[0] - 18, (p6[1] + p1[1]) / 2, lF, isWall("F"))}
+</svg>`;
+  }
+
+  return "";
+}
+
 function buildVars(payload, pageNo, totalPages, baseOrigin) {
-  const email = safeText(payload?.meta?.email || "");
+  // ✅ len raz:
   const calc = payload?.calc || {};
   const bom = payload?.bom || {};
+
+  // ✅ NOVÉ: pdfMeta z frontendu
+  const pdfMeta = payload?.pdfMeta || {};
+  const ownerEmail = safeText(payload?.meta?.email || "");
+
+  // ✅ meno do PDF: customerLabel z frontendu -> fallbacky
+  const customerLabel =
+    safeText(pdfMeta?.customerLabel) ||
+    safeText(calc?.customerName) ||
+    safeText(calc?.customerLabel) ||
+    "Zákazník";
+
+  // ✅ e-mail do PDF: len ak je povolené (checkbox)
+  const customerEmailForPdf = pdfMeta?.showEmailInPdf
+    ? safeText(pdfMeta?.customerEmail) || ownerEmail
+    : "";
 
   const pdfCode = safeText(payload?.meta?.pdfCode) || `LC-${Date.now()}`;
 
@@ -346,7 +491,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const drainLabel = safeText(calc?.drainLabel || "–");
 
   const areaText = area != null ? `${formatNumSk(area, 1)} m²` : "–";
-  const perimeterText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} bm` : "–";
+  const perimeterText =
+    perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} bm` : "–";
 
   const ditraAreaText =
     bom?.membraneArea != null
@@ -364,12 +510,19 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
       : "–";
 
   // ✅ profily: len voľné hrany
-  const edgeLengthText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
+  const edgeLengthText =
+    perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
   const edgeProfilePiecesText =
     bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
 
   const systemShortNote = safeText(calc?.systemTitle || "");
-  const shapeSketchSvg = safeText(calc?.shapeSketchSvg || "");
+
+  // ✅ fallback náčrt
+  let shapeSketchSvg = safeText(calc?.shapeSketchSvg || "");
+  if (!shapeSketchSvg) {
+    shapeSketchSvg = buildShapeSketchSvg(calc);
+  }
+
   const systemCutawayCaption = safeText(calc?.systemTitle || "");
 
   const heightId = safeText(calc?.heightId || "").toLowerCase();
@@ -395,6 +548,7 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     cutawayImage = "/img/systems/balkon-high-internal-drain.png";
   }
 
+  // ak príde z frontu previewSrc, použijeme ho
   const fromCalcPreview = safeText(calc?.previewSrc);
   if (fromCalcPreview) {
     cutawayImage = fromCalcPreview.startsWith("/")
@@ -414,7 +568,7 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     perimeterFull,
   });
 
-  // ✅ PAGE 6/7 – BARA RT/RW vars
+  // ✅ PAGE 6/7 – BARA vars
   const profilePiecesNum =
     bom?.profilesCount != null ? Number(bom.profilesCount) : null;
 
@@ -423,8 +577,11 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   return {
     baseUrl: baseOrigin.replace(/\/$/, ""),
     pdfCode,
-    customerName: safeText(calc?.customerName || "Zákazník"),
-    customerEmail: email,
+
+    // ✅ toto je kľúčová oprava:
+    customerName: customerLabel,
+    customerEmail: customerEmailForPdf,
+
     createdAt: isoDateTimeSk(),
     constructionType: safeText(calc?.typeLabel || ""),
     systemTitle: safeText(calc?.systemTitle || ""),
@@ -451,7 +608,7 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     edgeLengthText,
     edgeProfilePiecesText,
 
-    // ✅ page5 variables
+    // page5
     ditraJointsText: page5.ditraJointsText,
     kebaEdgeText: page5.kebaEdgeText,
     kebaJointsText: page5.kebaJointsText,
@@ -459,7 +616,7 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     collConsumptionText: page5.collConsumptionText,
     collPacksText: page5.collPacksText,
 
-    // ✅ page6/7 variables
+    // page6/7
     ...baraVars,
   };
 }
@@ -534,7 +691,9 @@ router.post("/balkon-final-html", async (req, res) => {
 
     const htmlPages = plan.map((fileName, idx) => {
       const filePath = path.join(process.cwd(), "public", fileName);
-      if (!fs.existsSync(filePath)) throw new Error(`Chýba HTML stránka: ${filePath}`);
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`Chýba HTML stránka: ${filePath}`);
+      }
 
       const raw = fs.readFileSync(filePath, "utf8");
       const vars = buildVars(payload, idx + 1, totalPages, baseOrigin);

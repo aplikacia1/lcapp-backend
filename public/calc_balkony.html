@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Schlüter® vysunutý balkón – kalkulačka</title>
+
+  <!-- Globálny štýl appky (ponechané) -->
   <link rel="stylesheet" href="style.css" />
+
   <style>
     :root {
       --max-w: 1120px;
@@ -257,7 +260,6 @@
     .side-label.bottom { bottom: -10px; left: 50%; transform: translateX(-50%); }
     .side-label.left { left: -10px; top: 50%; transform: translateY(-50%); }
 
-    /* zvýraznenie strany pri stene (len vizuál) */
     .side-label.at-wall {
       color: #e5e7eb;
       border-color: rgba(148, 163, 184, 0.85);
@@ -268,7 +270,6 @@
       text-underline-offset: 2px;
     }
 
-    /* L SVG */
     .shape-l-svg { width: 90%; max-width: 240px; height: auto; display: block; }
     .shape-l-label {
       font-size: 13px;
@@ -372,7 +373,6 @@
     .btn-primary:disabled { opacity: 0.4; cursor: default; box-shadow: none; filter: grayscale(0.4); }
     .btn-primary:not(:disabled):active { transform: translateY(1px); box-shadow: 0 5px 16px rgba(251, 191, 36, 0.4); }
 
-    /* Box pre strany pri stene */
     .wall-box {
       margin-top: 8px;
       padding: 8px 9px;
@@ -390,7 +390,6 @@
     .wall-box-label input { transform: translateY(1px); }
     .wall-box-label.hidden { display: none; }
 
-    /* KROK 3 + 4 – obal */
     .step3-shell, .step4-shell {
       margin-top: 26px;
       background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96) 0, rgba(3, 7, 18, 0.98) 55%);
@@ -458,6 +457,7 @@
       gap: 3px;
       transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease, background 0.08s ease;
       font-size: 0.78rem;
+      color: #e5e7eb;
     }
 
     .drain-option:hover { transform: translateY(-1px); box-shadow: 0 10px 18px rgba(0, 0, 0, 0.7); }
@@ -482,7 +482,6 @@
     .recommended-name { font-weight: 600; color: #fbbf24; margin-bottom: 4px; }
     .recommended-note { font-size: 0.76rem; color: #d1d5db; }
 
-    /* Modal náhľadu */
     .preview-modal {
       position: fixed;
       inset: 0;
@@ -493,7 +492,6 @@
     }
 
     .preview-modal.visible { display: flex; }
-
     .preview-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.86); }
 
     .preview-dialog {
@@ -557,7 +555,6 @@
       .page-subtitle { font-size: 0.82rem; }
     }
 
-    /* KONŠTRUKČNÁ VÝŠKA – blok v kroku 3 */
     .height-options { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 
     .height-option {
@@ -575,7 +572,6 @@
     .height-main { display: block; font-weight: 600; margin-bottom: 2px; }
     .height-note { display: block; font-size: 0.74rem; color: #d1d5db; }
 
-    /* KROK 4 – obrázok a sumár */
     .k4-preview-box {
       border-radius: 16px;
       padding: 9px 10px;
@@ -613,7 +609,6 @@
 
     .btn-secondary:disabled { opacity: 0.5; cursor: default; }
 
-    /* ✅ ÚDAJE PRE PDF – jednoduchý, stabilný box */
     .pdf-fields {
       margin-top: 12px;
       border-radius: 16px;
@@ -622,25 +617,15 @@
       border: 1px solid rgba(148, 163, 184, 0.7);
       font-size: 0.8rem;
     }
-    .pdf-fields .t {
-      font-size: 0.84rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
+    .pdf-fields .t { font-size: 0.84rem; font-weight: 600; margin-bottom: 6px; }
     .pdf-fields .desc {
       margin: 0 0 10px;
       font-size: 0.76rem;
       color: #d1d5db;
       line-height: 1.35;
     }
-    .pdf-fields .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    @media (max-width: 640px) {
-      .pdf-fields .row { grid-template-columns: 1fr; }
-    }
+    .pdf-fields .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    @media (max-width: 640px) { .pdf-fields .row { grid-template-columns: 1fr; } }
     .pdf-fields label {
       display: block;
       font-size: 0.75rem;
@@ -680,11 +665,34 @@
       color: #9ca3af;
     }
     .pdf-fields .muted-value strong { color: #e5e7eb; }
+
+    /* =========================================================
+       ✅ TYPO SAFE LAYER – len pre túto kalkulačku
+       (zastaví “lietanie” fontov z globálneho style.css)
+       ========================================================= */
+    .wrap, .wrap * {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: normal;
+    }
+    .wrap { font-size: 16px; line-height: 1.45; }
+
+    .wrap p, .wrap li, .wrap label, .wrap small, .wrap td, .wrap th, .wrap button, .wrap input {
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+    .wrap small { font-size: 0.80rem; }
+    .wrap h1 { font-size: 1.35rem; line-height: 1.2; }
+    .wrap h2 { font-size: 1.10rem; line-height: 1.25; }
+    .wrap h3 { font-size: 0.95rem; line-height: 1.3; }
+
+    /* čísla v tabuľkách nech sú rovnaké */
+    .summary-table, .summary-value, .side-label, .shape-l-label {
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 
 <body>
-  <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <button class="icon-btn" id="backBtn" aria-label="Späť">
@@ -698,10 +706,8 @@
     </div>
   </header>
 
-  <!-- Bezpečnostné pásy -->
   <div class="safety-stripes" aria-hidden="true"></div>
 
-  <!-- MAIN -->
   <main class="wrap">
     <h1 class="page-title">Schlüter® vysunutý balkón – kalkulačka</h1>
     <p class="page-subtitle">
@@ -711,7 +717,6 @@
       Vybraný typ z kroku 1: <strong id="typeLabelText">Vysunutý balkón (konzola)</strong>
     </p>
 
-    <!-- KROK 2 -->
     <section class="step2-shell step-section active" id="step2">
       <div class="step-header-row">
         <div class="step-title-main">
@@ -734,7 +739,6 @@
           </p>
 
           <div class="shape-grid" id="shapeGrid">
-            <!-- ŠTVOREC -->
             <article class="shape-card selected" data-shape="square">
               <div class="shape-title">Štvorec</div>
               <div class="shape-note">
@@ -750,7 +754,6 @@
               </div>
             </article>
 
-            <!-- OBDĹŽNIK -->
             <article class="shape-card" data-shape="rectangle">
               <div class="shape-title">Obdĺžnik / „kosoštvorec“</div>
               <div class="shape-note">
@@ -766,7 +769,6 @@
               </div>
             </article>
 
-            <!-- L-TVAR -->
             <article class="shape-card" data-shape="l-shape">
               <div class="shape-title">Balkón v tvare L</div>
               <div class="shape-note">
@@ -900,7 +902,6 @@
       </div>
     </section>
 
-    <!-- KROK 3 -->
     <section class="step3-shell step-section" id="step3">
       <div class="step-header-row">
         <div class="step-title-main">
@@ -928,7 +929,6 @@
         </div>
 
         <div>
-          <!-- KONŠTRUKČNÁ VÝŠKA -->
           <div class="question-block" id="heightQuestion">
             <div class="question-title">Otázka 0 – konštrukčná výška balkóna</div>
             <div class="question-text desktop-only">
@@ -964,7 +964,6 @@
             </div>
           </div>
 
-          <!-- ODTOK VODY -->
           <div class="question-block" id="balconyQuestion">
             <div class="question-title">Otázka 1 – ako odteká voda z balkóna?</div>
             <div class="question-text desktop-only">
@@ -990,7 +989,6 @@
             </div>
           </div>
 
-          <!-- Navrhovaná skladba -->
           <div class="recommended-box">
             <div class="summary-label">Navrhovaná skladba (pracovný názov)</div>
             <div class="recommended-name" id="recommendedName">Zatiaľ nevybraná – zvoľte výšku a odtok vody.</div>
@@ -1000,7 +998,6 @@
             </div>
           </div>
 
-          <!-- Orientačný materiál -->
           <div class="recommended-box" id="bomBox">
             <div class="summary-label">Orientačné množstvá materiálu</div>
             <table class="summary-table">
@@ -1024,7 +1021,6 @@
       </div>
     </section>
 
-    <!-- KROK 4 -->
     <section class="step4-shell step-section" id="step4">
       <div class="step-header-row">
         <div class="step-title-main"><span>Krok 4</span> Sumár, technický náhľad a PDF podklad</div>
@@ -1056,7 +1052,6 @@
             </div>
           </div>
 
-          <!-- ✅ Údaje do PDF (voliteľné) -->
           <div class="pdf-fields" id="pdfFieldsBox">
             <div class="t">Údaje pre PDF (voliteľné)</div>
             <p class="desc">
@@ -1122,7 +1117,6 @@
       </div>
     </section>
 
-    <!-- MODAL NÁHĽADU SKLADBY -->
     <div id="previewModal" class="preview-modal" aria-hidden="true">
       <div class="preview-backdrop"></div>
       <div class="preview-dialog" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
@@ -1133,7 +1127,6 @@
       </div>
     </div>
 
-    <!-- MODAL – hrúbka dlažby / obkladu -->
     <div id="tileModal" class="preview-modal" aria-hidden="true">
       <div class="preview-backdrop"></div>
       <div class="preview-dialog" role="dialog" aria-modal="true">
