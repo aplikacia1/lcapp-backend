@@ -165,10 +165,36 @@ function signupTemplate() {
   return { subject, html };
 }
 
+/* ===================== PDF (kompatibilita) ===================== */
+
+/**
+ * ✅ sendPdfEmail – kompatibilný helper, ktorý používa tvoj pdfTestRoutes.js
+ * TOTO ti opraví chybu: "sendPdfEmail is not a function"
+ */
+async function sendPdfEmail({ to, subject, html, text, pdfBuffer, filename = 'kalkulacia.pdf', cc, bcc }) {
+  if (!to) throw new Error('sendPdfEmail: "to" je povinné');
+  const pdf = normalizeToBuffer(pdfBuffer);
+  if (!pdf) throw new Error('sendPdfEmail: "pdfBuffer" je neplatný (nie Buffer/Uint8Array)');
+  return sendMail({
+    to,
+    cc,
+    bcc,
+    subject: subject || `${APP_NAME} – PDF`,
+    html,
+    text,
+    attachments: [{
+      filename,
+      content: pdf,
+      contentType: 'application/pdf',
+    }],
+  });
+}
+
 /* ===================== BALKÓN – TECH LISTY ===================== */
 
 /**
- * Načíta technické listy z: public/img/pdf/balkon/tech/
+ * Načíta technické listy z: public/img/pdf/tech/
+ * (podľa tvojho git statusu, kde ich reálne máš)
  */
 function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
   // zatiaľ iba: LOW + EDGE_FREE
@@ -180,8 +206,8 @@ function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
 
   if (!(isLow && isEdgeFree)) return [];
 
-  // ✅ tvoja reálna cesta podľa screenu:
-  const baseDir = path.join(process.cwd(), 'public', 'img', 'pdf', 'balkon', 'tech');
+  // ✅ opravná cesta: public/img/pdf/tech/  (nie /balkon/tech/)
+  const baseDir = path.join(process.cwd(), 'public', 'img', 'pdf', 'tech');
 
   const files = [
     { filename: 'technicky-list-schluter-ditra.pdf',   local: 'schluter-ditra.pdf' },
@@ -286,7 +312,13 @@ async function sendWelcomeEmail(toEmail) {
 }
 
 module.exports = {
+  // základ
   sendMail,
+
+  // ✅ kompatibilita pre pdfTestRoutes.js (fixne tvoj crash)
+  sendPdfEmail,
+
+  // welcome
   sendSignupEmail,
   sendWelcomeEmail,
 
