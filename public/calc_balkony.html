@@ -689,6 +689,34 @@
     .summary-table, .summary-value, .side-label, .shape-l-label {
       font-variant-numeric: tabular-nums;
     }
+
+    /* =========================================================
+       ✅ FIX: biele písmo v inputoch aj pri Chrome autofill
+       (len pre PDF sekciu, nič iné to neovplyvní)
+       ========================================================= */
+    .pdf-fields input,
+    .pdf-fields input[type="text"],
+    .pdf-fields input[type="email"]{
+      color: #e5e7eb !important;
+      -webkit-text-fill-color: #e5e7eb !important;
+      caret-color: #e5e7eb !important;
+    }
+
+    .pdf-fields input::placeholder{
+      color: #9ca3af !important;
+      opacity: 1;
+    }
+
+    .pdf-fields input:-webkit-autofill,
+    .pdf-fields input:-webkit-autofill:hover,
+    .pdf-fields input:-webkit-autofill:focus,
+    .pdf-fields input:-webkit-autofill:active{
+      -webkit-text-fill-color: #e5e7eb !important;
+      caret-color: #e5e7eb !important;
+      transition: background-color 9999s ease-in-out 0s;
+      box-shadow: 0 0 0px 1000px rgba(2, 6, 23, 0.96) inset !important;
+      border: 1px solid rgba(148, 163, 184, 0.9) !important;
+    }
   </style>
 </head>
 

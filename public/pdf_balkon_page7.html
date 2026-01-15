@@ -6,6 +6,40 @@
 
   <!-- ✅ v2 CSS -->
   <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+
+  <!-- ✅ LOKÁLNY FIT iba pre stranu 7 (bez zásahu do iných strán) -->
+  <style>
+    /* menší odstup pod subtitle */
+    .subtitle-sm--p7 { margin-bottom: 8px !important; }
+
+    /* zoberieme pár px z vnútra kariet */
+    .card-inner--p7.compact {
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+    }
+
+    /* tabuľka nech je kompaktnejšia */
+    .table-compact--p7 td,
+    .table-compact--p7 th { padding-top: 3px !important; padding-bottom: 3px !important; }
+
+    /* komponenty: menej medzier + nižšie obrázky */
+    .components-stack--p7 { gap: 6px !important; }
+    .component-item--p7 { padding-top: 4px !important; padding-bottom: 4px !important; }
+
+    /* obrázky v stacku – kľúčová úspora výšky */
+    .components-stack--p7 img {
+      max-height: 78px !important;
+      width: auto !important;
+      height: auto !important;
+      display: block;
+      margin: 4px auto !important;
+    }
+
+    /* titulky a kódy – menej riadkovania */
+    .p--p7 { margin-bottom: 8px !important; line-height: 1.25 !important; }
+    .component-title--p7 { margin-bottom: 2px !important; }
+    .component-code--p7 { margin-top: 2px !important; }
+  </style>
 </head>
 
 <body>
@@ -51,7 +85,6 @@
               <tr><td>Farba</td><td>{{rtColorCode}}</td></tr>
             </table>
 
-            <!-- ✅ NOVÉ: BARA -> ROH -> SPOJKA (pod sebou) -->
             <div class="components-stack components-stack--p7">
               <div class="component-item--p7 component-profile">
                 <div class="component-title--p7">BARA profil</div>
@@ -94,7 +127,6 @@
               <tr><td>Farba</td><td>{{rwColorCode}}</td></tr>
             </table>
 
-            <!-- ✅ NOVÉ: BARA -> ROH -> SPOJKA (pod sebou) -->
             <div class="components-stack components-stack--p7">
               <div class="component-item--p7 component-profile">
                 <div class="component-title--p7">BARA profil</div>
