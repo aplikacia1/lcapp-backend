@@ -840,21 +840,21 @@ router.post("/balkon-final-html-send", async (req, res) => {
       await browser.close();
     }
 
-    // pekný mail (základ)
-    const customerName =
-      safeText(pdfMeta?.customerLabel) ||
-      safeText(calc?.customerName) ||
-      "Zákazník";
+    // ✅ zákazník: PDF + technické listy (podľa variantu)
+if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
+  throw new Error(
+    "Mailer export missing: sendBalconyOfferCustomerEmail. Skontroluj utils/mailer.js export (module.exports) alebo circular dependency."
+  );
+}
 
-    const subject = `Lištobook – Vaša kalkulácia (PDF)`;
-    const html = `
-      <div style="font-family:Arial,sans-serif;line-height:1.5">
-        <p>Dobrý deň ${escapeHtml(customerName)},</p>
-        <p>v prílohe posielame Vašu kalkuláciu (PDF) podľa zadaných preferencií.</p>
-        <p>Ak chcete, odpovedzte na tento e-mail a doplníme odporúčania.</p>
-        <p>S pozdravom<br>Lištové centrum</p>
-      </div>
-    `;
+await mailer.sendBalconyOfferCustomerEmail({
+  to,
+  // ❗ NEPOSIELAME subject ani html -> mailer použije svoju profesionálnu šablónu
+  pdfBuffer: merged,
+  pdfFilename: "balkon-final.pdf",
+  customerName: customerName,
+  variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+});
 
     // ✅ zákazník: PDF + technické listy (podľa variantu)
 if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
