@@ -176,100 +176,188 @@ async function sendWelcomeEmail(toEmail) {
   return sendSignupEmail(toEmail);
 }
 
-/* ===================== BALKÓN – E-MAIL (tvoj nový text) ===================== */
+/* ===================== BALKÓN – E-MAIL (PROFI / TECH) ===================== */
 
-function balconyDocsTemplate({ customerName = 'Zákazník', pdfFilename = 'balkon-final.pdf' } = {}) {
+function balconyDocsTemplate({
+  customerName = 'Zákazník',
+  customerEmail = '',
+  pdfFilename = 'balkon-final.pdf',
+} = {}) {
   const app = String(APP_URL || '').replace(/\/+$/, '');
   const logoUrl = `${app}/icons/icon-512.png`;
+
+  // prekliky (s email parametrom – ak ho máme)
+  const q = customerEmail ? `?email=${encodeURIComponent(customerEmail)}` : '';
+  const linkOnboarding = `${app}/onboarding.html${q}`;
+  const linkDashboard  = `${app}/dashboard.html${q}`;   // prezývka / účet
+  const linkCatalog    = `${app}/catalog.html${q}`;     // hodnotenia
+  const linkTimeline   = `${app}/timeline.html${q}`;    // lištobook
+  const linkMessages   = `${app}/messages.html${q}`;    // správy
+
   const subject = `${APP_NAME} – Vaša kalkulácia (PDF)`;
 
+  // "toxicko-profesionálny, až mechanický" = vecný, presný, technický tón
+  const preheader = `Automatické doručenie PDF a technických listov – ${pdfFilename}`;
+
   const html = `
-<div style="background:#0c1f4b;padding:24px 0;">
-  <div style="max-width:560px;margin:0 auto;background:#0b1a3a;border-radius:16px;overflow:hidden;border:1px solid #16336b;font-family:Arial,sans-serif;">
+  <div style="background:#0a1029;padding:26px 0;">
+    <div style="max-width:640px;margin:0 auto;padding:0 14px;">
+      <div style="background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);border-radius:18px;overflow:hidden;font-family:Arial,sans-serif;box-shadow:0 12px 34px rgba(0,0,0,.45);">
+        <span style="display:none;max-height:0;max-width:0;opacity:0;overflow:hidden">${escapeHtml(preheader)}</span>
 
-    <!-- Header -->
-    <div style="text-align:center;padding:24px 24px 12px;background:#0c1f4b;">
-      <img src="${escapeAttr(logoUrl)}" alt="Lištové centrum" width="96" height="96" style="display:block;margin:0 auto 12px;border-radius:12px" />
-      <h1 style="margin:0;color:#ffffff;font-size:22px;line-height:1.35">Lištobook</h1>
+        <!-- Header -->
+        <div style="background:
+          radial-gradient(900px 640px at 6% -10%, #13255d 0%, transparent 60%),
+          radial-gradient(760px 560px at 100% 0%, #0d1e4a 0%, transparent 60%),
+          #0a1029;
+          padding:22px 18px 16px;
+          text-align:center;">
+          <img src="${escapeAttr(logoUrl)}" alt="Lištové centrum" width="76" height="76" style="display:block;margin:0 auto 10px;border-radius:14px" />
+          <div style="color:#ecf2ff;font-size:20px;font-weight:800;letter-spacing:.2px;margin:0">Lištobook</div>
+          <div style="color:#a8b3d6;font-size:13px;margin-top:6px">Automatický technický výstup • PDF + technické listy</div>
+        </div>
+
+        <!-- Body -->
+        <div style="padding:18px;background:#0a1029;color:#ecf2ff;line-height:1.55">
+
+          <!-- Card 1 -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
+            <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Doručenie dokumentov</div>
+
+            <div style="font-size:14.5px;margin:0 0 10px">
+              Ďakujeme za využitie našich služieb.
+            </div>
+
+            <div style="font-size:14.5px;margin:0 0 10px">
+              Dobrý deň <strong>${escapeHtml(customerName)}</strong>,
+              systém <strong>Lištobook</strong> automaticky vygeneroval technický podklad k Vášmu zadaniu.
+            </div>
+
+            <div style="font-size:14.5px;margin:0 0 10px">
+              V prílohe nájdete:
+              <ul style="margin:10px 0 0 18px;padding:0;color:#cfe2ff">
+                <li><strong>PDF dokument</strong> (${escapeHtml(pdfFilename)})</li>
+                <li><strong>Technické listy</strong> k odporúčaným materiálom a systémom</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
+            <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Ak chcete nacenenie</div>
+
+            <div style="font-size:14.5px;margin:0 0 10px;color:#cfe2ff">
+              Lištobook Vám to vypočítal. <strong>Tím Lištového centra</strong> nacení skladbu na základe týchto podkladov – ak máte záujem.
+            </div>
+
+            <div style="font-size:14.5px;margin:0 0 10px;color:#cfe2ff">
+              Postup je jednoduchý:
+              <ol style="margin:10px 0 0 18px;padding:0;color:#cfe2ff">
+                <li>Odpovedzte na tento e-mail</li>
+                <li>Nechajte priložené PDF (${escapeHtml(pdfFilename)})</li>
+                <li>Prípadne dopíšte doplňujúce informácie (fotky, poznámky, termín)</li>
+              </ol>
+            </div>
+
+            <div style="margin-top:12px;font-size:13px;color:#a8b3d6">
+              Kontakt:
+              <a href="mailto:bratislava@listovecentrum.sk" style="color:#7cd2ff;text-decoration:underline">bratislava@listovecentrum.sk</a>
+              •
+              <a href="tel:+421947922181" style="color:#7cd2ff;text-decoration:underline">0947&nbsp;922&nbsp;181</a>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
+            <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Čo je Lištobook</div>
+
+            <div style="font-size:14.5px;margin:0 0 10px;color:#cfe2ff">
+              Lištobook je komunitná <strong>mikrosieť</strong> a sada nástrojov pre majstrov a kutilov.
+            </div>
+
+            <div style="font-size:14.5px;margin:0 0 10px;color:#cfe2ff">
+              Obsahuje:
+              <ul style="margin:10px 0 0 18px;padding:0;color:#cfe2ff">
+                <li>časovú os (Lištobook) – fotky a príspevky z praxe</li>
+                <li>hodnotenie tovarov – recenzie + prekliky na e-shop</li>
+                <li>kalkulačky – technický podklad k skladbám</li>
+                <li>súkromné správy – rýchla komunikácia</li>
+              </ul>
+            </div>
+
+            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);margin:12px 0;"></div>
+
+            <div style="font-size:13.5px;color:#a8b3d6;margin:0 0 10px">
+              Prístupové pravidlá:
+              <ul style="margin:8px 0 0 18px;padding:0;color:#a8b3d6">
+                <li><strong>neregistrovaní</strong>: môžu čítať recenzie, preklikať sa do e-shopu a používať kalkulačky</li>
+                <li><strong>registrovaní</strong>: môžu pridávať príspevky, hodnotiť a písať správy (po nastavení prezývky)</li>
+              </ul>
+            </div>
+
+            <!-- CTA buttons (email-safe) -->
+            <div style="margin-top:12px;">
+              <div style="display:block;margin-bottom:10px;">
+                <a href="${escapeAttr(linkDashboard)}"
+                   style="display:inline-block;background:linear-gradient(135deg,#4da3ff,#7cd2ff);color:#0a1029;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:14px;">
+                  Nastaviť prezývku
+                </a>
+              </div>
+
+              <div style="display:block;margin-bottom:10px;">
+                <a href="${escapeAttr(linkCatalog)}"
+                   style="display:inline-block;background:linear-gradient(135deg,#22c55e,#86efac);color:#06220e;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:14px;">
+                  Hodnotiť produkty
+                </a>
+              </div>
+
+              <div style="display:block;margin-bottom:10px;">
+                <a href="${escapeAttr(linkTimeline)}"
+                   style="display:inline-block;background:#1a2b59;color:#ecf2ff;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.16);">
+                  Otvoriť Lištobook
+                </a>
+                <span style="display:inline-block;width:8px;"></span>
+                <a href="${escapeAttr(linkMessages)}"
+                   style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#fde68a);color:#3d2a05;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:14px;">
+                  Otvoriť správy
+                </a>
+              </div>
+
+              <div style="font-size:12.5px;color:#a8b3d6;margin-top:6px;">
+                Tip: ak sa v linkoch otvorí onboarding, tu je prehľad:
+                <a href="${escapeAttr(linkOnboarding)}" style="color:#7cd2ff;text-decoration:underline">Vitajte v Lištobooku</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;">
+            <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Kde nás nájdete</div>
+
+            <div style="font-size:14.5px;margin:0 0 10px;color:#cfe2ff">
+              Ešte raz ďakujeme a tešíme sa na Vašu skorú návštevu:
+            </div>
+
+            <div style="font-size:14.5px;margin:0;color:#cfe2ff">
+              <strong>Bratislava</strong> • Svornosti 43<br/>
+              <strong>Žilina</strong> • Sasinkova 13
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="padding:14px 16px;background:#081433;color:#8aa4d6;font-size:12px;text-align:center;border-top:1px solid rgba(255,255,255,.12)">
+          Automatická správa z <strong>no-reply@listobook.sk</strong> • Neodpovedajte na túto adresu.<br/>
+          Kontakt: <a href="mailto:bratislava@listovecentrum.sk" style="color:#7cd2ff;text-decoration:underline">bratislava@listovecentrum.sk</a>
+          • <a href="tel:+421947922181" style="color:#7cd2ff;text-decoration:underline">0947&nbsp;922&nbsp;181</a>
+          <br/><br/>
+          Lištobook.sk by LIŠTOVÉ CENTRUM EU, s.r.o. ©
+        </div>
+      </div>
     </div>
+  </div>`;
 
-    <!-- Body -->
-    <div style="padding:20px 24px;background:#0c1f4b;color:#cfe2ff;line-height:1.6">
-      <p style="margin:0 0 14px">
-        Dobrý deň <strong>${escapeHtml(customerName)}</strong>,
-      </p>
-
-      <p style="margin:0 0 14px">
-        ďakujeme, že ste využili našu <strong>kalkulačku Lištobook</strong>.
-      </p>
-
-      <p style="margin:0 0 14px">
-        V prílohe tohto e-mailu Vám posielame:
-      </p>
-
-      <ul style="margin:0 0 16px 18px;padding:0">
-        <li>📄 <strong>PDF dokument</strong> k Vášmu projektu (<strong>${escapeHtml(pdfFilename)}</strong>)</li>
-        <li>🧾 <strong>Technické listy</strong> k odporúčaným materiálom a systémom</li>
-      </ul>
-
-      <p style="margin:0 0 14px">
-        Ak máte záujem aj o <strong>cenovú ponuku</strong>, prosíme Vás:
-      </p>
-
-      <p style="margin:0 0 14px">
-        ➡️ pošlite nám PDF prílohu <strong>${escapeHtml(pdfFilename)}</strong> ako odpoveď na tento e-mail<br>
-        ➡️ alebo priamo na adresu
-        <a href="mailto:bratislava@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">
-          bratislava@listovecentrum.sk
-        </a>
-      </p>
-
-      <p style="margin:0 0 14px">
-        Na základe podkladov Vám pripravíme <strong>konkrétnu cenovú ponuku</strong> a pošleme ju späť
-        na e-mailovú adresu, z ktorej ste nás kontaktovali.
-      </p>
-
-      <hr style="border:none;border-top:1px solid #16336b;margin:20px 0">
-
-      <p style="margin:0 0 12px">
-        💡 <strong>Vedeli ste?</strong><br>
-        Lištobook nie je len kalkulačka – je to <strong>malá komunitná mini-sieť</strong>
-        pre majstrov a kutilov.
-      </p>
-
-      <p style="margin:0 0 12px">
-        Môžete:
-      </p>
-
-      <ul style="margin:0 0 16px 18px;padding:0">
-        <li>zdieľať fotky svojej práce na časovej osi</li>
-        <li>pýtať sa ostatných používateľov na rady</li>
-        <li>hodnotiť materiály a výrobky</li>
-        <li>jednoducho prejsť do e-shopu priamo z hodnoteného materiálu</li>
-      </ul>
-
-      <p style="margin:0">
-        Sme radi, že využívate nástroje <strong>Lištobooku</strong>.
-      </p>
-    </div>
-
-    <!-- Footer -->
-    <div style="padding:14px 16px;background:#081433;color:#8aa4d6;font-size:12px;text-align:center;border-top:1px solid #16336b">
-      Kontakt na Lištové centrum:
-      <a href="mailto:bratislava@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">
-        bratislava@listovecentrum.sk
-      </a>
-      •
-      <a href="tel:+421947922181" style="color:#9ab6e8;text-decoration:underline">
-        0947&nbsp;922&nbsp;181
-      </a>
-      <br><br>
-      Odoslané z <strong>no-reply@listobook.sk</strong>. Neodpovedajte.<br>
-      Lištobook.sk by LIŠTOVÉ CENTRUM EU, s.r.o. ©
-    </div>
-
-  </div>
-</div>`;
   return { subject, html };
 }
 
@@ -345,7 +433,11 @@ async function sendBalconyDocsEmail({
   if (!pdf || pdf.length < 1000) throw new Error('sendBalconyDocsEmail: PDF buffer je neplatný/príliš malý');
 
   // ✅ ak route neposlala html/subject, použijeme náš template
-  const tpl = balconyDocsTemplate({ customerName, pdfFilename });
+  const tpl = balconyDocsTemplate({
+    customerName,
+    customerEmail: to, // ✅ pre linky s ?email=
+    pdfFilename,
+  });
   const finalSubject = subject || tpl.subject;
   const finalHtml = html || tpl.html;
 
