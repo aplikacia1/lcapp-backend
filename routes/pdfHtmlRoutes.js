@@ -5,7 +5,7 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 const { PDFDocument } = require("pdf-lib");
 
-// ✅ NOVÉ: mailer (posielanie originál PDF + tech listy)
+// ✅ mailer (posielanie originál PDF + tech listy)
 // POZOR: nepoužívame destructuring, lebo pri circular dependency vie vrátiť undefined
 const mailer = require("../utils/mailer");
 
@@ -135,14 +135,7 @@ function ceilPositive(n) {
 }
 
 /**
- * Page 5 logic (server):
- * - DITRA width is ~ 1.0 m
- * - number of joints = max(0, ceil(B / 1.0) - 1)
- * - KEBA meters = perimeterFull + joints * A
- * - COLL kg:
- *    perimeterFull * 0.35  (DITRA + BARA napojenie ~350 g/m)
- *  + joints*A * 0.36   (DITRA spoj ~360 g/m)
- * - packaging: 4.25 kg (large), 1.85 kg (small)
+ * Page 5 logic (server)
  */
 function buildPage5Consumption(calc) {
   const perimeterFull =
@@ -237,7 +230,7 @@ function buildPage5Consumption(calc) {
 }
 
 // ---------------------------------------------------------------------------
-// ✅ Page 6/7: BARA-RT / BARA-RW helpery (len logika textov a kódov)
+// ✅ Page 6/7: BARA-RT / BARA-RW helpery
 // ---------------------------------------------------------------------------
 function normalizeRtVariantFromText(recoTextRaw) {
   const t = safeText(recoTextRaw).toUpperCase().replace(/\s+/g, " ").trim();
@@ -252,7 +245,7 @@ function normalizeRtVariantFromText(recoTextRaw) {
 
 function buildBaraVars(calc, perimeterProfiles, profilePieces) {
   const tileMm = pickNumber(calc, ["tileThicknessMm"]) ?? null;
-  const family = safeText(calc?.baraFamily).toUpperCase(); // "RT" | "RW" | ""
+  const family = safeText(calc?.baraFamily).toUpperCase();
   const recoText = safeText(calc?.baraRecommendationText);
   const rwOptionsText = safeText(calc?.baraRwOptionsText);
 
@@ -341,7 +334,7 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
 }
 
 // ---------------------------------------------------------------------------
-// ✅ Server fallback – vygeneruje SVG náčrt, ak neprišiel z frontendu
+// ✅ Server fallback – SVG náčrt
 // ---------------------------------------------------------------------------
 function buildShapeSketchSvg(calc) {
   const shapeKey = safeText(calc?.shapeKey || "").toLowerCase();
@@ -373,17 +366,13 @@ function buildShapeSketchSvg(calc) {
       ${dashed ? 'stroke-dasharray="8 6" stroke="#6b7280"' : ""}/>
   `;
 
-  const W = 420,
-    H = 240;
+  const W = 420, H = 240;
 
   if (shapeKey === "square") {
     const label = A != null ? formatNumSk(A, 1) : "A";
     const wallTop = isWall("A");
 
-    const x1 = 90,
-      y1 = 40,
-      x2 = 330,
-      y2 = 200;
+    const x1 = 90, y1 = 40, x2 = 330, y2 = 200;
 
     return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%">
@@ -405,10 +394,7 @@ function buildShapeSketchSvg(calc) {
     const wallA = isWall("A");
     const wallB = isWall("B");
 
-    const x1 = 70,
-      y1 = 45,
-      x2 = 350,
-      y2 = 195;
+    const x1 = 70, y1 = 45, x2 = 350, y2 = 195;
 
     return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%">
@@ -433,12 +419,11 @@ function buildShapeSketchSvg(calc) {
     const lF = F != null ? formatNumSk(F, 1) : "F";
 
     const p1 = [90, 45];
-    const p2 = [330, 45]; // A
-    const p3 = [330, 110]; // B
-    const p4 = [230, 110]; // C
-    const p5 = [230, 195]; // D
-    const p6 = [90, 195]; // E
-    // späť na p1 = F
+    const p2 = [330, 45];
+    const p3 = [330, 110];
+    const p4 = [230, 110];
+    const p5 = [230, 195];
+    const p6 = [90, 195];
 
     const seg = (a, b, key) => edge(a[0], a[1], b[0], b[1], isWall(key));
 
@@ -465,22 +450,17 @@ function buildShapeSketchSvg(calc) {
 }
 
 function buildVars(payload, pageNo, totalPages, baseOrigin) {
-  // ✅ len raz:
   const calc = payload?.calc || {};
   const bom = payload?.bom || {};
-
-  // ✅ NOVÉ: pdfMeta z frontendu
   const pdfMeta = payload?.pdfMeta || {};
   const ownerEmail = safeText(payload?.meta?.email || "");
 
-  // ✅ meno do PDF: customerLabel z frontendu -> fallbacky
   const customerLabel =
     safeText(pdfMeta?.customerLabel) ||
     safeText(calc?.customerName) ||
     safeText(calc?.customerLabel) ||
     "Zákazník";
 
-  // ✅ e-mail do PDF: len ak je povolené (checkbox)
   const customerEmailForPdf = pdfMeta?.showEmailInPdf
     ? safeText(pdfMeta?.customerEmail) || ownerEmail
     : "";
@@ -489,13 +469,11 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
 
   const area = calc?.area;
 
-  // ✅ obvod pre profily (voľné hrany)
   const perimeterProfiles =
     pickNumber(calc, ["perimeterProfiles"]) ??
     pickNumber(calc, ["perimeter_profiles", "perimeterProfiles"]) ??
     pickNumber(calc, ["perimeter"]);
 
-  // ✅ celý obvod (aj pri stene) – pre KEBA/COLL
   const perimeterFull =
     pickNumber(calc, ["perimeterFull"]) ??
     pickNumber(calc, ["perimeter_total", "perimeterTotal"]) ??
@@ -524,7 +502,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
       ? `≈ ${formatNumSk((bom.adhesiveBags * 25) / area, 1)} kg/m²`
       : "–";
 
-  // ✅ profily: len voľné hrany
   const edgeLengthText =
     perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
   const edgeProfilePiecesText =
@@ -532,7 +509,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
 
   const systemShortNote = safeText(calc?.systemTitle || "");
 
-  // ✅ fallback náčrt
   let shapeSketchSvg = safeText(calc?.shapeSketchSvg || "");
   if (!shapeSketchSvg) {
     shapeSketchSvg = buildShapeSketchSvg(calc);
@@ -563,7 +539,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     cutawayImage = "/img/systems/balkon-high-internal-drain.png";
   }
 
-  // ak príde z frontu previewSrc, použijeme ho
   const fromCalcPreview = safeText(calc?.previewSrc);
   if (fromCalcPreview) {
     cutawayImage = fromCalcPreview.startsWith("/")
@@ -577,13 +552,11 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     ? toAbsPublicUrl(baseOrigin, cutawayImage)
     : "";
 
-  // ✅ PAGE 5 – compute on server
   const page5 = buildPage5Consumption({
     ...calc,
     perimeterFull,
   });
 
-  // ✅ PAGE 6/7 – BARA vars
   const profilePiecesNum =
     bom?.profilesCount != null ? Number(bom.profilesCount) : null;
 
@@ -593,7 +566,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     baseUrl: baseOrigin.replace(/\/$/, ""),
     pdfCode,
 
-    // ✅ toto je kľúčová oprava:
     customerName: customerLabel,
     customerEmail: customerEmailForPdf,
 
@@ -623,7 +595,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     edgeLengthText,
     edgeProfilePiecesText,
 
-    // page5
     ditraJointsText: page5.ditraJointsText,
     kebaEdgeText: page5.kebaEdgeText,
     kebaJointsText: page5.kebaJointsText,
@@ -631,7 +602,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     collConsumptionText: page5.collConsumptionText,
     collPacksText: page5.collPacksText,
 
-    // page6/7
     ...baraVars,
   };
 }
@@ -696,7 +666,7 @@ function findChromeExecutable() {
 }
 
 /**
- * ✅ EXISTUJÚCE: download originál PDF
+ * ✅ DOWNLOAD originál PDF
  * POST /api/pdf/balkon-final-html
  */
 router.post("/balkon-final-html", async (req, res) => {
@@ -764,7 +734,7 @@ router.post("/balkon-final-html", async (req, res) => {
 });
 
 /**
- * ✅ NOVÉ: pošli originál PDF e-mailom + technické listy
+ * ✅ SEND e-mailom: originál PDF + technické listy
  * POST /api/pdf/balkon-final-html-send
  */
 router.post("/balkon-final-html-send", async (req, res) => {
@@ -788,6 +758,13 @@ router.post("/balkon-final-html-send", async (req, res) => {
           "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
       });
     }
+
+    // ✅ MENO zákazníka (fix na customerName is not defined)
+    const customerName =
+      safeText(pdfMeta?.customerLabel) ||
+      safeText(calc?.customerName) ||
+      safeText(calc?.customerLabel) ||
+      "Zákazník";
 
     // vygeneruj rovnaký originál PDF ako pri download route
     const plan = resolvePlan(payload);
@@ -841,50 +818,34 @@ router.post("/balkon-final-html-send", async (req, res) => {
     }
 
     // ✅ zákazník: PDF + technické listy (podľa variantu)
-if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
-  throw new Error(
-    "Mailer export missing: sendBalconyOfferCustomerEmail. Skontroluj utils/mailer.js export (module.exports) alebo circular dependency."
-  );
-}
+    if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
+      throw new Error(
+        "Mailer export missing: sendBalconyOfferCustomerEmail. Skontroluj utils/mailer.js export (module.exports) alebo circular dependency."
+      );
+    }
 
-await mailer.sendBalconyOfferCustomerEmail({
-  to,
-  // ❗ NEPOSIELAME subject ani html -> mailer použije svoju profesionálnu šablónu
-  pdfBuffer: merged,
-  pdfFilename: "balkon-final.pdf",
-  customerName: customerName,
-  variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-});
-
-    // ✅ zákazník: PDF + technické listy (podľa variantu)
-if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
-  throw new Error(
-    "Mailer export missing: sendBalconyOfferCustomerEmail. Skontroluj utils/mailer.js export (module.exports) alebo circular dependency."
-  );
-}
-
-await mailer.sendBalconyOfferCustomerEmail({
-  to,
-  subject,
-  html,
-  pdfBuffer: merged,
-  pdfFilename: "balkon-final.pdf",
-  variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-});
-
-// ✅ admin kópia (ak máš ADMIN_EMAIL v env)
-try {
-  if (typeof mailer.sendBalconyOfferAdminEmail === "function") {
-    await mailer.sendBalconyOfferAdminEmail({
-      subject: `Lištobook – kópia kalkulácie (PDF) – ${to}`,
-      html: `<p>Kópia kalkulácie poslaná zákazníkovi: <strong>${escapeHtml(to)}</strong></p>`,
+    await mailer.sendBalconyOfferCustomerEmail({
+      to,
+      // ❗ NEPOSIELAME subject ani html -> mailer použije svoju profesionálnu šablónu
       pdfBuffer: merged,
       pdfFilename: "balkon-final.pdf",
+      customerName,
+      variant: { heightId: calc?.heightId, drainId: calc?.drainId },
     });
-  }
-} catch (e) {
-  console.warn("Admin mail skipped:", e?.message || e);
-}
+
+    // ✅ admin kópia (ak máš ADMIN_EMAIL v env)
+    try {
+      if (typeof mailer.sendBalconyOfferAdminEmail === "function") {
+        await mailer.sendBalconyOfferAdminEmail({
+          subject: `Lištobook – kópia kalkulácie (PDF) – ${to}`,
+          html: `<p>Kópia kalkulácie poslaná zákazníkovi: <strong>${escapeHtml(to)}</strong></p>`,
+          pdfBuffer: merged,
+          pdfFilename: "balkon-final.pdf",
+        });
+      }
+    } catch (e) {
+      console.warn("Admin mail skipped:", e?.message || e);
+    }
 
     return res.status(200).json({ ok: true, message: "PDF odoslané e-mailom.", to });
   } catch (e) {

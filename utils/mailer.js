@@ -189,14 +189,13 @@ function balconyDocsTemplate({
   // prekliky (s email parametrom – ak ho máme)
   const q = customerEmail ? `?email=${encodeURIComponent(customerEmail)}` : '';
   const linkOnboarding = `${app}/onboarding.html${q}`;
-  const linkDashboard  = `${app}/dashboard.html${q}`;   // prezývka / účet
-  const linkCatalog    = `${app}/catalog.html${q}`;     // hodnotenia
-  const linkTimeline   = `${app}/timeline.html${q}`;    // lištobook
-  const linkMessages   = `${app}/messages.html${q}`;    // správy
+  const linkDashboard  = `${app}/dashboard.html${q}`;
+  const linkCatalog    = `${app}/catalog.html${q}`;
+  const linkTimeline   = `${app}/timeline.html${q}`;
+  const linkMessages   = `${app}/messages.html${q}`;
 
   const subject = `${APP_NAME} – Vaša kalkulácia (PDF)`;
 
-  // "toxicko-profesionálny, až mechanický" = vecný, presný, technický tón
   const preheader = `Automatické doručenie PDF a technických listov – ${pdfFilename}`;
 
   const html = `
@@ -205,7 +204,6 @@ function balconyDocsTemplate({
       <div style="background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);border-radius:18px;overflow:hidden;font-family:Arial,sans-serif;box-shadow:0 12px 34px rgba(0,0,0,.45);">
         <span style="display:none;max-height:0;max-width:0;opacity:0;overflow:hidden">${escapeHtml(preheader)}</span>
 
-        <!-- Header -->
         <div style="background:
           radial-gradient(900px 640px at 6% -10%, #13255d 0%, transparent 60%),
           radial-gradient(760px 560px at 100% 0%, #0d1e4a 0%, transparent 60%),
@@ -217,10 +215,8 @@ function balconyDocsTemplate({
           <div style="color:#a8b3d6;font-size:13px;margin-top:6px">Automatický technický výstup • PDF + technické listy</div>
         </div>
 
-        <!-- Body -->
         <div style="padding:18px;background:#0a1029;color:#ecf2ff;line-height:1.55">
 
-          <!-- Card 1 -->
           <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
             <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Doručenie dokumentov</div>
 
@@ -242,7 +238,6 @@ function balconyDocsTemplate({
             </div>
           </div>
 
-          <!-- Card 2 -->
           <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
             <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Ak chcete nacenenie</div>
 
@@ -267,7 +262,6 @@ function balconyDocsTemplate({
             </div>
           </div>
 
-          <!-- Card 3 -->
           <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
             <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Čo je Lištobook</div>
 
@@ -295,7 +289,6 @@ function balconyDocsTemplate({
               </ul>
             </div>
 
-            <!-- CTA buttons (email-safe) -->
             <div style="margin-top:12px;">
               <div style="display:block;margin-bottom:10px;">
                 <a href="${escapeAttr(linkDashboard)}"
@@ -330,7 +323,6 @@ function balconyDocsTemplate({
             </div>
           </div>
 
-          <!-- Card 4 -->
           <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;">
             <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Kde nás nájdete</div>
 
@@ -346,7 +338,6 @@ function balconyDocsTemplate({
 
         </div>
 
-        <!-- Footer -->
         <div style="padding:14px 16px;background:#081433;color:#8aa4d6;font-size:12px;text-align:center;border-top:1px solid rgba(255,255,255,.12)">
           Automatická správa z <strong>no-reply@listobook.sk</strong> • Neodpovedajte na túto adresu.<br/>
           Kontakt: <a href="mailto:bratislava@listovecentrum.sk" style="color:#7cd2ff;text-decoration:underline">bratislava@listovecentrum.sk</a>
@@ -367,12 +358,10 @@ function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
   const h = String(heightId || '').toLowerCase();
   const d = String(drainId || '').toLowerCase();
 
-  // Variant A: LOW + EDGE_FREE
   const isLow = h === 'low';
   const isEdgeFree = d === 'edge-free';
   if (!(isLow && isEdgeFree)) return [];
 
-  // ✅ Stabilná cesta (nezávisí od process.cwd())
   const baseDir = path.resolve(__dirname, '..', 'public', 'img', 'pdf', 'balkon', 'tech');
 
   const files = [
@@ -393,7 +382,6 @@ function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
     }
 
     const stat = fs.statSync(p);
-    // ✅ ochrana pred “prázdnym” pdf
     if (!stat.size || stat.size < 1500) {
       console.warn('⚠️ Technický list je podozrivo malý (pravdepodobne prázdny):', p, 'size=', stat.size);
       continue;
@@ -425,17 +413,16 @@ async function sendBalconyDocsEmail({
   pdfBuffer,
   pdfFilename = 'balkon-final.pdf',
   customerName = 'Zákazník',
-  variant, // { heightId, drainId }
+  variant,
 }) {
   if (!isValidEmail(to)) throw new Error('sendBalconyDocsEmail: neplatný e-mail');
 
   const pdf = normalizeToBuffer(pdfBuffer);
   if (!pdf || pdf.length < 1000) throw new Error('sendBalconyDocsEmail: PDF buffer je neplatný/príliš malý');
 
-  // ✅ ak route neposlala html/subject, použijeme náš template
   const tpl = balconyDocsTemplate({
     customerName,
-    customerEmail: to, // ✅ pre linky s ?email=
+    customerEmail: to,
     pdfFilename,
   });
   const finalSubject = subject || tpl.subject;
