@@ -1213,42 +1213,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function tryPdfMailEndpoints(payload) {
-    const candidates = [
-      "/api/pdf/balkon-final-mail",
-      "/api/pdf/test-mail",
-      "/api/pdf/balkon-mail",
-      "/api/pdf/mail/balkon",
-    ];
+  // ✅ posielame len originál (HTML→PDF + prílohy)
+  const url = "/api/pdf/balkon-final-html-send";
 
-    let lastErr = null;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payload }),
+    });
 
-    for (const url of candidates) {
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ payload }),
-        });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
 
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          lastErr = new Error(
-            `${url}: ${data.message || `HTTP ${res.status}`}`
-          );
-          continue;
-        }
-
-        return { ok: true, usedUrl: url, data };
-      } catch (e) {
-        lastErr = new Error(`${url}: ${e?.message || e}`);
-      }
-    }
-
-    return {
-      ok: false,
-      error: lastErr || new Error("Nepodarilo sa nájsť funkčný mail endpoint."),
-    };
+    return { ok: true, usedUrl: url, data };
+  } catch (e) {
+    return { ok: false, error: new Error(`${url}: ${e?.message || e}`) };
   }
+}
 
   async function postPdfDownload(skipTileCheck = false) {
     if (!canGoToStep4()) return;

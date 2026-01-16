@@ -5,11 +5,25 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 const { PDFDocument } = require("pdf-lib");
 
+// ✅ NOVÉ: mailer (posielanie originál PDF + tech listy)
+// POZOR: nepoužívame destructuring, lebo pri circular dependency vie vrátiť undefined
+const mailer = require("../utils/mailer");
+
 const router = express.Router();
 
 function safeText(v) {
   if (v === null || v === undefined) return "";
   return String(v);
+}
+
+function escapeHtml(s = "") {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]));
 }
 
 function formatNumSk(n, digits = 1) {
@@ -207,7 +221,8 @@ function buildPage5Consumption(calc) {
         : `${formatNumSk(kebaJoints, 1)} m (≈ ${joints}× ${formatNumSk(A, 1)} m)`
       : "0,0 m";
 
-  const kebaMetersText = kebaTotal != null ? `${formatNumSk(kebaTotal, 1)} m` : "–";
+  const kebaMetersText =
+    kebaTotal != null ? `${formatNumSk(kebaTotal, 1)} m` : "–";
   const collConsumptionText =
     collTotalKg != null ? `≈ ${formatNumSk(collTotalKg, 2)} kg` : "–";
 
@@ -680,6 +695,10 @@ function findChromeExecutable() {
   return "";
 }
 
+/**
+ * ✅ EXISTUJÚCE: download originál PDF
+ * POST /api/pdf/balkon-final-html
+ */
 router.post("/balkon-final-html", async (req, res) => {
   try {
     const payload = req.body?.payload;
@@ -741,6 +760,136 @@ router.post("/balkon-final-html", async (req, res) => {
   } catch (e) {
     console.error("balkon-final-html error:", e);
     return res.status(500).json({ message: e.message || "PDF chyba" });
+  }
+});
+
+/**
+ * ✅ NOVÉ: pošli originál PDF e-mailom + technické listy
+ * POST /api/pdf/balkon-final-html-send
+ */
+router.post("/balkon-final-html-send", async (req, res) => {
+  try {
+    const payload = req.body?.payload;
+    if (!payload) return res.status(400).json({ message: "Chýba payload." });
+
+    const calc = payload?.calc || {};
+    const pdfMeta = payload?.pdfMeta || {};
+    const ownerEmail = safeText(payload?.meta?.email || "");
+
+    // komu poslať PDF (priorita: pdfMeta.customerEmail -> calc.customerEmail -> meta.email)
+    const to =
+      safeText(pdfMeta?.customerEmail) ||
+      safeText(calc?.customerEmail) ||
+      ownerEmail;
+
+    if (!to) {
+      return res.status(400).json({
+        message:
+          "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
+      });
+    }
+
+    // vygeneruj rovnaký originál PDF ako pri download route
+    const plan = resolvePlan(payload);
+    const totalPages = plan.length;
+    const baseOrigin = `${req.protocol}://${req.get("host")}`;
+
+    const htmlPages = plan.map((fileName, idx) => {
+      const filePath = path.join(process.cwd(), "public", fileName);
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`Chýba HTML stránka: ${filePath}`);
+      }
+
+      const raw = fs.readFileSync(filePath, "utf8");
+      const vars = buildVars(payload, idx + 1, totalPages, baseOrigin);
+
+      if (!payload.meta) payload.meta = {};
+      payload.meta.pdfCode = vars.pdfCode;
+
+      const baseHref = `${baseOrigin}/`;
+      return applyTemplate(raw, vars, baseHref);
+    });
+
+    const chromePath = findChromeExecutable();
+    console.log("[PDF] chromePath used:", chromePath ? JSON.stringify(chromePath) : "(empty)");
+
+    let browser;
+    try {
+      browser = await puppeteer.launch({
+        headless: "new",
+        executablePath: chromePath || undefined,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
+    } catch (launchErr) {
+      console.error("[PDF] puppeteer launch error:", launchErr);
+      return res.status(500).json({
+        message:
+          "Chyba pri generovaní PDF: nepodarilo sa spustiť Chromium/Chrome na Renderi. Pozri logy (executablePath exists?).",
+      });
+    }
+
+    let merged;
+    try {
+      const pdfBuffers = [];
+      for (const html of htmlPages) {
+        const buf = await htmlToPdfBuffer(browser, html);
+        pdfBuffers.push(buf);
+      }
+      merged = await mergePdfBuffers(pdfBuffers);
+    } finally {
+      await browser.close();
+    }
+
+    // pekný mail (základ)
+    const customerName =
+      safeText(pdfMeta?.customerLabel) ||
+      safeText(calc?.customerName) ||
+      "Zákazník";
+
+    const subject = `Lištobook – Vaša kalkulácia (PDF)`;
+    const html = `
+      <div style="font-family:Arial,sans-serif;line-height:1.5">
+        <p>Dobrý deň ${escapeHtml(customerName)},</p>
+        <p>v prílohe posielame Vašu kalkuláciu (PDF) podľa zadaných preferencií.</p>
+        <p>Ak chcete, odpovedzte na tento e-mail a doplníme odporúčania.</p>
+        <p>S pozdravom<br>Lištové centrum</p>
+      </div>
+    `;
+
+    // ✅ zákazník: PDF + technické listy (podľa variantu)
+if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
+  throw new Error(
+    "Mailer export missing: sendBalconyOfferCustomerEmail. Skontroluj utils/mailer.js export (module.exports) alebo circular dependency."
+  );
+}
+
+await mailer.sendBalconyOfferCustomerEmail({
+  to,
+  subject,
+  html,
+  pdfBuffer: merged,
+  pdfFilename: "balkon-final.pdf",
+  variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+});
+
+// ✅ admin kópia (ak máš ADMIN_EMAIL v env)
+try {
+  if (typeof mailer.sendBalconyOfferAdminEmail === "function") {
+    await mailer.sendBalconyOfferAdminEmail({
+      subject: `Lištobook – kópia kalkulácie (PDF) – ${to}`,
+      html: `<p>Kópia kalkulácie poslaná zákazníkovi: <strong>${escapeHtml(to)}</strong></p>`,
+      pdfBuffer: merged,
+      pdfFilename: "balkon-final.pdf",
+    });
+  }
+} catch (e) {
+  console.warn("Admin mail skipped:", e?.message || e);
+}
+
+    return res.status(200).json({ ok: true, message: "PDF odoslané e-mailom.", to });
+  } catch (e) {
+    console.error("balkon-final-html-send error:", e);
+    return res.status(500).json({ message: e.message || "E-mail/PDF chyba" });
   }
 });
 

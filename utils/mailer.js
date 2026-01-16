@@ -104,7 +104,7 @@ async function sendMail({ to, subject, html, text, attachments, cc, bcc, replyTo
 }
 
 /**
- * ✅ BACKWARD COMPAT: sendPdfEmail (aby pdfTestRoutes nezlyhal)
+ * ✅ BACKWARD COMPAT: sendPdfEmail (aby staré routy nezlyhali)
  */
 async function sendPdfEmail({ to, subject, html, text, pdfBuffer, filename = 'kalkulacia.pdf', cc, bcc }) {
   if (!to) throw new Error('sendPdfEmail: "to" je povinné');
@@ -176,28 +176,98 @@ async function sendWelcomeEmail(toEmail) {
   return sendSignupEmail(toEmail);
 }
 
+/* ===================== BALKÓN – E-MAIL (rovnaký dizajn ako welcome) ===================== */
+
+function balconyDocsTemplate({ customerName = 'Zákazník', pdfFilename = 'balkon-final.pdf' } = {}) {
+  const app = String(APP_URL || '').replace(/\/+$/, '');
+  const logoUrl = `${app}/icons/icon-512.png`;
+  const subject = `${APP_NAME} – Vaša kalkulácia (PDF)`;
+
+  const preheader = 'V prílohe nájdete PDF kalkuláciu a technické listy k odporúčaným materiálom.';
+
+  const html = `
+  <div style="background:#0c1f4b;padding:24px 0;">
+    <div style="max-width:560px;margin:0 auto;background:#0b1a3a;border-radius:16px;overflow:hidden;border:1px solid #16336b;font-family:Arial,sans-serif;">
+      <span style="display:none;max-height:0;max-width:0;opacity:0;overflow:hidden">${escapeHtml(preheader)}</span>
+
+      <div style="text-align:center;padding:24px 24px 8px;background:#0c1f4b;">
+        <img src="${escapeAttr(logoUrl)}" alt="Lištové centrum" width="96" height="96" style="display:block;margin:0 auto 12px;border-radius:12px" />
+        <h1 style="margin:0;color:#ffffff;font-size:22px;line-height:1.35">${escapeHtml(APP_NAME)}</h1>
+      </div>
+
+      <div style="padding:16px 24px;background:#0c1f4b;color:#cfe2ff;line-height:1.55">
+        <p style="margin:0 0 12px">Dobrý deň ${escapeHtml(customerName)},</p>
+
+        <p style="margin:0 0 12px">
+          <strong>Ďakujeme</strong>, že využívate naše služby.
+        </p>
+
+        <div style="margin:12px 0 14px;padding:12px 14px;border:1px solid #16336b;border-radius:12px;background:#0b1a3a;">
+          <p style="margin:0 0 8px"><strong>V prílohách posielame:</strong></p>
+          <ul style="margin:0;padding-left:18px">
+            <li>PDF podklad k vášmu projektu (<strong>${escapeHtml(pdfFilename)}</strong>)</li>
+            <li>technické listy k odporúčaným materiálom</li>
+          </ul>
+        </div>
+
+        <p style="margin:0 0 12px">
+          Ak potrebujete aj <strong>cenovú ponuku</strong>, pošlite nám prosím e-mail na
+          <a href="mailto:bratislava@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">bratislava@listovecentrum.sk</a>
+          a priložte súbor <strong>${escapeHtml(pdfFilename)}</strong> (aby sme mali presný podklad).
+          Vyhotovíme ju a pošleme späť na e-mailovú adresu, z ktorej ste nás kontaktovali.
+        </p>
+
+        <p style="margin:0 0 12px">
+          Tip: Viete o tom, že <strong>Lištobook</strong> je aj malá komunitná mikro-sociálna sieť?
+          Môžete využiť <strong>časovú os</strong> na zdieľanie svojej práce, opýtať sa ostatných používateľov na radu,
+          a tiež <strong>hodnotiť tovary</strong> – z hodnotení sa ľahko dostanete aj do nášho e-shopu.
+        </p>
+
+        <p style="margin:16px 0 0;font-size:13px;color:#9ab6e8">
+          <strong>Kontakt na Lištové centrum:</strong>
+          <a href="mailto:bratislava@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">
+            bratislava@listovecentrum.sk
+          </a>
+          •
+          <a href="tel:+421947922181" style="color:#9ab6e8;text-decoration:underline">
+            0947&nbsp;922&nbsp;181
+          </a>
+        </p>
+      </div>
+
+      <div style="padding:12px 16px;background:#081433;color:#8aa4d6;font-size:12px;text-align:center;border-top:1px solid #16336b">
+        Odoslané z ${escapeHtml(user)} (no-reply). Neodpovedajte.<br/>
+        Lištobook.sk by LIŠTOVÉ CENTRUM EU, s.r.o. ©
+      </div>
+    </div>
+  </div>`;
+
+  return { subject, html };
+}
+
 /* ===================== BALKÓN – TECH LISTY ===================== */
 
 /**
  * ✅ TECH listy sú v gite tu:
- * public/img/pdf/tech/*.pdf
+ * public/img/pdf/balkon/tech/*.pdf
  */
 function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
   const h = String(heightId || '').toLowerCase();
   const d = String(drainId || '').toLowerCase();
 
-  // zatiaľ iba: LOW + EDGE_FREE
+  // Variant A: LOW + EDGE_FREE
   const isLow = h === 'low';
   const isEdgeFree = d === 'edge-free';
   if (!(isLow && isEdgeFree)) return [];
 
-  const baseDir = path.join(process.cwd(), 'public', 'img', 'pdf', 'tech');
+  // ✅ SPRÁVNA cesta podľa tvojho stromu:
+  const baseDir = path.join(process.cwd(), 'public', 'img', 'pdf', 'balkon', 'tech');
 
   const files = [
-    { filename: 'technicky-list-schluter-ditra.pdf',   local: 'schluter-ditra.pdf' },
+    { filename: 'technicky-list-mapei-lepidlo.pdf',    local: 'mapei-lepidlo.pdf' },
     { filename: 'technicky-list-schluter-bara-rt.pdf', local: 'schluter-bara-rt.pdf' },
     { filename: 'technicky-list-schluter-bara-rw.pdf', local: 'schluter-bara-rw.pdf' },
-    { filename: 'technicky-list-mapei-lepidlo.pdf',    local: 'mapei-lepidlo.pdf' },
+    { filename: 'technicky-list-schluter-ditra.pdf',   local: 'schluter-ditra.pdf' },
     { filename: 'technicky-list-sopro-lepidlo.pdf',    local: 'sopro-lepidlo.pdf' },
   ];
 
@@ -231,6 +301,16 @@ async function sendBalconyDocsEmail({
   const pdf = normalizeToBuffer(pdfBuffer);
   if (!pdf || pdf.length < 1000) throw new Error('sendBalconyDocsEmail: PDF buffer je neplatný/príliš malý');
 
+  // ✅ ak route neposlala html/subject, použijeme náš template (welcome štýl)
+  const resolvedCustomerName =
+    (variant && typeof variant.customerLabel === 'string' && variant.customerLabel.trim())
+      ? variant.customerLabel.trim()
+      : 'Zákazník';
+
+  const tpl = balconyDocsTemplate({ customerName: resolvedCustomerName, pdfFilename });
+  const finalSubject = subject || tpl.subject;
+  const finalHtml = html || tpl.html;
+
   const tech = loadTechSheetAttachmentsForVariant(variant || {});
   const attachments = [
     { filename: pdfFilename, content: pdf, contentType: 'application/pdf' },
@@ -239,8 +319,8 @@ async function sendBalconyDocsEmail({
 
   return sendMail({
     to,
-    subject: subject || `${APP_NAME} – technické podklady k balkónu`,
-    html,
+    subject: finalSubject || `${APP_NAME} – technické podklady k balkónu`,
+    html: finalHtml,
     text,
     attachments,
   });
@@ -273,7 +353,7 @@ async function sendBalconyOfferAdminEmail({
 
 module.exports = {
   sendMail,
-  sendPdfEmail, // ✅ dôležité pre existujúce routy
+  sendPdfEmail, // ✅ staré routy stále fungujú
   sendSignupEmail,
   sendWelcomeEmail,
   sendBalconyDocsEmail,
