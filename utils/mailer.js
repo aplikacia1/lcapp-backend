@@ -1,659 +1,512 @@
-// routes/pdfHtmlRoutes.js
-const express = require("express");
-const path = require("path");
-const fs = require("fs");
-const puppeteer = require("puppeteer");
-const { PDFDocument } = require("pdf-lib");
+// utils/mailer.js
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 
-// ✅ mailer (posielanie originál PDF + tech listy)
-const mailer = require("../utils/mailer");
+const {
+  SMTP_HOST = 'smtp.m1.websupport.sk',
+  SMTP_PORT = '465',
+  SMTP_SECURE = 'true',
+  SMTP_USER,
+  SMTP_PASS,
+  APP_NAME = 'Lištobook',
+  APP_URL = 'https://listobook.sk',
+  EMAIL_DEBUG = 'false',
+  SMTP_AUTH_METHOD = '',
+  ADMIN_EMAIL = '',
+} = process.env;
 
-const router = express.Router();
+// --- očistenie a defaulty ---
+const host = String(SMTP_HOST || '').trim();
+const port = Number(String(SMTP_PORT || '').trim()) || 587;
+const secure =
+  port === 465 ? true : String(SMTP_SECURE || 'false').trim().toLowerCase() === 'true';
+const user = String(SMTP_USER || '').trim();
+const pass = String(SMTP_PASS || '').trim();
+const debug = String(EMAIL_DEBUG || 'false').trim().toLowerCase() === 'true';
+const authMethod = String(SMTP_AUTH_METHOD || '').trim().toUpperCase() || null;
 
-function safeText(v) {
-  if (v === null || v === undefined) return "";
-  return String(v);
+if (!user || !pass) console.error('❌ SMTP_USER alebo SMTP_PASS chýba.');
+
+const transporter = nodemailer.createTransport({
+  host,
+  port,
+  secure,
+  auth: { user, pass },
+  ...(authMethod ? { authMethod } : {}),
+  tls: { minVersion: 'TLSv1.2' },
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
+  pool: false,
+  logger: debug,
+  debug,
+});
+
+let _verified = false;
+async function verifyOnce() {
+  if (_verified) return;
+  await transporter.verify();
+  _verified = true;
+  console.log(
+    `✅ SMTP ready as ${user} @ ${host}:${port} (secure=${secure}${authMethod ? `, auth=${authMethod}` : ''})`
+  );
 }
 
-function escapeHtml(s = "") {
-  return String(s).replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
+function stripHtml(s = '') {
+  return String(s).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function escapeHtml(s = '') {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
 }
+function escapeAttr(s = '') { return escapeHtml(s).replace(/"/g, '&quot;'); }
 
-function formatNumSk(n, digits = 1) {
-  if (n === null || n === undefined || Number.isNaN(Number(n))) return "–";
-  return Number(n).toFixed(digits).replace(".", ",");
+function isValidEmail(email) {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-function isoDateTimeSk() {
-  const d = new Date();
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
-}
-
-function applyTemplate(html, vars, baseHref) {
-  let out = html;
-
-  for (const [k, v] of Object.entries(vars)) {
-    const token = new RegExp(`\\{\\{\\s*${k}\\s*\\}\\}`, "g");
-    out = out.replace(token, safeText(v));
+/**
+ * ✅ Normalizácia PDF na Buffer (fix na “zlá príloha”)
+ */
+function normalizeToBuffer(input) {
+  if (!input) return null;
+  if (Buffer.isBuffer(input)) return input;
+  if (input instanceof Uint8Array) return Buffer.from(input);
+  if (typeof input === 'object' && input.type === 'Buffer' && Array.isArray(input.data)) {
+    return Buffer.from(input.data);
   }
+  return null;
+}
 
-  if (!/<base\s/i.test(out)) {
-    out = out.replace(/<head([^>]*)>/i, `<head$1><base href="${baseHref}">`);
-  } else {
-    out = out.replace(
-      /<base[^>]*href="[^"]*"[^>]*>/i,
-      `<base href="${baseHref}">`
-    );
+/**
+ * sendMail – základný odosielač
+ */
+async function sendMail({ to, subject, html, text, attachments, cc, bcc, replyTo }) {
+  if (!to) throw new Error('sendMail: "to" je povinné');
+  await verifyOnce();
+
+  const info = await transporter.sendMail({
+    from: `${APP_NAME} <${user}>`,
+    to,
+    cc,
+    bcc,
+    replyTo,
+    subject,
+    text: text || (html ? stripHtml(html) : ''),
+    html,
+    attachments: Array.isArray(attachments) ? attachments : undefined,
+  });
+
+  console.log('✉️ Message sent:', info.messageId, 'to', to);
+  return info;
+}
+
+/**
+ * ✅ BACKWARD COMPAT: sendPdfEmail (aby staré routy nezlyhali)
+ */
+async function sendPdfEmail({ to, subject, html, text, pdfBuffer, filename = 'kalkulacia.pdf', cc, bcc }) {
+  if (!to) throw new Error('sendPdfEmail: "to" je povinné');
+  const pdf = normalizeToBuffer(pdfBuffer);
+  if (!pdf || pdf.length < 1000) throw new Error('sendPdfEmail: PDF buffer je neplatný/príliš malý');
+
+  return sendMail({
+    to,
+    cc,
+    bcc,
+    subject: subject || `${APP_NAME} – PDF`,
+    html,
+    text,
+    attachments: [{
+      filename,
+      content: pdf,
+      contentType: 'application/pdf',
+    }],
+  });
+}
+
+/* ===================== ŠABLÓNY (WELCOME) ===================== */
+
+function signupTemplate() {
+  const app = String(APP_URL || '').replace(/\/+$/, '');
+  const logoUrl = `${app}/icons/icon-512.png`;
+  const subject = `Vitaj v ${APP_NAME}!`;
+  const preheader = 'Po prihlásení si zvoľ prezývku a máš hotovo.';
+
+  const html = `
+  <div style="background:#0c1f4b;padding:24px 0;">
+    <div style="max-width:560px;margin:0 auto;background:#0b1a3a;border-radius:16px;overflow:hidden;border:1px solid #16336b;font-family:Arial,sans-serif;">
+      <span style="display:none;max-height:0;max-width:0;opacity:0;overflow:hidden">${preheader}</span>
+      <div style="text-align:center;padding:24px 24px 8px;background:#0c1f4b;">
+        <img src="${escapeAttr(logoUrl)}" alt="Lištové centrum" width="96" height="96" style="display:block;margin:0 auto 12px;border-radius:12px" />
+        <h1 style="margin:0;color:#ffffff;font-size:22px;line-height:1.35">${escapeHtml(APP_NAME)}</h1>
+      </div>
+      <div style="padding:16px 24px;background:#0c1f4b;color:#cfe2ff;line-height:1.55">
+        <p style="margin:0 0 12px">Vitaj v <strong>Lištobooku</strong> 👋</p>
+        <p style="margin:0 0 12px">
+          Lištobook je <strong>komunitná mini-sieť</strong> pre majstrov a kutilov z Lištového centra.
+          Zdieľaj fotky svojej práce, pýtaj sa na rady, <strong>hodnoť materiály a výrobky</strong> a píš krátke recenzie.
+        </p>
+        <p style="margin:16px 0 0;font-size:13px;color:#9ab6e8">
+          <strong>Kontakt na Lištové centrum:</strong>
+          <a href="mailto:bratislava@listovecentrum.sk" style="color:#9ab6e8;text-decoration:underline">
+            bratislava@listovecentrum.sk
+          </a>
+          •
+          <a href="tel:+421947922181" style="color:#9ab6e8;text-decoration:underline">
+            0947&nbsp;922&nbsp;181
+          </a>
+        </p>
+      </div>
+      <div style="padding:12px 16px;background:#081433;color:#8aa4d6;font-size:12px;text-align:center;border-top:1px solid #16336b">
+        Odoslané z ${escapeHtml(user)} (no-reply). Neodpovedajte.<br/>
+        Lištobook.sk by LIŠTOVÉ CENTRUM EU, s.r.o. ©
+      </div>
+    </div>
+  </div>`;
+  return { subject, html };
+}
+
+async function sendSignupEmail(toEmail) {
+  const { subject, html } = signupTemplate();
+  return sendMail({ to: toEmail, subject, html });
+}
+async function sendWelcomeEmail(toEmail) {
+  return sendSignupEmail(toEmail);
+}
+
+/* ===================== BALKÓN – E-MAIL (PDF + TECH) ===================== */
+
+function balconyDocsTemplate({
+  customerName = 'Zákazník',
+  customerEmail = '',
+  pdfFilename = 'balkon-final.pdf',
+} = {}) {
+  const app = String(APP_URL || '').replace(/\/+$/, '');
+  const logoUrl = `${app}/icons/icon-512.png`;
+
+  const q = customerEmail ? `?email=${encodeURIComponent(customerEmail)}` : '';
+  const linkOnboarding = `${app}/onboarding.html${q}`;
+  const linkDashboard  = `${app}/dashboard.html${q}`;
+  const linkCatalog    = `${app}/catalog.html${q}`;
+  const linkTimeline   = `${app}/timeline.html${q}`;
+  const linkMessages   = `${app}/messages.html${q}`;
+
+  const subject = `${APP_NAME} – Vaša kalkulácia (PDF)`;
+  const preheader = `Automatické doručenie PDF a technických listov – ${pdfFilename}`;
+
+  const html = `
+  <div style="background:#0a1029;padding:26px 0;">
+    <div style="max-width:640px;margin:0 auto;padding:0 14px;">
+      <div style="background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);border-radius:18px;overflow:hidden;font-family:Arial,sans-serif;box-shadow:0 12px 34px rgba(0,0,0,.45);">
+        <span style="display:none;max-height:0;max-width:0;opacity:0;overflow:hidden">${escapeHtml(preheader)}</span>
+
+        <div style="background:
+          radial-gradient(900px 640px at 6% -10%, #13255d 0%, transparent 60%),
+          radial-gradient(760px 560px at 100% 0%, #0d1e4a 0%, transparent 60%),
+          #0a1029;
+          padding:22px 18px 16px;
+          text-align:center;">
+          <img src="${escapeAttr(logoUrl)}" alt="Lištové centrum" width="76" height="76" style="display:block;margin:0 auto 10px;border-radius:14px" />
+          <div style="color:#ecf2ff;font-size:20px;font-weight:800;letter-spacing:.2px;margin:0">Lištobook</div>
+          <div style="color:#a8b3d6;font-size:13px;margin-top:6px">Automatický technický výstup • PDF + technické listy</div>
+        </div>
+
+        <div style="padding:18px;background:#0a1029;color:#ecf2ff;line-height:1.55">
+
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
+            <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Doručenie dokumentov</div>
+
+            <div style="font-size:14.5px;margin:0 0 10px">
+              Dobrý deň <strong>${escapeHtml(customerName)}</strong>,
+              systém <strong>Lištobook</strong> automaticky vygeneroval technický podklad k Vášmu zadaniu.
+            </div>
+
+            <div style="font-size:14.5px;margin:0 0 10px">
+              V prílohe nájdete:
+              <ul style="margin:10px 0 0 18px;padding:0;color:#cfe2ff">
+                <li><strong>PDF dokument</strong> (${escapeHtml(pdfFilename)})</li>
+                <li><strong>Technické listy</strong> k odporúčaným materiálom a systémom</li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
+            <div style="color:#a8b3d6;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Čo je Lištobook</div>
+
+            <div style="font-size:14.5px;margin:0 0 10px;color:#cfe2ff">
+              Lištobook je komunitná <strong>mikrosieť</strong> a sada nástrojov pre majstrov a kutilov.
+            </div>
+
+            <div style="margin-top:12px;">
+              <div style="display:block;margin-bottom:10px;">
+                <a href="${escapeAttr(linkDashboard)}"
+                   style="display:inline-block;background:linear-gradient(135deg,#4da3ff,#7cd2ff);color:#0a1029;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:14px;">
+                  Nastaviť prezývku
+                </a>
+              </div>
+
+              <div style="display:block;margin-bottom:10px;">
+                <a href="${escapeAttr(linkCatalog)}"
+                   style="display:inline-block;background:linear-gradient(135deg,#22c55e,#86efac);color:#06220e;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:14px;">
+                  Hodnotiť produkty
+                </a>
+              </div>
+
+              <div style="display:block;margin-bottom:10px;">
+                <a href="${escapeAttr(linkTimeline)}"
+                   style="display:inline-block;background:#1a2b59;color:#ecf2ff;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.16);">
+                  Otvoriť Lištobook
+                </a>
+                <span style="display:inline-block;width:8px;"></span>
+                <a href="${escapeAttr(linkMessages)}"
+                   style="display:inline-block;background:linear-gradient(135deg,#f59e0b,#fde68a);color:#3d2a05;text-decoration:none;font-weight:800;padding:12px 16px;border-radius:14px;">
+                  Otvoriť správy
+                </a>
+              </div>
+
+              <div style="font-size:12.5px;color:#a8b3d6;margin-top:6px;">
+                Tip: ak sa v linkoch otvorí onboarding, tu je prehľad:
+                <a href="${escapeAttr(linkOnboarding)}" style="color:#7cd2ff;text-decoration:underline">Vitajte v Lištobooku</a>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:14px 16px;background:#081433;color:#8aa4d6;font-size:12px;text-align:center;border-top:1px solid rgba(255,255,255,.12)">
+            Automatická správa z <strong>no-reply@listobook.sk</strong> • Neodpovedajte na túto adresu.<br/>
+            Kontakt: <a href="mailto:bratislava@listovecentrum.sk" style="color:#7cd2ff;text-decoration:underline">bratislava@listovecentrum.sk</a>
+            • <a href="tel:+421947922181" style="color:#7cd2ff;text-decoration:underline">0947&nbsp;922&nbsp;181</a>
+            <br/><br/>
+            Lištobook.sk by LIŠTOVÉ CENTRUM EU, s.r.o. ©
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  return { subject, html };
+}
+
+/**
+ * ✅ NOVÁ šablóna: “Žiadosť o cenovú ponuku”
+ * Zákazník dostane rovnaké prílohy (PDF + tech listy), ale iný text.
+ */
+function balconyOfferTemplateCustomer({
+  customerName = 'Zákazník',
+  customerEmail = '',
+  pdfFilename = 'balkon-final.pdf',
+} = {}) {
+  const base = balconyDocsTemplate({ customerName, customerEmail, pdfFilename });
+
+  // iba upravíme header texty + vložíme “ponuka” blok
+  const subject = `${APP_NAME} – Žiadosť o cenovú ponuku (potvrdenie)`;
+
+  // krátky blok, aby zákazník nečakal “hneď”
+  const offerBlock = `
+    <div style="background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.35);border-radius:16px;padding:16px 16px 14px;margin-bottom:12px;">
+      <div style="color:#fde68a;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Žiadosť o cenovú ponuku</div>
+
+      <div style="font-size:14.5px;margin:0 0 10px;color:#ecf2ff">
+        Ďakujeme — Vašu žiadosť o nacenenie sme prijali.
+      </div>
+
+      <div style="font-size:14.5px;margin:0 0 10px;color:#cfe2ff">
+        Cenovú ponuku Vám pripravíme a pošleme <strong>ako samostatný e-mail</strong>.
+        Zvyčajne to trvá <strong>niekoľko hodín</strong>.
+      </div>
+
+      <div style="font-size:14.5px;margin:0 0 10px;color:#cfe2ff">
+        Spracovanie prebieha <strong>v pracovné dni</strong> v čase <strong>8:00 – 16:00</strong>.
+      </div>
+
+      <div style="font-size:13px;color:#a8b3d6">
+        Podklady máte v prílohe (PDF + technické listy). Ak chcete doplniť fotky alebo poznámku, stačí odpovedať na tento e-mail.
+      </div>
+    </div>
+  `;
+
+  // vložíme ho hneď po prvom boxe “Doručenie dokumentov”
+  const html = String(base.html).replace(
+    /(<div[^>]*>[\s\S]*?Doručenie dokumentov[\s\S]*?<\/div>)/,
+    `$1${offerBlock}`
+  );
+
+  return { subject, html };
+}
+
+/* ===================== BALKÓN – TECH LISTY ===================== */
+
+function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
+  const h = String(heightId || '').toLowerCase();
+  const d = String(drainId || '').toLowerCase();
+
+  const isLow = h === 'low';
+  const isEdgeFree = d === 'edge-free';
+  if (!(isLow && isEdgeFree)) return [];
+
+  const baseDir = path.resolve(__dirname, '..', 'public', 'img', 'pdf', 'balkon', 'tech');
+
+  const files = [
+    { filename: 'technicky-list-mapei-lepidlo.pdf',    local: 'mapei-lepidlo.pdf' },
+    { filename: 'technicky-list-schluter-bara-rt.pdf', local: 'schluter-bara-rt.pdf' },
+    { filename: 'technicky-list-schluter-bara-rw.pdf', local: 'schluter-bara-rw.pdf' },
+    { filename: 'technicky-list-schluter-ditra.pdf',   local: 'schluter-ditra.pdf' },
+    { filename: 'technicky-list-sopro-lepidlo.pdf',    local: 'sopro-lepidlo.pdf' },
+  ];
+
+  const out = [];
+  for (const f of files) {
+    const p = path.join(baseDir, f.local);
+
+    if (!fs.existsSync(p)) {
+      console.warn('⚠️ Chýba technický list:', p);
+      continue;
+    }
+
+    const stat = fs.statSync(p);
+    if (!stat.size || stat.size < 1500) {
+      console.warn('⚠️ Technický list je podozrivo malý (pravdepodobne prázdny):', p, 'size=', stat.size);
+      continue;
+    }
+
+    const buf = fs.readFileSync(p);
+    if (!buf || buf.length < 1500) {
+      console.warn('⚠️ Technický list sa načítal prázdny:', p, 'len=', buf ? buf.length : 0);
+      continue;
+    }
+
+    console.log('📎 Tech sheet OK:', f.local, 'bytes=', buf.length);
+
+    out.push({
+      filename: f.filename,
+      content: buf,
+      contentType: 'application/pdf',
+    });
   }
 
   return out;
 }
 
-function toAbsPublicUrl(baseOrigin, maybePath) {
-  if (!maybePath) return "";
-  let p = String(maybePath).trim();
-  if (!p) return "";
+async function sendBalconyDocsEmail({
+  to,
+  subject,
+  html,
+  text,
+  pdfBuffer,
+  pdfFilename = 'balkon-final.pdf',
+  customerName = 'Zákazník',
+  variant,
+}) {
+  if (!isValidEmail(to)) throw new Error('sendBalconyDocsEmail: neplatný e-mail');
 
-  if (/^https?:\/\//i.test(p)) return p;
+  const pdf = normalizeToBuffer(pdfBuffer);
+  if (!pdf || pdf.length < 1000) throw new Error('sendBalconyDocsEmail: PDF buffer je neplatný/príliš malý');
 
-  if (p.startsWith("img/")) p = "/" + p;
-  if (!p.startsWith("/")) p = "/" + p;
+  const tpl = balconyDocsTemplate({
+    customerName,
+    customerEmail: to,
+    pdfFilename,
+  });
+  const finalSubject = subject || tpl.subject;
+  const finalHtml = html || tpl.html;
 
-  return baseOrigin.replace(/\/$/, "") + p;
-}
-
-function resolvePlan(payload) {
-  const heightId = safeText(payload?.calc?.heightId).toLowerCase();
-  const drainId = safeText(payload?.calc?.drainId).toLowerCase();
-
-  const isLow = heightId === "low";
-  const isFree = drainId === "edge-free";
-  const isGutter =
-    drainId === "edge-gutter" ||
-    drainId.includes("gutter") ||
-    drainId.includes("ryn");
-
-  if (isLow && isFree) {
-    return [
-      "pdf_balkon_intro.html",
-      "pdf_balkon_page2.html",
-      "pdf_balkon_page3.html",
-      "pdf_balkon_page4.html",
-      "pdf_balkon_page5.html",
-      "pdf_balkon_page6.html",
-      "pdf_balkon_page7.html",
-      "pdf_balkon_page8.html",
-    ];
-  }
-
-  if (isLow && isGutter) {
-    return [
-      "pdf_balkon_intro.html",
-      "pdf_balkon_page2.html",
-      "pdf_balkon_page3.html",
-      "pdf_balkon_page4.html",
-      "pdf_balkon_page5.html",
-      "pdf_balkon_page6.html",
-      "pdf_balkon_page10.html",
-      "pdf_balkon_page9.html",
-      "pdf_balkon_page11.html",
-    ];
-  }
-
-  return [
-    "pdf_balkon_intro.html",
-    "pdf_balkon_page2.html",
-    "pdf_balkon_page3.html",
-    "pdf_balkon_page4.html",
+  const tech = loadTechSheetAttachmentsForVariant(variant || {});
+  const attachments = [
+    { filename: pdfFilename, content: pdf, contentType: 'application/pdf' },
+    ...tech,
   ];
-}
 
-function pickNumber(obj, keys) {
-  for (const k of keys) {
-    const v = obj?.[k];
-    const n = Number(v);
-    if (v !== null && v !== undefined && !Number.isNaN(n)) return n;
-  }
-  return null;
-}
-
-function ceilPositive(n) {
-  const x = Number(n);
-  if (!Number.isFinite(x)) return null;
-  if (x <= 0) return 0;
-  return Math.ceil(x);
-}
-
-/**
- * Page 5 logic (server)
- */
-function buildPage5Consumption(calc) {
-  const perimeterFull =
-    pickNumber(calc, ["perimeterFull"]) ??
-    pickNumber(calc, ["perimeter_total", "perimeterTotal"]) ??
-    pickNumber(calc, ["perimeter"]);
-
-  const A = pickNumber(calc, [
-    "a",
-    "A",
-    "lengthA",
-    "lenA",
-    "length",
-    "longSide",
-    "sideA",
-  ]);
-  const B = pickNumber(calc, [
-    "b",
-    "B",
-    "widthB",
-    "lenB",
-    "width",
-    "shortSide",
-    "sideB",
-  ]);
-
-  const widthForJoints = B;
-  const joints =
-    widthForJoints != null
-      ? Math.max(0, ceilPositive(widthForJoints / 1.0) - 1)
-      : null;
-
-  const kebaEdge = perimeterFull != null ? perimeterFull : null;
-  const kebaJoints = joints != null && A != null ? joints * A : 0;
-  const kebaTotal = kebaEdge != null ? kebaEdge + kebaJoints : null;
-
-  const collEdgeKg = perimeterFull != null ? perimeterFull * 0.35 : null;
-  const collJointsKg = joints != null && A != null ? joints * A * 0.36 : 0;
-  const collTotalKg = collEdgeKg != null ? collEdgeKg + collJointsKg : null;
-
-  const PACK_L = 4.25;
-  const PACK_S = 1.85;
-
-  let packsText = "–";
-  if (collTotalKg != null) {
-    const big = Math.ceil(collTotalKg / PACK_L);
-    const rem = collTotalKg - big * PACK_L;
-
-    if (collTotalKg <= PACK_L) {
-      packsText = `1× 4,25 kg (alebo 1× 1,85 kg pri menšej spotrebe)`;
-    } else {
-      if (rem > 0.3) {
-        if (rem <= PACK_S) {
-          packsText = `${big}× 4,25 kg + 1× 1,85 kg`;
-        } else {
-          packsText = `${big + 1}× 4,25 kg`;
-        }
-      } else {
-        packsText = `${big}× 4,25 kg`;
-      }
-    }
-  }
-
-  const ditraJointsText =
-    joints == null
-      ? "–"
-      : joints === 0
-      ? "0 (šírka do 1,0 m)"
-      : `${joints} (šírka nad 1,0 m)`;
-
-  const kebaEdgeText = kebaEdge != null ? `${formatNumSk(kebaEdge, 1)} m` : "–";
-  const kebaJointsText =
-    joints != null && A != null
-      ? joints === 0
-        ? "0,0 m"
-        : `${formatNumSk(kebaJoints, 1)} m (≈ ${joints}× ${formatNumSk(A, 1)} m)`
-      : "0,0 m";
-
-  const kebaMetersText =
-    kebaTotal != null ? `${formatNumSk(kebaTotal, 1)} m` : "–";
-  const collConsumptionText =
-    collTotalKg != null ? `≈ ${formatNumSk(collTotalKg, 2)} kg` : "–";
-
-  return {
-    ditraJointsText,
-    kebaEdgeText,
-    kebaJointsText,
-    kebaMetersText,
-    collConsumptionText,
-    collPacksText: packsText,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// ✅ Page 6/7: BARA-RT / BARA-RW helpery
-// ---------------------------------------------------------------------------
-function normalizeRtVariantFromText(recoTextRaw) {
-  const t = safeText(recoTextRaw).toUpperCase().replace(/\s+/g, " ").trim();
-  if (t.includes("RT12/65")) return "RT12/65";
-  if (t.includes("RT12/15") || t.includes("RT12/16")) return "RT12/15";
-  if (t.includes("RT9/60")) return "RT9/60";
-  if (t.includes("RT20/50")) return "RT20/50";
-  if (t.includes("RT25/40")) return "RT25/40";
-  if (t.includes("RT30/35")) return "RT30/35";
-  return "";
-}
-
-function buildBaraVars(calc, perimeterProfiles, profilePieces) {
-  const tileMm = pickNumber(calc, ["tileThicknessMm"]) ?? null;
-  const family = safeText(calc?.baraFamily).toUpperCase();
-  const recoText = safeText(calc?.baraRecommendationText);
-  const rwOptionsText = safeText(calc?.baraRwOptionsText);
-
-  const tileThicknessText = tileMm != null ? `${Math.round(tileMm)} mm` : "–";
-  const colorBaseText = "základná (bez RAL)";
-
-  const pcs = Number.isFinite(Number(profilePieces)) ? Number(profilePieces) : null;
-  const connectorsQty = pcs != null ? Math.max(0, pcs - 1) : null;
-  const cornersQty = perimeterProfiles != null && perimeterProfiles > 0 ? 2 : 0;
-
-  const rtVariant = normalizeRtVariantFromText(recoText) || "RT";
-  const rtCornerCode = rtVariant && rtVariant !== "RT" ? `E90${rtVariant}` : "E90RT…";
-  const rtConnectorCode = rtVariant && rtVariant !== "RT" ? `V/${rtVariant}` : "V/RT…";
-
-  const rwCornerCode = "E90/RW…";
-  const rwConnectorCode = "V/RW…";
-
-  const baraProfileTypeText = family === "RW" ? "BARA-RW (alternatíva)" : "BARA-RT";
-
-  let baraHeightChoiceText = "–";
-  let baraHeightNoteText = "";
-  if (family === "RT") {
-    baraHeightChoiceText = recoText ? recoText : "BARA-RT (podľa hrúbky dlažby)";
-    baraHeightNoteText =
-      "RT: horné číslo profilu kryje a chráni hranu dlažby; spodné číslo je len prekrytie betónu (dekor).";
-  } else if (family === "RW") {
-    baraHeightChoiceText =
-      "BARA-RW (odporúčané pri dlažbách nad 30 mm alebo ako alternatíva)";
-    baraHeightNoteText =
-      "RW je dekoračný profil – rieši len spodné prekrytie betónu (odkvapový „jazyk“). Krytie dlažby sa pri RW nepočíta.";
-  } else {
-    baraHeightChoiceText = recoText ? recoText : "–";
-  }
-
-  const rtProfilePiecesText = family === "RT" ? (pcs != null ? `${pcs} ks` : "–") : "–";
-  const rtCornersText = family === "RT" ? `${cornersQty} ks` : "–";
-  const rtConnectorsText =
-    family === "RT" ? (connectorsQty != null ? `${connectorsQty} ks` : "–") : "–";
-  const rtColorCode = family === "RT" ? colorBaseText : "–";
-
-  const rwLengthText =
-    perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
-  const rwProfilePiecesText = family === "RW" ? (pcs != null ? `${pcs} ks` : "–") : "–";
-  const rwCornerCodeAndQty = family === "RW" ? `${rwCornerCode} (${cornersQty} ks)` : "–";
-  const rwConnectorCodeAndQty =
-    family === "RW"
-      ? `${rwConnectorCode} (${connectorsQty != null ? connectorsQty : 0} ks)`
-      : "–";
-  const rwColorCode = family === "RW" ? colorBaseText : "–";
-
-  const rwOptionsLine =
-    family === "RW" && rwOptionsText
-      ? rwOptionsText
-      : family === "RW"
-      ? "Možnosti RW spodok (mm): 15, 25, 30, 45, 55, 75, 95, 120, 150"
-      : "";
-
-  const rtCodeShortText = family === "RT" ? (rtVariant || "RT…") : "–";
-  const rtCornerCodeText = family === "RT" ? rtCornerCode : "–";
-  const rtConnectorCodeText = family === "RT" ? rtConnectorCode : "–";
-
-  return {
-    tileThicknessText,
-    baraFamilyText: family || "–",
-    baraRecommendationText: recoText || "–",
-    baraRwOptionsText: rwOptionsLine,
-
-    baraProfileTypeText,
-    baraHeightChoiceText,
-    baraHeightNoteText,
-
-    rtProfilePiecesText,
-    rtCornersText,
-    rtConnectorsText,
-    rtColorCode,
-    rtCodeShortText,
-    rtCornerCodeText,
-    rtConnectorCodeText,
-
-    rwLengthText,
-    rwProfilePiecesText,
-    rwCornerCodeAndQty,
-    rwConnectorCodeAndQty,
-    rwColorCode,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// ✅ Server fallback – SVG náčrt (nezmenené)
-// ---------------------------------------------------------------------------
-function buildShapeSketchSvg(calc) {
-  // (tvoje existujúce SVG funkcie ostávajú nezmenené – kvôli dĺžke ich tu neprepisujem)
-  // PONECHAJ tvoj existujúci obsah buildShapeSketchSvg presne tak, ako ho máš.
-  // --- IMPORTANT: sem vlož svoj existujúci buildShapeSketchSvg (už ho máš hore v súbore) ---
-  return "";
-}
-
-// ⚠️ POZOR: buildShapeSketchSvg je už v tvojom súbore vyššie celý.
-// Tu ho nezduplikujeme, aby nevznikli konflikty.
-
-// --- buildVars, htmlToPdfBuffer, mergePdfBuffers, findChromeExecutable ---
-// PONECHAJ presne tak ako máš (máš ich v súbore vyššie). V tomto „swap“ sú už zahrnuté v tvojom originále.
-
-// --------- HELPERS pre PDF build + admin summary (nezmenené z tvojej verzie) ----------
-async function htmlToPdfBuffer(browser, html) {
-  const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: "networkidle0" });
-  await page.emulateMediaType("print");
-
-  const pdf = await page.pdf({
-    format: "A4",
-    printBackground: true,
-    preferCSSPageSize: true,
-    margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
+  return sendMail({
+    to,
+    subject: finalSubject || `${APP_NAME} – technické podklady k balkónu`,
+    html: finalHtml,
+    text,
+    attachments,
   });
-
-  await page.close();
-  return pdf;
 }
 
-async function mergePdfBuffers(buffers) {
-  const outDoc = await PDFDocument.create();
+/**
+ * ✅ ZÁKAZNÍK – docs mail (tlačidlo 2) alebo offer mail (tlačidlo 3)
+ * - purpose: "docs" | "offer"
+ */
+async function sendBalconyOfferCustomerEmail({
+  purpose = 'docs',
+  to,
+  pdfBuffer,
+  pdfFilename = 'balkon-final.pdf',
+  customerName = 'Zákazník',
+  variant,
+  subject,
+  html,
+  text,
+} = {}) {
+  if (purpose === 'offer') {
+    const tpl = balconyOfferTemplateCustomer({
+      customerName,
+      customerEmail: to,
+      pdfFilename,
+    });
 
-  for (const buf of buffers) {
-    const src = await PDFDocument.load(buf);
-    const pages = await outDoc.copyPages(src, src.getPageIndices());
-    pages.forEach((p) => outDoc.addPage(p));
+    return sendBalconyDocsEmail({
+      to,
+      subject: subject || tpl.subject,
+      html: html || tpl.html,
+      text,
+      pdfBuffer,
+      pdfFilename,
+      customerName,
+      variant,
+    });
   }
 
-  const merged = await outDoc.save();
-  return Buffer.from(merged);
-}
-
-function cleanPath(p) {
-  return (p || "").toString().trim();
-}
-
-function findChromeExecutable() {
-  const envPath = cleanPath(process.env.PUPPETEER_EXECUTABLE_PATH);
-  if (envPath) {
-    const ok = fs.existsSync(envPath);
-    console.log(
-      "[PDF] env PUPPETEER_EXECUTABLE_PATH:",
-      JSON.stringify(envPath),
-      "exists:",
-      ok
-    );
-    if (ok) return envPath;
-  }
-
-  try {
-    const p = cleanPath(puppeteer.executablePath());
-    const ok = p ? fs.existsSync(p) : false;
-    console.log("[PDF] puppeteer.executablePath():", JSON.stringify(p), "exists:", ok);
-    if (p && ok) return p;
-  } catch (e) {
-    console.log("[PDF] puppeteer.executablePath() error:", e?.message || e);
-  }
-
-  return "";
-}
-
-async function buildMergedPdfFromPayload(req, payload) {
-  const plan = resolvePlan(payload);
-  const totalPages = plan.length;
-  const baseOrigin = `${req.protocol}://${req.get("host")}`;
-
-  const htmlPages = plan.map((fileName, idx) => {
-    const filePath = path.join(process.cwd(), "public", fileName);
-    if (!fs.existsSync(filePath)) {
-      throw new Error(`Chýba HTML stránka: ${filePath}`);
-    }
-
-    const raw = fs.readFileSync(filePath, "utf8");
-    const vars = buildVars(payload, idx + 1, totalPages, baseOrigin);
-
-    if (!payload.meta) payload.meta = {};
-    payload.meta.pdfCode = vars.pdfCode;
-
-    const baseHref = `${baseOrigin}/`;
-    return applyTemplate(raw, vars, baseHref);
+  // default = docs (tlačidlo 2)
+  return sendBalconyDocsEmail({
+    to,
+    subject,
+    html,
+    text,
+    pdfBuffer,
+    pdfFilename,
+    customerName,
+    variant,
   });
-
-  const chromePath = findChromeExecutable();
-  console.log("[PDF] chromePath used:", chromePath ? JSON.stringify(chromePath) : "(empty)");
-
-  let browser;
-  try {
-    browser = await puppeteer.launch({
-      headless: "new",
-      executablePath: chromePath || undefined,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-  } catch (launchErr) {
-    console.error("[PDF] puppeteer launch error:", launchErr);
-    throw new Error(
-      "Chyba pri generovaní PDF: nepodarilo sa spustiť Chromium/Chrome na Renderi."
-    );
-  }
-
-  try {
-    const pdfBuffers = [];
-    for (const html of htmlPages) {
-      const buf = await htmlToPdfBuffer(browser, html);
-      pdfBuffers.push(buf);
-    }
-
-    const merged = await mergePdfBuffers(pdfBuffers);
-    return merged;
-  } finally {
-    await browser.close();
-  }
-}
-
-function buildAdminOfferSummaryHtml({ payload, to, customerName }) {
-  const calc = payload?.calc || {};
-  const bom = payload?.bom || {};
-
-  const area = calc?.area != null ? `${formatNumSk(calc.area, 1)} m²` : "–";
-  const per = calc?.perimeter != null ? `${formatNumSk(calc.perimeter, 1)} bm` : "–";
-
-  const system = safeText(calc?.systemTitle || "–");
-  const shape = safeText(calc?.shapeLabel || "–");
-  const type = safeText(calc?.typeLabel || "–");
-  const height = safeText(calc?.heightLabel || "–");
-  const drain = safeText(calc?.drainLabel || "–");
-
-  const ditra = bom?.membraneArea != null ? `${formatNumSk(bom.membraneArea, 1)} m²` : area;
-  const profiles = bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
-  const adhesive = bom?.adhesiveBags != null ? `${safeText(bom.adhesiveBags)} ks` : "–";
-
-  const baraText = safeText(calc?.baraRecommendationText || "–");
-  const tileMm = calc?.tileThicknessMm != null ? `${safeText(calc.tileThicknessMm)} mm` : "–";
-
-  return `
-    <div style="font-family:Arial,sans-serif;line-height:1.5">
-      <h2 style="margin:0 0 10px">Lištobook – NOVÁ žiadosť o cenovú ponuku (balkón)</h2>
-      <p style="margin:0 0 8px">Zákazník: <strong>${escapeHtml(customerName)}</strong></p>
-      <p style="margin:0 0 14px">E-mail: <strong>${escapeHtml(to)}</strong></p>
-
-      <div style="background:#f4f6fb;border:1px solid #d7deef;border-radius:10px;padding:12px">
-        <p style="margin:0 0 8px"><strong>Typ:</strong> ${escapeHtml(type)}</p>
-        <p style="margin:0 0 8px"><strong>Tvar:</strong> ${escapeHtml(shape)}</p>
-        <p style="margin:0 0 8px"><strong>Výška:</strong> ${escapeHtml(height)}</p>
-        <p style="margin:0 0 8px"><strong>Odtok:</strong> ${escapeHtml(drain)}</p>
-        <p style="margin:0 0 8px"><strong>Systém:</strong> ${escapeHtml(system)}</p>
-        <hr style="border:none;border-top:1px solid #d7deef;margin:10px 0"/>
-        <p style="margin:0 0 6px"><strong>Plocha:</strong> ${escapeHtml(area)}</p>
-        <p style="margin:0 0 6px"><strong>Obvod pre profily:</strong> ${escapeHtml(per)}</p>
-        <p style="margin:0 0 6px"><strong>DITRA (m²):</strong> ${escapeHtml(ditra)}</p>
-        <p style="margin:0 0 6px"><strong>Profily (ks):</strong> ${escapeHtml(profiles)}</p>
-        <p style="margin:0 0 6px"><strong>Lepidlo (vrecia):</strong> ${escapeHtml(adhesive)}</p>
-        <hr style="border:none;border-top:1px solid #d7deef;margin:10px 0"/>
-        <p style="margin:0 0 6px"><strong>Dlažba:</strong> ${escapeHtml(tileMm)}</p>
-        <p style="margin:0"><strong>BARA odporúčanie:</strong> ${escapeHtml(baraText)}</p>
-      </div>
-
-      <p style="margin:12px 0 0;color:#334155">
-        Príloha: <strong>balkon-final.pdf</strong> (hlavný podklad).
-      </p>
-    </div>
-  `;
 }
 
 /**
- * ✅ DOWNLOAD originál PDF
- * POST /api/pdf/balkon-final-html
+ * ✅ ADMIN – notifikácia (tlačidlo 3)
+ * sem pôjde summary HTML/text + príloha PDF (a ak chceš, môžeme pridať aj tech listy neskôr)
  */
-router.post("/balkon-final-html", async (req, res) => {
-  try {
-    const payload = req.body?.payload;
-    if (!payload) return res.status(400).json({ message: "Chýba payload." });
+async function sendBalconyOfferAdminEmail({
+  subject,
+  html,
+  text,
+  pdfBuffer,
+  pdfFilename = 'balkon-final.pdf',
+}) {
+  if (!ADMIN_EMAIL) throw new Error('ADMIN_EMAIL nie je nastavený v env (Render)');
 
-    const merged = await buildMergedPdfFromPayload(req, payload);
+  const pdf = normalizeToBuffer(pdfBuffer);
+  if (!pdf || pdf.length < 1000) throw new Error('sendBalconyOfferAdminEmail: PDF buffer je neplatný/príliš malý');
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", 'attachment; filename="balkon-final.pdf"');
-    return res.status(200).send(merged);
-  } catch (e) {
-    console.error("balkon-final-html error:", e);
-    return res.status(500).json({ message: e.message || "PDF chyba" });
-  }
-});
+  return sendMail({
+    to: ADMIN_EMAIL,
+    subject: subject || `${APP_NAME} – NOVÁ žiadosť o cenovú ponuku (balkón)`,
+    html,
+    text,
+    attachments: [{ filename: pdfFilename, content: pdf, contentType: 'application/pdf' }],
+  });
+}
 
-/**
- * ✅ SEND e-mailom: originál PDF + technické listy
- * (TLAČIDLO 2) – len zákazník, žiadna admin kópia
- * POST /api/pdf/balkon-final-html-send
- */
-router.post("/balkon-final-html-send", async (req, res) => {
-  try {
-    const payload = req.body?.payload;
-    if (!payload) return res.status(400).json({ message: "Chýba payload." });
+module.exports = {
+  sendMail,
+  sendPdfEmail,
+  sendSignupEmail,
+  sendWelcomeEmail,
 
-    const calc = payload?.calc || {};
-    const pdfMeta = payload?.pdfMeta || {};
-    const ownerEmail = safeText(payload?.meta?.email || "");
-
-    const to =
-      safeText(pdfMeta?.customerEmail) ||
-      safeText(calc?.customerEmail) ||
-      ownerEmail;
-
-    if (!to) {
-      return res.status(400).json({
-        message:
-          "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
-      });
-    }
-
-    const customerName =
-      safeText(pdfMeta?.customerLabel) ||
-      safeText(calc?.customerName) ||
-      safeText(calc?.customerLabel) ||
-      "Zákazník";
-
-    const merged = await buildMergedPdfFromPayload(req, payload);
-
-    if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
-      throw new Error("Mailer export missing: sendBalconyOfferCustomerEmail.");
-    }
-
-    await mailer.sendBalconyOfferCustomerEmail({
-      purpose: "docs",
-      to,
-      pdfBuffer: merged,
-      pdfFilename: "balkon-final.pdf",
-      customerName,
-      variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-    });
-
-    return res.status(200).json({ ok: true, message: "PDF odoslané e-mailom.", to });
-  } catch (e) {
-    console.error("balkon-final-html-send error:", e);
-    return res.status(500).json({ message: e.message || "E-mail/PDF chyba" });
-  }
-});
-
-/**
- * ✅ OFFER (TLAČIDLO 3):
- * - zákazník dostane rovnaký balík ako SEND (PDF + tech listy), len iný text
- * - admin dostane notifikáciu + prílohu hlavné PDF (bez tech listov)
- * POST /api/pdf/balkon-final-html-offer
- */
-router.post("/balkon-final-html-offer", async (req, res) => {
-  try {
-    const payload = req.body?.payload;
-    if (!payload) return res.status(400).json({ message: "Chýba payload." });
-
-    const calc = payload?.calc || {};
-    const pdfMeta = payload?.pdfMeta || {};
-    const ownerEmail = safeText(payload?.meta?.email || "");
-
-    const to =
-      safeText(pdfMeta?.customerEmail) ||
-      safeText(calc?.customerEmail) ||
-      ownerEmail;
-
-    if (!to) {
-      return res.status(400).json({
-        message:
-          "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
-      });
-    }
-
-    const customerName =
-      safeText(pdfMeta?.customerLabel) ||
-      safeText(calc?.customerName) ||
-      safeText(calc?.customerLabel) ||
-      "Zákazník";
-
-    const merged = await buildMergedPdfFromPayload(req, payload);
-
-    if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
-      throw new Error("Mailer export missing: sendBalconyOfferCustomerEmail.");
-    }
-
-    // ✅ zákazník: rovnaké prílohy ako bod 2, len iný text v maili
-    await mailer.sendBalconyOfferCustomerEmail({
-      purpose: "offer",
-      to,
-      pdfBuffer: merged,
-      pdfFilename: "balkon-final.pdf",
-      customerName,
-      variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-    });
-
-    // ✅ admin: notifikácia + hlavné PDF (bez tech listov)
-    try {
-      if (typeof mailer.sendBalconyOfferAdminEmail === "function") {
-        const html = buildAdminOfferSummaryHtml({ payload, to, customerName });
-        await mailer.sendBalconyOfferAdminEmail({
-          subject: `Lištobook – žiadosť o cenovú ponuku (balkón) – ${to}`,
-          html,
-          pdfBuffer: merged,
-          pdfFilename: "balkon-final.pdf",
-        });
-      }
-    } catch (e) {
-      console.warn("Admin offer mail failed:", e?.message || e);
-    }
-
-    return res
-      .status(200)
-      .json({ ok: true, message: "Žiadosť o ponuku bola odoslaná.", to });
-  } catch (e) {
-    console.error("balkon-final-html-offer error:", e);
-    return res.status(500).json({ message: e.message || "E-mail/PDF chyba" });
-  }
-});
-
-module.exports = router;
+  // balkón
+  sendBalconyDocsEmail,
+  sendBalconyOfferCustomerEmail,
+  sendBalconyOfferAdminEmail,
+};
