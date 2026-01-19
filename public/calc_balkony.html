@@ -717,6 +717,103 @@
       box-shadow: 0 0 0px 1000px rgba(2, 6, 23, 0.96) inset !important;
       border: 1px solid rgba(148, 163, 184, 0.9) !important;
     }
+
+    /* =========================================================
+       ✅ MOBILE “zväčšovacie okienko” pre rozmery (iba doplnok)
+       - nič neovplyvní na PC, modal sa otvorí iba JS na mobile
+       ========================================================= */
+    .dims-sketch {
+      position: relative;
+      width: 100%;
+      min-height: 220px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.75);
+      background: radial-gradient(circle at top, #111827 0, #020617 70%);
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .dims-shape {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      margin: 0 auto;
+      aspect-ratio: 4/3;
+      border-radius: 12px;
+      border: 2px solid rgba(251, 191, 36, 0.9);
+      background: rgba(2, 6, 23, 0.55);
+    }
+
+    .dims-shape.l {
+      aspect-ratio: 4/3;
+      border: none;
+      background: transparent;
+    }
+
+    .dims-input-pill {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: rgba(2, 6, 23, 0.92);
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.55);
+      color: #e5e7eb;
+      font-size: 0.78rem;
+      z-index: 2;
+      max-width: 92%;
+    }
+
+    .dims-input-pill strong {
+      color: #facc15;
+      font-weight: 700;
+      min-width: 16px;
+      text-align: center;
+    }
+
+    .dims-input-pill input {
+      width: 90px;
+      max-width: 40vw;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.75);
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      padding: 6px 10px;
+      font-size: 0.84rem;
+      outline: none;
+    }
+
+    .dims-input-pill input:focus {
+      border-color: rgba(251, 191, 36, 0.95);
+      box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35);
+    }
+
+    .dims-hint {
+      margin: 10px 0 8px;
+      font-size: 0.74rem;
+      color: #9ca3af;
+      line-height: 1.35;
+    }
+
+    /* pozície (univerzálne) */
+    .pos-top { top: 10px; left: 50%; transform: translateX(-50%); }
+    .pos-right { right: 10px; top: 50%; transform: translateY(-50%); }
+    .pos-bottom { bottom: 10px; left: 50%; transform: translateX(-50%); }
+    .pos-left { left: 10px; top: 50%; transform: translateY(-50%); }
+
+    /* L-pozície (rozumne rozložené v boxe) */
+    .pos-l-a { top: 6px; left: 50%; transform: translateX(-50%); }
+    .pos-l-b { top: 44px; right: 6px; }
+    .pos-l-c { top: 92px; right: 80px; }
+    .pos-l-d { bottom: 52px; right: 106px; }
+    .pos-l-e { bottom: 8px; left: 50%; transform: translateX(-50%); }
+    .pos-l-f { top: 92px; left: 6px; }
+
+    @media (max-width: 380px) {
+      .dims-input-pill input { width: 78px; }
+    }
   </style>
 </head>
 
@@ -1175,6 +1272,30 @@
         />
         <button type="button" id="tileConfirmBtn" class="btn-primary" style="margin-top:10px;width:100%;justify-content:center;">
           Pokračovať
+        </button>
+      </div>
+    </div>
+
+    <!-- ✅ NOVÉ: MOBILE modal pre rozmery balkóna (zobrazí sa len na mobile cez JS) -->
+    <div id="dimsModal" class="preview-modal" aria-hidden="true">
+      <div class="preview-backdrop" id="dimsBackdrop"></div>
+      <div class="preview-dialog" role="dialog" aria-modal="true" aria-labelledby="dimsTitle">
+        <button type="button" class="preview-close" id="dimsCloseBtn" aria-label="Zavrieť okno">×</button>
+        <h3 id="dimsTitle">Rozmery balkóna</h3>
+        <p style="font-size:0.78rem;color:#d1d5db;margin:0 0 10px;line-height:1.35;">
+          Zadajte rozmery priamo do náčrtu. Strany pri stene nastavíte až potom (mimo náčrtu).
+        </p>
+
+        <div id="dimsSketch" class="dims-sketch">
+          <div id="dimsSketchInner"></div>
+        </div>
+
+        <div class="dims-hint">
+          Tip: desatinnú čiarku môžete písať bodkou. Po potvrdení sa posuniete na výber „strany pri stene“.
+        </div>
+
+        <button type="button" id="dimsConfirmBtn" class="btn-primary" style="width:100%;justify-content:center;">
+          Potvrdiť rozmery
         </button>
       </div>
     </div>

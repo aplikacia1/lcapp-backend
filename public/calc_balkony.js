@@ -240,6 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
     F: document.getElementById("fieldSideF"),
   };
 
+  const wallBox = document.getElementById("wallBox");
+
   const summaryAreaEl = document.getElementById("summaryArea");
   const summaryPerimeterEl = document.getElementById("summaryPerimeter");
 
@@ -314,6 +316,169 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const pdfAutoNameInfoEl = document.getElementById("pdfAutoNameInfo");
   const pdfAutoNameTextEl = document.getElementById("pdfAutoNameText");
+
+  // ---------------------------------------------------------------------------
+  // ✅ MOBILE dimsModal (nové v HTML)
+  // ---------------------------------------------------------------------------
+  const dimsModal = document.getElementById("dimsModal");
+  const dimsBackdrop = document.getElementById("dimsBackdrop");
+  const dimsCloseBtn = document.getElementById("dimsCloseBtn");
+  const dimsConfirmBtn = document.getElementById("dimsConfirmBtn");
+  const dimsSketchInner = document.getElementById("dimsSketchInner");
+
+  function isMobileUi() {
+    // konzervatívne: iba malé šírky + touch zariadenia
+    const w = window.innerWidth || 9999;
+    const hasTouch =
+      "ontouchstart" in window ||
+      (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+    return w <= 640 && hasTouch;
+  }
+
+  function openDimsModal() {
+    if (!dimsModal) return;
+    dimsModal.classList.add("visible");
+    dimsModal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeDimsModal() {
+    if (!dimsModal) return;
+    dimsModal.classList.remove("visible");
+    dimsModal.setAttribute("aria-hidden", "true");
+  }
+
+  function scrollToWallBox() {
+    if (!wallBox) return;
+    wallBox.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function buildDimsPill({ side, posClass }) {
+    const wrap = document.createElement("div");
+    wrap.className = `dims-input-pill ${posClass || ""}`.trim();
+
+    const strong = document.createElement("strong");
+    strong.textContent = side;
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.inputMode = "decimal";
+    input.step = "0.1";
+    input.min = "0";
+    input.placeholder = "m";
+
+    // predvyplnenie z existujúceho inputu v stránke
+    const src = dimInputs[side];
+    if (src && String(src.value || "").trim()) input.value = src.value;
+
+    // live sync do „hlavných“ inputov + prepočet
+    const sync = () => {
+      if (!dimInputs[side]) return;
+      dimInputs[side].value = input.value;
+      recomputeFromInputs();
+    };
+    input.addEventListener("input", sync);
+    input.addEventListener("change", sync);
+
+    wrap.appendChild(strong);
+    wrap.appendChild(input);
+    return { wrap, input };
+  }
+
+  function renderDimsSketchForShape(shapeKey) {
+    if (!dimsSketchInner) return [];
+
+    dimsSketchInner.innerHTML = "";
+
+    // Základ: pri štvorec/obdĺžnik použijeme .dims-shape (border box)
+    // Pri L-tvare použijeme SVG, ale pill inputy dáme “voľne” do dimsSketchInner.
+    const createdInputs = [];
+
+    if (shapeKey === "square") {
+      const shape = document.createElement("div");
+      shape.className = "dims-shape";
+      dimsSketchInner.appendChild(shape);
+
+      const a = buildDimsPill({ side: "A", posClass: "pos-top" });
+      shape.appendChild(a.wrap);
+      createdInputs.push(a.input);
+
+      // malý hint: A je všade rovnaké (nemusíme riešiť ďalšie)
+    } else if (shapeKey === "rectangle") {
+      const shape = document.createElement("div");
+      shape.className = "dims-shape";
+      dimsSketchInner.appendChild(shape);
+
+      const a = buildDimsPill({ side: "A", posClass: "pos-top" });
+      const b = buildDimsPill({ side: "B", posClass: "pos-right" });
+      shape.appendChild(a.wrap);
+      shape.appendChild(b.wrap);
+      createdInputs.push(a.input, b.input);
+    } else if (shapeKey === "l-shape") {
+      // jednoduchý SVG náčrt do pozadia (neinteraktívny)
+      const svgWrap = document.createElement("div");
+      svgWrap.style.position = "relative";
+      svgWrap.style.width = "100%";
+      svgWrap.style.maxWidth = "340px";
+      svgWrap.style.margin = "0 auto";
+      svgWrap.style.height = "240px";
+
+      svgWrap.innerHTML = `
+        <svg viewBox="0 0 200 150" style="width:100%;height:100%;display:block;">
+          <path d="M20 20 H180 V55 H110 V130 H20 Z"
+            fill="rgba(2,6,23,0.35)"
+            stroke="rgba(251,191,36,0.9)"
+            stroke-width="3"
+            stroke-linejoin="round"
+          />
+        </svg>
+      `;
+      dimsSketchInner.appendChild(svgWrap);
+
+      // pill inputy – pozície z CSS (pos-l-a ... pos-l-f)
+      const a = buildDimsPill({ side: "A", posClass: "pos-l-a" });
+      const b = buildDimsPill({ side: "B", posClass: "pos-l-b" });
+      const c = buildDimsPill({ side: "C", posClass: "pos-l-c" });
+      const d = buildDimsPill({ side: "D", posClass: "pos-l-d" });
+      const e = buildDimsPill({ side: "E", posClass: "pos-l-e" });
+      const f = buildDimsPill({ side: "F", posClass: "pos-l-f" });
+
+      // vložiť do rovnakého kontajnera, aby fungovali absolute pozície
+      [a, b, c, d, e, f].forEach((o) => {
+        o.wrap.style.position = "absolute";
+        svgWrap.appendChild(o.wrap);
+        createdInputs.push(o.input);
+      });
+    }
+
+    // focus na prvý input
+    setTimeout(() => {
+      if (createdInputs[0]) createdInputs[0].focus();
+    }, 50);
+
+    return createdInputs;
+  }
+
+  function openDimsFlowForCurrentShape() {
+    if (!isMobileUi()) return false;
+    if (!dimsModal || !dimsSketchInner || !dimsConfirmBtn) return false;
+
+    renderDimsSketchForShape(state.shapeKey);
+    openDimsModal();
+    return true;
+  }
+
+  function dimsModalConfirm() {
+    // hodnoty sa už syncujú live do stránkových inputov
+    // tu len zavrieme a presunieme na wallBox
+    closeDimsModal();
+    setTimeout(() => {
+      scrollToWallBox();
+    }, 100);
+  }
+
+  if (dimsConfirmBtn) dimsConfirmBtn.addEventListener("click", dimsModalConfirm);
+  if (dimsCloseBtn) dimsCloseBtn.addEventListener("click", closeDimsModal);
+  if (dimsBackdrop) dimsBackdrop.addEventListener("click", closeDimsModal);
 
   // ---------------------------------------------------------------------------
   // TVARY + ✅ wallOptions presne ako chceš
@@ -671,8 +836,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
   function updateStep3Summary() {
     if (k3TypeEl)
-      k3TypeEl.textContent =
-        state.fromStep1TypeLabel || "Vysunutý balkón";
+      k3TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
     if (k3ShapeEl)
       k3ShapeEl.textContent = shapeConfigs[state.shapeKey]?.label || "–";
 
@@ -695,8 +859,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!document.getElementById("step4")) return;
 
     if (k4TypeEl)
-      k4TypeEl.textContent =
-        state.fromStep1TypeLabel || "Vysunutý balkón";
+      k4TypeEl.textContent = state.fromStep1TypeLabel || "Vysunutý balkón";
     if (k4ShapeEl)
       k4ShapeEl.textContent = shapeConfigs[state.shapeKey]?.label || "–";
 
@@ -1213,24 +1376,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function tryPdfMailEndpoints(payload) {
-  // ✅ posielame len originál (HTML→PDF + prílohy)
-  const url = "/api/pdf/balkon-final-html-send";
+    // ✅ posielame len originál (HTML→PDF + prílohy)
+    const url = "/api/pdf/balkon-final-html-send";
 
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payload }),
-    });
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ payload }),
+      });
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
 
-    return { ok: true, usedUrl: url, data };
-  } catch (e) {
-    return { ok: false, error: new Error(`${url}: ${e?.message || e}`) };
+      return { ok: true, usedUrl: url, data };
+    } catch (e) {
+      return { ok: false, error: new Error(`${url}: ${e?.message || e}`) };
+    }
   }
-}
 
   async function postPdfDownload(skipTileCheck = false) {
     if (!canGoToStep4()) return;
@@ -1340,9 +1503,14 @@ document.addEventListener("DOMContentLoaded", () => {
     shapeGrid.addEventListener("click", (e) => {
       const card = e.target.closest(".shape-card");
       if (!card) return;
+
       setShape(card.dataset.shape);
 
-      if (window.innerWidth <= 768) {
+      // ✅ NOVÉ: na mobile otvoríme dimsModal (ak existuje)
+      const opened = openDimsFlowForCurrentShape();
+
+      // fallback (ak sa modal neotvoril): pôvodné správanie – scroll na A input
+      if (!opened && window.innerWidth <= 768) {
         const sideAInput = dimInputs.A;
         if (sideAInput)
           sideAInput.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1468,4 +1636,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ skús načítať meno/prezývku prihláseného
   tryLoadLoggedUserName();
+
+  // ✅ ak user hneď otvorí stránku na mobile, nech má možnosť kliknúť tvar a modal sa zobrazí
 });
