@@ -33,9 +33,7 @@ function formatNumSk(n, digits = 1) {
 function isoDateTimeSk() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
-  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(
-    d.getHours()
-  )}:${pad(d.getMinutes())}`;
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function applyTemplate(html, vars, baseHref) {
@@ -49,10 +47,7 @@ function applyTemplate(html, vars, baseHref) {
   if (!/<base\s/i.test(out)) {
     out = out.replace(/<head([^>]*)>/i, `<head$1><base href="${baseHref}">`);
   } else {
-    out = out.replace(
-      /<base[^>]*href="[^"]*"[^>]*>/i,
-      `<base href="${baseHref}">`
-    );
+    out = out.replace(/<base[^>]*href="[^"]*"[^>]*>/i, `<base href="${baseHref}">`);
   }
 
   return out;
@@ -62,12 +57,9 @@ function toAbsPublicUrl(baseOrigin, maybePath) {
   if (!maybePath) return "";
   let p = String(maybePath).trim();
   if (!p) return "";
-
   if (/^https?:\/\//i.test(p)) return p;
-
   if (p.startsWith("img/")) p = "/" + p;
   if (!p.startsWith("/")) p = "/" + p;
-
   return baseOrigin.replace(/\/$/, "") + p;
 }
 
@@ -142,24 +134,8 @@ function buildPage5Consumption(calc) {
     pickNumber(calc, ["perimeter_total", "perimeterTotal"]) ??
     pickNumber(calc, ["perimeter"]);
 
-  const A = pickNumber(calc, [
-    "a",
-    "A",
-    "lengthA",
-    "lenA",
-    "length",
-    "longSide",
-    "sideA",
-  ]);
-  const B = pickNumber(calc, [
-    "b",
-    "B",
-    "widthB",
-    "lenB",
-    "width",
-    "shortSide",
-    "sideB",
-  ]);
+  const A = pickNumber(calc, ["a", "A", "lengthA", "lenA", "length", "longSide", "sideA"]);
+  const B = pickNumber(calc, ["b", "B", "widthB", "lenB", "width", "shortSide", "sideB"]);
 
   const widthForJoints = B;
   const joints =
@@ -213,10 +189,8 @@ function buildPage5Consumption(calc) {
         : `${formatNumSk(kebaJoints, 1)} m (≈ ${joints}× ${formatNumSk(A, 1)} m)`
       : "0,0 m";
 
-  const kebaMetersText =
-    kebaTotal != null ? `${formatNumSk(kebaTotal, 1)} m` : "–";
-  const collConsumptionText =
-    collTotalKg != null ? `≈ ${formatNumSk(collTotalKg, 2)} kg` : "–";
+  const kebaMetersText = kebaTotal != null ? `${formatNumSk(kebaTotal, 1)} m` : "–";
+  const collConsumptionText = collTotalKg != null ? `≈ ${formatNumSk(collTotalKg, 2)} kg` : "–";
 
   return {
     ditraJointsText,
@@ -285,8 +259,7 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     family === "RT" ? (connectorsQty != null ? `${connectorsQty} ks` : "–") : "–";
   const rtColorCode = family === "RT" ? colorBaseText : "–";
 
-  const rwLengthText =
-    perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
+  const rwLengthText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
   const rwProfilePiecesText = family === "RW" ? (pcs != null ? `${pcs} ks` : "–") : "–";
   const rwCornerCodeAndQty = family === "RW" ? `${rwCornerCode} (${cornersQty} ks)` : "–";
   const rwConnectorCodeAndQty =
@@ -311,11 +284,9 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     baraFamilyText: family || "–",
     baraRecommendationText: recoText || "–",
     baraRwOptionsText: rwOptionsLine,
-
     baraProfileTypeText,
     baraHeightChoiceText,
     baraHeightNoteText,
-
     rtProfilePiecesText,
     rtCornersText,
     rtConnectorsText,
@@ -323,7 +294,6 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     rtCodeShortText,
     rtCornerCodeText,
     rtConnectorCodeText,
-
     rwLengthText,
     rwProfilePiecesText,
     rwCornerCodeAndQty,
@@ -333,7 +303,7 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
 }
 
 // ---------------------------------------------------------------------------
-// ✅ Server fallback – SVG náčrt
+// ✅ Server fallback – SVG náčrt (nezmenené)
 // ---------------------------------------------------------------------------
 function buildShapeSketchSvg(calc) {
   const shapeKey = safeText(calc?.shapeKey || "").toLowerCase();
@@ -483,8 +453,7 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const drainLabel = safeText(calc?.drainLabel || "–");
 
   const areaText = area != null ? `${formatNumSk(area, 1)} m²` : "–";
-  const perimeterText =
-    perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} bm` : "–";
+  const perimeterText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} bm` : "–";
 
   const ditraAreaText =
     bom?.membraneArea != null
@@ -493,18 +462,15 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
       ? `${formatNumSk(area, 1)} m²`
       : "–";
 
-  const adhesiveBagsText =
-    bom?.adhesiveBags != null ? `${safeText(bom.adhesiveBags)} ks` : "–";
+  const adhesiveBagsText = bom?.adhesiveBags != null ? `${safeText(bom.adhesiveBags)} ks` : "–";
 
   const adhesiveConsumptionText =
     bom?.adhesiveBags != null && area != null && area > 0
       ? `≈ ${formatNumSk((bom.adhesiveBags * 25) / area, 1)} kg/m²`
       : "–";
 
-  const edgeLengthText =
-    perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
-  const edgeProfilePiecesText =
-    bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
+  const edgeLengthText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
+  const edgeProfilePiecesText = bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
 
   const systemShortNote = safeText(calc?.systemTitle || "");
 
@@ -547,60 +513,43 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
       : fromCalcPreview;
   }
 
-  const systemCutawayImageAbs = cutawayImage
-    ? toAbsPublicUrl(baseOrigin, cutawayImage)
-    : "";
+  const systemCutawayImageAbs = cutawayImage ? toAbsPublicUrl(baseOrigin, cutawayImage) : "";
 
-  const page5 = buildPage5Consumption({
-    ...calc,
-    perimeterFull,
-  });
+  const page5 = buildPage5Consumption({ ...calc, perimeterFull });
 
-  const profilePiecesNum =
-    bom?.profilesCount != null ? Number(bom.profilesCount) : null;
-
+  const profilePiecesNum = bom?.profilesCount != null ? Number(bom.profilesCount) : null;
   const baraVars = buildBaraVars(calc, perimeterProfiles, profilePiecesNum);
 
   return {
     baseUrl: baseOrigin.replace(/\/$/, ""),
     pdfCode,
-
     customerName: customerLabel,
     customerEmail: customerEmailForPdf,
-
     createdAt: isoDateTimeSk(),
     constructionType: safeText(calc?.typeLabel || ""),
     systemTitle: safeText(calc?.systemTitle || ""),
-
     totalPages,
     pageNumber: pageNo,
-
     shapeLabel,
     heightLabel,
     drainLabel,
     areaText,
     perimeterText,
-
     systemShortNote,
     shapeSketchSvg,
     systemCutawayCaption,
-
     systemCutawayImageAbs,
-
     ditraAreaText,
     adhesiveConsumptionText,
     adhesiveBagsText,
-
     edgeLengthText,
     edgeProfilePiecesText,
-
     ditraJointsText: page5.ditraJointsText,
     kebaEdgeText: page5.kebaEdgeText,
     kebaJointsText: page5.kebaJointsText,
     kebaMetersText: page5.kebaMetersText,
     collConsumptionText: page5.collConsumptionText,
     collPacksText: page5.collPacksText,
-
     ...baraVars,
   };
 }
@@ -608,7 +557,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
 async function htmlToPdfBuffer(browser, html) {
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });
-
   await page.emulateMediaType("print");
 
   const pdf = await page.pdf({
@@ -624,13 +572,11 @@ async function htmlToPdfBuffer(browser, html) {
 
 async function mergePdfBuffers(buffers) {
   const outDoc = await PDFDocument.create();
-
   for (const buf of buffers) {
     const src = await PDFDocument.load(buf);
     const pages = await outDoc.copyPages(src, src.getPageIndices());
     pages.forEach((p) => outDoc.addPage(p));
   }
-
   const merged = await outDoc.save();
   return Buffer.from(merged);
 }
@@ -643,12 +589,7 @@ function findChromeExecutable() {
   const envPath = cleanPath(process.env.PUPPETEER_EXECUTABLE_PATH);
   if (envPath) {
     const ok = fs.existsSync(envPath);
-    console.log(
-      "[PDF] env PUPPETEER_EXECUTABLE_PATH:",
-      JSON.stringify(envPath),
-      "exists:",
-      ok
-    );
+    console.log("[PDF] env PUPPETEER_EXECUTABLE_PATH:", JSON.stringify(envPath), "exists:", ok);
     if (ok) return envPath;
   }
 
@@ -697,9 +638,7 @@ async function buildMergedPdfFromPayload(req, payload) {
     });
   } catch (launchErr) {
     console.error("[PDF] puppeteer launch error:", launchErr);
-    throw new Error(
-      "Chyba pri generovaní PDF: nepodarilo sa spustiť Chromium/Chrome na Renderi."
-    );
+    throw new Error("Chyba pri generovaní PDF: nepodarilo sa spustiť Chromium/Chrome na Renderi.");
   }
 
   try {
@@ -708,9 +647,7 @@ async function buildMergedPdfFromPayload(req, payload) {
       const buf = await htmlToPdfBuffer(browser, html);
       pdfBuffers.push(buf);
     }
-
-    const merged = await mergePdfBuffers(pdfBuffers);
-    return merged;
+    return await mergePdfBuffers(pdfBuffers);
   } finally {
     await browser.close();
   }
@@ -807,8 +744,7 @@ router.post("/balkon-final-html-send", async (req, res) => {
 
     if (!to) {
       return res.status(400).json({
-        message:
-          "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
+        message: "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
       });
     }
 
@@ -820,21 +756,35 @@ router.post("/balkon-final-html-send", async (req, res) => {
 
     const merged = await buildMergedPdfFromPayload(req, payload);
 
-    if (typeof mailer.sendBalconyOfferCustomerEmail !== "function") {
-      throw new Error(
-        "Mailer export missing: sendBalconyOfferCustomerEmail."
-      );
+    // ✅ FALLBACKY – nech to funguje s hocijakou verziou utils/mailer.js
+    if (typeof mailer.sendBalconyOfferCustomerEmail === "function") {
+      await mailer.sendBalconyOfferCustomerEmail({
+        to,
+        pdfBuffer: merged,
+        pdfFilename: "balkon-final.pdf",
+        customerName,
+        variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+      });
+    } else if (typeof mailer.sendBalconyDocsEmail === "function") {
+      await mailer.sendBalconyDocsEmail({
+        to,
+        pdfBuffer: merged,
+        pdfFilename: "balkon-final.pdf",
+        customerName,
+        variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+      });
+    } else if (typeof mailer.sendPdfEmail === "function") {
+      await mailer.sendPdfEmail({
+        to,
+        subject: "Lištobook – Vaša kalkulácia (PDF)",
+        html: `<p>Dobrý deň ${escapeHtml(customerName)}, v prílohe je PDF.</p>`,
+        pdfBuffer: merged,
+        filename: "balkon-final.pdf",
+      });
+    } else {
+      throw new Error("Mailer nemá žiadnu použiteľnú funkciu (sendBalconyOfferCustomerEmail/sendBalconyDocsEmail/sendPdfEmail).");
     }
 
-    await mailer.sendBalconyOfferCustomerEmail({
-      to,
-      pdfBuffer: merged,
-      pdfFilename: "balkon-final.pdf",
-      customerName,
-      variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-    });
-
-    // ✅ Úmyselne: žiadna admin kópia pri tlačidle 2
     return res.status(200).json({ ok: true, message: "PDF odoslané e-mailom.", to });
   } catch (e) {
     console.error("balkon-final-html-send error:", e);
@@ -844,8 +794,8 @@ router.post("/balkon-final-html-send", async (req, res) => {
 
 /**
  * ✅ OFFER (TLAČIDLO 3):
- * - zákazník dostane rovnaký balík ako SEND (PDF + tech listy), len iný text
- * - admin dostane notifikáciu + prílohu hlavné PDF (bez tech listov)
+ * - zákazník dostane PDF + tech listy
+ * - admin dostane notifikáciu + hlavné PDF (bez tech listov)
  * POST /api/pdf/balkon-final-html-offer
  */
 router.post("/balkon-final-html-offer", async (req, res) => {
@@ -864,8 +814,7 @@ router.post("/balkon-final-html-offer", async (req, res) => {
 
     if (!to) {
       return res.status(400).json({
-        message:
-          "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
+        message: "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
       });
     }
 
@@ -877,22 +826,38 @@ router.post("/balkon-final-html-offer", async (req, res) => {
 
     const merged = await buildMergedPdfFromPayload(req, payload);
 
-    if (typeof mailer.sendBalconyOfferRequestCustomerEmail !== "function") {
-      throw new Error(
-        "Mailer export missing: sendBalconyOfferRequestCustomerEmail."
-      );
+    // ✅ zákazník: pošli (preferuj “balcony” helpery, fallback na sendPdfEmail)
+    if (typeof mailer.sendBalconyDocsEmail === "function") {
+      // zatiaľ použijeme existujúcu profi šablónu (je pekná a stabilná)
+      await mailer.sendBalconyDocsEmail({
+        to,
+        pdfBuffer: merged,
+        pdfFilename: "balkon-final.pdf",
+        customerName,
+        variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+        // text “ponuka” doladíme hneď v ďalšom kroku, keď bude stabilné posielanie
+      });
+    } else if (typeof mailer.sendBalconyOfferCustomerEmail === "function") {
+      await mailer.sendBalconyOfferCustomerEmail({
+        to,
+        pdfBuffer: merged,
+        pdfFilename: "balkon-final.pdf",
+        customerName,
+        variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+      });
+    } else if (typeof mailer.sendPdfEmail === "function") {
+      await mailer.sendPdfEmail({
+        to,
+        subject: "Lištobook – Žiadosť o cenovú ponuku (PDF)",
+        html: `<p>Dobrý deň ${escapeHtml(customerName)}, žiadosť o cenovú ponuku sme prijali. Ozveme sa v pracovné dni 8:00–16:00.</p>`,
+        pdfBuffer: merged,
+        filename: "balkon-final.pdf",
+      });
+    } else {
+      throw new Error("Mailer nemá funkcie na odoslanie zákazníkovi.");
     }
 
-    // ✅ zákazník: rovnaké prílohy ako bod 2, len iný text v maili
-    await mailer.sendBalconyOfferRequestCustomerEmail({
-      to,
-      pdfBuffer: merged,
-      pdfFilename: "balkon-final.pdf",
-      customerName,
-      variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-    });
-
-    // ✅ admin: notifikácia + hlavné PDF (bez tech listov)
+    // ✅ admin: notifikácia + PDF
     try {
       if (typeof mailer.sendBalconyOfferAdminEmail === "function") {
         const html = buildAdminOfferSummaryHtml({ payload, to, customerName });
@@ -907,9 +872,7 @@ router.post("/balkon-final-html-offer", async (req, res) => {
       console.warn("Admin offer mail failed:", e?.message || e);
     }
 
-    return res
-      .status(200)
-      .json({ ok: true, message: "Žiadosť o ponuku bola odoslaná.", to });
+    return res.status(200).json({ ok: true, message: "Žiadosť o ponuku bola odoslaná.", to });
   } catch (e) {
     console.error("balkon-final-html-offer error:", e);
     return res.status(500).json({ message: e.message || "E-mail/PDF chyba" });
