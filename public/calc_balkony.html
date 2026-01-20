@@ -1076,6 +1076,55 @@
         box-shadow: 0 0 0px 1000px rgba(2, 6, 23, 0.96) inset !important;
         border: 1px solid rgba(148, 163, 184, 0.9) !important;
       }
+      /* =========================================================
+   MOBILE FIX – calc_balkony (CSS ONLY)
+   ========================================================= */
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden !important; }
+  .wrap { overflow-x: hidden !important; }
+  /* 1) kroky do jedného stĺpca */
+  .step2-layout,
+  .step3-layout,
+  .step4-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 2) akcie tlačidlá pod sebou */
+  .step2-actions,
+  .k4-actions {
+    justify-content: stretch !important;
+  }
+  .step2-actions > *,
+  .k4-actions > * {
+    width: 100% !important;
+  }
+
+  /* 3) inputy a tlačidlá nech sú pohodlné na dotyk */
+  input,
+  button,
+  .btn-inline,
+  .btn-primary,
+  .btn-secondary {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 16px !important;
+  }
+
+  /* 4) rozmerové polia pod sebou */
+  .dim-row {
+    flex-direction: column !important;
+  }
+  .dim-row .field {
+    width: 100% !important;
+  }
+
+  /* 5) tabuľky v kroku 3/4 nech sa nelámu */
+  .summary-table th,
+  .summary-table td {
+    font-size: 0.82rem !important;
+    word-break: break-word;
+  }
+}
     </style>
   </head>
 
