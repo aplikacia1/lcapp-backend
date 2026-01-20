@@ -472,37 +472,23 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const edgeLengthText = perimeterProfiles != null ? `${formatNumSk(perimeterProfiles, 1)} m` : "–";
   const edgeProfilePiecesText = bom?.profilesCount != null ? `${safeText(bom.profilesCount)} ks` : "–";
 
-  const systemShortNote = safeText(calc?.systemTitle || "");
-
   let shapeSketchSvg = safeText(calc?.shapeSketchSvg || "");
   if (!shapeSketchSvg) {
     shapeSketchSvg = buildShapeSketchSvg(calc);
   }
 
-  const systemCutawayCaption = safeText(calc?.systemTitle || "");
-
   const heightId = safeText(calc?.heightId || "").toLowerCase();
   const drainId = safeText(calc?.drainId || "").toLowerCase();
 
   let cutawayImage = "";
-
-  if (heightId === "low" && drainId === "edge-free") {
-    cutawayImage = "/img/systems/balkon-low-edge-free.png";
-  } else if (heightId === "low" && drainId === "edge-gutter") {
-    cutawayImage = "/img/systems/balkon-low-edge-gutter.png";
-  } else if (heightId === "low" && drainId === "internal-drain") {
-    cutawayImage = "/img/systems/balkon-low-internal-drain.png";
-  } else if (heightId === "medium" && drainId === "edge-free") {
-    cutawayImage = "/img/systems/balkon-edge-free.png";
-  } else if (heightId === "medium" && drainId === "edge-gutter") {
-    cutawayImage = "/img/systems/balkon-edge-gutter.png";
-  } else if (heightId === "medium" && drainId === "internal-drain") {
-    cutawayImage = "/img/systems/balkon-internal-drain.png";
-  } else if (heightId === "high" && drainId === "edge-gutter") {
-    cutawayImage = "/img/systems/balkon-high-edge-gutter.png";
-  } else if (heightId === "high" && drainId === "internal-drain") {
-    cutawayImage = "/img/systems/balkon-high-internal-drain.png";
-  }
+  if (heightId === "low" && drainId === "edge-free") cutawayImage = "/img/systems/balkon-low-edge-free.png";
+  else if (heightId === "low" && drainId === "edge-gutter") cutawayImage = "/img/systems/balkon-low-edge-gutter.png";
+  else if (heightId === "low" && drainId === "internal-drain") cutawayImage = "/img/systems/balkon-low-internal-drain.png";
+  else if (heightId === "medium" && drainId === "edge-free") cutawayImage = "/img/systems/balkon-edge-free.png";
+  else if (heightId === "medium" && drainId === "edge-gutter") cutawayImage = "/img/systems/balkon-edge-gutter.png";
+  else if (heightId === "medium" && drainId === "internal-drain") cutawayImage = "/img/systems/balkon-internal-drain.png";
+  else if (heightId === "high" && drainId === "edge-gutter") cutawayImage = "/img/systems/balkon-high-edge-gutter.png";
+  else if (heightId === "high" && drainId === "internal-drain") cutawayImage = "/img/systems/balkon-high-internal-drain.png";
 
   const fromCalcPreview = safeText(calc?.previewSrc);
   if (fromCalcPreview) {
@@ -535,9 +521,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     drainLabel,
     areaText,
     perimeterText,
-    systemShortNote,
     shapeSketchSvg,
-    systemCutawayCaption,
+    systemCutawayCaption: safeText(calc?.systemTitle || ""),
     systemCutawayImageAbs,
     ditraAreaText,
     adhesiveConsumptionText,
@@ -697,7 +682,7 @@ function buildAdminOfferSummaryHtml({ payload, to, customerName }) {
       </div>
 
       <p style="margin:12px 0 0;color:#334155">
-        Príloha: <strong>balkon-final.pdf</strong> (hlavný podklad).
+        Admin notifikácia je bez príloh (PDF dostal zákazník).
       </p>
     </div>
   `;
@@ -756,7 +741,6 @@ router.post("/balkon-final-html-send", async (req, res) => {
 
     const merged = await buildMergedPdfFromPayload(req, payload);
 
-    // ✅ FALLBACKY – nech to funguje s hocijakou verziou utils/mailer.js
     if (typeof mailer.sendBalconyOfferCustomerEmail === "function") {
       await mailer.sendBalconyOfferCustomerEmail({
         to,
@@ -794,8 +778,8 @@ router.post("/balkon-final-html-send", async (req, res) => {
 
 /**
  * ✅ OFFER (TLAČIDLO 3):
- * - zákazník dostane PDF + tech listy
- * - admin dostane notifikáciu + hlavné PDF (bez tech listov)
+ * - zákazník dostane PDF + tech listy + text “ponuka”
+ * - admin dostane notifikáciu BEZ príloh
  * POST /api/pdf/balkon-final-html-offer
  */
 router.post("/balkon-final-html-offer", async (req, res) => {
@@ -826,19 +810,19 @@ router.post("/balkon-final-html-offer", async (req, res) => {
 
     const merged = await buildMergedPdfFromPayload(req, payload);
 
-    // ✅ zákazník: pošli (preferuj “balcony” helpery, fallback na sendPdfEmail)
-    if (typeof mailer.sendBalconyDocsEmail === "function") {
-      // zatiaľ použijeme existujúcu profi šablónu (je pekná a stabilná)
-      await mailer.sendBalconyDocsEmail({
+    // ✅ 1) ZÁKAZNÍK – pošli “offer” (preferuj offer helpery)
+    if (typeof mailer.sendBalconyOfferCustomerEmail === "function") {
+      await mailer.sendBalconyOfferCustomerEmail({
+        purpose: "offer",
         to,
         pdfBuffer: merged,
         pdfFilename: "balkon-final.pdf",
         customerName,
         variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-        // text “ponuka” doladíme hneď v ďalšom kroku, keď bude stabilné posielanie
       });
-    } else if (typeof mailer.sendBalconyOfferCustomerEmail === "function") {
-      await mailer.sendBalconyOfferCustomerEmail({
+    } else if (typeof mailer.sendBalconyDocsEmail === "function") {
+      // fallback – ak ešte nemáš offer šablónu, aspoň to odošle
+      await mailer.sendBalconyDocsEmail({
         to,
         pdfBuffer: merged,
         pdfFilename: "balkon-final.pdf",
@@ -857,22 +841,37 @@ router.post("/balkon-final-html-offer", async (req, res) => {
       throw new Error("Mailer nemá funkcie na odoslanie zákazníkovi.");
     }
 
-    // ✅ admin: notifikácia + PDF
+    // ✅ 2) ADMIN – notifikácia BEZ príloh
     try {
-      if (typeof mailer.sendBalconyOfferAdminEmail === "function") {
+      const adminEmail = safeText(process.env.ADMIN_EMAIL || "");
+      if (adminEmail) {
         const html = buildAdminOfferSummaryHtml({ payload, to, customerName });
-        await mailer.sendBalconyOfferAdminEmail({
-          subject: `Lištobook – žiadosť o cenovú ponuku (balkón) – ${to}`,
-          html,
-          pdfBuffer: merged,
-          pdfFilename: "balkon-final.pdf",
-        });
+
+        if (typeof mailer.sendPdfEmail === "function") {
+          await mailer.sendPdfEmail({
+            to: adminEmail,
+            subject: `Lištobook – žiadosť o cenovú ponuku (balkón) – ${to}`,
+            html,
+            // ✅ žiadne pdfBuffer -> žiadna príloha
+          });
+        } else if (typeof mailer.sendBalconyOfferAdminEmail === "function") {
+          await mailer.sendBalconyOfferAdminEmail({
+            to: adminEmail,
+            subject: `Lištobook – žiadosť o cenovú ponuku (balkón) – ${to}`,
+            html,
+            includeAttachments: false,
+          });
+        }
       }
     } catch (e) {
       console.warn("Admin offer mail failed:", e?.message || e);
     }
 
-    return res.status(200).json({ ok: true, message: "Žiadosť o ponuku bola odoslaná.", to });
+    return res.status(200).json({
+      ok: true,
+      message: "Ponuka bola odoslaná. Potvrdenie nájdete v e-maile.",
+      to
+    });
   } catch (e) {
     console.error("balkon-final-html-offer error:", e);
     return res.status(500).json({ message: e.message || "E-mail/PDF chyba" });
