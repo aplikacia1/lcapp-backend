@@ -5,7 +5,28 @@
   <title>Pridať produkt</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ... (pôvodné štýly nechávame bez zmien) ... */
+    /* ✅ Bezpečná oprava scrollu iba pre túto stránku (nič iné nerozbije) */
+    html, body {
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .full-container {
+      min-height: 100vh;
+      overflow-y: auto;
+    }
+
+    /* Tabuľka produktov dostane vlastný scroll */
+    .table-section {
+      max-height: 70vh;     /* môžeš dať 80vh ak chceš viac */
+      overflow-y: auto;
+    }
+
+    /* Aby sa tabuľka pekne správala pri scrollovaní */
+    .table-section table {
+      width: 100%;
+      border-collapse: collapse;
+    }
   </style>
 </head>
 <body>

@@ -1,5 +1,8 @@
 // ===== admin_add_product.js =====
 
+// ✅ veľký limit, aby admin videl všetky produkty (backend často vracia default napr. 7)
+const BIG_LIMIT = 5000;
+
 function getCategoryIdFromURL() {
   const p = new URLSearchParams(location.search);
   return p.get('categoryId') || p.get('id') || '';
@@ -21,6 +24,24 @@ const clean = s =>
   String(s || '')
     .replace(/^\/?uploads[\\/]/i, '')
     .replace(/^\/+/, '');
+
+// ✅ pripojí limit k URL, ak tam ešte nie je
+function withBigLimit(url) {
+  try {
+    const u = new URL(url, location.origin);
+    // ak už má limit, nechaj tak
+    if (!u.searchParams.has('limit')) u.searchParams.set('limit', String(BIG_LIMIT));
+    // niektoré API používajú perPage/size/take – pridáme len ak nie sú (bez konfliktu)
+    if (!u.searchParams.has('perPage')) u.searchParams.set('perPage', String(BIG_LIMIT));
+    if (!u.searchParams.has('size')) u.searchParams.set('size', String(BIG_LIMIT));
+    if (!u.searchParams.has('take')) u.searchParams.set('take', String(BIG_LIMIT));
+    return u.pathname + u.search;
+  } catch (e) {
+    // fallback pre prípad, že url je relatívne a URL() by zlyhalo
+    if (url.includes('?')) return url + `&limit=${BIG_LIMIT}`;
+    return url + `?limit=${BIG_LIMIT}`;
+  }
+}
 
 // --- fetch helpers + filter (rovnaké princípy ako v products.js) ---
 async function tryFetchArray(url) {
@@ -67,7 +88,7 @@ const filterByCategory = (list, id) =>
 // --- init: categories + products ---
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const cats = await tryFetchArray('/api/categories');
+    const cats = await tryFetchArray(withBigLimit('/api/categories'));
     const sel = document.getElementById('categorySelect');
     cats.forEach(c => {
       const o = document.createElement('option');
@@ -92,10 +113,10 @@ async function loadProducts() {
   tbody.innerHTML = '';
 
   const endpoints = [
-    `/api/categories/items/${encodeURIComponent(categoryId)}`,
-    `/api/products/byCategory/${encodeURIComponent(categoryId)}`,
-    `/api/products?category=${encodeURIComponent(categoryId)}`,
-    `/api/products?categoryId=${encodeURIComponent(categoryId)}`
+    withBigLimit(`/api/categories/items/${encodeURIComponent(categoryId)}`),
+    withBigLimit(`/api/products/byCategory/${encodeURIComponent(categoryId)}`),
+    withBigLimit(`/api/products?category=${encodeURIComponent(categoryId)}`),
+    withBigLimit(`/api/products?categoryId=${encodeURIComponent(categoryId)}`)
   ];
 
   let items = [];
@@ -107,13 +128,13 @@ async function loadProducts() {
     }
   }
 
-  // 🔎 vždy prefiltruj
+  // 🔎 vždy prefiltruj (aj keď endpoint už filtruje)
   if (items && items.length) {
     items = filterByCategory(items, categoryId);
   }
 
   if (!items || !items.length) {
-    const all = await tryFetchArray('/api/products');
+    const all = await tryFetchArray(withBigLimit('/api/products'));
     items = filterByCategory(all, categoryId);
   }
 
