@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         nextParams.set("label", state.constructionLabel);
       }
 
-      const target = "calc_balkony.html";
+      const target = "calc_balkony_v2.html";
       window.location.href = `${target}?${nextParams.toString()}`;
     });
 
