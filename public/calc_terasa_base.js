@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // ✅ Vysunutý balkón → preklik na calc_balkony.html, s parametrami
+      // ✅ Vysunutý balkón → preklik na calc_balkony_v2.html, s parametrami
       const nextParams = new URLSearchParams();
       if (email) {
         nextParams.set("email", email);

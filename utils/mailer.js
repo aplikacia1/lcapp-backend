@@ -479,23 +479,32 @@ async function sendBalconyOfferCustomerEmail({
  * sem pôjde summary HTML/text + príloha PDF (a ak chceš, môžeme pridať aj tech listy neskôr)
  */
 async function sendBalconyOfferAdminEmail({
+  to = '',
   subject,
   html,
   text,
+  includeAttachments = false, // ✅ default: BEZ príloh (presne ako chceš)
   pdfBuffer,
   pdfFilename = 'balkon-final.pdf',
-}) {
-  if (!ADMIN_EMAIL) throw new Error('ADMIN_EMAIL nie je nastavený v env (Render)');
+} = {}) {
+  const target = (to || ADMIN_EMAIL || '').trim();
+  if (!target) throw new Error('sendBalconyOfferAdminEmail: chýba "to" aj ADMIN_EMAIL v env');
 
-  const pdf = normalizeToBuffer(pdfBuffer);
-  if (!pdf || pdf.length < 1000) throw new Error('sendBalconyOfferAdminEmail: PDF buffer je neplatný/príliš malý');
+  let attachments;
+  if (includeAttachments) {
+    const pdf = normalizeToBuffer(pdfBuffer);
+    if (!pdf || pdf.length < 1000) {
+      throw new Error('sendBalconyOfferAdminEmail: PDF buffer je neplatný/príliš malý');
+    }
+    attachments = [{ filename: pdfFilename, content: pdf, contentType: 'application/pdf' }];
+  }
 
   return sendMail({
-    to: ADMIN_EMAIL,
+    to: target,
     subject: subject || `${APP_NAME} – NOVÁ žiadosť o cenovú ponuku (balkón)`,
     html,
     text,
-    attachments: [{ filename: pdfFilename, content: pdf, contentType: 'application/pdf' }],
+    attachments, // ✅ undefined => žiadne prílohy
   });
 }
 

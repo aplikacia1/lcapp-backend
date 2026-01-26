@@ -104,7 +104,7 @@
   document.addEventListener("keydown", (e) => {
     if (bannerId || !list.length) return;
     if (e.key === "ArrowRight") {
-      idx = (idx + 1) % list.length;
+      idx = (idx + 1) % list.length;  
       renderBanner(list[idx]);
     } else if (e.key === "ArrowLeft") {
       idx = (idx - 1 + list.length) % list.length;
