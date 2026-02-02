@@ -1086,9 +1086,21 @@
         padding:18px;
       }
 
-      @media (max-width:640px){
-        #wizardOverlay{ display:block; }
-        .wrap{ visibility:hidden; }
+      #wizardOverlay{
+        position:fixed;
+        inset:0;
+        background:radial-gradient(circle at top,#1b2b68 0,#050c22 60%,#020617 100%);
+        z-index:5000;
+        padding:18px;
+        display:none;
+      }
+
+      body.mobile-wizard #wizardOverlay{
+        display:block;
+      }
+
+      body.mobile-wizard .wrap{
+        visibility:hidden;
       }
     </style>
   </head>
@@ -1102,7 +1114,7 @@
 
       <div id="wizardShapeMount"></div>
     </div>
-    
+
     <header class="app-header" role="banner">
       <div class="app-header-inner">
         <button class="icon-btn" id="backBtn" aria-label="Späť">

@@ -1473,33 +1473,32 @@ if (btnPdfRequestOffer) {
   tryLoadLoggedUserName();
   
 });
-// ================= MOBILE WIZARD STEP 1 =================
+// ================= MOBILE WIZARD STEP 1 (FIX) =================
 document.addEventListener("DOMContentLoaded", () => {
   if (window.innerWidth > 640) return;
 
-  const mount = document.getElementById("wizardShapeMount");
+  document.body.classList.add("mobile-wizard");
+
+  const overlay = document.getElementById("wizardOverlay");
   const originalGrid = document.getElementById("shapeGrid");
 
-  if (!mount || !originalGrid) return;
+  if (!overlay || !originalGrid) return;
 
-  // skopírujeme existujúce karty tvarov
-  mount.innerHTML = originalGrid.outerHTML;
+  // presunieme ORIGINÁL grid do overlay (žiadna kópia!)
+  const mount = document.getElementById("wizardShapeMount");
+  mount.appendChild(originalGrid);
 
-  // kliknutie na tvar
-  mount.querySelectorAll(".shape-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const shape = card.dataset.shape;
+  // po kliknutí na tvar zavri wizard
+  originalGrid.addEventListener("click", (e) => {
+    const card = e.target.closest(".shape-card");
+    if (!card) return;
 
-      // simulujeme klik v originálnej kalkulačke
-      const realCard = originalGrid.querySelector(`[data-shape="${shape}"]`);
-      if (realCard) realCard.click();
+    overlay.style.display = "none";
+    document.querySelector(".wrap").style.visibility = "visible";
 
-      // skryjeme wizard
-      document.getElementById("wizardOverlay").style.display = "none";
-      document.querySelector(".wrap").style.visibility = "visible";
-
-      // posuň na rozmery
-      document.getElementById("sideA").focus();
-    });
+    setTimeout(() => {
+      const a = document.getElementById("sideA");
+      if (a) a.focus();
+    }, 300);
   });
 });
