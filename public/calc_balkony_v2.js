@@ -1021,6 +1021,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     state.tileThicknessMm = Math.round(v);
+    recomputeFromInputs();
     closeTileModal();
     runPendingActionIfAny();
   }
@@ -1293,19 +1294,53 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnPdfDownload) btnPdfDownload.addEventListener("click", () => postPdfDownload(false));
   if (btnPdfToEmail) btnPdfToEmail.addEventListener("click", () => postPdfEmail(false));
 
-  if (btnPdfRequestOffer) {
-    btnPdfRequestOffer.addEventListener("click", () => {
-      if (!canGoToStep4()) return;
+  async function postPdfOffer(skipTileCheck = false) {
+  if (!canGoToStep4()) return;
 
-      if (!hasRecipientEmailForMailOrOffer()) {
-        alert("Chýba e-mail pre ponuku. Prihláste sa, alebo zadajte e-mail v údajoch do PDF.");
-        return;
-      }
-
-      ensureTileThicknessBefore("offer");
-      alert("Ponuka: zatiaľ len pripravujeme. Neskôr dopojíme odoslanie požiadavky technikovi.");
-    });
+  if (!hasRecipientEmailForMailOrOffer()) {
+    alert("Chýba e-mail pre ponuku. Prihláste sa, alebo zadajte e-mail v údajoch do PDF.");
+    return;
   }
+
+  if (!skipTileCheck) {
+    const ok = ensureTileThicknessBefore("offer");
+    if (!ok) return;
+  }
+
+  const btn = btnPdfRequestOffer;
+  const oldText = btn ? btn.textContent : "";
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "⏳ Odosielam požiadavku...";
+    }
+
+    const payload = buildBridgePayload();
+
+    const res = await fetch("/api/pdf/balkon-final-html-offer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ payload }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+
+    alert("Požiadavka o cenovú ponuku bola odoslaná. Potvrdenie nájdete v e-maile.");
+  } catch (e) {
+    alert(`Chyba pri odoslaní ponuky: ${e?.message || e}`);
+  } finally {
+    if (btn) {
+      btn.textContent = oldText;
+      updatePdfButtons();
+    }
+  }
+}
+
+if (btnPdfRequestOffer) {
+  btnPdfRequestOffer.addEventListener("click", () => postPdfOffer(false));
+}
 
   // ---------------------------------------------------------------------------
   // LISTENERY – KROK 2
@@ -1436,4 +1471,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ skús načítať meno/prezývku prihláseného
   tryLoadLoggedUserName();
+  
 });

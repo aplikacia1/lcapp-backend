@@ -797,81 +797,43 @@ router.post("/balkon-final-html-offer", async (req, res) => {
       ownerEmail;
 
     if (!to) {
-      return res.status(400).json({
-        message: "Chýba e-mail príjemcu (payload.pdfMeta.customerEmail alebo payload.meta.email).",
-      });
+      return res.status(400).json({ message: "Chýba e-mail príjemcu." });
     }
 
     const customerName =
       safeText(pdfMeta?.customerLabel) ||
       safeText(calc?.customerName) ||
-      safeText(calc?.customerLabel) ||
       "Zákazník";
 
     const merged = await buildMergedPdfFromPayload(req, payload);
 
-    // ✅ 1) ZÁKAZNÍK – pošli “offer” (preferuj offer helpery)
-    if (typeof mailer.sendBalconyOfferCustomerEmail === "function") {
-      await mailer.sendBalconyOfferCustomerEmail({
-        purpose: "offer",
-        to,
-        pdfBuffer: merged,
-        pdfFilename: "balkon-final.pdf",
-        customerName,
-        variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-      });
-    } else if (typeof mailer.sendBalconyDocsEmail === "function") {
-      // fallback – ak ešte nemáš offer šablónu, aspoň to odošle
-      await mailer.sendBalconyDocsEmail({
-        to,
-        pdfBuffer: merged,
-        pdfFilename: "balkon-final.pdf",
-        customerName,
-        variant: { heightId: calc?.heightId, drainId: calc?.drainId },
-      });
-    } else if (typeof mailer.sendPdfEmail === "function") {
-      await mailer.sendPdfEmail({
-        to,
-        subject: "Lištobook – Žiadosť o cenovú ponuku (PDF)",
-        html: `<p>Dobrý deň ${escapeHtml(customerName)}, žiadosť o cenovú ponuku sme prijali. Ozveme sa v pracovné dni 8:00–16:00.</p>`,
-        pdfBuffer: merged,
-        filename: "balkon-final.pdf",
-      });
-    } else {
-      throw new Error("Mailer nemá funkcie na odoslanie zákazníkovi.");
-    }
+    // ✅ zákazník dostane PDF + offer text
+    await mailer.sendBalconyOfferCustomerEmail({
+      purpose: "offer",
+      to,
+      pdfBuffer: merged,
+      pdfFilename: "balkon-final.pdf",
+      customerName,
+      variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+    });
 
-    // ✅ 2) ADMIN – notifikácia BEZ príloh
-    try {
-      const adminEmail = safeText(process.env.ADMIN_EMAIL || "");
-      if (adminEmail) {
-        const html = buildAdminOfferSummaryHtml({ payload, to, customerName });
+    // ✅ admin dostane TEN ISTÝ PDF ako zákazník (bez tech listov)
+    const adminHtml = buildAdminOfferSummaryHtml({ payload, to, customerName });
 
-        if (typeof mailer.sendPdfEmail === "function") {
-          await mailer.sendPdfEmail({
-            to: adminEmail,
-            subject: `Lištobook – žiadosť o cenovú ponuku (balkón) – ${to}`,
-            html,
-            // ✅ žiadne pdfBuffer -> žiadna príloha
-          });
-        } else if (typeof mailer.sendBalconyOfferAdminEmail === "function") {
-          await mailer.sendBalconyOfferAdminEmail({
-            to: adminEmail,
-            subject: `Lištobook – žiadosť o cenovú ponuku (balkón) – ${to}`,
-            html,
-            includeAttachments: false,
-          });
-        }
-      }
-    } catch (e) {
-      console.warn("Admin offer mail failed:", e?.message || e);
-    }
+    await mailer.sendPdfEmail({
+      to: "bratislava@listovecentrum.sk",
+      subject: `Žiadosť o cenovú ponuku – balkón – ${to}`,
+      html: adminHtml,
+      pdfBuffer: merged,
+      filename: "balkon-final.pdf",
+    });
 
     return res.status(200).json({
       ok: true,
-      message: "Ponuka bola odoslaná. Potvrdenie nájdete v e-maile.",
+      message: "Ponuka bola odoslaná zákazníkovi aj adminovi.",
       to
     });
+
   } catch (e) {
     console.error("balkon-final-html-offer error:", e);
     return res.status(500).json({ message: e.message || "E-mail/PDF chyba" });
