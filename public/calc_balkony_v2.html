@@ -1076,10 +1076,33 @@
         box-shadow: 0 0 0px 1000px rgba(2, 6, 23, 0.96) inset !important;
         border: 1px solid rgba(148, 163, 184, 0.9) !important;
       }
+      /* ================= MOBILE WIZARD OVERLAY ================= */
+      #wizardOverlay{
+        position:fixed;
+        inset:0;
+        background:radial-gradient(circle at top,#1b2b68 0,#050c22 60%,#020617 100%);
+        z-index:5000;
+        display:none;
+        padding:18px;
+      }
+
+      @media (max-width:640px){
+        #wizardOverlay{ display:block; }
+        .wrap{ visibility:hidden; }
+      }
     </style>
   </head>
 
   <body>
+    <div id="wizardOverlay">
+      <h2 style="margin-top:20px;font-size:1.2rem;">Zvoľte tvar vášho balkóna</h2>
+      <p style="font-size:0.9rem;color:#cbd5f5;margin-bottom:18px;">
+        Kliknite na tvar, ktorý sa najviac podobá vášmu balkónu.
+      </p>
+
+      <div id="wizardShapeMount"></div>
+    </div>
+    
     <header class="app-header" role="banner">
       <div class="app-header-inner">
         <button class="icon-btn" id="backBtn" aria-label="Späť">

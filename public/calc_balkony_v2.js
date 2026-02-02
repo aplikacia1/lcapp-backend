@@ -1473,3 +1473,33 @@ if (btnPdfRequestOffer) {
   tryLoadLoggedUserName();
   
 });
+// ================= MOBILE WIZARD STEP 1 =================
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.innerWidth > 640) return;
+
+  const mount = document.getElementById("wizardShapeMount");
+  const originalGrid = document.getElementById("shapeGrid");
+
+  if (!mount || !originalGrid) return;
+
+  // skopírujeme existujúce karty tvarov
+  mount.innerHTML = originalGrid.outerHTML;
+
+  // kliknutie na tvar
+  mount.querySelectorAll(".shape-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const shape = card.dataset.shape;
+
+      // simulujeme klik v originálnej kalkulačke
+      const realCard = originalGrid.querySelector(`[data-shape="${shape}"]`);
+      if (realCard) realCard.click();
+
+      // skryjeme wizard
+      document.getElementById("wizardOverlay").style.display = "none";
+      document.querySelector(".wrap").style.visibility = "visible";
+
+      // posuň na rozmery
+      document.getElementById("sideA").focus();
+    });
+  });
+});
