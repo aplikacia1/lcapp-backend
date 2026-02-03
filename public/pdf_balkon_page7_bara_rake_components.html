@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>PDF – BARA RAKE – komponenty</title>
+
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+
+  <style>
+    .card-inner--p7.compact { padding-top: 10px !important; padding-bottom: 10px !important; }
+    .table-compact--p7 td, .table-compact--p7 th { padding-top: 3px !important; padding-bottom: 3px !important; }
+    .components-stack--p7 img {
+      max-height: 80px !important;
+      display: block;
+      margin: 6px auto !important;
+    }
+  </style>
+</head>
+
+<body>
+<div class="pdf-page pdf-pad-14-18-12">
+  <div class="pdf-watermark"></div>
+
+  <div class="pdf-content">
+    <header class="pdf-mini-header">
+      <div class="mini-left">
+        <div class="mini-logo"><img src="/logo_lc.jpg"></div>
+        <div class="mini-title">
+          <strong>Technický podklad – balkónová skladba</strong>
+          <span>Komponenty ukončenia hrany – BARA RAKE</span>
+        </div>
+      </div>
+      <div class="mini-code">
+        <div class="label">Číslo PDF</div>
+        <div class="value">{{pdfCode}}</div>
+      </div>
+    </header>
+
+    <h2 class="pdf-h2">7. Ukončenie hrany – komponenty BARA RAKE</h2>
+
+    <p class="subtitle-sm">
+      Profil <strong>BARA RAKE</strong> sa používa pri drenážnej skladbe <strong>DITRA-DRAIN</strong>.
+      Dodáva sa v dĺžke 2,50 m a volí sa podľa hrúbky dlažby.
+    </p>
+
+    <section class="grid-2-stretch">
+      <!-- TABUĽKA -->
+      <article class="card">
+        <div class="card-inner compact card-inner--p7">
+
+          <table class="table-compact table-compact--p7">
+            <tr><th>Položka</th><th>Hodnota</th></tr>
+            <tr><td>Hrúbka dlažby</td><td>{{tileThicknessText}}</td></tr>
+            <tr><td>Voľná hrana balkóna</td><td>{{edgeLengthText}}</td></tr>
+            <tr><td>Profily (2,50 m)</td><td>{{edgeProfilePiecesText}}</td></tr>
+            <tr><td>Rohy 90°</td><td>{{rakeCornersText}}</td></tr>
+            <tr><td>Kúty (vnútorné)</td><td>{{rakeInnerCornersText}}</td></tr>
+            <tr><td>Spojky</td><td>{{rakeConnectorsText}}</td></tr>
+            <tr><td>Výška profilu</td><td><strong>{{rakeHeightChoiceText}}</strong></td></tr>
+          </table>
+
+          <div class="note">
+            Výška BARA RAKE sa vyrába v rozmeroch <strong>10 / 15 / 18 / 21 mm</strong>.
+            Profil sa volí podľa hrúbky dlažby tak, aby horná hrana chránila krytinu.
+          </div>
+        </div>
+      </article>
+
+      <!-- OBRÁZKY -->
+      <article class="card">
+        <div class="card-inner compact card-inner--p7">
+
+          <div class="components-stack--p7">
+            <div>
+              <div class="component-title">BARA RAKE profil</div>
+              <img src="/img/pdf/balkon/bara-rake-profile-v1.png">
+            </div>
+
+            <div>
+              <div class="component-title">Roh 90°</div>
+              <img src="/img/pdf/balkon/bara-rake-corner-e90.png">
+            </div>
+
+            <div>
+              <div class="component-title">Spojka</div>
+              <img src="/img/pdf/balkon/bara-rake-connector-v.png">
+            </div>
+          </div>
+
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <footer class="pdf-footer">
+    <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+    <span>Strana 7 / {{totalPages}}</span>
+  </footer>
+</div>
+</body>
+</html>
