@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 3 (DITRA-DRAIN)</title>
+
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+</head>
+
+<body>
+  <div class="pdf-page pdf-pad-16-18-14">
+    <div class="pdf-watermark"></div>
+
+    <div class="pdf-content">
+      <header class="pdf-mini-header">
+        <div class="mini-left">
+          <div class="mini-logo">
+            <img src="/logo_lc.jpg" alt="Lištové centrum" />
+          </div>
+          <div class="mini-title">
+            <strong>Technický podklad – balkónová skladba</strong>
+            <span>Strana 3: vrstva č. 1 (odvodňovacia skladba)</span>
+          </div>
+        </div>
+
+        <div class="mini-code">
+          <div class="label">Číslo PDF podkladu</div>
+          <div class="value">{{pdfCode}}</div>
+        </div>
+      </header>
+
+      <h2 class="pdf-h2">
+        3. Skladba: {{systemTitle}} – vrstva 1: Schlüter®-DITRA-DRAIN 8 + KERDI 200
+      </h2>
+
+      <p class="pdf-sub pdf-sub--p3">
+        Vybraná konštrukčná výška: <strong>{{heightLabel}}</strong>. 
+        Táto skladba sa používa pri väčších formátoch dlažby, kde je potrebné zabezpečiť 
+        aktívne odvádzanie vody spod krytiny a plnohodnotnú hydroizoláciu pod rohožou.
+      </p>
+
+      <section class="grid-2-stretch grid-2-stretch--p3">
+        <!-- LEFT -->
+        <article class="card">
+          <div class="card-inner card-inner--p3">
+
+            <div class="chip chip--p3">Vrstvy – krok 1 / 2 (hydroizolácia)</div>
+
+            <p class="p">
+              <strong>Schlüter®-KERDI 200</strong> je hydroizolačná fólia, ktorá sa celoplošne lepí na pripravený podklad.
+              Zabezpečuje spoľahlivú izoláciu proti prenikaniu vody do konštrukcie balkóna.
+            </p>
+
+            <div class="sep sep--p3"></div>
+
+            <div class="chip chip--p3">Vrstvy – krok 2 / 2 (drenáž)</div>
+
+            <p class="p">
+              <strong>Schlüter®-DITRA-DRAIN 8</strong> je drenážna a separačná rohož, ktorá sa lepí na vrstvu KERDI.
+              Vytvára aktívny odvod vody spod dlažby a eliminuje zadržiavanie vlhkosti v skladbe.
+            </p>
+
+            <p class="p p-strongline">
+              Prečo je táto skladba dôležitá pri väčších formátoch dlažby:
+            </p>
+
+            <ul class="bullet bullet--tight">
+              <li><strong>Odvod vody</strong> spod krytiny – nevzniká trvalo vlhké prostredie.</li>
+              <li><strong>Oddelenie pnutí</strong> medzi podkladom a dlažbou.</li>
+              <li><strong>Plnohodnotná hydroizolácia</strong> pod drenážnou rohožou.</li>
+              <li><strong>Stabilné správanie skladby</strong> pri teplotných zmenách.</li>
+            </ul>
+
+            <div class="sep sep--p3"></div>
+
+            <div class="kv kv--p3">
+              <div class="k">Plocha z kalkulačky</div>
+              <div class="v">{{areaText}}</div>
+
+              <div class="k">KERDI 200 (m²)</div>
+              <div class="v">{{ditraAreaText}}</div>
+
+              <div class="k">DITRA-DRAIN 8 (m²)</div>
+              <div class="v">{{ditraAreaText}}</div>
+
+              <div class="k">Lepidlo C2 (spotreba)</div>
+              <div class="v">{{adhesiveConsumptionText}}</div>
+
+              <div class="k">Počet vriec (25 kg)</div>
+              <div class="v">{{adhesiveBagsText}}</div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- RIGHT -->
+        <article class="card">
+          <div class="card-head card-head--p3">
+            <div class="t">Obrázok vrstvy</div>
+            <div class="s">Hydroizolácia + drenážna rohož (ilustračne)</div>
+          </div>
+
+          <div class="card-inner card-inner--p3-right">
+            <div class="imgbox imgbox--p3">
+              <img src="/img/pdf/balkon/kerdi-200-roll-v1.png" alt="Schlüter KERDI 200" />
+            </div>
+
+            <div class="imgbox imgbox--p3">
+              <img src="/img/pdf/balkon/ditra-drain-roll-v1.png" alt="Schlüter DITRA DRAIN" />
+            </div>
+
+            <div class="under-img under-img--p3">
+              <strong>Postup:</strong> najprv sa lepí KERDI 200 ako hydroizolačná vrstva, 
+              následne sa na ňu lepí DITRA-DRAIN 8 ako drenážna a separačná vrstva pod dlažbu.
+            </div>
+
+            <div class="under-img under-img--p3 under-img--p3-tight">
+              <strong>Objednávka:</strong> všetky uvedené komponenty je možné objednať v <strong>LIŠTOVOM CENTRE</strong>.
+            </div>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <footer class="pdf-footer">
+      <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+      <span>Strana 3 / {{totalPages}}</span>
+    </footer>
+  </div>
+</body>
+</html>

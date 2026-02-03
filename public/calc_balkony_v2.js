@@ -199,7 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
     system: null,
 
     tileThicknessMm: null,
-    pendingAction: null, // "download" | "email" | "offer" | null
+    tileSizeCm: null,      // ⬅️ DOPLNIŤ
+    pendingAction: null,
 
     // ✅ PDF údaje (verejné + prihlásený)
     pdfCustomerName: "",
@@ -308,6 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ✅ tile modal
   const tileModal = document.getElementById("tileModal");
   const tileThicknessInput = document.getElementById("tileThicknessInput");
+  const tileSizeInput = document.getElementById("tileSizeInput"); // ⬅️ NOVÉ
   const tileConfirmBtn = document.getElementById("tileConfirmBtn");
   const tileCloseBtn = document.getElementById("tileCloseBtn");
 
@@ -1012,19 +1014,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function confirmTileThickness() {
-    if (!tileThicknessInput) return;
+   if (!tileThicknessInput || !tileSizeInput) return;
 
-    const v = parseFloat(String(tileThicknessInput.value || "").replace(",", "."));
-    if (!Number.isFinite(v) || v <= 0) {
-      alert("Prosím zadajte platnú hrúbku dlažby v mm (napr. 10, 20, 30).");
-      return;
-    }
+   const v = parseFloat(String(tileThicknessInput.value || "").replace(",", "."));
+   if (!Number.isFinite(v) || v <= 0) {
+    alert("Prosím zadajte platnú hrúbku dlažby v mm (napr. 10, 20, 30).");
+    return;
+   }
 
-    state.tileThicknessMm = Math.round(v);
-    recomputeFromInputs();
-    closeTileModal();
-    runPendingActionIfAny();
-  }
+   const s = parseFloat(String(tileSizeInput.value || "").replace(",", "."));
+   if (!Number.isFinite(s) || s <= 0) {
+    alert("Prosím zadajte rozmer dlažby v cm (napr. 30, 60, 90).");
+    return;
+   }
+
+   state.tileThicknessMm = Math.round(v);
+   state.tileSizeCm = Math.round(s); // ⬅️ TU SA TO ULOŽÍ
+
+   recomputeFromInputs();
+   closeTileModal();
+   runPendingActionIfAny();
+}
 
   if (tileConfirmBtn) tileConfirmBtn.addEventListener("click", confirmTileThickness);
 

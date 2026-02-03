@@ -1625,11 +1625,13 @@
         <div class="preview-backdrop"></div>
         <div class="preview-dialog" role="dialog" aria-modal="true">
           <button type="button" class="preview-close" id="tileCloseBtn" aria-label="Zavrieť okno">×</button>
-          <h3>Hrúbka dlažby / obkladu</h3>
-          <p style="font-size: 0.8rem; color: #d1d5db; margin-bottom: 8px;">
-            Uveďte hrúbku dlažby, ktorú plánujete použiť (napr. 10, 20 alebo 30&nbsp;mm). Túto hodnotu potrebujeme na
-            presný výber Schlüter® BARA profilu a prípravu cenovej ponuky.
+          <h3>Parametre dlažby / obkladu</h3>
+
+          <p style="font-size: 0.8rem; color: #d1d5db; margin-bottom: 10px;">
+            Potrebujeme dva údaje pre správny návrh Schlüter® skladby:
           </p>
+
+          <label style="font-size:0.8rem;">Hrúbka dlažby (mm)</label>
           <input
             type="number"
             id="tileThicknessInput"
@@ -1637,13 +1639,29 @@
             max="50"
             step="1"
             placeholder="napr. 20"
+            style="width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #9ca3af; background: #020617; color: #e5e7eb; margin-bottom:10px;"
+          /> 
+
+          <label style="font-size:0.8rem;">Rozmer dlažby – najdlhšia strana (cm)</label>
+          <input
+            type="number"
+            id="tileSizeInput"
+            min="10"
+            max="200"
+            step="1"
+            placeholder="napr. 60"
             style="width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #9ca3af; background: #020617; color: #e5e7eb;"
           />
+
+          <p style="font-size: 0.72rem; color: #9ca3af; margin-top:8px;">
+            Tento údaj rozhoduje, či použijeme systém Schlüter®-DITRA alebo Schlüter®-DITRA-DRAIN.
+          </p>
+
           <button
             type="button"
             id="tileConfirmBtn"
             class="btn-primary"
-            style="margin-top: 10px; width: 100%; justify-content: center;"
+            style="margin-top: 12px; width: 100%; justify-content: center;"
           >
             Pokračovať
           </button>
