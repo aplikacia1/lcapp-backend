@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Strana 4 – Lepidlá a spotreba</title>
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+</head>
+
+<body>
+<div class="pdf-page pdf-pad-16-18-18">
+  <div class="pdf-watermark"></div>
+
+  <div class="pdf-content">
+    <header class="pdf-mini-header">
+      <div class="mini-left">
+        <div class="mini-logo">
+          <img src="/logo_lc.jpg" />
+        </div>
+        <div class="mini-title">
+          <strong>Technický podklad – balkónová skladba</strong>
+          <span>Strana 4: Spotreba lepidla</span>
+        </div>
+      </div>
+
+      <div class="mini-code">
+        <div class="label">Číslo PDF</div>
+        <div class="value">{{pdfCode}}</div>
+      </div>
+    </header>
+
+    <h2 class="pdf-h2">4. Lepidlá pod systémové vrstvy</h2>
+
+    <p class="pdf-sub">
+      {{adhesiveLayersText}}
+    </p>
+
+    <div class="card">
+      <div class="card-inner">
+
+        <table class="table-kv">
+          <tr>
+            <th>Plocha balkóna</th>
+            <td>{{areaText}}</td>
+          </tr>
+
+          <tr>
+            <th>Počet lepených vrstiev</th>
+            <td>{{adhesiveLayerCount}}</td>
+          </tr>
+
+          <tr>
+            <th>Celková spotreba lepidla</th>
+            <td><strong>{{adhesiveTotalKg}} kg</strong></td>
+          </tr>
+
+          <tr>
+            <th>Počet vriec (25 kg)</th>
+            <td><strong>{{adhesiveBags25kg}}</strong></td>
+          </tr>
+        </table>
+
+        <div class="note">
+          Pri výpočte sa uvažuje zub 4×4 mm a priemerná spotreba 1,4 kg/m² na jednu vrstvu.
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="pdf-footer">
+    <span>LIŠTOVÉ CENTRUM EU, s.r.o.</span>
+    <span>Strana 4 / {{totalPages}}</span>
+  </footer>
+</div>
+</body>
+</html>
