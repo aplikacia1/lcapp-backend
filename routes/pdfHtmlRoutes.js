@@ -39,7 +39,11 @@ function isoDateTimeSk() {
 function applyTemplate(html, vars, baseHref) {
   let out = html;
 
-  for (const [k, v] of Object.entries(vars)) {
+  // zoradíme kľúče od NAJDLHŠÍCH po najkratšie
+  const keys = Object.keys(vars).sort((a, b) => b.length - a.length);
+
+  for (const k of keys) {
+    const v = vars[k];
     const token = new RegExp(`\\{\\{\\s*${k}\\s*\\}\\}`, "g");
     out = out.replace(token, safeText(v));
   }
@@ -264,6 +268,44 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
   const rwConnectorCode = "V/RW…";
 
   const baraProfileTypeText = family === "RW" ? "BARA-RW (alternatíva)" : "BARA-RT";
+    // ---------------------------------------------------------------------------
+  // ✅ RAKE logika pre DITRA-DRAIN
+  // ---------------------------------------------------------------------------
+  let rakeCornersText = "";
+  let rakeInnerCornersText = "";
+  let rakeConnectorsText = "";
+  let rakeHeightChoiceText = "";
+
+  if (family === "RAKE") {
+    const tileMm = pickNumber(calc, ["tileThicknessMm"]) ?? 0;
+
+    // Výška RAKE podľa hrúbky dlažby
+    if (tileMm <= 10) rakeHeightChoiceText = "BARA RAKE 10 mm";
+    else if (tileMm <= 15) rakeHeightChoiceText = "BARA RAKE 15 mm";
+    else if (tileMm <= 18) rakeHeightChoiceText = "BARA RAKE 18 mm";
+    else if (tileMm <= 20) rakeHeightChoiceText = "BARA RAKE 21 mm";
+    else {
+      rakeHeightChoiceText =
+        "BARA RAKE je určený pre dlažby do max. 20 mm. Pre hrubšiu dlažbu odporúčame riešenie na terčoch.";
+      rakeCornersText = "—";
+      rakeInnerCornersText = "—";
+      rakeConnectorsText = "—";
+    }
+
+    // Ak je dlažba v norme, rátame komponenty
+    if (tileMm <= 20) {
+      const pcs = Number.isFinite(Number(profilePieces)) ? Number(profilePieces) : 0;
+
+      // jednoduchá logika: 2 vonkajšie rohy, žiadne vnútorné (pre väčšinu tvarov)
+      const corners = 2;
+      const innerCorners = 0;
+      const connectors = Math.max(0, pcs - 1 - corners - innerCorners);
+
+      rakeCornersText = `${corners} ks`;
+      rakeInnerCornersText = `${innerCorners} ks`;
+      rakeConnectorsText = `${connectors} ks`;
+    }
+  }
 
   let baraHeightChoiceText = "–";
   let baraHeightNoteText = "";
@@ -326,8 +368,14 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     rwCornerCodeAndQty,
     rwConnectorCodeAndQty,
     rwColorCode,
-  };
-}
+
+    // 👇 TOTO TAM DOPLŇ
+    rakeCornersText,
+    rakeInnerCornersText,
+    rakeConnectorsText,
+    rakeHeightChoiceText,
+    };
+  }
 
 // ---------------------------------------------------------------------------
 // ✅ Server fallback – SVG náčrt (nezmenené)
@@ -545,7 +593,7 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     calc.baraFamily = "RAKE";
     calc.baraRecommendationText = "BARA-RAKE odkvapový profil pre systém DITRA-DRAIN";
   }
-  const baraVars = buildBaraVars(calc, perimeterProfiles, profilePiecesNum);
+
   // prepíš texty pre rekapituláciu
   let systemTitleOverride = safeText(calc?.systemTitle || "");
   let systemShortNoteOverride = safeText(calc?.systemShortNote || "");
@@ -571,45 +619,49 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     adhesiveLayerCount === 2
       ? "Lepidlo sa používa na lepenie separačnej rohože a hydroizolačnej vrstvy."
       : "Pri systéme DITRA-DRAIN sa lepidlo používa na lepenie drenážnej rohože, separačnej rohože a hydroizolačnej vrstvy.";
-
+  
+  const baraVars = buildBaraVars(calc, perimeterProfiles, profilePiecesNum);
   const adhesiveTotalKg = (areaM2 * adhesiveLayerCount * 1.4).toFixed(1);
   const adhesiveBags25kg = Math.ceil(adhesiveTotalKg / 25);
+
+  // 🔁 spätná kompatibilita pre staré HTML šablóny MUSÍ byť prvá
   return {
-    baseUrl: baseOrigin.replace(/\/$/, ""),
-    pdfCode,
-    customerName: customerLabel,
-    customerEmail: customerEmailForPdf,
-    createdAt: isoDateTimeSk(),
-    constructionType: safeText(calc?.typeLabel || ""),
-    systemTitle: systemTitleOverride,
-    systemShortNote: systemShortNoteOverride,
-    totalPages,
-    pageNumber: pageNo,
-    shapeLabel,
-    heightLabel,
-    drainLabel,
-    areaText,
-    perimeterText,
-    shapeSketchSvg,
-    systemCutawayCaption: safeText(calc?.systemTitle || ""),
-    systemCutawayImageAbs,
-    ditraAreaText,
-    adhesiveConsumptionText,
-    adhesiveBagsText,
-    adhesiveLayersText,
-    adhesiveLayerCount,
-    adhesiveTotalKg,
-    adhesiveBags25kg,
-    edgeLengthText,
-    edgeProfilePiecesText,
-    ditraJointsText: page5.ditraJointsText,
-    kebaEdgeText: page5.kebaEdgeText,
-    kebaJointsText: page5.kebaJointsText,
-    kebaMetersText: page5.kebaMetersText,
-    collConsumptionText: page5.collConsumptionText,
-    collPacksText: page5.collPacksText,
-    ...baraVars,
-  };
+  customerName: customerLabel,
+  customerEmail: customerEmailForPdf,
+  createdAt: isoDateTimeSk(),
+  constructionType: shapeLabel,
+  systemTitle: systemTitleOverride,
+  systemShortNote: systemShortNoteOverride,
+  totalPages,
+  pageNo,
+
+  ...page5,
+  ...baraVars,
+
+  pdfCode,
+  customerLabel,
+  customerEmailForPdf,
+
+  areaText,
+  perimeterText,
+  ditraAreaText,
+  adhesiveBagsText,
+  adhesiveConsumptionText,
+
+  edgeLengthText,
+  edgeProfilePiecesText,
+
+  shapeLabel,
+  heightLabel,
+  drainLabel,
+
+  shapeSketchSvg,
+  systemCutawayImageAbs,
+
+ adhesiveLayersText,
+ adhesiveTotalKg,
+ adhesiveBags25kg,
+ };
 }
 
 async function htmlToPdfBuffer(browser, html) {
