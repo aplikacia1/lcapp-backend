@@ -994,7 +994,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (
       state.tileThicknessMm != null &&
       Number.isFinite(state.tileThicknessMm) &&
-      state.tileThicknessMm > 0
+      state.tileThicknessMm > 0 &&
+      state.tileSizeCm != null &&               // ⬅️ DOPLNIŤ
+      Number.isFinite(state.tileSizeCm) &&
+      state.tileSizeCm > 0
     ) {
       return true;
     }
@@ -1129,6 +1132,7 @@ document.addEventListener("DOMContentLoaded", () => {
         perimeter: state.perimeter,
 
         tileThicknessMm: bara.tileMm,
+        tileSizeCm: state.tileSizeCm,
         baraFamily: bara.family,
         baraRecommendationText: bara.recommendationText,
         baraNote: bara.note,

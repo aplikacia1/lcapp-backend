@@ -64,8 +64,20 @@ function toAbsPublicUrl(baseOrigin, maybePath) {
 }
 
 function resolvePlan(payload) {
+
+  console.log("TILE DEBUG:", payload);
+
   const heightId = safeText(payload?.calc?.heightId).toLowerCase();
   const drainId = safeText(payload?.calc?.drainId).toLowerCase();
+
+  // ✅ DITRA vs DITRA-DRAIN podľa rozmeru dlažby (cm)
+  const tileMaxSide =
+    Number(payload?.calc?.tileMaxSideCm) ||
+    Number(payload?.calc?.tileLongestSideCm) ||
+    Number(payload?.calc?.tileSizeCm) ||
+    0;
+
+  const useDitraDrain = tileMaxSide > 30;
 
   const isLow = heightId === "low";
   const isFree = drainId === "edge-free";
@@ -74,18 +86,33 @@ function resolvePlan(payload) {
     drainId.includes("gutter") ||
     drainId.includes("ryn");
 
-  if (isLow && isFree) {
-    return [
-      "pdf_balkon_intro.html",
-      "pdf_balkon_page2.html",
-      "pdf_balkon_page3.html",
-      "pdf_balkon_page4.html",
-      "pdf_balkon_page5.html",
-      "pdf_balkon_page6.html",
-      "pdf_balkon_page7.html",
-      "pdf_balkon_page8.html",
-    ];
-  }
+  if (isLow && isFree && !useDitraDrain) {
+  // ⭐ klasická DITRA (dlažba do 30×30)
+  return [
+    "pdf_balkon_intro.html",
+    "pdf_balkon_page2.html",
+    "pdf_balkon_page3.html",
+    "pdf_balkon_page4.html",
+    "pdf_balkon_page5.html",
+    "pdf_balkon_page6.html",
+    "pdf_balkon_page7.html",
+    "pdf_balkon_page8.html",
+  ];
+}
+
+if (isLow && isFree && useDitraDrain) {
+  // ⭐⭐ DITRA-DRAIN (dlažba nad 30×30)
+  return [
+    "pdf_balkon_intro.html",
+    "pdf_balkon_page2.html",
+    "pdf_balkon_page3_ditra_drain.html",   // nová 3
+    "pdf_balkon_page4_smart_adhesive.html", // nová 4
+    "pdf_balkon_page5.html",
+    "pdf_balkon_page6_bara_rake.html",     // nová 6
+    "pdf_balkon_page7_bara_rake_components.html", // nová 7
+    "pdf_balkon_page8.html",
+  ];
+}
 
   if (isLow && isGutter) {
     return [
@@ -504,8 +531,49 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const page5 = buildPage5Consumption({ ...calc, perimeterFull });
 
   const profilePiecesNum = bom?.profilesCount != null ? Number(bom.profilesCount) : null;
-  const baraVars = buildBaraVars(calc, perimeterProfiles, profilePiecesNum);
+  
+    // ✅ DITRA vs DITRA-DRAIN pre stranu 8 (rekapitulácia)
+  const tileMaxSide =
+    Number(calc?.tileMaxSideCm) ||
+    Number(calc?.tileLongestSideCm) ||
+    Number(calc?.tileSizeCm) ||
+    0;
 
+  const useDitraDrain = tileMaxSide > 30;
+  // 🔥 OPRAVA PRE DITRA-DRAIN – MUSÍ BYŤ TU
+  if (useDitraDrain) {
+    calc.baraFamily = "RAKE";
+    calc.baraRecommendationText = "BARA-RAKE odkvapový profil pre systém DITRA-DRAIN";
+  }
+  const baraVars = buildBaraVars(calc, perimeterProfiles, profilePiecesNum);
+  // prepíš texty pre rekapituláciu
+  let systemTitleOverride = safeText(calc?.systemTitle || "");
+  let systemShortNoteOverride = safeText(calc?.systemShortNote || "");
+
+  if (useDitraDrain) {
+    systemTitleOverride = "Schlüter® DITRA-DRAIN + KERDI 200";
+    systemShortNoteOverride =
+      "Použitá drenážna rohož DITRA-DRAIN 8 s podkladovou hydroizoláciou KERDI 200. Odvodnenie prebieha pod dlažbou, nie po povrchu.";
+  }
+  // ---------------------------------------------------------------------------
+  // ✅ STRANA 4 – spotreba lepidla (DITRA / DITRA-DRAIN / KERDI)
+  // ---------------------------------------------------------------------------
+  const areaM2 = Number(calc?.area) || 0;
+
+  // počet lepených vrstiev podľa systému
+  let adhesiveLayerCount = 2; // základ: rohož + hydro
+
+  if (useDitraDrain) {
+    adhesiveLayerCount = 3; // DITRA-DRAIN má o vrstvu viac
+  }
+
+  const adhesiveLayersText =
+    adhesiveLayerCount === 2
+      ? "Lepidlo sa používa na lepenie separačnej rohože a hydroizolačnej vrstvy."
+      : "Pri systéme DITRA-DRAIN sa lepidlo používa na lepenie drenážnej rohože, separačnej rohože a hydroizolačnej vrstvy.";
+
+  const adhesiveTotalKg = (areaM2 * adhesiveLayerCount * 1.4).toFixed(1);
+  const adhesiveBags25kg = Math.ceil(adhesiveTotalKg / 25);
   return {
     baseUrl: baseOrigin.replace(/\/$/, ""),
     pdfCode,
@@ -513,7 +581,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     customerEmail: customerEmailForPdf,
     createdAt: isoDateTimeSk(),
     constructionType: safeText(calc?.typeLabel || ""),
-    systemTitle: safeText(calc?.systemTitle || ""),
+    systemTitle: systemTitleOverride,
+    systemShortNote: systemShortNoteOverride,
     totalPages,
     pageNumber: pageNo,
     shapeLabel,
@@ -527,6 +596,10 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     ditraAreaText,
     adhesiveConsumptionText,
     adhesiveBagsText,
+    adhesiveLayersText,
+    adhesiveLayerCount,
+    adhesiveTotalKg,
+    adhesiveBags25kg,
     edgeLengthText,
     edgeProfilePiecesText,
     ditraJointsText: page5.ditraJointsText,
