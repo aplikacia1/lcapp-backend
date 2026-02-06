@@ -872,7 +872,15 @@ router.post("/balkon-final-html-send", async (req, res) => {
         pdfBuffer: merged,
         pdfFilename: "balkon-final.pdf",
         customerName,
-        variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+        variant: {
+         heightId: calc?.heightId,
+         drainId: calc?.drainId,
+         useDitraDrain:
+           (Number(calc?.tileMaxSideCm) ||
+            Number(calc?.tileLongestSideCm) ||
+            Number(calc?.tileSizeCm) ||
+            0) > 30
+        },
       });
     } else if (typeof mailer.sendBalconyDocsEmail === "function") {
       await mailer.sendBalconyDocsEmail({
@@ -880,7 +888,15 @@ router.post("/balkon-final-html-send", async (req, res) => {
         pdfBuffer: merged,
         pdfFilename: "balkon-final.pdf",
         customerName,
-        variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+        variant: {
+         heightId: calc?.heightId,
+         drainId: calc?.drainId,
+         useDitraDrain:
+           (Number(calc?.tileMaxSideCm) ||
+            Number(calc?.tileLongestSideCm) ||
+            Number(calc?.tileSizeCm) ||
+            0) > 30
+        },
       });
     } else if (typeof mailer.sendPdfEmail === "function") {
       await mailer.sendPdfEmail({
@@ -939,7 +955,15 @@ router.post("/balkon-final-html-offer", async (req, res) => {
       pdfBuffer: merged,
       pdfFilename: "balkon-final.pdf",
       customerName,
-      variant: { heightId: calc?.heightId, drainId: calc?.drainId },
+      variant: {
+        heightId: calc?.heightId,
+        drainId: calc?.drainId,
+        useDitraDrain:
+          (Number(calc?.tileMaxSideCm) ||
+          Number(calc?.tileLongestSideCm) ||
+          Number(calc?.tileSizeCm) ||
+          0) > 30
+      },
     });
 
     // ✅ admin dostane TEN ISTÝ PDF ako zákazník (bez tech listov)

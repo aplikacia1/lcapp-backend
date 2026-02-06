@@ -338,7 +338,7 @@ function balconyOfferTemplateCustomer({
 
 /* ===================== BALKÓN – TECH LISTY ===================== */
 
-function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
+function loadTechSheetAttachmentsForVariant({ heightId, drainId, useDitraDrain }) {
   const h = String(heightId || '').toLowerCase();
   const d = String(drainId || '').toLowerCase();
 
@@ -348,14 +348,36 @@ function loadTechSheetAttachmentsForVariant({ heightId, drainId }) {
 
   const baseDir = path.resolve(__dirname, '..', 'public', 'img', 'pdf', 'balkon', 'tech');
 
-  const files = [
-    { filename: 'technicky-list-mapei-lepidlo.pdf',    local: 'mapei-lepidlo.pdf' },
+let files = [];
+
+if (useDitraDrain) {
+  // ✅ DITRA-DRAIN vetva
+  files = [
+    { filename: 'technicky-list-schluter-ditra-drain.pdf', local: 'schluter-ditra-drain.pdf' },
+
+    { filename: 'technicky-list-schluter-kerdi-200.pdf', local: 'schluter-kerdi-200.pdf' },
+    { filename: 'technicky-list-schluter-kerdi-coll.pdf', local: 'kerdi-coll-lepidlo.pdf' },
+
+    { filename: 'technicky-list-mapei-lepidlo.pdf', local: 'mapei-lepidlo.pdf' },
+    { filename: 'technicky-list-sopro-lepidlo.pdf', local: 'sopro-lepidlo.pdf' },
+
+    { filename: 'technicky-list-schluter-bara-rake.pdf', local: 'schluter-bara-rake.pdf' },
+  ];
+} else {
+  // ✅ klasická DITRA vetva
+  files = [
+    { filename: 'technicky-list-schluter-ditra.pdf', local: 'schluter-ditra.pdf' },
+
+    { filename: 'technicky-list-schluter-kerdi-200.pdf', local: 'schluter-kerdi-200.pdf' },
+    { filename: 'technicky-list-schluter-kerdi-coll.pdf', local: 'kerdi-coll-lepidlo.pdf' },
+
+    { filename: 'technicky-list-mapei-lepidlo.pdf', local: 'mapei-lepidlo.pdf' },
+    { filename: 'technicky-list-sopro-lepidlo.pdf', local: 'sopro-lepidlo.pdf' },
+
     { filename: 'technicky-list-schluter-bara-rt.pdf', local: 'schluter-bara-rt.pdf' },
     { filename: 'technicky-list-schluter-bara-rw.pdf', local: 'schluter-bara-rw.pdf' },
-    { filename: 'technicky-list-schluter-ditra.pdf',   local: 'schluter-ditra.pdf' },
-    { filename: 'technicky-list-sopro-lepidlo.pdf',    local: 'sopro-lepidlo.pdf' },
   ];
-
+}
   const out = [];
   for (const f of files) {
     const p = path.join(baseDir, f.local);
