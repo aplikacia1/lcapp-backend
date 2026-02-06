@@ -69,12 +69,11 @@ function toAbsPublicUrl(baseOrigin, maybePath) {
 
 function resolvePlan(payload) {
 
-  console.log("TILE DEBUG:", payload);
+  console.log("CALC DEBUG:", payload.calc);
 
   const heightId = safeText(payload?.calc?.heightId).toLowerCase();
   const drainId = safeText(payload?.calc?.drainId).toLowerCase();
 
-  // ✅ DITRA vs DITRA-DRAIN podľa rozmeru dlažby (cm)
   const tileMaxSide =
     Number(payload?.calc?.tileMaxSideCm) ||
     Number(payload?.calc?.tileLongestSideCm) ||
@@ -90,54 +89,68 @@ function resolvePlan(payload) {
     drainId.includes("gutter") ||
     drainId.includes("ryn");
 
+  // ⭐ klasická DITRA
   if (isLow && isFree && !useDitraDrain) {
-  // ⭐ klasická DITRA (dlažba do 30×30)
-  return [
-    "pdf_balkon_intro.html",
-    "pdf_balkon_page2.html",
-    "pdf_balkon_page3.html",
-    "pdf_balkon_page4.html",
-    "pdf_balkon_page5.html",
-    "pdf_balkon_page6.html",
-    "pdf_balkon_page7.html",
-    "pdf_balkon_page8.html",
-  ];
-}
+    return {
+      pages: [
+        "pdf_balkon_intro.html",
+        "pdf_balkon_page2.html",
+        "pdf_balkon_page3.html",
+        "pdf_balkon_page4.html",
+        "pdf_balkon_page5.html",
+        "pdf_balkon_page6.html",
+        "pdf_balkon_page7.html",
+        "pdf_balkon_page8.html",
+      ],
+      variant: { heightId, drainId, useDitraDrain }
+    };
+  }
 
-if (isLow && isFree && useDitraDrain) {
-  // ⭐⭐ DITRA-DRAIN (dlažba nad 30×30)
-  return [
-    "pdf_balkon_intro.html",
-    "pdf_balkon_page2.html",
-    "pdf_balkon_page3_ditra_drain.html",   // nová 3
-    "pdf_balkon_page4_smart_adhesive.html", // nová 4
-    "pdf_balkon_page5.html",
-    "pdf_balkon_page6_bara_rake.html",     // nová 6
-    "pdf_balkon_page7_bara_rake_components.html", // nová 7
-    "pdf_balkon_page8.html",
-  ];
-}
+  // ⭐⭐ DITRA-DRAIN
+  if (isLow && isFree && useDitraDrain) {
+    return {
+      pages: [
+        "pdf_balkon_intro.html",
+        "pdf_balkon_page2.html",
+        "pdf_balkon_page3_ditra_drain.html",
+        "pdf_balkon_page4_smart_adhesive.html",
+        "pdf_balkon_page5.html",
+        "pdf_balkon_page6_bara_rake.html",
+        "pdf_balkon_page7_bara_rake_components.html",
+        "pdf_balkon_page8.html",
+      ],
+      variant: { heightId, drainId, useDitraDrain }
+    };
+  }
 
+  // gutter variant
   if (isLow && isGutter) {
-    return [
+    return {
+      pages: [
+        "pdf_balkon_intro.html",
+        "pdf_balkon_page2.html",
+        "pdf_balkon_page3.html",
+        "pdf_balkon_page4.html",
+        "pdf_balkon_page5.html",
+        "pdf_balkon_page6.html",
+        "pdf_balkon_page10.html",
+        "pdf_balkon_page9.html",
+        "pdf_balkon_page11.html",
+      ],
+      variant: { heightId, drainId, useDitraDrain }
+    };
+  }
+
+  // fallback
+  return {
+    pages: [
       "pdf_balkon_intro.html",
       "pdf_balkon_page2.html",
       "pdf_balkon_page3.html",
       "pdf_balkon_page4.html",
-      "pdf_balkon_page5.html",
-      "pdf_balkon_page6.html",
-      "pdf_balkon_page10.html",
-      "pdf_balkon_page9.html",
-      "pdf_balkon_page11.html",
-    ];
-  }
-
-  return [
-    "pdf_balkon_intro.html",
-    "pdf_balkon_page2.html",
-    "pdf_balkon_page3.html",
-    "pdf_balkon_page4.html",
-  ];
+    ],
+    variant: { heightId, drainId, useDitraDrain }
+  };
 }
 
 function pickNumber(obj, keys) {
@@ -717,10 +730,10 @@ function findChromeExecutable() {
 
 async function buildMergedPdfFromPayload(req, payload) {
   const plan = resolvePlan(payload);
-  const totalPages = plan.length;
+  const totalPages = plan.pages.length;
   const baseOrigin = `${req.protocol}://${req.get("host")}`;
 
-  const htmlPages = plan.map((fileName, idx) => {
+  const htmlPages = plan.pages.map((fileName, idx) => {
     const filePath = path.join(process.cwd(), "public", fileName);
     if (!fs.existsSync(filePath)) {
       throw new Error(`Chýba HTML stránka: ${filePath}`);
@@ -824,6 +837,8 @@ router.post("/balkon-final-html", async (req, res) => {
 
     const merged = await buildMergedPdfFromPayload(req, payload);
 
+    console.log("DEBUG CALC:", calc);
+
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", 'attachment; filename="balkon-final.pdf"');
     return res.status(200).send(merged);
@@ -872,33 +887,17 @@ router.post("/balkon-final-html-send", async (req, res) => {
         pdfBuffer: merged,
         pdfFilename: "balkon-final.pdf",
         customerName,
-        variant: {
-         heightId: calc?.heightId,
-         drainId: calc?.drainId,
-         useDitraDrain:
-           (Number(calc?.tileMaxSideCm) ||
-            Number(calc?.tileLongestSideCm) ||
-            Number(calc?.tileSizeCm) ||
-            0) > 30
-        },
+        variant: resolvePlan(payload).variant,
       });
-    } else if (typeof mailer.sendBalconyDocsEmail === "function") {
+      } else if (typeof mailer.sendBalconyDocsEmail === "function") {
       await mailer.sendBalconyDocsEmail({
         to,
         pdfBuffer: merged,
         pdfFilename: "balkon-final.pdf",
         customerName,
-        variant: {
-         heightId: calc?.heightId,
-         drainId: calc?.drainId,
-         useDitraDrain:
-           (Number(calc?.tileMaxSideCm) ||
-            Number(calc?.tileLongestSideCm) ||
-            Number(calc?.tileSizeCm) ||
-            0) > 30
-        },
+        variant: resolvePlan(payload).variant,
       });
-    } else if (typeof mailer.sendPdfEmail === "function") {
+      } else if (typeof mailer.sendPdfEmail === "function") {
       await mailer.sendPdfEmail({
         to,
         subject: "Lištobook – Vaša kalkulácia (PDF)",
@@ -911,7 +910,7 @@ router.post("/balkon-final-html-send", async (req, res) => {
     }
 
     return res.status(200).json({ ok: true, message: "PDF odoslané e-mailom.", to });
-  } catch (e) {
+    } catch (e) {
     console.error("balkon-final-html-send error:", e);
     return res.status(500).json({ message: e.message || "E-mail/PDF chyba" });
   }
@@ -958,11 +957,7 @@ router.post("/balkon-final-html-offer", async (req, res) => {
       variant: {
         heightId: calc?.heightId,
         drainId: calc?.drainId,
-        useDitraDrain:
-          (Number(calc?.tileMaxSideCm) ||
-          Number(calc?.tileLongestSideCm) ||
-          Number(calc?.tileSizeCm) ||
-          0) > 30
+        useDitraDrain: Number(calc?.tileSizeCm || 0) > 30
       },
     });
 

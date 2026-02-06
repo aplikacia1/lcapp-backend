@@ -338,7 +338,11 @@ function balconyOfferTemplateCustomer({
 
 /* ===================== BALKÓN – TECH LISTY ===================== */
 
-function loadTechSheetAttachmentsForVariant({ heightId, drainId, useDitraDrain }) {
+function loadTechSheetAttachmentsForVariant({ heightId, drainId, useDitraDrain, tileSizeCm }) {
+  if (typeof useDitraDrain !== 'boolean') {
+  useDitraDrain = Number(tileSizeCm || 0) > 30;
+}
+  console.log('TECH VARIANT:', heightId, drainId, useDitraDrain);
   const h = String(heightId || '').toLowerCase();
   const d = String(drainId || '').toLowerCase();
 
