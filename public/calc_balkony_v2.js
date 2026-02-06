@@ -201,6 +201,8 @@ document.addEventListener("DOMContentLoaded", () => {
     tileThicknessMm: null,
     tileSizeCm: null,      // ⬅️ DOPLNIŤ
     pendingAction: null,
+    barinHasDownpipe: false,
+    barinHeightCm: null,
 
     // ✅ PDF údaje (verejné + prihlásený)
     pdfCustomerName: "",
@@ -960,6 +962,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function toggleBarinExtraQuestions() {
+  const box = document.getElementById("barinExtraBox");
+  if (!box) return;
+
+  if (state.drainDomId === "edge-gutter") {
+    box.classList.remove("hidden");
+  } else {
+    box.classList.add("hidden");
+    state.barinHasDownpipe = false;
+    state.barinHeightCm = null;
+  }
+}
+
   function recalcSystemFromSelections() {
     state.system = findBalconySystem(state.heightDomId, state.drainDomId);
     updateRecommendedBox();
@@ -1426,6 +1441,7 @@ if (btnPdfRequestOffer) {
         state.drainDomId = btn.dataset.drainOption;
 
         drainOptions.forEach((other) => other.classList.toggle("selected", other === btn));
+        toggleBarinExtraQuestions();
         recalcSystemFromSelections();
       });
     });
@@ -1485,6 +1501,7 @@ if (btnPdfRequestOffer) {
 
   // ✅ skús načítať meno/prezývku prihláseného
   tryLoadLoggedUserName();
+  toggleBarinExtraQuestions();
   
 });
 // ================= MOBILE WIZARD STEP 1 (FIX) =================

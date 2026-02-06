@@ -1441,6 +1441,45 @@
               </div>
             </div>
 
+            <!-- =========================================================
+                 BARIN – doplňujúce otázky (zobrazí sa len pri žľabe)
+             ========================================================= -->
+             <div class="question-block hidden" id="barinExtraBox">
+              <div class="question-title">Doplnenie pre žľab (Schlüter® BARIN)</div>
+
+              <div class="question-text">
+                Ak je voda odvádzaná do žľabu pri hrane, potrebujeme vedieť,
+                ako bude voda odvedená zo žľabu na zem alebo do kanalizácie.
+                Tento údaj slúži neskôr pre orientačný výpočet komponentov.
+              </div>
+
+              <div class="height-options" style="margin-top:6px;">
+                <label class="height-option">
+                  <input type="checkbox" id="barinHasDownpipe">
+                  <div>
+                    <span class="height-main">Žľab má zvod (rúru smerom dole)</span>
+                    <span class="height-note">
+                      Používa sa napr. keď je balkón nad chodníkom alebo fasádou.
+                    </span>
+                  </div>
+                </label>
+              </div>
+
+  <div style="margin-top:8px;">
+    <label style="font-size:0.78rem;">Výška balkóna od zeme (cm)</label>
+    <input
+      type="number"
+      id="barinHeightInput"
+      min="0"
+      step="10"
+      placeholder="napr. 250"
+      style="width:100%;padding:7px 10px;border-radius:999px;border:1px solid rgba(148,163,184,0.9);background:rgba(2,6,23,0.96);color:#e5e7eb;"
+    />
+    <small style="color:#9ca3af;">
+      Ak je balkón nad záhradou a voda môže voľne stekať, pole môžete nechať prázdne.
+    </small>
+  </div>
+</div>
             <div class="recommended-box">
               <div class="summary-label">Navrhovaná skladba (pracovný názov)</div>
               <div class="recommended-name" id="recommendedName">Zatiaľ nevybraná – zvoľte výšku a odtok vody.</div>

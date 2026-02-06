@@ -452,3 +452,6 @@ input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--lc-a
 .post strong {
   color: #0c1f4b !important;       /* meno autora nechávame modré */
 }
+.hidden {
+  display: none !important;
+}

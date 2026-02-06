@@ -679,6 +679,13 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
 
 async function htmlToPdfBuffer(browser, html) {
   const page = await browser.newPage();
+
+  await page.setViewport({
+    width: 1240,
+    height: 1754,
+    deviceScaleFactor: 1,
+  });
+
   await page.setContent(html, { waitUntil: "networkidle0" });
   await page.emulateMediaType("print");
 
@@ -730,6 +737,9 @@ function findChromeExecutable() {
 
 async function buildMergedPdfFromPayload(req, payload) {
   const plan = resolvePlan(payload);
+  if (!plan || !Array.isArray(plan.pages)) {
+  throw new Error("PDF PLAN ERROR: plan.pages nie je pole");
+  }
   const totalPages = plan.pages.length;
   const baseOrigin = `${req.protocol}://${req.get("host")}`;
 
@@ -836,9 +846,7 @@ router.post("/balkon-final-html", async (req, res) => {
     if (!payload) return res.status(400).json({ message: "Chýba payload." });
 
     const merged = await buildMergedPdfFromPayload(req, payload);
-
-    console.log("DEBUG CALC:", calc);
-
+    
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", 'attachment; filename="balkon-final.pdf"');
     return res.status(200).send(merged);
