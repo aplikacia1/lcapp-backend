@@ -124,19 +124,24 @@ function resolvePlan(payload) {
   }
 
   // gutter variant
-  if (isLow && isGutter) {
-    return {
-      pages: [
+if (isLow && isGutter) {
+
+  const page6File = useDitraDrain
+    ? "pdf_balkon_page6_bara_rtke.html"
+    : "pdf_balkon_page6_bara_rtk.html";
+
+  return {
+    pages: [
         "pdf_balkon_intro.html",
         "pdf_balkon_page2.html",
         "pdf_balkon_page3.html",
         "pdf_balkon_page4.html",
         "pdf_balkon_page5.html",
-        "pdf_balkon_page6.html",
+        page6File,
         "pdf_balkon_page10.html",
         "pdf_balkon_page9.html",
         "pdf_balkon_page11.html",
-      ],
+    ],
       variant: { heightId, drainId, useDitraDrain }
     };
   }
