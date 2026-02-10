@@ -913,6 +913,16 @@ document.addEventListener("DOMContentLoaded", () => {
     updateStep3ContinueButton();
     updateStep4Summary();
     updateStep4Preview();
+    // odporúčanie pre veľký formát dlažby (UI refresh)
+    const recommendationBox = document.getElementById("tileRecommendationBox");
+
+    if (recommendationBox) {
+      if (state.tileSizeCm > 30) {
+        recommendationBox.style.display = "block";
+      } else {
+        recommendationBox.style.display = "none";
+      }
+    }
     updatePdfButtons();
   }
 
@@ -1048,6 +1058,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
    state.tileThicknessMm = Math.round(v);
    state.tileSizeCm = Math.round(s); // ⬅️ TU SA TO ULOŽÍ
+
+   // ✅ odporúčanie pre veľký formát dlažby
+  const recommendationBox = document.getElementById("tileRecommendationBox");
+
+  if (recommendationBox) {
+    if (state.tileSizeCm > 30) {
+      recommendationBox.style.display = "block";
+    } else {
+      recommendationBox.style.display = "none";
+    }
+  }
 
    recomputeFromInputs();
    closeTileModal();
