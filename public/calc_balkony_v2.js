@@ -923,6 +923,16 @@ document.addEventListener("DOMContentLoaded", () => {
         recommendationBox.style.display = "none";
       }
     }
+    // technické upozornenie v kroku 4 (LOW + veľký formát)
+    const tileWarningBox = document.getElementById("tileWarningBox");
+
+    if (tileWarningBox) {
+      if (state.heightDomId === "low" && state.tileSizeCm > 30) {
+        tileWarningBox.style.display = "block";
+      } else {
+        tileWarningBox.style.display = "none";
+      }
+    }
     updatePdfButtons();
   }
 
