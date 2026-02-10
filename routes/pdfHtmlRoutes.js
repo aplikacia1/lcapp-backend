@@ -80,7 +80,7 @@ function resolvePlan(payload) {
     Number(payload?.calc?.tileSizeCm) ||
     0;
 
-  const useDitraDrain = tileMaxSide > 30;
+  const useDitraDrain = false;
 
   const isLow = heightId === "low";
   const isFree = drainId === "edge-free";
@@ -90,7 +90,7 @@ function resolvePlan(payload) {
     drainId.includes("ryn");
 
   // ⭐ klasická DITRA
-  if (isLow && isFree && !useDitraDrain) {
+  if (isLow && isFree) {
     return {
       pages: [
         "pdf_balkon_intro.html",
@@ -107,7 +107,7 @@ function resolvePlan(payload) {
   }
 
   // ⭐⭐ DITRA-DRAIN
-  if (isLow && isFree && useDitraDrain) {
+  if (false) {
     return {
       pages: [
         "pdf_balkon_intro.html",
@@ -127,7 +127,7 @@ function resolvePlan(payload) {
 if (isLow && isGutter) {
 
   const page6File = useDitraDrain
-    ? "pdf_balkon_page6_bara_rtke.html"
+    ? "pdf_balkon_page6_bara_rake.html"
     : "pdf_balkon_page6_bara_rtk.html";
 
   return {
@@ -573,9 +573,25 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const heightId = safeText(calc?.heightId || "").toLowerCase();
   const drainId = safeText(calc?.drainId || "").toLowerCase();
 
+  const tileMaxSide =
+    Number(calc?.tileMaxSideCm) ||
+    Number(calc?.tileLongestSideCm) ||
+    Number(calc?.tileSizeCm) ||
+    0;
+
+  const useDitraDrain = tileMaxSide > 30;
+
   let cutawayImage = "";
-  if (heightId === "low" && drainId === "edge-free") cutawayImage = "/img/systems/balkon-low-edge-free.png";
-  else if (heightId === "low" && drainId === "edge-gutter") cutawayImage = "/img/systems/balkon-low-edge-gutter.png";
+  if (heightId === "low" && drainId === "edge-free") {
+  cutawayImage = useDitraDrain
+    ? "/img/systems/balkon-edge-free.png"
+    : "/img/systems/balkon-low-edge-free.png";
+  }  
+  else if (heightId === "low" && drainId === "edge-gutter") {
+  cutawayImage = useDitraDrain
+    ? "/img/systems/balkon-edge-gutter.png"
+    : "/img/systems/balkon-low-edge-gutter.png";
+}
   else if (heightId === "low" && drainId === "internal-drain") cutawayImage = "/img/systems/balkon-low-internal-drain.png";
   else if (heightId === "medium" && drainId === "edge-free") cutawayImage = "/img/systems/balkon-edge-free.png";
   else if (heightId === "medium" && drainId === "edge-gutter") cutawayImage = "/img/systems/balkon-edge-gutter.png";
@@ -599,13 +615,6 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   const profilePiecesNum = bom?.profilesCount != null ? Number(bom.profilesCount) : null;
   
     // ✅ DITRA vs DITRA-DRAIN pre stranu 8 (rekapitulácia)
-  const tileMaxSide =
-    Number(calc?.tileMaxSideCm) ||
-    Number(calc?.tileLongestSideCm) ||
-    Number(calc?.tileSizeCm) ||
-    0;
-
-  const useDitraDrain = tileMaxSide > 30;
   // 🔥 OPRAVA PRE DITRA-DRAIN – MUSÍ BYŤ TU
   if (useDitraDrain) {
     calc.baraFamily = "RAKE";
