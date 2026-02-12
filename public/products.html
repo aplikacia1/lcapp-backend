@@ -28,13 +28,37 @@
 
     /* --- MarSab® v hlavičke --- */
     .header-badge{
-      position:absolute; right:12px; top:10px;
-      display:inline-flex; align-items:center; gap:6px;
-      padding:4px 6px; border:1px solid #ffffff33; border-radius:10px;
-      background: rgba(0,0,0,.18); backdrop-filter: blur(2px);
-      text-decoration:none; color:#fff; opacity:.95;
-    }
+      position:absolute;
+      right:12px;
+      top:10px;
+
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+
+      padding:6px 8px;
+      border-radius:12px;
+
+      background: radial-gradient(circle at center,
+                  rgba(255,255,255,.10) 0%,
+                  rgba(255,255,255,.03) 60%,
+                  rgba(0,0,0,.25) 100%);
+
+      border:1px solid rgba(255,255,255,.18);
+
+      box-shadow:
+        0 6px 14px rgba(0,0,0,.35),
+        inset 0 0 10px rgba(255,255,255,.05);
+
+      text-decoration:none;
+      color:#fff;
+   }
     .header-badge img{ height:18px; width:auto; display:block; }
+    .header-badge img{
+       background: radial-gradient(circle, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 70%);
+       border-radius:50%;
+       padding:3px;
+    }
     .header-badge .wordmark{ font-size:12px; font-weight:700; letter-spacing:.2px; }
     @media (max-width: 480px){
       .header-badge{ right:8px; top:8px; padding:3px 6px; }
@@ -159,11 +183,16 @@
       </button>
 
       <!-- MarSab™ v hlavičke -->
-      <a class="header-badge" href="#" aria-label="MarSab™">
+      <div class="header-badge" aria-hidden="true">
         <img src="img/marsab_logo.png" alt="">
-        <span class="wordmark">MarSab™</span>
-      </a>
-
+      
+      <div class="marsab-initials" id="marsabInitials">
+        <strong>MarSab, s. r. o.</strong><br>
+        info@marsab.sk<br><br>
+        <em>tvorca digitálneho priestoru pre komunity</em>
+      </div>
+    </div>
+    
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userGreeting">Prihlásený:</div>
     </div>

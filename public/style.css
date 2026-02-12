@@ -455,3 +455,27 @@ input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--lc-a
 .hidden {
   display: none !important;
 }
+/* ===== MarSab initials popup ===== */
+
+.marsab-initials {
+  position:absolute;
+  top:48px;
+  right:0;
+  width:200px;
+  background:#fff;
+  color:#111;
+  border-radius:12px;
+  padding:12px 14px;
+  box-shadow:0 20px 40px rgba(0,0,0,.2);
+
+  opacity:0;
+  transform:translateY(10px);
+  pointer-events:none;
+  transition:.25s ease;
+}
+
+.marsab-initials.open {
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}

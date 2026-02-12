@@ -187,6 +187,57 @@
     .pwa-btn-primary:hover{
       filter:brightness(1.05);
     }
+    /* ===== MARSAB MINIMAL SYMBOL ===== */
+
+.marsab-symbol {
+  position: fixed;
+  bottom: 18px;
+  left: 18px;
+  width: 28px;
+  opacity: 0.35;
+  cursor: pointer;
+  z-index: 800;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.marsab-symbol img {
+  width: 100%;
+  display: block;
+}
+
+.marsab-symbol:hover {
+  opacity: 0.7;
+  transform: scale(1.05);
+}
+
+.marsab-initials {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  width: 200px;
+  background: #ffffff;
+  color: #111;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 20px 40px rgba(0,0,0,.2);
+
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all .25s ease;
+}
+
+.marsab-initials em {
+  color:#666;
+}
+
+.marsab-initials.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
   </style>
 </head>
 <body>
@@ -208,12 +259,6 @@
       <button class="btn" id="goLogin">Prihlásiť sa</button>
     </div>
   </div>
-
-  <!-- MarSab™ badge -->
-  <a class="brand-badge" href="#" aria-label="MarSab™">
-    <img src="img/marsab_logo.png" alt="">
-    <span class="wordmark">MarSab™</span>
-  </a>
 
   <!-- PWA inštalačné okno -->
   <div id="pwaPrompt" aria-hidden="true">
@@ -274,12 +319,39 @@
           location.href = 'admin_login.html';
         }
       });
-    })();
+      document.addEventListener("DOMContentLoaded", function () {
+
+        const marsabSymbol = document.getElementById("marsabSymbol");
+        const marsabInitials = document.getElementById("marsabInitials");
+
+        if (marsabSymbol && marsabInitials) {
+          marsabSymbol.addEventListener("click", function (e) {
+            e.stopPropagation();
+            marsabInitials.classList.toggle("open");
+          });
+
+          document.addEventListener("click", function () {
+            marsabInitials.classList.remove("open");
+          });
+       }
+
+      });
+  })();
   </script>
 
   <!-- Cookies (len info/súhlas, nič s prihlásením) -->
   <script src="/js/cookies.js"></script>
   <!-- PWA prompt -->
   <script src="/js/pwa-prompt.js"></script>
+  <!-- MarSab symbol (minimal) -->
+<div class="marsab-symbol" id="marsabSymbol">
+  <img src="img/marsab_logo.png" alt="MarSab">
+
+  <div class="marsab-initials" id="marsabInitials">
+    <strong>MarSab, s. r. o.</strong><br>
+    info@marsab.sk<br><br>
+    <em>tvorca digitálneho priestoru pre komunity</em>
+  </div>
+</div>
 </body>
 </html>

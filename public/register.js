@@ -191,4 +191,21 @@
       }
     });
   });
+  document.addEventListener("DOMContentLoaded", function () {
+
+  const marsabSymbol = document.getElementById("marsabSymbol");
+  const marsabInitials = document.getElementById("marsabInitials");
+
+  if (!marsabSymbol || !marsabInitials) return;
+
+  marsabSymbol.addEventListener("click", function (e) {
+    e.stopPropagation();
+    marsabInitials.classList.toggle("open");
+  });
+
+  document.addEventListener("click", function () {
+    marsabInitials.classList.remove("open");
+  });
+
+});
 })();

@@ -41,6 +41,54 @@
     /* Jemná animácia vynorenia */
     .fade-in { opacity:0; transform:translateY(20px); animation: fadeInUp .6s ease forwards; }
     @keyframes fadeInUp { to { opacity:1; transform:translateY(0); } }
+
+    /* ===== MARSAB MINIMAL SYMBOL ===== */
+
+.marsab-symbol {
+  position: fixed;
+  bottom: 18px;
+  left: 18px;
+  width: 28px;
+  opacity: 0.35;
+  cursor: pointer;
+  z-index: 800;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.marsab-symbol img {
+  width: 100%;
+  display: block;
+}
+
+.marsab-symbol:hover {
+  opacity: 0.7;
+  transform: scale(1.05);
+}
+
+.marsab-initials {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  width: 200px;
+  background: #ffffff;
+  color: #111;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 20px 40px rgba(0,0,0,.2);
+
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all .25s ease;
+}
+
+.marsab-initials.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
   </style>
 </head>
 <body>
@@ -65,10 +113,15 @@
     </form>
   </div>
 
-  <a class="brand-badge" href="#" aria-label="MarSab™">
-    <img src="img/marsab_logo.png" alt=""><span>MarSab™</span>
-  </a>
-
   <script src="register.js?v=20250923-2" defer></script>
+  <div class="marsab-symbol" id="marsabSymbol">
+  <img src="img/marsab_logo.png" alt="MarSab">
+
+  <div class="marsab-initials" id="marsabInitials">
+    <strong>MarSab, s. r. o.</strong><br>
+    info@marsab.sk<br><br>
+    <em>tvorca digitálneho priestoru pre komunity</em>
+  </div>
+</div>
 </body>
 </html>

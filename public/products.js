@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
   bindHeader();
+  bindMarsab();   // ✅ PRIDAŤ TENTO RIADOK
   await showUser();
   await loadProducts();
   $('#searchInput')?.addEventListener('input', onSearch);
@@ -158,4 +159,26 @@ function onSearch() {
       .includes(q)
   );
   render(filtered);
+}
+/* --------- MarSab popup --------- */
+function bindMarsab() {
+  const badge = document.querySelector('.header-badge');
+  const popup = document.getElementById('marsabInitials');
+
+  if (!badge || !popup) return;
+
+  badge.addEventListener('click', (e) => {
+    e.stopPropagation();
+    popup.classList.toggle('open');
+  });
+
+  // klik mimo popup zavrie
+  document.addEventListener('click', () => {
+    popup.classList.remove('open');
+  });
+
+  // klik do popup ho nezatvorí
+  popup.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
 }

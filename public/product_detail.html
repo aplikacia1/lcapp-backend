@@ -61,13 +61,41 @@
 
     /* MarSab™ v hlavičke (vpravo hore) */
     .header-badge{
-      position:absolute; right:12px; top:10px;
-      display:inline-flex; align-items:center; gap:6px;
-      padding:4px 6px; border:1px solid #ffffff33; border-radius:10px;
-      background: rgba(0,0,0,.18); backdrop-filter: blur(2px);
-      text-decoration:none; color:#fff; opacity:.95;
+      position:absolute; 
+      position:absolute;
+  right:12px;
+  top:10px;
+
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+
+  padding:6px 8px;
+  border-radius:12px;
+
+  background: radial-gradient(circle at center,
+              rgba(255,255,255,.10) 0%,
+              rgba(255,255,255,.03) 60%,
+              rgba(0,0,0,.25) 100%);
+
+  border:1px solid rgba(255,255,255,.18);
+
+  box-shadow:
+    0 6px 14px rgba(0,0,0,.35),
+    inset 0 0 10px rgba(255,255,255,.05);
+
+  text-decoration:none;
+  color:#fff;
     }
-    .header-badge img{ height:18px; width:auto; display:block; }
+   .header-badge img{
+  height:18px;
+  width:auto;
+  display:block;
+
+  background: radial-gradient(circle, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 70%);
+  border-radius:50%;
+  padding:3px;
+}
     .header-badge .wordmark{ font-size:12px; font-weight:700; letter-spacing:.2px; }
 
     @media (max-width: 480px){
@@ -397,10 +425,15 @@
       </a>
 
       <!-- Badge vpravo -->
-      <a class="header-badge" href="#" aria-label="MarSab™">
+      <div class="header-badge" id="marsabSymbol">
         <img src="img/marsab_logo.png" alt="">
-        <span class="wordmark">MarSab™</span>
-      </a>
+
+      <div class="marsab-initials" id="marsabInitials">
+        <strong>MarSab, s. r. o.</strong><br>
+        info@marsab.sk<br><br>
+        <em>tvorca digitálneho priestoru pre komunity</em>
+      </div>
+   </div>
 
       <!-- Logo a info o používateľovi -->
       <img src="logo_lc.jpg" class="logo-small" alt="Logo">
@@ -502,6 +535,25 @@
       }
     })();
   </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const marsabSymbol = document.getElementById("marsabSymbol");
+  const marsabInitials = document.getElementById("marsabInitials");
+
+  if (!marsabSymbol || !marsabInitials) return;
+
+  marsabSymbol.addEventListener("click", function(e){
+    e.stopPropagation();
+    marsabInitials.classList.toggle("open");
+  });
+
+  document.addEventListener("click", function(){
+    marsabInitials.classList.remove("open");
+  });
+
+});
+</script>
 
   <script src="product_detail.js"></script>
 </body>
