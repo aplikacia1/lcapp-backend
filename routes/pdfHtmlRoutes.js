@@ -67,6 +67,20 @@ function toAbsPublicUrl(baseOrigin, maybePath) {
   return baseOrigin.replace(/\/$/, "") + p;
 }
 
+const PAGE = {
+  INTRO: "pdf_balkon_intro.html",
+  SUMMARY: "pdf_balkon_page2.html",
+  LAYER_LOW: "pdf_balkon_page3.html",
+  ADHESIVE: "pdf_balkon_page4.html",
+  WATERPROOF: "pdf_balkon_page5.html",
+  EDGE: "pdf_balkon_page6.html",
+  EDGE_COMPONENTS: "pdf_balkon_page7.html",
+  RECAP: "pdf_balkon_page8.html",
+  BARIN_1: "pdf_balkon_page9.html",
+  BARIN_2: "pdf_balkon_page10.html",
+  RECAP_BARIN: "pdf_balkon_page11.html"
+};
+
 function resolvePlan(payload) {
 
   console.log("CALC DEBUG:", payload.calc);
@@ -93,14 +107,13 @@ function resolvePlan(payload) {
   if (isLow && isFree) {
     return {
       pages: [
-        "pdf_balkon_intro.html",
-        "pdf_balkon_page2.html",
-        "pdf_balkon_page3.html",
-        "pdf_balkon_page4.html",
-        "pdf_balkon_page5.html",
-        "pdf_balkon_page6.html",
-        "pdf_balkon_page7.html",
-        "pdf_balkon_page8.html",
+       PAGE.INTRO,
+       PAGE.SUMMARY,
+       PAGE.LAYER_LOW,
+       PAGE.ADHESIVE,
+       PAGE.WATERPROOF,
+       PAGE.EDGE,
+       PAGE.RECAP,
       ],
       variant: { heightId, drainId, useDitraDrain }
     };
@@ -132,18 +145,18 @@ if (isLow && isGutter) {
 
   return {
     pages: [
-        "pdf_balkon_intro.html",
-        "pdf_balkon_page2.html",
-        "pdf_balkon_page3.html",
-        "pdf_balkon_page4.html",
-        "pdf_balkon_page5.html",
-        page6File,
-        "pdf_balkon_page10.html",
-        "pdf_balkon_page9.html",
-        "pdf_balkon_page11.html",
+      PAGE.INTRO,
+      PAGE.SUMMARY,
+      PAGE.LAYER_LOW,
+      PAGE.ADHESIVE,
+      PAGE.WATERPROOF,
+      page6File,
+      PAGE.BARIN_1,
+      PAGE.BARIN_2,
+      PAGE.RECAP_BARIN
     ],
-      variant: { heightId, drainId, useDitraDrain }
-    };
+    variant: { heightId, drainId, useDitraDrain }
+  };
   }
 
   // fallback
@@ -616,7 +629,7 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   
     // ✅ DITRA vs DITRA-DRAIN pre stranu 8 (rekapitulácia)
   // 🔥 OPRAVA PRE DITRA-DRAIN – MUSÍ BYŤ TU
-  if (useDitraDrain) {
+  if (useDitraDrain && !calc.baraFamily) {
     calc.baraFamily = "RAKE";
     calc.baraRecommendationText = "BARA-RAKE odkvapový profil pre systém DITRA-DRAIN";
   }
@@ -624,6 +637,26 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   // prepíš texty pre rekapituláciu
   let systemTitleOverride = safeText(calc?.systemTitle || "");
   let systemShortNoteOverride = safeText(calc?.systemShortNote || "");
+
+  // ----------------------------------------------------
+// ✅ SMART TEXT PRE REKAPITULÁCIU (strana 8)
+// ----------------------------------------------------
+const baraFamily = safeText(calc?.baraFamily || "").toUpperCase();
+
+if (baraFamily === "RT") {
+  systemShortNoteOverride +=
+    " Ukončenie hrany je riešené profilom BARA-RT, ktorý chráni hranu dlažby a zabezpečuje kontrolovaný odtok vody.";
+}
+
+if (baraFamily === "RW") {
+  systemShortNoteOverride +=
+    " Ukončenie hrany je riešené profilom BARA-RW, ktorý slúži ako estetické prekrytie betónovej hrany.";
+}
+
+if (drainId.includes("gutter") || drainId.includes("ryn")) {
+  systemShortNoteOverride +=
+    " Odvod vody je riešený žľabovým systémom BARIN pri hrane balkóna.";
+}
 
   if (useDitraDrain) {
     systemTitleOverride = "Schlüter® DITRA-DRAIN + KERDI 200";
