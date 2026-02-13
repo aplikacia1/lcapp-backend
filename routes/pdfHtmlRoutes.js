@@ -78,7 +78,9 @@ const PAGE = {
   RECAP: "pdf_balkon_page8.html",
   BARIN_1: "pdf_balkon_page9.html",
   BARIN_2: "pdf_balkon_page10.html",
-  RECAP_BARIN: "pdf_balkon_page11.html"
+  RECAP_BARIN: "pdf_balkon_page11.html",
+  KERDI: "pdf_balkon_page6_kerdi.html", 
+  KERDI_DRAIN: "pdf_balkon_page7_kerdi_drain.html",
 };
 
 function resolvePlan(payload) {
@@ -102,6 +104,9 @@ function resolvePlan(payload) {
     drainId === "edge-gutter" ||
     drainId.includes("gutter") ||
     drainId.includes("ryn");
+  const isInternal =
+    drainId === "internal-drain" ||
+    drainId.includes("internal");
 
   // ⭐ klasická DITRA
   if (isLow && isFree) {
@@ -118,6 +123,23 @@ function resolvePlan(payload) {
       variant: { heightId, drainId, useDitraDrain }
     };
   }
+
+  // ⭐ LOW + INTERNAL DRAIN (odtok v strede)
+if (isLow && isInternal) {
+  return {
+    pages: [
+      PAGE.INTRO,
+      PAGE.SUMMARY,
+      PAGE.LAYER_LOW,
+      PAGE.ADHESIVE,
+      PAGE.WATERPROOF,
+      PAGE.KERDI,
+      PAGE.KERDI_DRAIN,
+      PAGE.RECAP,
+    ],
+    variant: { heightId, drainId, useDitraDrain }
+  };
+}
 
   // ⭐⭐ DITRA-DRAIN
   if (false) {
