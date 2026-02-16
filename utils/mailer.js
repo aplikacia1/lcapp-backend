@@ -349,6 +349,7 @@ function loadTechSheetAttachmentsForVariant({ heightId, drainId, useDitraDrain, 
   const isLow = h === 'low';
   const isEdgeFree = d === 'edge-free';
   const isEdgeGutter = d === 'edge-gutter';
+  const isKerdiDrain = d === 'drain';
   if (!isLow) return [];
   const baseDir = path.resolve(__dirname, '..', 'public', 'img', 'pdf', 'balkon', 'tech');
 
@@ -367,8 +368,19 @@ if (isLow && isEdgeGutter) {
     { filename: 'technicky-list-sopro-lepidlo.pdf', local: 'sopro-lepidlo.pdf' },
   ];
 }
+else if (isLow && isKerdiDrain) {
+  // ✅ LOW + KERDI-DRAIN (VPUSŤ)
+  files = [
+    { filename: 'technicky-list-schluter-ditra.pdf', local: 'schluter-ditra.pdf' },
 
-else if (useDitraDrain) {
+    { filename: 'technicky-list-schluter-kerdi-200.pdf', local: 'schluter-kerdi-200.pdf' },
+    { filename: 'technicky-list-schluter-kerdi-coll.pdf', local: 'kerdi-coll-lepidlo.pdf' },
+
+    { filename: 'technicky-list-mapei-lepidlo.pdf', local: 'mapei-lepidlo.pdf' },
+    { filename: 'technicky-list-sopro-lepidlo.pdf', local: 'sopro-lepidlo.pdf' },
+  ];
+}
+else if (!isEdgeFree && !isEdgeGutter && !isKerdiDrain && useDitraDrain) {
   // ✅ DITRA-DRAIN vetva (bez BARA líšt)
   files = [
     { filename: 'technicky-list-schluter-ditra-drain.pdf', local: 'schluter-ditra-drain.pdf' },
