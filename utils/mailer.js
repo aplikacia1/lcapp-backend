@@ -367,7 +367,7 @@ if (isLow && isEdgeGutter) {
     { filename: 'technicky-list-sopro-lepidlo.pdf', local: 'sopro-lepidlo.pdf' },
   ];
 }
-else
+
 else if (useDitraDrain) {
   // ✅ DITRA-DRAIN vetva (bez BARA líšt)
   files = [
@@ -382,7 +382,7 @@ else if (useDitraDrain) {
     { filename: 'technicky-list-sopro-lepidlo.pdf', local: 'sopro-lepidlo.pdf' },
   ];
 }
-} else {
+else {
   // ✅ klasická DITRA vetva
   files = [
     { filename: 'technicky-list-schluter-ditra.pdf', local: 'schluter-ditra.pdf' },
