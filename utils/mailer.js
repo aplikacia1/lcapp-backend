@@ -374,6 +374,7 @@ else if (isLow && isKerdiDrain) {
     { filename: 'technicky-list-schluter-ditra.pdf', local: 'schluter-ditra.pdf' },
 
     { filename: 'technicky-list-schluter-kerdi-200.pdf', local: 'schluter-kerdi-200.pdf' },
+    { filename: 'technicky-list-schluter-kerdi-drain.pdf', local: 'kerdi drain vpusť.pdf' },
     { filename: 'technicky-list-schluter-kerdi-coll.pdf', local: 'kerdi-coll-lepidlo.pdf' },
 
     { filename: 'technicky-list-mapei-lepidlo.pdf', local: 'mapei-lepidlo.pdf' },
