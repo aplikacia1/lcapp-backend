@@ -349,7 +349,7 @@ function loadTechSheetAttachmentsForVariant({ heightId, drainId, useDitraDrain, 
   const isLow = h === 'low';
   const isEdgeFree = d === 'edge-free';
   const isEdgeGutter = d === 'edge-gutter';
-  const isKerdiDrain = d === 'drain';
+  const isKerdiDrain = d === 'drain' || d === 'internal-drain';
   if (!isLow) return [];
   const baseDir = path.resolve(__dirname, '..', 'public', 'img', 'pdf', 'balkon', 'tech');
 
