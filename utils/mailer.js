@@ -348,12 +348,26 @@ function loadTechSheetAttachmentsForVariant({ heightId, drainId, useDitraDrain, 
 
   const isLow = h === 'low';
   const isEdgeFree = d === 'edge-free';
-  if (!(isLow && isEdgeFree)) return [];
-
+  const isEdgeGutter = d === 'edge-gutter';
+  if (!isLow) return [];
   const baseDir = path.resolve(__dirname, '..', 'public', 'img', 'pdf', 'balkon', 'tech');
 
 let files = [];
+// ✅ LOW + EDGE_GUTTER (BARIN)
+if (isLow && isEdgeGutter) {
+  files = [
+    { filename: 'technicky-list-schluter-barin.pdf', local: 'schluter-barin.pdf' },
+    { filename: 'technicky-list-schluter-bara-rtk.pdf', local: 'schluter-bara-rtk.pdf' },
 
+    { filename: 'technicky-list-schluter-ditra.pdf', local: 'schluter-ditra.pdf' },
+    { filename: 'technicky-list-schluter-kerdi-200.pdf', local: 'schluter-kerdi-200.pdf' },
+    { filename: 'technicky-list-schluter-kerdi-coll.pdf', local: 'kerdi-coll-lepidlo.pdf' },
+
+    { filename: 'technicky-list-mapei-lepidlo.pdf', local: 'mapei-lepidlo.pdf' },
+    { filename: 'technicky-list-sopro-lepidlo.pdf', local: 'sopro-lepidlo.pdf' },
+  ];
+}
+else
 if (useDitraDrain) {
   // ✅ DITRA-DRAIN vetva
   files = [
