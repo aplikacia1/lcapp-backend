@@ -368,19 +368,20 @@ if (isLow && isEdgeGutter) {
   ];
 }
 else
-if (useDitraDrain) {
-  // ✅ DITRA-DRAIN vetva
+else if (useDitraDrain) {
+  // ✅ DITRA-DRAIN vetva (bez BARA líšt)
   files = [
     { filename: 'technicky-list-schluter-ditra-drain.pdf', local: 'schluter-ditra-drain.pdf' },
+
+    { filename: 'technicky-list-schluter-ditra.pdf', local: 'schluter-ditra.pdf' },
 
     { filename: 'technicky-list-schluter-kerdi-200.pdf', local: 'schluter-kerdi-200.pdf' },
     { filename: 'technicky-list-schluter-kerdi-coll.pdf', local: 'kerdi-coll-lepidlo.pdf' },
 
     { filename: 'technicky-list-mapei-lepidlo.pdf', local: 'mapei-lepidlo.pdf' },
     { filename: 'technicky-list-sopro-lepidlo.pdf', local: 'sopro-lepidlo.pdf' },
-
-    { filename: 'technicky-list-schluter-bara-rake.pdf', local: 'schluter-bara-rake.pdf' },
   ];
+}
 } else {
   // ✅ klasická DITRA vetva
   files = [
