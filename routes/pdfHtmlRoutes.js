@@ -99,6 +99,7 @@ function resolvePlan(payload) {
   const useDitraDrain = false;
 
   const isLow = heightId === "low";
+  const isMedium = heightId === "medium";
   const isFree = drainId === "edge-free";
   const isGutter =
     drainId === "edge-gutter" ||
@@ -140,9 +141,41 @@ if (isLow && isInternal) {
     variant: { heightId, drainId, useDitraDrain }
   };
 }
-
+// ⭐⭐ MEDIUM + INTERNAL DRAIN (KERDI-DRAIN)
+if (isMedium && isInternal) {
+  return {
+    pages: [
+      PAGE.INTRO,
+      PAGE.SUMMARY,
+      "pdf_balkon_page3_ditra_drain.html",
+      "pdf_balkon_page4_smart_adhesive.html",
+      PAGE.WATERPROOF,
+      PAGE.KERDI,
+      PAGE.KERDI_DRAIN,
+      "pdf_balkon_page8_system.html"
+    ],
+    variant: { heightId, drainId, useDitraDrain }
+  };
+}
+// ⭐⭐ MEDIUM + BARIN (žľab pri hrane)
+if (isMedium && isGutter) {
+  return {
+    pages: [
+      PAGE.INTRO,
+      PAGE.SUMMARY,
+      "pdf_balkon_page3_ditra_drain.html",
+      "pdf_balkon_page4_smart_adhesive.html",
+      PAGE.WATERPROOF,
+      "pdf_balkon_page6_bara_rtke.html",
+      PAGE.BARIN_1,
+      PAGE.BARIN_2,
+      PAGE.RECAP_BARIN
+    ],
+    variant: { heightId, drainId, useDitraDrain }
+  };
+}
   // ⭐⭐ DITRA-DRAIN
-  if (false) {
+  if (isMedium) {
     return {
       pages: [
         "pdf_balkon_intro.html",
@@ -218,8 +251,15 @@ function buildPage5Consumption(calc) {
     pickNumber(calc, ["perimeter_total", "perimeterTotal"]) ??
     pickNumber(calc, ["perimeter"]);
 
-  const A = pickNumber(calc, ["a", "A", "lengthA", "lenA", "length", "longSide", "sideA"]);
-  const B = pickNumber(calc, ["b", "B", "widthB", "lenB", "width", "shortSide", "sideB"]);
+  const dims = calc?.dims || calc?.dimsRaw || {};
+
+  const A =
+    pickNumber(calc, ["a", "A", "lengthA", "lenA", "length", "longSide", "sideA"]) ??
+    pickNumber(dims, ["A", "a", "sideA"]);
+
+  const B =
+    pickNumber(calc, ["b", "B", "widthB", "lenB", "width", "shortSide", "sideB"]) ??
+    pickNumber(dims, ["B", "b", "sideB"]);
 
   const widthForJoints = B;
   const joints =
@@ -645,7 +685,11 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
 
   const systemCutawayImageAbs = cutawayImage ? toAbsPublicUrl(baseOrigin, cutawayImage) : "";
 
-  const page5 = buildPage5Consumption({ ...calc, perimeterFull });
+  const page5 = buildPage5Consumption({
+    ...calc,
+    perimeterFull,
+    dims: calc?.dims || calc?.dimsRaw
+  });
 
   const profilePiecesNum = bom?.profilesCount != null ? Number(bom.profilesCount) : null;
   

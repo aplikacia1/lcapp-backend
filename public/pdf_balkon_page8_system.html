@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 8 (Rekapitulácia)</title>
+
+  <!-- ✅ v2 CSS -->
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+</head>
+
+<body>
+  <div class="pdf-page pdf-pad-16-18-14">
+    <div class="pdf-watermark"></div>
+
+    <div class="pdf-content">
+      <header class="pdf-mini-header">
+        <div class="mini-left">
+          <div class="mini-logo"><img src="/logo_lc.jpg" alt="Lištové centrum"></div>
+          <div class="mini-title">
+            <strong>Technický podklad – balkónová skladba</strong>
+            <span>Rekapitulácia výpočtu a odporúčané položky</span>
+          </div>
+        </div>
+
+        <div class="mini-code">
+          <div class="label">Číslo PDF</div>
+          <div class="value">{{pdfCode}}</div>
+        </div>
+      </header>
+
+      <h2 class="pdf-h2">8. Rekapitulácia a čo ďalej</h2>
+      <p class="pdf-sub pdf-sub--p8">
+        Nižšie je zhrnutie údajov z kalkulačky a orientačný zoznam komponentov.
+        Dokument slúži ako technický podklad; finálne množstvá závisia od konkrétnych podmienok stavby.
+      </p>
+
+      <section class="grid-2-stretch grid-2-stretch--p8">
+        <!-- LEFT -->
+        <article class="card">
+          <div class="card-inner compact card-inner--p8">
+            <div class="chip chip--p8">Zadané parametre (z kalkulačky)</div>
+
+            <div class="kv kv--p8">
+              <div class="k">Typ</div><div class="v">{{constructionType}}</div>
+              <div class="k">Tvar</div><div class="v">{{shapeLabel}}</div>
+              <div class="k">Plocha</div><div class="v">{{areaText}}</div>
+              <div class="k">Obvod pre lišty</div><div class="v">{{perimeterText}}</div>
+            </div>
+
+            <div class="sep sep--p8"></div>
+
+            <div class="kv kv--p8">
+              <div class="k">Konštrukčná výška</div><div class="v">{{heightLabel}}</div>
+              <div class="k">Odtok vody</div><div class="v">{{drainLabel}}</div>
+              <div class="k">Systém</div><div class="v">{{systemTitle}}</div>
+              <div class="k">Poznámka</div><div class="v v-wrap">{{systemShortNote}}</div>
+            </div>
+            
+          </div>
+        </article>
+
+        <!-- RIGHT -->
+        <article class="card">
+          <div class="card-inner compact card-inner--p8">
+            <div class="chip chip--p8">Orientačný zoznam komponentov</div>
+
+            <ul class="list list--p8">
+              <li><strong>Schlüter®-DITRA:</strong> {{ditraAreaText}}</li>
+              <li><strong>Lepidlo C2:</strong> {{adhesiveBagsText}} (spotreba {{adhesiveConsumptionText}})</li>
+              <li><strong>KERDI-KEBA:</strong> {{kebaMetersText}}</li>
+              <li><strong>KERDI-COLL:</strong> {{collPacksText}} (orientačne {{collConsumptionText}})</li>
+                            
+            </ul>
+
+            <!-- ✅ pripravené na budúce premenné, aby nemusel listovať -->
+            
+            <div class="note note--p8">
+              <strong>Dôležité:</strong> Pri skladbách balkón/terasa rozhodujú detaily napojenia (stena, prah, hrana, dilatácie).
+              Presné riešenie detailov sa stanoví podľa konkrétnych podmienok stavby a zvoleného systému.
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="cta cta--p8">
+        <p class="cta-title">Odporúčané riešenie a ďalší postup</p>
+
+        <p class="p p--p8-cta">
+          Na základe zadaných údajov kalkulačka pripravila orientačný návrh skladby balkóna
+          a odporúčané systémové komponenty. Tento dokument slúži ako technický podklad,
+          ktorý pomáha správne navrhnúť skladbu a vyhnúť sa problémom s odvodnením alebo napojením detailov.
+        </p>
+
+        <p class="p p--p8-cta">
+          V prípade záujmu vám v <strong>LIŠTOVOM CENTRE EU, s.r.o.</strong> pomôžeme návrh
+          doladiť podľa konkrétnych podmienok stavby, preveriť správnosť detailov
+          a pripraviť odporúčanie vhodných variantov riešenia.
+        </p>
+
+        <div class="contact contact--p8">
+          <div><strong>E-mail:</strong> bratislava@listovecentrum.sk</div>
+          <div><strong>Tel.:</strong> +421 947 922 181</div>
+          <div><strong>Adresa:</strong> Sasinkova 13, 010 01 Žilina</div>
+          <div><strong>Web:</strong> listobook.sk / listovecentrum.sk</div>
+       </div>
+     </section>
+    </div>
+
+    <footer class="pdf-footer">
+      <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+      <span>Strana 8 / {{totalPages}}</span>
+    </footer>
+  </div>
+</body>
+</html>
