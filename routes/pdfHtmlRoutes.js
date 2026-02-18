@@ -88,6 +88,11 @@ function resolvePlan(payload) {
 
   const heightId = safeText(payload?.calc?.heightId).toLowerCase();
   const drainId = safeText(payload?.calc?.drainId).toLowerCase();
+  // NORMALIZÁCIA typu odvodnenia (oddelené od názvov systémov)
+  const drainType =
+    drainId.includes("internal") ? "internal" :
+    drainId.includes("gutter") || drainId.includes("ryn") ? "gutter" :
+    "free";
 
   const tileMaxSide =
     Number(payload?.calc?.tileMaxSideCm) ||
@@ -100,14 +105,9 @@ function resolvePlan(payload) {
   const isLow = heightId === "low";
   const isMedium = heightId === "medium";
   const isHigh = heightId === "high";
-  const isFree = drainId === "edge-free";
-  const isGutter =
-    drainId === "edge-gutter" ||
-    drainId.includes("gutter") ||
-    drainId.includes("ryn");
-  const isInternal =
-    drainId === "internal-drain" ||
-    drainId.includes("internal");
+  const isInternal = drainType === "internal";
+  const isGutter = drainType === "gutter";
+  const isFree = drainType === "free";
 
   // ⭐ klasická DITRA
   if (isLow && isFree) {
@@ -176,7 +176,22 @@ function resolvePlan(payload) {
       variant: { heightId, drainId, useDitraDrain }
     };
   }
-
+// ⭐⭐⭐ HIGH + INTERNAL DRAIN (KERDI-DRAIN – nová skladba)
+if (isHigh && isInternal) {
+  return {
+    pages: [
+      PAGE.INTRO,
+      PAGE.SUMMARY,
+      "pdf_balkon_troba_plus.html",
+      PAGE.ADHESIVE,
+      "pdf_balkon_page3_ditra_drain.html",
+      PAGE.KERDI,
+      PAGE.KERDI_DRAIN,
+      PAGE.RECAP
+    ],
+    variant: { heightId, drainId, useDitraDrain }
+  };
+}
   // ⭐⭐⭐ HIGH – TROBA + BEKOTEC (vysoká skladba)
   if (isHigh) {
     return {
