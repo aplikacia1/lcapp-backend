@@ -1190,6 +1190,9 @@ document.addEventListener("DOMContentLoaded", () => {
         drainId: state.drainDomId,
         drainLabel: getDrainLabel(state.drainDomId),
 
+        barinHasDownpipe: state.barinHasDownpipe,
+        barinHeightCm: state.barinHeightCm,
+
         systemId: sys ? sys.id : null,
         systemTitle: sys ? sys.uiTitle || "" : null,
 

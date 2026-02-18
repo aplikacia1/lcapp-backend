@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Strana 3 (DITRA-DRAIN)</title>
+
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+</head>
+
+<body>
+  <div class="pdf-page pdf-pad-16-18-14">
+    <div class="pdf-watermark"></div>
+
+    <div class="pdf-content">
+
+      <!-- MINI HEADER -->
+      <header class="pdf-mini-header">
+        <div class="mini-left">
+          <div class="mini-logo">
+            <img src="/logo_lc.jpg" alt="Lištové centrum" />
+          </div>
+          <div class="mini-title">
+            <strong>Technický podklad – balkónová skladba</strong>
+            <span>Strana 3: vrstva č. 1 (drenážna vrstva)</span>
+          </div>
+        </div>
+
+        <div class="mini-code">
+          <div class="label">Číslo PDF podkladu</div>
+          <div class="value">{{pdfCode}}</div>
+        </div>
+      </header>
+
+      <!-- TITLE -->
+      <h2 class="pdf-h2">
+        3. Skladba: {{systemTitle}} – vrstva 1: Schlüter®-DITRA-DRAIN 8
+      </h2>
+
+      <p class="pdf-sub pdf-sub--p3">
+        Vybraná konštrukčná výška: <strong>{{heightLabel}}</strong>.
+        V tejto skladbe je odvodnenie balkóna riešené podlahovou vpustou
+        <strong>Schlüter®-KERDI-DRAIN</strong>. Drenážna rohož DITRA-DRAIN zabezpečuje
+        odvádzanie vody spod dlažby smerom k vpusti a zároveň oddeľuje
+        dlažbu od podkladu.
+      </p>
+
+      <section class="grid-2-stretch grid-2-stretch--p3">
+
+        <!-- LEFT CARD -->
+        <article class="card">
+          <div class="card-inner card-inner--p3">
+
+            <div class="chip chip--p3">
+              Vrstva – drenáž a separácia
+            </div>
+
+            <p class="p">
+              <strong>Schlüter®-DITRA-DRAIN 8</strong> je drenážna a separačná rohož,
+              ktorá sa lepí na pripravený a hydroizolovaný podklad.
+              Vytvára odvetranú vrstvu pod dlažbou a umožňuje aktívne
+              odvádzanie vody smerom k podlahovej vpusti.
+            </p>
+
+            <div class="sep sep--p3"></div>
+
+            <p class="p p-strongline">
+              Funkcia drenážnej vrstvy v tejto skladbe:
+            </p>
+
+            <ul class="bullet bullet--tight">
+              <li><strong>Odvod vody</strong> spod keramickej krytiny smerom k vpusti.</li>
+              <li><strong>Zníženie vlhkosti</strong> v skladbe balkóna.</li>
+              <li><strong>Oddelenie pnutí</strong> medzi podkladom a dlažbou.</li>
+              <li><strong>Stabilita skladby</strong> pri teplotných zmenách.</li>
+            </ul>
+
+            <div class="sep sep--p3"></div>
+
+            <div class="chip chip--p3">
+              Dôležitá poznámka
+            </div>
+
+            <p class="p">
+              V tomto variante je odvod vody riešený podlahovou vpustou,
+              preto sa nepoužívajú ukončovacie profily BARA ani žľabový
+              systém BARIN. Hrany balkóna sú riešené ako murované
+              napojenie na konštrukciu.
+            </p>
+
+            <div class="sep sep--p3"></div>
+
+            <!-- DATA FROM CALCULATOR -->
+            <div class="kv kv--p3">
+              <div class="k">Plocha z kalkulačky</div>
+              <div class="v">{{areaText}}</div>
+
+              <div class="k">DITRA-DRAIN 8 (m²)</div>
+              <div class="v">{{ditraAreaText}}</div>
+
+              <div class="k">Lepidlo C2 (spotreba)</div>
+              <div class="v">{{adhesiveConsumptionText}}</div>
+
+              <div class="k">Počet vriec (25 kg)</div>
+              <div class="v">{{adhesiveBagsText}}</div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- RIGHT CARD -->
+        <article class="card">
+          <div class="card-head card-head--p3">
+            <div class="t">Obrázok vrstvy</div>
+            <div class="s">Drenážna rohož pod dlažbou (ilustračne)</div>
+          </div>
+
+          <div class="card-inner card-inner--p3-right">
+
+            <div class="imgbox imgbox--p3">
+              <img src="/img/pdf/balkon/ditra-drain-roll-v1.png"
+                   alt="Schlüter DITRA-DRAIN" />
+            </div>
+
+            <div class="under-img under-img--p3">
+              <strong>Postup:</strong>
+              na pripravený hydroizolovaný podklad sa lepí drenážna rohož
+              DITRA-DRAIN 8, na ktorú sa následne lepí keramická dlažba.
+              Voda je odvádzaná drenážnou vrstvou smerom k podlahovej vpusti.
+            </div>
+
+            <div class="under-img under-img--p3 under-img--p3-tight">
+              <strong>Objednávka:</strong>
+              všetky uvedené komponenty je možné objednať v
+              <strong>LIŠTOVOM CENTRE</strong>.
+            </div>
+
+          </div>
+        </article>
+
+      </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="pdf-footer">
+      <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+      <span>Strana 3 / {{totalPages}}</span>
+    </footer>
+  </div>
+</body>
+</html>

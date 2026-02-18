@@ -79,12 +79,11 @@ const PAGE = {
   BARIN_1: "pdf_balkon_page9.html",
   BARIN_2: "pdf_balkon_page10.html",
   RECAP_BARIN: "pdf_balkon_page11.html",
-  KERDI: "pdf_balkon_page6_kerdi.html", 
+  KERDI: "pdf_balkon_page6_kerdi.html",
   KERDI_DRAIN: "pdf_balkon_page7_kerdi_drain.html",
 };
 
 function resolvePlan(payload) {
-
   console.log("CALC DEBUG:", payload.calc);
 
   const heightId = safeText(payload?.calc?.heightId).toLowerCase();
@@ -100,6 +99,7 @@ function resolvePlan(payload) {
 
   const isLow = heightId === "low";
   const isMedium = heightId === "medium";
+  const isHigh = heightId === "high";
   const isFree = drainId === "edge-free";
   const isGutter =
     drainId === "edge-gutter" ||
@@ -113,67 +113,86 @@ function resolvePlan(payload) {
   if (isLow && isFree) {
     return {
       pages: [
-       PAGE.INTRO,
-       PAGE.SUMMARY,
-       PAGE.LAYER_LOW,
-       PAGE.ADHESIVE,
-       PAGE.WATERPROOF,
-       PAGE.EDGE,
-       PAGE.RECAP,
+        PAGE.INTRO,
+        PAGE.SUMMARY,
+        PAGE.LAYER_LOW,
+        PAGE.ADHESIVE,
+        PAGE.WATERPROOF,
+        PAGE.EDGE,
+        PAGE.RECAP,
       ],
       variant: { heightId, drainId, useDitraDrain }
     };
   }
 
   // ⭐ LOW + INTERNAL DRAIN (odtok v strede)
-if (isLow && isInternal) {
-  return {
-    pages: [
-      PAGE.INTRO,
-      PAGE.SUMMARY,
-      PAGE.LAYER_LOW,
-      PAGE.ADHESIVE,
-      PAGE.WATERPROOF,
-      PAGE.KERDI,
-      PAGE.KERDI_DRAIN,
-      PAGE.RECAP,
-    ],
-    variant: { heightId, drainId, useDitraDrain }
-  };
-}
-// ⭐⭐ MEDIUM + INTERNAL DRAIN (KERDI-DRAIN)
-if (isMedium && isInternal) {
-  return {
-    pages: [
-      PAGE.INTRO,
-      PAGE.SUMMARY,
-      "pdf_balkon_page3_ditra_drain.html",
-      "pdf_balkon_page4_smart_adhesive.html",
-      PAGE.WATERPROOF,
-      PAGE.KERDI,
-      PAGE.KERDI_DRAIN,
-      "pdf_balkon_page8_system.html"
-    ],
-    variant: { heightId, drainId, useDitraDrain }
-  };
-}
-// ⭐⭐ MEDIUM + BARIN (žľab pri hrane)
-if (isMedium && isGutter) {
-  return {
-    pages: [
-      PAGE.INTRO,
-      PAGE.SUMMARY,
-      "pdf_balkon_page3_ditra_drain.html",
-      "pdf_balkon_page4_smart_adhesive.html",
-      PAGE.WATERPROOF,
-      "pdf_balkon_page6_bara_rtke.html",
-      PAGE.BARIN_1,
-      PAGE.BARIN_2,
-      PAGE.RECAP_BARIN
-    ],
-    variant: { heightId, drainId, useDitraDrain }
-  };
-}
+  if (isLow && isInternal) {
+    return {
+      pages: [
+        PAGE.INTRO,
+        PAGE.SUMMARY,
+        PAGE.LAYER_LOW,
+        PAGE.ADHESIVE,
+        PAGE.WATERPROOF,
+        PAGE.KERDI,
+        PAGE.KERDI_DRAIN,
+        PAGE.RECAP,
+      ],
+      variant: { heightId, drainId, useDitraDrain }
+    };
+  }
+
+  // ⭐⭐ MEDIUM + INTERNAL DRAIN (KERDI-DRAIN)
+  if (isMedium && isInternal) {
+    return {
+      pages: [
+        PAGE.INTRO,
+        PAGE.SUMMARY,
+        "pdf_balkon_page3_ditra_drain.html",
+        "pdf_balkon_page4_smart_adhesive.html",
+        PAGE.WATERPROOF,
+        PAGE.KERDI,
+        PAGE.KERDI_DRAIN,
+        "pdf_balkon_page8_system.html"
+      ],
+      variant: { heightId, drainId, useDitraDrain }
+    };
+  }
+
+  // ⭐⭐ MEDIUM + BARIN (žľab pri hrane)
+  if (isMedium && isGutter) {
+    return {
+      pages: [
+        PAGE.INTRO,
+        PAGE.SUMMARY,
+        "pdf_balkon_page3_ditra_drain.html",
+        "pdf_balkon_page4_smart_adhesive.html",
+        PAGE.WATERPROOF,
+        "pdf_balkon_page6_bara_rtke.html",
+        PAGE.BARIN_1,
+        PAGE.BARIN_2,
+        PAGE.RECAP_BARIN
+      ],
+      variant: { heightId, drainId, useDitraDrain }
+    };
+  }
+
+  // ⭐⭐⭐ HIGH – TROBA + BEKOTEC (vysoká skladba)
+  if (isHigh) {
+    return {
+      pages: [
+        PAGE.INTRO,
+        PAGE.SUMMARY,
+        "pdf_balkon_troba_plus.html",
+        "pdf_balkon_bekotec_drain.html",
+        PAGE.ADHESIVE,
+        PAGE.BARIN_2,
+        PAGE.RECAP
+      ],
+      variant: { heightId, drainId, useDitraDrain }
+    };
+  }
+
   // ⭐⭐ DITRA-DRAIN
   if (isMedium) {
     return {
@@ -192,26 +211,24 @@ if (isMedium && isGutter) {
   }
 
   // gutter variant
-if (isLow && isGutter) {
+  if (isLow && isGutter) {
+    const page6File = useDitraDrain
+      ? "pdf_balkon_page6_bara_rake.html"
+      : "pdf_balkon_page6_bara_rtk.html";
 
-  const page6File = useDitraDrain
-    ? "pdf_balkon_page6_bara_rake.html"
-    : "pdf_balkon_page6_bara_rtk.html";
-
-  return {
-    pages: [
-      PAGE.INTRO,
-      PAGE.SUMMARY,
-      PAGE.LAYER_LOW,
-      PAGE.ADHESIVE,
-      PAGE.WATERPROOF,
-      page6File,
-      PAGE.BARIN_1,
-      PAGE.BARIN_2,
-      PAGE.RECAP_BARIN
-    ],
-    variant: { heightId, drainId, useDitraDrain }
-  };
+    return {
+      pages: [
+        PAGE.INTRO,
+        PAGE.SUMMARY,
+        PAGE.LAYER_LOW,
+        PAGE.ADHESIVE,
+        PAGE.WATERPROOF,
+        page6File,
+        PAGE.BARIN_2,
+        PAGE.RECAP_BARIN
+      ],
+      variant: { heightId, drainId, useDitraDrain }
+    };
   }
 
   // fallback
@@ -302,8 +319,8 @@ function buildPage5Consumption(calc) {
     joints == null
       ? "–"
       : joints === 0
-      ? "0 (šírka do 1,0 m)"
-      : `${joints} (šírka nad 1,0 m)`;
+        ? "0 (šírka do 1,0 m)"
+        : `${joints} (šírka nad 1,0 m)`;
 
   const kebaEdgeText = kebaEdge != null ? `${formatNumSk(kebaEdge, 1)} m` : "–";
   const kebaJointsText =
@@ -361,7 +378,8 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
   const rwConnectorCode = "V/RW…";
 
   const baraProfileTypeText = family === "RW" ? "BARA-RW (alternatíva)" : "BARA-RT";
-    // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
   // ✅ RAKE logika pre DITRA-DRAIN
   // ---------------------------------------------------------------------------
   let rakeCornersText = "";
@@ -434,8 +452,8 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     family === "RW" && rwOptionsText
       ? rwOptionsText
       : family === "RW"
-      ? "Možnosti RW spodok (mm): 15, 25, 30, 45, 55, 75, 95, 120, 150"
-      : "";
+        ? "Možnosti RW spodok (mm): 15, 25, 30, 45, 55, 75, 95, 120, 150"
+        : "";
 
   const rtCodeShortText = family === "RT" ? (rtVariant || "RT…") : "–";
   const rtCornerCodeText = family === "RT" ? rtCornerCode : "–";
@@ -462,13 +480,13 @@ function buildBaraVars(calc, perimeterProfiles, profilePieces) {
     rwConnectorCodeAndQty,
     rwColorCode,
 
-    // 👇 TOTO TAM DOPLŇ
+    // 👇 RAKE
     rakeCornersText,
     rakeInnerCornersText,
     rakeConnectorsText,
     rakeHeightChoiceText,
-    };
-  }
+  };
+}
 
 // ---------------------------------------------------------------------------
 // ✅ Server fallback – SVG náčrt (nezmenené)
@@ -491,8 +509,8 @@ function buildShapeSketchSvg(calc) {
     <g>
       <circle cx="${x}" cy="${y}" r="14" fill="#0b1f50" />
       <circle cx="${x}" cy="${y}" r="14" fill="none" stroke="#ffffff" stroke-width="1.5" ${
-        dashed ? 'stroke-dasharray="3 3"' : ""
-      }/>
+    dashed ? 'stroke-dasharray="3 3"' : ""
+  }/>
       <text x="${x}" y="${y + 4}" text-anchor="middle" font-size="12" fill="#ffffff" font-family="Arial" font-weight="700">${text}</text>
     </g>
   `;
@@ -627,8 +645,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     bom?.membraneArea != null
       ? `${formatNumSk(bom.membraneArea, 1)} m²`
       : area != null
-      ? `${formatNumSk(area, 1)} m²`
-      : "–";
+        ? `${formatNumSk(area, 1)} m²`
+        : "–";
 
   const adhesiveBagsText = bom?.adhesiveBags != null ? `${safeText(bom.adhesiveBags)} ks` : "–";
 
@@ -656,17 +674,38 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
 
   const useDitraDrain = tileMaxSide > 30;
 
+  // ✅ BARIN – zvod / výška balkóna od zeme (pripravíme pre templaty)
+  const barinHasDownpipe = !!calc?.barinHasDownpipe;
+  const barinHeightCmNum =
+    pickNumber(calc, ["barinHeightCm", "barinHeightFromGroundCm", "balconyHeightCm"]) ??
+    null;
+
+  const isGutter =
+    drainId === "edge-gutter" ||
+    drainId.includes("gutter") ||
+    drainId.includes("ryn");
+
+  const barinDownpipeHeightText =
+    isGutter && barinHasDownpipe && barinHeightCmNum != null && barinHeightCmNum > 0
+      ? `${formatNumSk(barinHeightCmNum, 0)} cm`
+      : "";
+
+  const barinDownpipeNoteText =
+    isGutter && barinHasDownpipe && barinHeightCmNum != null && barinHeightCmNum > 0
+      ? "Pri žľabe Schlüter®-BARIN je potrebné doobjednať zvod (dodáva sa typicky v dĺžkach 2,50 m a 1,00 m). Zvod sa objednáva vo farbe profilu BARA a vo farbe systému BARIN; farba nemá vplyv na cenu a určuje sa pri objednávke."
+      : "";
+
   let cutawayImage = "";
   if (heightId === "low" && drainId === "edge-free") {
-  cutawayImage = useDitraDrain
-    ? "/img/systems/balkon-edge-free.png"
-    : "/img/systems/balkon-low-edge-free.png";
-  }  
+    cutawayImage = useDitraDrain
+      ? "/img/systems/balkon-edge-free.png"
+      : "/img/systems/balkon-low-edge-free.png";
+  }
   else if (heightId === "low" && drainId === "edge-gutter") {
-  cutawayImage = useDitraDrain
-    ? "/img/systems/balkon-edge-gutter.png"
-    : "/img/systems/balkon-low-edge-gutter.png";
-}
+    cutawayImage = useDitraDrain
+      ? "/img/systems/balkon-edge-gutter.png"
+      : "/img/systems/balkon-low-edge-gutter.png";
+  }
   else if (heightId === "low" && drainId === "internal-drain") cutawayImage = "/img/systems/balkon-low-internal-drain.png";
   else if (heightId === "medium" && drainId === "edge-free") cutawayImage = "/img/systems/balkon-edge-free.png";
   else if (heightId === "medium" && drainId === "edge-gutter") cutawayImage = "/img/systems/balkon-edge-gutter.png";
@@ -679,8 +718,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     cutawayImage = fromCalcPreview.startsWith("/")
       ? fromCalcPreview
       : fromCalcPreview.startsWith("img/")
-      ? "/" + fromCalcPreview
-      : fromCalcPreview;
+        ? "/" + fromCalcPreview
+        : fromCalcPreview;
   }
 
   const systemCutawayImageAbs = cutawayImage ? toAbsPublicUrl(baseOrigin, cutawayImage) : "";
@@ -692,9 +731,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   });
 
   const profilePiecesNum = bom?.profilesCount != null ? Number(bom.profilesCount) : null;
-  
-    // ✅ DITRA vs DITRA-DRAIN pre stranu 8 (rekapitulácia)
-  // 🔥 OPRAVA PRE DITRA-DRAIN – MUSÍ BYŤ TU
+
+  // ✅ DITRA vs DITRA-DRAIN pre stranu 8 (rekapitulácia)
   if (useDitraDrain && !calc.baraFamily) {
     calc.baraFamily = "RAKE";
     calc.baraRecommendationText = "BARA-RAKE odkvapový profil pre systém DITRA-DRAIN";
@@ -704,90 +742,87 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
   let systemTitleOverride = safeText(calc?.systemTitle || "");
   let systemShortNoteOverride = safeText(calc?.systemShortNote || "");
 
-  // ----------------------------------------------------
-// ✅ SMART TEXT PRE REKAPITULÁCIU (strana 8)
-// ----------------------------------------------------
-const baraFamily = safeText(calc?.baraFamily || "").toUpperCase();
+  // ✅ SMART TEXT PRE REKAPITULÁCIU (strana 8)
+  const baraFamily = safeText(calc?.baraFamily || "").toUpperCase();
 
-if (baraFamily === "RT") {
-  systemShortNoteOverride +=
-    " Ukončenie hrany je riešené profilom BARA-RT, ktorý chráni hranu dlažby a zabezpečuje kontrolovaný odtok vody.";
-}
+  if (baraFamily === "RT") {
+    systemShortNoteOverride +=
+      " Ukončenie hrany je riešené profilom BARA-RT, ktorý chráni hranu dlažby a zabezpečuje kontrolovaný odtok vody.";
+  }
 
-if (baraFamily === "RW") {
-  systemShortNoteOverride +=
-    " Ukončenie hrany je riešené profilom BARA-RW, ktorý slúži ako estetické prekrytie betónovej hrany.";
-}
+  if (baraFamily === "RW") {
+    systemShortNoteOverride +=
+      " Ukončenie hrany je riešené profilom BARA-RW, ktorý slúži ako estetické prekrytie betónovej hrany.";
+  }
 
-if (drainId.includes("gutter") || drainId.includes("ryn")) {
-  systemShortNoteOverride +=
-    " Odvod vody je riešený žľabovým systémom BARIN pri hrane balkóna.";
-}
+  if (drainId.includes("gutter") || drainId.includes("ryn")) {
+    systemShortNoteOverride +=
+      " Odvod vody je riešený žľabovým systémom BARIN pri hrane balkóna.";
+  }
 
   if (useDitraDrain) {
     systemTitleOverride = "Schlüter® DITRA-DRAIN + KERDI 200";
     systemShortNoteOverride =
       "Použitá drenážna rohož DITRA-DRAIN 8 s podkladovou hydroizoláciou KERDI 200. Odvodnenie prebieha pod dlažbou, nie po povrchu.";
   }
-  // ---------------------------------------------------------------------------
-  // ✅ STRANA 4 – spotreba lepidla (DITRA / DITRA-DRAIN / KERDI)
-  // ---------------------------------------------------------------------------
+
+  // ✅ STRANA 4 – spotreba lepidla
   const areaM2 = Number(calc?.area) || 0;
 
-  // počet lepených vrstiev podľa systému
   let adhesiveLayerCount = 2; // základ: rohož + hydro
-
-  if (useDitraDrain) {
-    adhesiveLayerCount = 3; // DITRA-DRAIN má o vrstvu viac
-  }
+  if (useDitraDrain) adhesiveLayerCount = 3; // DITRA-DRAIN má o vrstvu viac
 
   const adhesiveLayersText =
     adhesiveLayerCount === 2
       ? "Lepidlo sa používa na lepenie separačnej rohože a hydroizolačnej vrstvy."
       : "Pri systéme DITRA-DRAIN sa lepidlo používa na lepenie drenážnej rohože, separačnej rohože a hydroizolačnej vrstvy.";
-  
+
   const baraVars = buildBaraVars(calc, perimeterProfiles, profilePiecesNum);
   const adhesiveTotalKg = (areaM2 * adhesiveLayerCount * 1.4).toFixed(1);
   const adhesiveBags25kg = Math.ceil(adhesiveTotalKg / 25);
 
-  // 🔁 spätná kompatibilita pre staré HTML šablóny MUSÍ byť prvá
+  // 🔁 spätná kompatibilita pre staré HTML šablóny
   return {
-  customerName: customerLabel,
-  customerEmail: customerEmailForPdf,
-  createdAt: isoDateTimeSk(),
-  constructionType: shapeLabel,
-  systemTitle: systemTitleOverride,
-  systemShortNote: systemShortNoteOverride,
-  totalPages,
-  pageNo,
+    customerName: customerLabel,
+    customerEmail: customerEmailForPdf,
+    createdAt: isoDateTimeSk(),
+    constructionType: shapeLabel,
+    systemTitle: systemTitleOverride,
+    systemShortNote: systemShortNoteOverride,
+    totalPages,
+    pageNo,
 
-  ...page5,
-  ...baraVars,
+    ...page5,
+    ...baraVars,
 
-  pdfCode,
-  customerLabel,
-  customerEmailForPdf,
+    // ✅ nové BARIN premenné pre templaty
+    barinDownpipeHeightText,
+    barinDownpipeNoteText,
 
-  areaText,
-  perimeterText,
-  ditraAreaText,
-  adhesiveBagsText,
-  adhesiveConsumptionText,
+    pdfCode,
+    customerLabel,
+    customerEmailForPdf,
 
-  edgeLengthText,
-  edgeProfilePiecesText,
+    areaText,
+    perimeterText,
+    ditraAreaText,
+    adhesiveBagsText,
+    adhesiveConsumptionText,
 
-  shapeLabel,
-  heightLabel,
-  drainLabel,
+    edgeLengthText,
+    edgeProfilePiecesText,
 
-  shapeSketchSvg,
-  systemCutawayImageAbs,
+    shapeLabel,
+    heightLabel,
+    drainLabel,
 
- adhesiveLayersText,
- adhesiveTotalKg,
- adhesiveBags25kg,
- };
+    shapeSketchSvg,
+    systemCutawayImageAbs,
+
+    adhesiveLayersText,
+    adhesiveTotalKg,
+    adhesiveBags25kg,
+  };
 }
 
 async function htmlToPdfBuffer(browser, html) {
@@ -851,7 +886,7 @@ function findChromeExecutable() {
 async function buildMergedPdfFromPayload(req, payload) {
   const plan = resolvePlan(payload);
   if (!plan || !Array.isArray(plan.pages)) {
-  throw new Error("PDF PLAN ERROR: plan.pages nie je pole");
+    throw new Error("PDF PLAN ERROR: plan.pages nie je pole");
   }
   const totalPages = plan.pages.length;
   const baseOrigin = `${req.protocol}://${req.get("host")}`;
@@ -959,7 +994,7 @@ router.post("/balkon-final-html", async (req, res) => {
     if (!payload) return res.status(400).json({ message: "Chýba payload." });
 
     const merged = await buildMergedPdfFromPayload(req, payload);
-    
+
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", 'attachment; filename="balkon-final.pdf"');
     return res.status(200).send(merged);
@@ -1010,7 +1045,7 @@ router.post("/balkon-final-html-send", async (req, res) => {
         customerName,
         variant: resolvePlan(payload).variant,
       });
-      } else if (typeof mailer.sendBalconyDocsEmail === "function") {
+    } else if (typeof mailer.sendBalconyDocsEmail === "function") {
       await mailer.sendBalconyDocsEmail({
         to,
         pdfBuffer: merged,
@@ -1018,7 +1053,7 @@ router.post("/balkon-final-html-send", async (req, res) => {
         customerName,
         variant: resolvePlan(payload).variant,
       });
-      } else if (typeof mailer.sendPdfEmail === "function") {
+    } else if (typeof mailer.sendPdfEmail === "function") {
       await mailer.sendPdfEmail({
         to,
         subject: "Lištobook – Vaša kalkulácia (PDF)",
@@ -1031,7 +1066,7 @@ router.post("/balkon-final-html-send", async (req, res) => {
     }
 
     return res.status(200).json({ ok: true, message: "PDF odoslané e-mailom.", to });
-    } catch (e) {
+  } catch (e) {
     console.error("balkon-final-html-send error:", e);
     return res.status(500).json({ message: e.message || "E-mail/PDF chyba" });
   }
