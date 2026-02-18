@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Schlüter BEKOTEC-DRAIN</title>
+
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+</head>
+
+<body>
+  <div class="pdf-page pdf-pad-16-18-14">
+    <div class="pdf-watermark"></div>
+
+```
+<div class="pdf-content">
+
+  <!-- HEADER -->
+  <header class="pdf-mini-header">
+    <div class="mini-left">
+      <div class="mini-logo">
+        <img src="/logo_lc.jpg" alt="Lištové centrum" />
+      </div>
+      <div class="mini-title">
+        <strong>Technický podklad – balkónová skladba</strong>
+        <span>Vrstva: systémová potěrová vrstva</span>
+      </div>
+    </div>
+
+    <div class="mini-code">
+      <div class="label">Číslo PDF podkladu</div>
+      <div class="value">{{pdfCode}}</div>
+    </div>
+  </header>
+
+  <!-- TITLE -->
+  <h2 class="pdf-h2">
+    3. Skladba: {{systemTitle}} – vrstva 2 / 2: Schlüter®-BEKOTEC-DRAIN
+  </h2>
+
+  <p class="pdf-sub pdf-sub--p3">
+    Vybraná konštrukčná výška: <strong>{{heightLabel}}</strong>.
+    Táto vrstva tvorí systémovú roznášaciu vrstvu pod dlažbu a umožňuje
+    realizáciu tenkovrstvového potěru s minimálnym rizikom vzniku trhlín.
+  </p>
+
+  <section class="grid-2-stretch grid-2-stretch--p3">
+
+    <!-- LEFT -->
+    <article class="card">
+      <div class="card-inner card-inner--p3">
+
+        <div class="chip chip--p3">Vrstvy – krok 2 / 2 (roznášacia vrstva)</div>
+
+        <p class="p">
+          <strong>Schlüter®-BEKOTEC-DRAIN</strong> je systémová nopová doska,
+          ktorá slúži ako podklad pre tenkovrstvový cementový potěr.
+          Geometria nopov umožňuje rovnomerné rozloženie napätí
+          v potěrovej vrstve a znižuje riziko vzniku trhlín.
+        </p>
+
+        <p class="p">
+          Systém umožňuje realizovať stabilnú roznášaciu vrstvu aj pri
+          menších konštrukčných výškach. V kombinácii s drenážnou vrstvou
+          TROBA-PLUS zabezpečuje správne odvádzanie vlhkosti zo skladby.
+        </p>
+
+        <p class="p p-strongline">
+          Funkcia vrstvy v skladbe:
+        </p>
+
+        <ul class="bullet bullet--tight">
+          <li><strong>Stabilná roznášacia vrstva</strong> pod dlažbu.</li>
+          <li><strong>Obmedzenie vzniku trhlín</strong> v potěrovej vrstve.</li>
+          <li><strong>Rovnomerné rozloženie zaťaženia</strong>.</li>
+          <li><strong>Vhodné riešenie</strong> pre balkóny a terasy s vyšším zaťažením.</li>
+        </ul>
+
+        <div class="warn warn--tight">
+          <strong>Technická poznámka:</strong>
+          BEKOTEC-DRAIN je súčasťou systémovej skladby Schlüter.
+          Potěrová vrstva sa realizuje podľa odporúčaní výrobcu
+          a následne tvorí podklad pre separačnú alebo drenážnu vrstvu pod dlažbu.
+        </div>
+
+      </div>
+    </article>
+
+    <!-- RIGHT -->
+    <article class="card">
+      <div class="card-head card-head--p3">
+        <div class="t">Obrázok vrstvy</div>
+        <div class="s">Schlüter®-BEKOTEC-DRAIN – systémová doska</div>
+      </div>
+
+      <div class="card-inner card-inner--p3-right">
+
+        <div class="imgbox imgbox--p3">
+          <img src="/img/pdf/balkon/bekotec_drain.png" alt="Schlüter BEKOTEC-DRAIN" />
+        </div>
+
+        <div class="under-img under-img--p3">
+          <strong>Umiestnenie v skladbe:</strong>
+          systémová doska sa ukladá na drenážnu vrstvu TROBA-PLUS
+          a tvorí podklad pre ďalšiu vrstvu – separačnú alebo drenážnu rohož pod dlažbu.
+        </div>
+
+        <div class="under-img under-img--p3 under-img--p3-tight">
+          <strong>Objednávka:</strong>
+          všetky uvedené komponenty je možné objednať v <strong>LIŠTOVOM CENTRE</strong>.
+        </div>
+
+        <div class="sep sep--p3"></div>
+
+        <div class="kv kv--p3">
+          <div class="k">Plocha z kalkulačky</div>
+          <div class="v">{{areaText}}</div>
+
+          <div class="k">BEKOTEC-DRAIN (m²)</div>
+          <div class="v">{{areaText}}</div>
+        </div>
+
+      </div>
+    </article>
+
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer class="pdf-footer">
+  <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+  <span>Strana {{currentPage}} / {{totalPages}}</span>
+</footer>
+```
+
+  </div>
+</body>
+</html>

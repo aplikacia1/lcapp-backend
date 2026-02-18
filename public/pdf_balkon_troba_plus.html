@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>LIŠTOVÉ CENTRUM EU, s.r.o. – PDF podklad – Schlüter TROBA-PLUS</title>
+
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+</head>
+
+<body>
+  <div class="pdf-page pdf-pad-16-18-14">
+    <div class="pdf-watermark"></div>
+
+```
+<div class="pdf-content">
+
+  <!-- HEADER -->
+  <header class="pdf-mini-header">
+    <div class="mini-left">
+      <div class="mini-logo">
+        <img src="/logo_lc.jpg" alt="Lištové centrum" />
+      </div>
+      <div class="mini-title">
+        <strong>Technický podklad – balkónová skladba</strong>
+        <span>Vrstva: drenážna ochranná vrstva</span>
+      </div>
+    </div>
+
+    <div class="mini-code">
+      <div class="label">Číslo PDF podkladu</div>
+      <div class="value">{{pdfCode}}</div>
+    </div>
+  </header>
+
+  <!-- TITLE -->
+  <h2 class="pdf-h2">
+    3. Skladba: {{systemTitle}} – vrstva 1 / 2: Schlüter®-TROBA-PLUS
+  </h2>
+
+  <p class="pdf-sub pdf-sub--p3">
+    Vybraná konštrukčná výška: <strong>{{heightLabel}}</strong>.
+    Táto vrstva sa ukladá na hotovú stavebnú hydroizoláciu a zabezpečuje
+    ochranu izolácie a spoľahlivé odvádzanie vody z konštrukcie balkóna.
+  </p>
+
+  <section class="grid-2-stretch grid-2-stretch--p3">
+
+    <!-- LEFT -->
+    <article class="card">
+      <div class="card-inner card-inner--p3">
+
+        <div class="chip chip--p3">Vrstvy – krok 1 / 2 (drenáž)</div>
+
+        <p class="p">
+          <strong>Schlüter®-TROBA-PLUS</strong> je plošná drenážna rohož určená
+          na pokládku na izoláciu uloženú v spáde. V skladbe vytvára drenážny
+          priestor, ktorý umožňuje spoľahlivé odvádzanie vody prenikajúcej
+          pod dlažbu smerom k odtoku.
+        </p>
+
+        <p class="p">
+          Rohož zároveň chráni hydroizoláciu pred mechanickým poškodením
+          počas realizácie aj pri dlhodobom zaťažení konštrukcie.
+          Husté výlisky rovnomerne rozkladajú zaťaženie na podklad.
+        </p>
+
+        <p class="p p-strongline">
+          Funkcia vrstvy v skladbe:
+        </p>
+
+        <ul class="bullet bullet--tight">
+          <li><strong>Drenážna vrstva</strong> – umožňuje voľný odtok vody.</li>
+          <li><strong>Ochrana izolácie</strong> pred mechanickým poškodením.</li>
+          <li><strong>Rozloženie zaťaženia</strong> na celú plochu konštrukcie.</li>
+          <li><strong>Vyrovnanie drobných nerovností</strong> v spáde izolácie.</li>
+        </ul>
+
+        <div class="warn warn--tight">
+          <strong>Technická poznámka:</strong>
+          TROBA-PLUS sa ukladá voľne na hotovú izoláciu v spáde.
+          Nelepí sa k podkladu a ďalšie vrstvy sa realizujú priamo na nej
+          podľa systémového riešenia Schlüter.
+        </div>
+
+      </div>
+    </article>
+
+    <!-- RIGHT -->
+    <article class="card">
+      <div class="card-head card-head--p3">
+        <div class="t">Obrázok vrstvy</div>
+        <div class="s">Schlüter®-TROBA-PLUS – drenážna rohož</div>
+      </div>
+
+      <div class="card-inner card-inner--p3-right">
+
+        <div class="imgbox imgbox--p3">
+          <img src="/img/pdf/balkon/troba-plus-v1.png" alt="Schlüter TROBA PLUS" />
+        </div>
+
+        <div class="under-img under-img--p3">
+          <strong>Umiestnenie v skladbe:</strong>
+          drenážna rohož sa ukladá na hydroizoláciu a tvorí podklad
+          pre systémovú potěrovú vrstvu BEKOTEC-DRAIN.
+        </div>
+
+        <div class="under-img under-img--p3 under-img--p3-tight">
+          <strong>Objednávka:</strong>
+          všetky uvedené komponenty je možné objednať v <strong>LIŠTOVOM CENTRE</strong>.
+        </div>
+
+        <div class="sep sep--p3"></div>
+
+        <div class="kv kv--p3">
+          <div class="k">Plocha z kalkulačky</div>
+          <div class="v">{{areaText}}</div>
+
+          <div class="k">TROBA-PLUS (m²)</div>
+          <div class="v">{{areaText}}</div>
+        </div>
+
+      </div>
+    </article>
+
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer class="pdf-footer">
+  <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+  <span>Strana {{currentPage}} / {{totalPages}}</span>
+</footer>
+```
+
+  </div>
+</body>
+</html>
