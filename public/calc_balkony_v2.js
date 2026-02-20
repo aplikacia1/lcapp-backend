@@ -1480,6 +1480,43 @@ if (btnPdfRequestOffer) {
       });
     });
   }
+  // -----------------------------------------------------------
+// BARIN – listener pre zvod a výšku
+// -----------------------------------------------------------
+const barinHasDownpipeCheckbox = document.getElementById("barinHasDownpipe");
+const barinHeightInput = document.getElementById("barinHeightInput");
+
+// výber strany zvodu (L / R)
+const barinSideRadios = Array.from(
+  document.querySelectorAll('input[name="barinDownpipeSide"]')
+);
+
+if (barinSideRadios.length) {
+  barinSideRadios.forEach((radio) => {
+    radio.addEventListener("change", () => {
+      if (!radio.checked) return;
+
+      state.barinDownpipeSide = radio.value; // "left" alebo "right"
+    });
+  });
+}
+
+if (barinHasDownpipeCheckbox) {
+  barinHasDownpipeCheckbox.addEventListener("change", () => {
+    state.barinHasDownpipe = barinHasDownpipeCheckbox.checked;
+  });
+}
+
+if (barinHeightInput) {
+  barinHeightInput.addEventListener("input", () => {
+    const v = parseFloat(
+      String(barinHeightInput.value || "").replace(",", ".")
+    );
+
+    state.barinHeightCm =
+      Number.isFinite(v) && v > 0 ? Math.round(v) : null;
+  });
+}
 
   if (backToStep2Btn) backToStep2Btn.addEventListener("click", () => showStep(2));
 

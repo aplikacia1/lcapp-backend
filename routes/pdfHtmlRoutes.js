@@ -160,22 +160,22 @@ function resolvePlan(payload) {
   }
 
   // ⭐⭐ MEDIUM + BARIN (žľab pri hrane)
-  if (isMedium && isGutter) {
-    return {
-      pages: [
-        PAGE.INTRO,
-        PAGE.SUMMARY,
-        "pdf_balkon_page3_ditra_drain.html",
-        "pdf_balkon_page4_smart_adhesive.html",
-        PAGE.WATERPROOF,
-        "pdf_balkon_page6_bara_rtke.html",
-        PAGE.BARIN_1,
-        PAGE.BARIN_2,
-        PAGE.RECAP_BARIN
-      ],
-      variant: { heightId, drainId, useDitraDrain }
-    };
-  }
+if (isMedium && isGutter) {
+  return {
+    pages: [
+      PAGE.INTRO,
+      PAGE.SUMMARY,
+      "pdf_balkon_page3_ditra_drain.html",
+      "pdf_balkon_page4_smart_adhesive.html",
+      PAGE.WATERPROOF,
+      "pdf_balkon_page6_bara_rtke.html",
+      PAGE.BARIN_1,
+      PAGE.BARIN_2,
+      PAGE.RECAP_BARIN
+    ],
+    variant: { heightId, drainId, useDitraDrain }
+  };
+}
 // ⭐⭐⭐ HIGH + INTERNAL DRAIN (KERDI-DRAIN – nová skladba)
 if (isHigh && isInternal) {
   return {
@@ -813,6 +813,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     // ✅ nové BARIN premenné pre templaty
     barinDownpipeHeightText,
     barinDownpipeNoteText,
+    barinHasDownpipe,
+    barinHeightCm: barinHeightCmNum,
 
     pdfCode,
     customerLabel,

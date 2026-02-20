@@ -1454,16 +1454,36 @@
               </div>
 
               <div class="height-options" style="margin-top:6px;">
-                <label class="height-option">
-                  <input type="checkbox" id="barinHasDownpipe">
-                  <div>
-                    <span class="height-main">Žľab má zvod (rúru smerom dole)</span>
-                    <span class="height-note">
-                      Používa sa napr. keď je balkón nad chodníkom alebo fasádou.
-                    </span>
-                  </div>
-                </label>
-              </div>
+<label class="height-option">
+  <input type="checkbox" id="barinHasDownpipe">
+  <div>
+    <span class="height-main">Žľab má zvod (rúru smerom dole)</span>
+    <span class="height-note">
+      Používa sa napr. keď je balkón nad chodníkom alebo fasádou.
+    </span>
+
+    <!-- Výber strany zvodu -->
+    <div id="barinDownpipeSideBox"
+         style="display:none;margin-top:8px;padding:8px;border-radius:12px;background:rgba(2,6,23,0.6);border:1px solid rgba(148,163,184,0.5);">
+
+      <div style="font-size:0.78rem;margin-bottom:6px;">
+        Umiestnenie zvodu (pri pohľade na čelo balkóna):
+      </div>
+
+      <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;margin-bottom:4px;">
+        <input type="radio" name="barinDownpipeSide" value="left">
+        Naľavo (BSR4 E90 L DN 60)
+      </label>
+
+      <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;">
+        <input type="radio" name="barinDownpipeSide" value="right">
+        Napravo (BSR4 E90 R DN 60)
+      </label>
+
+    </div>
+
+  </div>
+</label>
 
   <div style="margin-top:8px;">
     <label style="font-size:0.78rem;">Výška balkóna od zeme (cm)</label>
@@ -1756,7 +1776,7 @@
           konzultácii s technikom Lištového centra.
         </div>
         <div style="position:fixed;bottom:10px;right:10px;z-index:9999;background:#facc15;color:#111827;padding:6px 10px;border-radius:999px;font:600 12px/1 system-ui;">
-  DEPLOY-CHECK: mobile-wizard 2026-01-23-01
+  
 </div>
       </footer>
     </main>
@@ -1764,6 +1784,7 @@
     <script src="/js/cookies.js"></script>
     <script src="/js/config.js"></script>
     <script src="/js/config_balkony.js"></script>
+    <script src="/js/config_barin.js"></script>
     <script src="/calc_balkony_v2.js"></script>
     
   </body>
