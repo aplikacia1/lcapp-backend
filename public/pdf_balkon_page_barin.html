@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lištové centrum – PDF podklad – BARIN</title>
+
+  <link rel="stylesheet" href="/css/pdf_balkon_common_v2.css">
+</head>
+
+<body>
+  <div class="pdf-page pdf-pad-16-18-18">
+    <div class="pdf-watermark"></div>
+
+    <div class="pdf-content">
+
+      <header class="pdf-mini-header">
+        <div class="mini-left">
+          <div class="mini-logo">
+            <img src="/logo_lc.jpg" alt="Lištové centrum" />
+          </div>
+          <div class="mini-title">
+            <strong>Technický podklad – balkónová skladba</strong>
+            <span>Schlüter®-BARIN – žľab pri hrane balkóna</span>
+          </div>
+        </div>
+
+        <div class="mini-code">
+          <div class="label">Číslo PDF podkladu</div>
+          <div class="value">{{pdfCode}}</div>
+        </div>
+      </header>
+
+      <h2 class="pdf-h2">
+        Schlüter®-BARIN – žľab pri hrane balkóna
+      </h2>
+
+      <p class="pdf-sub">
+        Žľabový systém pre bezpečný odvod vody z voľných hrán balkóna.
+        Dĺžky sú optimalizované z celkového súčtu voľných strán tak,
+        aby bol minimalizovaný odpad materiálu.
+      </p>
+
+      <!-- OBRÁZOK -->
+      <section class="card" style="margin-bottom:16px;">
+        <div class="card-inner">
+          <img
+            src="/img/pdf/balkon/barin-system-overview.png"
+            style="width:100%; height:auto;"
+            alt="BARIN systém"
+          />
+        </div>
+      </section>
+
+      <!-- VÝPOČET -->
+      <section class="card" style="margin-bottom:16px;">
+        <div class="card-inner">
+
+          <div class="section-title">Výpočet žľabov</div>
+
+          <div class="calc">
+            <div class="calc-row">
+              <div class="calc-k">Celková voľná dĺžka hrán</div>
+              <div class="calc-v">{{barin.totalLength}} m</div>
+            </div>
+
+            <div class="calc-row">
+              <div class="calc-k">Počet BARIN set 2,50 m</div>
+              <div class="calc-v">{{barin.set25}} ks</div>
+            </div>
+
+            <div class="calc-row">
+              <div class="calc-k">Počet BARIN set 1,50 m</div>
+              <div class="calc-v">{{barin.set15}} ks</div>
+            </div>
+
+            <div class="calc-row">
+              <div class="calc-k">Celková dodaná dĺžka</div>
+              <div class="calc-v">{{barin.totalSuppliedLength}} m</div>
+            </div>
+
+            <div class="calc-row">
+              <div class="calc-k">Odhadovaný odpad po rezaní</div>
+              <div class="calc-v">{{barin.waste}} m</div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- OBSAH BALENIA -->
+      <section class="card">
+        <div class="card-inner">
+
+          <div class="section-title">Obsah systémových balení</div>
+
+          <ul class="bullet">
+            <li>Žľab (2,50 m alebo 1,50 m podľa balenia)</li>
+            <li>Krycí profil</li>
+            <li>Spojky</li>
+            <li>Skrutky pre napojenie na ukončovacie profily BARA</li>
+          </ul>
+
+          <div class="note" style="margin-top:10px;">
+            Systém Schlüter®-BARIN je navrhnutý ako kompletné riešenie
+            pre odvodnenie voľných hrán balkóna.
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="pdf-footer">
+      <span>LIŠTOVÉ CENTRUM EU, s.r.o. – technický podklad z kalkulačky Lištobook.sk</span>
+      <span>Strana {{pageNo}} / {{totalPages}}</span>
+    </footer>
+
+  </div>
+</body>
+</html>

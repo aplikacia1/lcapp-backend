@@ -79,6 +79,7 @@ const PAGE = {
   BARIN_1: "pdf_balkon_page9.html",
   BARIN_2: "pdf_balkon_page10.html",
   RECAP_BARIN: "pdf_balkon_page11.html",
+  BARIN_NEW: "pdf_balkon_page_barin.html",
   KERDI: "pdf_balkon_page6_kerdi.html",
   KERDI_DRAIN: "pdf_balkon_page7_kerdi_drain.html",
 };
@@ -225,26 +226,26 @@ if (isHigh && isInternal) {
     };
   }
 
-  // gutter variant
-  if (isLow && isGutter) {
-    const page6File = useDitraDrain
-      ? "pdf_balkon_page6_bara_rake.html"
-      : "pdf_balkon_page6_bara_rtk.html";
+// gutter variant
+if (isLow && isGutter) {
+  const page6File = useDitraDrain
+    ? "pdf_balkon_page6_bara_rake.html"
+    : "pdf_balkon_page6_bara_rtk.html";
 
-    return {
-      pages: [
-        PAGE.INTRO,
-        PAGE.SUMMARY,
-        PAGE.LAYER_LOW,
-        PAGE.ADHESIVE,
-        PAGE.WATERPROOF,
-        page6File,
-        PAGE.BARIN_2,
-        PAGE.RECAP_BARIN
-      ],
-      variant: { heightId, drainId, useDitraDrain }
-    };
-  }
+  return {
+    pages: [
+      PAGE.INTRO,
+      PAGE.SUMMARY,
+      PAGE.LAYER_LOW,
+      PAGE.ADHESIVE,
+      PAGE.WATERPROOF,
+      page6File,
+      PAGE.BARIN_NEW,
+      PAGE.RECAP_BARIN
+    ],
+    variant: { heightId, drainId, useDitraDrain }
+  };
+}
 
   // fallback
   return {
@@ -620,6 +621,7 @@ function buildShapeSketchSvg(calc) {
 }
 
 function buildVars(payload, pageNo, totalPages, baseOrigin) {
+  console.log("DEBUG CALC:", payload.calc);
   const calc = payload?.calc || {};
   const bom = payload?.bom || {};
   const pdfMeta = payload?.pdfMeta || {};

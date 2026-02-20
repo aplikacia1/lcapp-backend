@@ -1109,7 +1109,46 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   }
+// -----------------------------------------------------------
+// BARIN – výpočet setov (minimalizácia odpadu)
+// -----------------------------------------------------------
+function calculateBarinSets(totalLength) {
+  const result = {
+    totalLength: totalLength || 0,
+    set25: 0,
+    set15: 0,
+    totalSuppliedLength: 0,
+    waste: 0,
+  };
 
+  if (!Number.isFinite(totalLength) || totalLength <= 0) {
+    return result;
+  }
+
+  // 1️⃣ najprv čo najviac 2,5 m
+  let count25 = Math.floor(totalLength / 2.5);
+  let remainder = totalLength - count25 * 2.5;
+
+  // 2️⃣ dorovnanie zvyšku
+  if (remainder > 0) {
+    if (remainder <= 1.5) {
+      result.set15 = 1;
+    } else {
+      count25 += 1;
+    }
+  }
+
+  result.set25 = count25;
+
+  result.totalSuppliedLength =
+    result.set25 * 2.5 +
+    result.set15 * 1.5;
+
+  result.waste =
+    Math.max(0, result.totalSuppliedLength - totalLength);
+
+  return result;
+}
   // ---------------------------------------------------------------------------
   // ✅ PAYLOAD + PDF akcie
   // ---------------------------------------------------------------------------
@@ -1136,6 +1175,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const dimsNormalized = buildNormalizedDims();
+    // 🔹 BARIN výpočet zo súčtu voľných hrán
+    const barinCalc =
+      state.drainDomId === "edge-gutter"
+        ? calculateBarinSets(state.perimeter)
+        : null;
     const wallSidesNormalized = buildNormalizedWallSides();
 
     const bara = recommendBaraProfile(state.tileThicknessMm);
@@ -1192,6 +1236,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         barinHasDownpipe: state.barinHasDownpipe,
         barinHeightCm: state.barinHeightCm,
+
+        barin: barinCalc,
 
         systemId: sys ? sys.id : null,
         systemTitle: sys ? sys.uiTitle || "" : null,
@@ -1483,29 +1529,39 @@ if (btnPdfRequestOffer) {
   // -----------------------------------------------------------
 // BARIN – listener pre zvod a výšku
 // -----------------------------------------------------------
-const barinHasDownpipeCheckbox = document.getElementById("barinHasDownpipe");
 const barinHeightInput = document.getElementById("barinHeightInput");
 
 // výber strany zvodu (L / R)
-const barinSideRadios = Array.from(
-  document.querySelectorAll('input[name="barinDownpipeSide"]')
-);
+document.addEventListener("change", (e) => {
 
-if (barinSideRadios.length) {
-  barinSideRadios.forEach((radio) => {
-    radio.addEventListener("change", () => {
-      if (!radio.checked) return;
+  // checkbox zvodu
+  if (e.target && e.target.id === "barinHasDownpipe") {
 
-      state.barinDownpipeSide = radio.value; // "left" alebo "right"
-    });
-  });
-}
+    const sideBox = document.getElementById("barinDownpipeSideBox");
 
-if (barinHasDownpipeCheckbox) {
-  barinHasDownpipeCheckbox.addEventListener("change", () => {
-    state.barinHasDownpipe = barinHasDownpipeCheckbox.checked;
-  });
-}
+    if (e.target.checked) {
+      sideBox.style.display = "block";
+    } else {
+      sideBox.style.display = "none";
+
+      document
+        .querySelectorAll('input[name="barinDownpipeSide"]')
+        .forEach(r => r.checked = false);
+
+      state.barinDownpipeSide = null;
+    }
+
+    state.barinHasDownpipe = e.target.checked;
+  }
+
+  // 🔥 výber strany zvodu (delegation)
+  if (e.target && e.target.name === "barinDownpipeSide") {
+    if (e.target.checked) {
+      state.barinDownpipeSide = e.target.value; // left / right
+    }
+  }
+
+});
 
 if (barinHeightInput) {
   barinHeightInput.addEventListener("input", () => {
