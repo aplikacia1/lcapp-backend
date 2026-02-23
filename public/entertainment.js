@@ -79,6 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // späť z prehrávača na dlaždice
   $('#backToTiles')?.addEventListener('click', () => showView('tiles'));
 
+  // BLOG – otvorí externý blog v novej karte
+const goBlog = () => {
+  window.open('https://listovecentrumeu.blogspot.com/', '_blank');
+};
+
+$('#tileBlog')?.addEventListener('click', goBlog);
+$('#tileBlog')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    goBlog();
+  }
+});
   // štart: zobraz dve dlaždice
   showView('tiles');
 });
