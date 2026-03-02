@@ -54,35 +54,69 @@ body {
 
 <div class="page">
   <div class="header">
-    TEST – Unified PDF systém
+    Lištobook – Balkónová skladba
   </div>
-
-  <div class="content">
-    <div class="test-box">
-      Strana 1 – funguje.
-    </div>
-  </div>
-
-  <div class="footer">
-    Strana {{pageNo}} / {{totalPages}}
-  </div>
-</div>
 
 <div class="page">
-  <div class="header">
-    TEST – Druhá strana
+
+  <div style="text-align:center; margin-top:40mm;">
+    <img src="/img/logo.png" style="height:40mm; margin-bottom:20mm;">
+    <h1 style="font-size:26px; margin:0;">
+      Balkónová skladba – technický návrh
+    </h1>
+    <p style="margin-top:10mm; font-size:16px;">
+      Individuálny návrh systému Schlüter®
+    </p>
   </div>
 
-  <div class="content">
-    <div class="test-box">
-      Strana 2 – funguje.
-    </div>
+  <div style="position:absolute; bottom:60mm; left:20mm; right:20mm;">
+    <hr>
+    <p><strong>Zákazník:</strong> {{customerName}}</p>
+    <p><strong>Dátum:</strong> {{createdAt}}</p>
+    <p><strong>Kód dokumentu:</strong> {{pdfCode}}</p>
   </div>
 
   <div class="footer">
-    Strana {{pageNo}} / {{totalPages}}
+    www.listovecentrum.sk | bratislava@listovecentrum.sk
   </div>
+
+</div>
+<!-- STRANA 2 -->
+
+<div class="page">
+
+  <div class="header">
+    Technický podklad – zhrnutie výberu
+  </div>
+
+  <div class="content">
+
+    <div style="margin-bottom:12mm;">
+      {{humanSummaryText}}
+      <h3 style="margin:10mm 0 5mm 0;">Technický prierez skladby</h3>
+
+<div style="margin-bottom:15mm;">
+  <img src="{{systemCutawayImageAbs}}" 
+       style="width:100%; height:auto;">
+    <div style="margin-top:12mm;">
+  <h3 style="margin-bottom:4mm;">{{edgeInfoTitle}}</h3>
+  <p style="line-height:1.5;">
+    {{edgeInfoText}}
+  </p>
+</div>
 </div>
 
+<h3 style="margin:10mm 0 5mm 0;">Náčrt tvaru a rozmerov</h3>
+
+<div style="width:60%; margin:0 auto;">
+  {{shapeSketchSvg}}
+</div>
+    </div>
+
+  <div class="footer">
+    Strana 2 / {{totalPages}}
+  </div>
+
+</div>
 </body>
 </html>

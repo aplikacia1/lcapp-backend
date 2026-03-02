@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<title>LOW – Voľný okraj</title>
+
+<style>
+@page { size: A4; margin: 0; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.page {
+  width: 210mm;
+  height: 297mm;
+  padding: 20mm;
+  box-sizing: border-box;
+  page-break-after: always;
+  position: relative;
+}
+
+.header {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 15mm;
+}
+
+.footer {
+  position: absolute;
+  bottom: 15mm;
+  left: 20mm;
+  right: 20mm;
+  font-size: 11px;
+  color: #555;
+}
+
+h1 { font-size: 22px; margin-bottom: 10mm; }
+p  { font-size: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- STRANA 1 -->
+<div class="page">
+
+  <div class="header">
+    Lištobook – LOW skladba (voľný okraj)
+    <div style="float:right;">PDF: {{pdfCode}}</div>
+  </div>
+
+  <h1>Balkónová skladba – LOW</h1>
+
+  <p><strong>Zákazník:</strong> {{customerName}}</p>
+  <p><strong>Plocha balkóna:</strong> {{areaText}}</p>
+
+  <p style="margin-top:15mm;">
+    Tento dokument predstavuje jednoduchý technický podklad
+    pre skladbu LOW – voľný okraj.
+  </p>
+
+  <div class="footer">
+    Strana 1 / 1 · Lištobook · listovecentrum.sk
+  </div>
+
+</div>
+
+</body>
+</html>

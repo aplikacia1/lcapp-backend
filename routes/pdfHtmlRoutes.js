@@ -741,6 +741,37 @@ ochranu hrany dlažby aj kontrolovaný odtok vody.
 ${formatNoteText}
 </p>
 `;
+// ------------------------------------------------------------
+// INFORMÁCIA O OKRAJI / ODVODNENÍ (STRANA 2)
+// ------------------------------------------------------------
+let edgeInfoTitle = "";
+let edgeInfoText = "";
+
+const drainIdLower = drainId.toLowerCase();
+
+const hasFreeEdge =
+  drainIdLower.includes("edge-free") ||
+  drainIdLower.includes("edge-gutter") ||
+  drainIdLower.includes("gutter") ||
+  drainIdLower.includes("ryn");
+
+if (hasFreeEdge) {
+  edgeInfoTitle = "Ukončenie hrany balkóna";
+  edgeInfoText = `
+Váš návrh obsahuje voľný okraj na odtok vody.
+Na základe zvolenej konštrukčnej výšky a spôsobu odvodnenia
+je hrana balkóna riešená systémovými profilmi Schlüter® BARA,
+ktoré zabezpečujú ochranu hrany dlažby a kontrolovaný odtok vody.
+Konkrétne typy profilov budú uvedené v nasledujúcej časti dokumentu.
+`;
+} else {
+  edgeInfoTitle = "Odvodnenie balkóna";
+  edgeInfoText = `
+Váš návrh neobsahuje voľný okraj.
+Odvodnenie balkóna je riešené systémovou vpustou,
+ktorá zabezpečuje bezpečný odvod zrážkovej vody z konštrukcie.
+`;
+}
 
   const tileMaxSide =
     Number(calc?.tileMaxSideCm) ||
@@ -858,6 +889,7 @@ ${formatNoteText}
   const adhesiveBags25kg = Math.ceil(adhesiveTotalKg / 25);
 
   // 🔁 spätná kompatibilita pre staré HTML šablóny
+  console.log("EDGE DEBUG:", edgeInfoTitle, edgeInfoText);
   return {
     customerName: customerLabel,
     customerEmail: customerEmailForPdf,
@@ -902,6 +934,8 @@ ${formatNoteText}
     adhesiveBags25kg,
     formatNoteText,
     humanSummaryText,
+    edgeInfoTitle,
+    edgeInfoText,
   };
 }
 
@@ -964,28 +998,28 @@ function findChromeExecutable() {
 }
 
 async function buildMergedPdfFromPayload(req, payload) {
-  // 🔵 TEST UNIFIED TEMPLATE
+// 🔵 TEST UNIFIED TEMPLATE
 const testFile = "pdf_balkon_unified.html";
 const filePath = path.join(process.cwd(), "public", testFile);
 
 const raw = fs.readFileSync(filePath, "utf8");
 
-const vars = buildVars(payload, 1, 2, `${req.protocol}://${req.get("host")}`);
+const vars = buildVars(payload, 1, 1, `${req.protocol}://${req.get("host")}`);
 
 const html = applyTemplate(raw, vars, `${req.protocol}://${req.get("host")}/`);
 
-const chromePath = findChromeExecutable();
-const browser = await puppeteer.launch({
+const testChromePath = findChromeExecutable();
+const testBrowser = await puppeteer.launch({
   headless: "new",
-  executablePath: chromePath || undefined,
+  executablePath: testChromePath || undefined,
   args: ["--no-sandbox", "--disable-setuid-sandbox"],
 });
 
 try {
-  const pdfBuffer = await htmlToPdfBuffer(browser, html);
+  const pdfBuffer = await htmlToPdfBuffer(testBrowser, html);
   return pdfBuffer;
 } finally {
-  await browser.close();
+  await testBrowser.close();
 }
   const plan = resolvePlan(payload);
   if (!plan || !Array.isArray(plan.pages)) {
@@ -1244,3 +1278,54 @@ router.post("/balkon-final-html-offer", async (req, res) => {
 });
 
 module.exports = router;
+// ===============================================
+// LOW – VOĽNÝ OKRAJ (jednoduchý PDF route)
+// ===============================================
+router.post("/pdf/low-free", async (req, res) => {
+  try {
+    const payload = req.body || {};
+
+    const fs = require("fs");
+    const path = require("path");
+    const puppeteer = require("puppeteer");
+
+    const templatePath = path.join(
+      __dirname,
+      "..",
+      "public",
+      "pdf_low_free.html"
+    );
+
+    let html = fs.readFileSync(templatePath, "utf8");
+
+    // 🔹 základné premenné (zatiaľ minimum)
+    html = html.replace(/{{customerName}}/g, payload.customerName || "—");
+    html = html.replace(/{{areaText}}/g, payload.areaText || "—");
+    html = html.replace(/{{pdfCode}}/g, payload.pdfCode || "LOW-TEST");
+
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    });
+
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
+    const buffer = await page.pdf({
+      format: "A4",
+      printBackground: true
+    });
+
+    await browser.close();
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": "attachment; filename=low-free.pdf"
+    });
+
+    res.send(buffer);
+  } catch (err) {
+    console.error("LOW PDF error:", err);
+    res.status(500).json({ error: "LOW PDF generation failed" });
+  }
+});

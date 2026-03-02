@@ -1342,7 +1342,18 @@ function calculateBarinSets(totalLength) {
       }
 
       const payload = buildBridgePayload();
-      const out = await tryPdfDownloadEndpoints(payload);
+      const res = await fetch("/api/pdf/low-free", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`LOW PDF error: ${res.status} ${txt}`);
+      }
+
+      const blob = await res.blob();
       if (!out.ok) throw out.error;
 
       const url = URL.createObjectURL(out.blob);
