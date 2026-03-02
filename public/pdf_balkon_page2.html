@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <div class="pdf-page pdf-pad-16-18">
+  <div class="pdf-page pdf-pad-16-18" data-page="2">
     <div class="pdf-watermark"></div>
 
     <div class="pdf-content">
@@ -36,48 +36,10 @@
       <p class="pdf-sub pdf-sub--compact">
         Nižšie je zhrnutie zadaných parametrov a veľký orientačný technický prierez zvolenej skladby.
       </p>
-
-      <!-- HORE: skladba + náčrt -->
-      <section class="grid-top grid-top--tight">
-        <article class="card">
-          <div class="card-inner card-inner--tight">
-            <div class="chip chip--tight">Zvolená skladba</div>
-
-            <div class="kv kv--tight">
-              <div class="k">Typ</div>
-              <div class="v">{{constructionType}}</div>
-
-              <div class="k">Tvar</div>
-              <div class="v">{{shapeLabel}}</div>
-
-              <div class="k">Plocha</div>
-              <div class="v">{{areaText}}</div>
-
-              <div class="k">Obvod pre lišty</div>
-              <div class="v">{{perimeterText}}</div>
-            </div>
-
-            <div class="sep sep--tight"></div>
-
-            <div class="kv kv--tight">
-              <div class="k">Konštrukčná výška</div>
-              <div class="v">{{heightLabel}}</div>
-
-              <div class="k">Spôsob odtoku vody</div>
-              <div class="v">{{drainLabel}}</div>
-
-              <div class="k">Odporúčaný systém</div>
-              <div class="v">{{systemTitle}}</div>
-            </div>
-
-            <div class="note note--tight">
-              <strong>Poznámka:</strong> {{systemShortNote}}
-            </div>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="card-inner card-inner--tight">
+     <div class="human-summary">
+       {{humanSummaryText}}
+     </div>
+        <section class="shape-section">
             <div class="chip chip--tight">Náčrt tvaru a rozmerov (krok 2)</div>
 
             <div class="img-box img-box--tight">
@@ -86,15 +48,9 @@
                 {{shapeSketchSvg}}
               </div>
             </div>
-
-            <div class="note note--tight note--p2">
-              <div><strong>● čísla</strong> = zadané rozmery (m)</div>
-              <div class="note-row"><strong>— čiarkovane</strong> = strana pri stene / napojení</div>
-            </div>
-          </div>
-        </article>
-      </section>
-
+           
+          </section>
+      
       <!-- DOLE: prierez -->
       <section class="grid-bottom grid-bottom--tight">
         <article class="card">

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<title>Lištobook – Unified PDF</title>
+
+<style>
+@page {
+  size: A4;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.page {
+  width: 210mm;
+  height: 297mm;
+  padding: 20mm;
+  box-sizing: border-box;
+  page-break-after: always;
+  position: relative;
+}
+
+.header {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 10mm;
+}
+
+.footer {
+  position: absolute;
+  bottom: 15mm;
+  left: 20mm;
+  right: 20mm;
+  font-size: 11px;
+  color: #555;
+}
+
+.content {
+  font-size: 14px;
+}
+
+.test-box {
+  margin-top: 20mm;
+  padding: 10mm;
+  border: 1px solid #ccc;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="header">
+    TEST – Unified PDF systém
+  </div>
+
+  <div class="content">
+    <div class="test-box">
+      Strana 1 – funguje.
+    </div>
+  </div>
+
+  <div class="footer">
+    Strana {{pageNo}} / {{totalPages}}
+  </div>
+</div>
+
+<div class="page">
+  <div class="header">
+    TEST – Druhá strana
+  </div>
+
+  <div class="content">
+    <div class="test-box">
+      Strana 2 – funguje.
+    </div>
+  </div>
+
+  <div class="footer">
+    Strana {{pageNo}} / {{totalPages}}
+  </div>
+</div>
+
+</body>
+</html>

@@ -546,17 +546,24 @@ function buildShapeSketchSvg(calc) {
     const x1 = 90, y1 = 40, x2 = 330, y2 = 200;
 
     return `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%">
-  <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
-  ${edge(x1, y1, x2, y1, wallTop)}
-  ${edge(x2, y1, x2, y2, false)}
-  ${edge(x2, y2, x1, y2, false)}
-  ${edge(x1, y2, x1, y1, false)}
-  ${bubble((x1 + x2) / 2, y1 - 10, label, wallTop)}
-  ${bubble(x2 + 18, (y1 + y2) / 2, label, false)}
-  ${bubble((x1 + x2) / 2, y2 + 18, label, false)}
-  ${bubble(x1 - 18, (y1 + y2) / 2, label, false)}
-</svg>`;
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%">
+    <rect x="0" y="0" width="${W}" height="${H}" fill="transparent"/>
+    ${edge(x1, y1, x2, y1, wallTop)}
+    ${edge(x2, y1, x2, y2, false)}
+    ${edge(x2, y2, x1, y2, false)}
+    ${edge(x1, y2, x1, y1, false)}
+    ${bubble((x1 + x2) / 2, y1 - 10, label, wallTop)}
+    ${bubble(x2 + 18, (y1 + y2) / 2, label, false)}
+    ${bubble((x1 + x2) / 2, y2 + 18, label, false)}
+    ${bubble(x1 - 18, (y1 + y2) / 2, label, false)}
+
+    <text x="10" y="${H - 20}" font-size="10" fill="#6b7280" font-family="Arial">
+      ● čísla = zadané rozmery (m)
+    </text>
+    <text x="10" y="${H - 8}" font-size="10" fill="#6b7280" font-family="Arial">
+      — čiarkovane = strana pri stene / napojení
+    </text>
+  </svg>`;
   }
 
   if (shapeKey === "rectangle") {
@@ -682,6 +689,58 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
 
   const heightId = safeText(calc?.heightId || "").toLowerCase();
   const drainId = safeText(calc?.drainId || "").toLowerCase();
+
+  // ------------------------------------------------------------
+// TECHNICKÁ POZNÁMKA PODĽA VÝŠKY A FORMÁTU DLAŽBY
+// ------------------------------------------------------------
+const tileSizeCm = Number(calc?.tileSizeCm || 0);
+let formatNoteText = "";
+
+if (heightId === "low") {
+  if (tileSizeCm > 30) {
+    formatNoteText =
+      "Pri väčších formátoch dlažby (nad 30 × 30 cm) odporúčame zvážiť skladbu s drenážnou vrstvou. Väčšie formáty v exteriéri zvyšujú napätie vplyvom teplotných zmien.";
+  } else {
+    formatNoteText =
+      "Pri bežných formátoch dlažby (do cca 30 × 30 cm) je táto skladba plne vyhovujúca pre exteriérové použitie.";
+  }
+}
+
+if (heightId === "medium") {
+  formatNoteText =
+    "Táto skladba obsahuje drenážnu vrstvu, ktorá znižuje napätie spôsobené teplotnými zmenami. Je vhodná aj pre väčšie formáty dlažby v exteriéri.";
+}
+
+if (heightId === "high") {
+  formatNoteText =
+    "Systém BEKOTEC-DRAIN predstavuje konštrukčne robustné riešenie vhodné aj pre väčšie formáty dlažby a vyššie mechanické zaťaženie.";
+}
+// ------------------------------------------------------------
+// ĽUDSKÝ POPIS SKLADBY (STRANA 2)
+// ------------------------------------------------------------
+const humanSummaryText = `
+<p>
+Vybrali ste si balkón v tvare <strong>${shapeLabel}</strong>
+s plochou <strong>${areaText}</strong>
+a obvodom pre ukončovacie lišty <strong>${perimeterText}</strong>.
+</p>
+
+<p>
+Zvolená je <strong>${heightLabel}</strong>,
+pričom voda bude odvádzaná <strong>${drainLabel}</strong>.
+</p>
+
+<p>
+Odporúčaným riešením je systém
+<strong>„${safeText(calc?.systemTitle || "")}“</strong>,
+ktorý je navrhnutý pre tento typ konštrukcie a zabezpečuje
+ochranu hrany dlažby aj kontrolovaný odtok vody.
+</p>
+
+<p>
+${formatNoteText}
+</p>
+`;
 
   const tileMaxSide =
     Number(calc?.tileMaxSideCm) ||
@@ -841,6 +900,8 @@ function buildVars(payload, pageNo, totalPages, baseOrigin) {
     adhesiveLayersText,
     adhesiveTotalKg,
     adhesiveBags25kg,
+    formatNoteText,
+    humanSummaryText,
   };
 }
 
@@ -903,6 +964,29 @@ function findChromeExecutable() {
 }
 
 async function buildMergedPdfFromPayload(req, payload) {
+  // 🔵 TEST UNIFIED TEMPLATE
+const testFile = "pdf_balkon_unified.html";
+const filePath = path.join(process.cwd(), "public", testFile);
+
+const raw = fs.readFileSync(filePath, "utf8");
+
+const vars = buildVars(payload, 1, 2, `${req.protocol}://${req.get("host")}`);
+
+const html = applyTemplate(raw, vars, `${req.protocol}://${req.get("host")}/`);
+
+const chromePath = findChromeExecutable();
+const browser = await puppeteer.launch({
+  headless: "new",
+  executablePath: chromePath || undefined,
+  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+});
+
+try {
+  const pdfBuffer = await htmlToPdfBuffer(browser, html);
+  return pdfBuffer;
+} finally {
+  await browser.close();
+}
   const plan = resolvePlan(payload);
   if (!plan || !Array.isArray(plan.pages)) {
     throw new Error("PDF PLAN ERROR: plan.pages nie je pole");

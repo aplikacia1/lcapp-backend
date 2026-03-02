@@ -35,16 +35,12 @@ body {
   height: 297mm;
   margin: 0 auto;
   position: relative;
-
-  /* luxury background: subtle depth */
-  background:
-    radial-gradient(140mm 140mm at 20% 10%, rgba(250,204,21,0.06), transparent 60%),
-    radial-gradient(160mm 160mm at 85% 25%, rgba(148,163,184,0.06), transparent 62%),
-    linear-gradient(180deg, rgba(2,6,23,1) 0%, rgba(2,6,23,1) 60%, rgba(3,8,30,1) 100%);
+  background: #ffffff;
+  color: #111;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 11.5pt;
+  line-height: 1.45;
   overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
 }
 
 /* ✅ page stability: force each .pdf-page to behave like a “sheet” */
@@ -493,8 +489,15 @@ body {
 .pdf-footer span { white-space: nowrap; }
 
 /* avoid ugly breaks in print engines */
-.grid-top, .grid-mid, .grid-2, .grid-110-90, .grid-2-stretch,
-.card, .cta, .note, .info-box, .img-box { break-inside: avoid; page-break-inside: avoid; }
+.grid-top, .grid-mid, .grid-2, .grid-110-90, .grid-2-stretch {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.card {
+  break-inside: auto;
+  page-break-inside: auto;
+}
 
 /* =========================================================
    INTRO PAGE – classes (page 1)
@@ -853,6 +856,19 @@ body {
 
 /* Strana 2: prierez – viac priestoru + trochu väčší obrázok */
 .imgbox img { max-height: 78mm !important; }
+/* ===== PAGE 2 – gain vertical space ===== */
+.pdf-page[data-page="2"] .card-inner {
+  padding: 4mm 5mm !important;   /* bolo cca 6mm */
+}
+
+.pdf-page[data-page="2"] .pdf-sub {
+  margin-bottom: 3mm !important; /* zoberieme trochu vzduchu */
+}
+/* ===== PAGE 2 – enlarge image safely ===== */
+.pdf-page[data-page="2"] .img-box img {
+  height: 86mm !important;   /* pevná výška */
+  max-height: none !important;
+}
 
 /* =========================================================
    PAGE 7 – COMPONENT STACK (BARA -> CORNER -> CONNECTOR)
@@ -1132,4 +1148,11 @@ body {
   .pdf-page[data-page="7"] .component-title--p7{
     color: #374151 !important;
   }
+}
+/* ---- Strana 2 – zmenšený ľudský sumár ---- */
+.human-summary {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #2f3a4a;
+  margin-bottom: 14px;
 }
