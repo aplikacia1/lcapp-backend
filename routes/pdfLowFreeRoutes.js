@@ -22,14 +22,25 @@ router.post("/low-free", async (req, res) => {
 
     html = html
       .replaceAll("{{ROOT}}", process.cwd())
+
       .replaceAll("{{area}}", calc.area || "")
       .replaceAll("{{perimeter}}", calc.perimeter || "")
+
+      .replaceAll("{{shapeLabel}}", calc.shapeLabel || "")
+      .replaceAll("{{systemTitle}}", calc.systemTitle || "")
+      .replaceAll("{{heightLabel}}", calc.heightLabel || "")
+      .replaceAll("{{drainLabel}}", calc.drainLabel || "")
+
       .replaceAll("{{tile}}", calc.tileThicknessMm || "")
       .replaceAll("{{tiles}}", calc.tileSizeCm || "")
+
       .replaceAll("{{customerName}}", customer.name || "")
       .replaceAll("{{customerCompany}}", customer.company || "")
       .replaceAll("{{customerEmailLine}}", customer.email ? customer.email : "")
+
       .replaceAll("{{projectLabel}}", "Balkón – vysunutý")
+      .replaceAll("{{pdfCode}}", customer.pdfCode || "")
+
       .replaceAll("{{date}}", new Date().toLocaleDateString("sk-SK"));
 
     const browser = await puppeteer.launch({
@@ -39,7 +50,10 @@ router.post("/low-free", async (req, res) => {
 
     const page = await browser.newPage();
 
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(html, {
+      waitUntil: "networkidle0",
+      url: "http://localhost:3000"
+    });
 
     const pdf = await page.pdf({
       format: "A4",
