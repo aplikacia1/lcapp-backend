@@ -146,7 +146,7 @@ async function loadPosts(opts = {}) {
   const prevY = preserve ? (scroller.scrollTop || 0) : 0;
 
   try {
-    const r = await fetch("/api/timeline");
+    const r = await fetch(`/api/timeline?email=${encodeURIComponent(userEmail)}`);
     const posts = await r.json();
     feed.innerHTML = "";
 
@@ -409,6 +409,31 @@ async function openProfileCard(nick) {
 
     // tlačidlá
     $("#profileMsgBtn").onclick = () => openMessages(nick);
+    // BLOKOVAŤ používateľa
+const blockBtn = $("#profileBlockBtn");
+if (blockBtn) {
+  blockBtn.onclick = async () => {
+    try {
+
+      const r = await fetch("/api/users/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: userEmail,
+          targetEmail: data?.email
+        })
+      });
+
+      if (!r.ok) throw 0;
+
+      toast("Používateľ bol zablokovaný");
+      hideProfileModal();
+
+    } catch {
+      toast("Blokovanie sa nepodarilo");
+    }
+  };
+}
     $("#profileEditBtn").style.display =
       (userData?.name && userData.name.toLocaleLowerCase('sk') === nick.toLocaleLowerCase('sk'))
         ? "" : "none";

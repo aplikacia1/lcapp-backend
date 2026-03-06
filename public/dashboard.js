@@ -57,6 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     $('#userLabel').textContent = `Prihlásený: ${email}`;
   }
 
+  loadSocialLists(email);
+
   // ========== 2) Upload avatara (+ okamžité uloženie avatarUrl) ==========
   avatarFile?.addEventListener('change', async (ev)=>{
     const f = ev.target.files && ev.target.files[0];
@@ -167,3 +169,82 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+// =============================
+// Sociálne nastavenia
+// =============================
+
+async function loadSocialLists(email){
+
+  try{
+
+    const res = await fetch(`/api/users/${encodeURIComponent(email)}`);
+    if(!res.ok) return;
+
+    const user = await res.json();
+
+    const friends = user.friends || [];
+    const blocked = user.blockedUsers || [];
+
+    const friendsList = document.getElementById("friendsList");
+    const blockedList = document.getElementById("blockedList");
+
+    // PRIATELIA
+    friendsList.innerHTML = friends.map(e => `
+      <li>
+        ${e}
+        <button onclick="removeFriend('${e}')" style="margin-left:10px;">
+          Zrušiť priateľstvo
+        </button>
+      </li>
+    `).join("") || "<li>Žiadni priatelia</li>";
+
+    // BLOKOVANÍ
+    blockedList.innerHTML = blocked.map(e => `
+      <li>
+        ${e}
+        <button onclick="unblockUser('${e}')" style="margin-left:10px;">
+          Odblokovať
+        </button>
+      </li>
+    `).join("") || "<li>Žiadni blokovaní používatelia</li>";
+
+  }catch(e){
+    console.error("Social lists error",e);
+  }
+}
+
+async function unblockUser(targetEmail){
+
+  const email = getEmail();
+
+  if(!confirm("Naozaj chceš odblokovať používateľa?")) return;
+
+  await fetch("/api/users/unblock",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body: JSON.stringify({
+      email,
+      targetEmail
+    })
+  });
+
+  loadSocialLists(email);
+}
+
+async function removeFriend(targetEmail){
+
+  const email = getEmail();
+
+  if(!confirm("Naozaj chceš zrušiť priateľstvo?")) return;
+
+  await fetch("/api/users/remove-friend",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json"},
+    body: JSON.stringify({
+      email,
+      targetEmail
+    })
+  });
+
+  loadSocialLists(email);
+}

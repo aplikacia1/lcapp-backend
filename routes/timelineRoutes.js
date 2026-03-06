@@ -59,6 +59,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
 
     const post = new TimelinePost({
       author: user.name,
+      authorCompany: user.companyName || '',
       text: text || '',
       imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
       createdAt: new Date()
@@ -72,11 +73,45 @@ router.post('/add', upload.single('image'), async (req, res) => {
   }
 });
 
-/* 📄 Získanie všetkých príspevkov */
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   try {
+
+    const email = req.query?.email;
+
     const posts = await TimelinePost.find().sort({ createdAt: -1 });
-    res.status(200).json(posts);
+
+    // ak nie je prihlásený používateľ → zobraz všetko
+    if (!email) {
+      return res.status(200).json(posts);
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user || !Array.isArray(user.blockedUsers) || user.blockedUsers.length === 0) {
+      return res.status(200).json(posts);
+    }
+
+    // získať mená blokovaných používateľov
+    const blockedUsers = await User.find({
+      email: { $in: user.blockedUsers }
+    }).select("name");
+
+    const blockedNames = blockedUsers.map(u => String(u.name));
+
+    // filtrovať príspevky
+    const filteredPosts = posts
+      .filter(p => !blockedNames.includes(p.author))
+      .map(p => {
+
+        if (!Array.isArray(p.comments)) return p;
+
+        // filtrovať komentáre
+        p.comments = p.comments.filter(c => !blockedNames.includes(c.author));
+        return p;
+      });
+
+    res.status(200).json(filteredPosts);
+
   } catch (e) {
     console.error('timeline list error', e);
     res.status(500).json({ message: 'Chyba pri načítaní' });
@@ -96,7 +131,12 @@ router.post('/comment/:postId', async (req, res) => {
     const post = await TimelinePost.findById(req.params.postId);
     if (!post) return res.status(404).json({ message: 'Príspevok nenájdený' });
 
-    post.comments.push({ author: user.name, text: text.trim(), createdAt: new Date() });
+    post.comments.push({
+      author: user.name,
+      authorCompany: user.companyName || user.company || '',
+      text: text.trim(),
+      createdAt: new Date()
+    });
     await post.save();
     res.status(200).json({ message: 'Komentár pridaný' });
   } catch (e) {

@@ -37,6 +37,22 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken:   { type: String, default: null },
     resetPasswordExpires: { type: Date,   default: null },
     passwordChangedAt:    { type: Date,   default: null },
+
+    // =========================================
+    // MIKROKOMUNITY
+    // =========================================
+
+    // zoznam blokovaných používateľov (emaily)
+    blockedUsers: {
+      type: [String],
+      default: []
+    },
+
+    // zoznam priateľov (emaily)
+    friends: {
+      type: [String],
+      default: []
+    }
   },
   { timestamps: true }
 );

@@ -6,10 +6,14 @@ const puppeteer = require("puppeteer");
 const router = express.Router();
 
 router.post("/low-free", async (req, res) => {
+  console.log("LOW FREE ROUTE STARTED");
   try {
     const payload = req.body || {};
     const calc = payload.calc || payload.bom || {};
     const customer = payload.customer || payload.pdfMeta || {};
+    const systemImage = calc.previewSrc
+  ? "https://listobook.sk/" + calc.previewSrc
+  : "";
 
     const templatePath = path.join(
       process.cwd(),
@@ -34,27 +38,29 @@ router.post("/low-free", async (req, res) => {
       .replaceAll("{{tile}}", calc.tileThicknessMm || "")
       .replaceAll("{{tiles}}", calc.tileSizeCm || "")
 
-      .replaceAll("{{customerName}}", customer.name || "")
+      .replaceAll("{{customerName}}", payload.meta?.email || "")
       .replaceAll("{{customerCompany}}", customer.company || "")
       .replaceAll("{{customerEmailLine}}", customer.email ? customer.email : "")
 
       .replaceAll("{{projectLabel}}", "Balkón – vysunutý")
-      .replaceAll("{{pdfCode}}", customer.pdfCode || "")
+      .replaceAll("{{pdfCode}}", payload.meta?.pdfCode || "")
 
-      .replaceAll("{{date}}", new Date().toLocaleDateString("sk-SK"));
+      .replaceAll("{{date}}", new Date().toLocaleDateString("sk-SK"))
+      .replaceAll("{{systemImage}}", systemImage);
 
     const browser = await puppeteer.launch({
       headless: "new",
-      args: ["--no-sandbox"]
+      args: [
+        "--no-sandbox",
+        "--allow-file-access-from-files"
+      ]
     });
 
     const page = await browser.newPage();
-
+   
     await page.setContent(html, {
-      waitUntil: "networkidle0",
-      url: "http://localhost:3000"
+      waitUntil: "domcontentloaded"
     });
-
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true

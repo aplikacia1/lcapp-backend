@@ -76,6 +76,7 @@ router.get('/public/by-name/:name', async (req, res) => {
       { nameLower },
       {
         _id: 0,
+        email: 1,
         name: 1,
         note: 1,
         bio: 1,
@@ -108,6 +109,7 @@ router.get('/public/by-name/:name', async (req, res) => {
       '';
 
     return res.json({
+      email: user.email,
       name: user.name || raw,
       city,
       bio: user.bio || '',
@@ -328,5 +330,85 @@ router.get('/:email', async (req, res) => {
     return res.status(500).json({ message: 'Chyba servera.' });
   }
 });
+/* ========= BLOCK USER ========= */
+// POST /api/users/block
+router.post('/block', async (req, res) => {
+  try {
+    const { email, targetEmail } = req.body || {};
+    if (!email || !targetEmail) {
+      return res.status(400).json({ message: 'Chýbajú údaje.' });
+    }
 
+    if (email === targetEmail) {
+      return res.status(400).json({ message: 'Nemôžeš zablokovať seba.' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
+
+    if (!user.blockedUsers.includes(String(targetEmail))) {
+      user.blockedUsers.push(targetEmail);
+      await user.save();
+    }
+
+    return res.json({ message: 'Používateľ zablokovaný.' });
+
+  } catch (e) {
+    console.error('POST /api/users/block error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
+  }
+});
+
+
+/* ========= UNBLOCK USER ========= */
+// POST /api/users/unblock
+router.post('/unblock', async (req, res) => {
+  try {
+    const { email, targetEmail } = req.body || {};
+    if (!email || !targetEmail) {
+      return res.status(400).json({ message: 'Chýbajú údaje.' });
+    }
+    
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
+
+    user.blockedUsers = user.blockedUsers.filter(e => e !== targetEmail);
+    await user.save();
+
+    return res.json({ message: 'Používateľ odblokovaný.' });
+
+  } catch (e) {
+    console.error('POST /api/users/unblock error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
+  }
+});
+/* ========= REMOVE FRIEND ========= */
+// POST /api/users/remove-friend
+router.post('/remove-friend', async (req, res) => {
+  try {
+
+    const { email, targetEmail } = req.body || {};
+
+    if (!email || !targetEmail) {
+      return res.status(400).json({ message: 'Chýbajú údaje.' });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Používateľ nenájdený.' });
+    }
+
+    user.friends = (user.friends || []).filter(e => e !== targetEmail);
+
+    await user.save();
+
+    return res.json({ message: 'Priateľstvo zrušené.' });
+
+  } catch (e) {
+    console.error('POST /api/users/remove-friend error', e);
+    return res.status(500).json({ message: 'Chyba servera.' });
+  }
+});
 module.exports = router;
