@@ -8,7 +8,8 @@ const router = express.Router();
 router.post("/low-free", async (req, res) => {
   try {
     const payload = req.body || {};
-    const calc = payload.calc || {};
+    const calc = payload.calc || payload.bom || {};
+    const customer = payload.customer || payload.pdfMeta || {};
 
     const templatePath = path.join(
       process.cwd(),
@@ -20,10 +21,16 @@ router.post("/low-free", async (req, res) => {
     let html = fs.readFileSync(templatePath, "utf8");
 
     html = html
+      .replaceAll("{{ROOT}}", process.cwd())
       .replaceAll("{{area}}", calc.area || "")
       .replaceAll("{{perimeter}}", calc.perimeter || "")
       .replaceAll("{{tile}}", calc.tileThicknessMm || "")
-      .replaceAll("{{tiles}}", calc.tileSizeCm || "");
+      .replaceAll("{{tiles}}", calc.tileSizeCm || "")
+      .replaceAll("{{customerName}}", customer.name || "")
+      .replaceAll("{{customerCompany}}", customer.company || "")
+      .replaceAll("{{customerEmailLine}}", customer.email ? customer.email : "")
+      .replaceAll("{{projectLabel}}", "Balkón – vysunutý")
+      .replaceAll("{{date}}", new Date().toLocaleDateString("sk-SK"));
 
     const browser = await puppeteer.launch({
       headless: "new",

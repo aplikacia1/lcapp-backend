@@ -1354,9 +1354,7 @@ function calculateBarinSets(totalLength) {
       }
 
       const blob = await res.blob();
-      if (!out.ok) throw out.error;
-
-      const url = URL.createObjectURL(out.blob);
+      const url = URL.createObjectURL(blob);   
       const a = document.createElement("a");
       a.href = url;
       a.download = "balkon-final.pdf";
