@@ -89,15 +89,14 @@
 
     card.innerHTML = `
       <div style="display:flex; gap:10px; align-items:flex-start;">
-        <div style="font-size:22px; line-height:1.1;">🍭</div>
+        <div style="font-size:22px; line-height:1.1;">📲</div>
         <div style="flex:1; min-width:0;">
           <div style="font-weight:700; margin-bottom:4px;">
-            Lištobook ako lollipop aplikácia
+            Lištobook ako aplikácia
           </div>
           <div style="opacity:.9; line-height:1.4; margin-bottom:8px;">
             Pridajte si našu aplikáciu <strong>Lištobook</strong> na plochu a majte
-            časovú os, recenzie aj správy vždy po ruke – ako malé lízatko v mobile
-            alebo notebooku.
+            časovú os, recenzie aj správy vždy po ruke – rýchlo a bez klikania.
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px;">
             <button type="button" data-role="install"
