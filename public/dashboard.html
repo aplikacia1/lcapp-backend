@@ -195,6 +195,30 @@
         <ul id="blockedList" style="margin-top:6px; line-height:1.8;"></ul>
       </div>
 
+      <h3 class="section-title" style="margin-top:28px; color:#ffb3b3;">
+  Nebezpečná zóna
+</h3>
+
+<div style="background:#2a0f17; border:1px solid #ff4d6d; border-radius:12px; padding:14px; margin-top:8px;">
+  <p style="margin:0 0 10px; font-size:.9rem; color:#ffd6dc;">
+    Ak zrušíte účet, odstránia sa všetky vaše príspevky, komentáre a správy.
+    Hodnotenia produktov ostanú zachované, ale budú anonymné.
+  </p>
+
+  <button id="deleteAccountBtn"
+    style="
+      background:#ff4d6d;
+      border:none;
+      color:white;
+      padding:10px 16px;
+      border-radius:10px;
+      font-weight:600;
+      cursor:pointer;
+    ">
+    Vymazať účet
+  </button>
+</div>
+
     </div>
   </div>
 
@@ -202,5 +226,62 @@
   <script src="dashboard.js"></script>
   <script src="banners.js"></script>
   <script src="/js/cookies.js"></script>
+  <!-- LC MODAL -->
+<div id="lcModal" style="
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(0,0,0,.55);
+z-index:9999;
+">
+
+  <div style="
+    width:100%;
+    max-width:380px;
+    margin:0 16px;
+    background:radial-gradient(circle at 0 0,#1d4ed8 0,rgba(15,23,42,0.96) 52%,#020617 100%);
+    color:#e5edff;
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 20px 50px rgba(3,7,18,.9);
+    border:1px solid rgba(129,140,248,.9);
+    text-align:center;
+  ">
+
+    <div id="lcModalText" style="margin-bottom:16px;font-size:.95rem;"></div>
+
+    <div style="display:flex;gap:10px;justify-content:center">
+
+      <button id="lcModalCancel" style="
+      height:38px;
+      padding:0 16px;
+      border-radius:999px;
+      border:1px solid #cbd5e1;
+      background:#ffffff;
+      color:#0c1f4b;
+      cursor:pointer;
+      ">
+      Zrušiť
+      </button>
+
+      <button id="lcModalOk" style="
+      height:38px;
+      padding:0 16px;
+      border-radius:999px;
+      border:none;
+      background:#ff4d6d;
+      color:white;
+      cursor:pointer;
+      font-weight:600;
+      ">
+      Pokračovať
+      </button>
+
+    </div>
+
+  </div>
+</div>
 </body>
 </html>

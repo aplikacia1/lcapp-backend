@@ -186,6 +186,78 @@ router.delete('/:id', async (req, res) => {
     return res.status(500).json({ message: 'Chyba servera pri mazaní používateľa.' });
   }
 });
+/* ========= USER: DELETE OWN ACCOUNT ========= */
+// DELETE /api/users/self/:email
+router.delete('/self/:email', async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email);
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'Používateľ nenájdený.' });
+
+    const userId = user._id;
+    const nick   = (user.name || '').trim();
+    const nickRX = nick ? new RegExp(`^${nick}$`, 'i') : null;
+
+    // 1) hodnotenia NEZMAŽEME – anonymizujeme
+    await Rating.updateMany(
+  { email },
+  { 
+    $set: { 
+      email: null,
+      name: "Bývalý používateľ",
+      userId: null
+    }
+  }
+);
+
+    // 2) príspevky timeline
+    const postOwnerFilter = {
+      $or: [
+        { email }, { userEmail: email }, { authorEmail: email },
+        { 'author.email': email }, { 'user.email': email },
+        { userId }, { authorId: userId }, { createdBy: userId },
+        { 'author._id': userId }, { 'user._id': userId },
+        ...(nick ? [
+          { authorName: nickRX }, { author: nickRX }, { nickname: nickRX }, { userName: nickRX }, { name: nickRX },
+          { 'author.name': nickRX }, { 'user.name': nickRX }
+        ] : [])
+      ]
+    };
+
+    await TimelinePost.deleteMany(postOwnerFilter);
+
+    // 3) komentáre
+    const pullOr = [
+      { email }, { userEmail: email }, { authorEmail: email },
+      { 'author.email': email },
+      { userId }, { authorId: userId }, { 'author._id': userId }
+    ];
+
+    if (nickRX) {
+      pullOr.push(
+        { authorName: nickRX }, { author: nickRX }, { nickname: nickRX }, { userName: nickRX }, { name: nickRX },
+        { 'author.name': nickRX }
+      );
+    }
+
+    await TimelinePost.updateMany(
+      {},
+      { $pull: { comments: { $or: pullOr } } }
+    );
+
+    // 4) samotný používateľ
+    await User.deleteOne({ email });
+
+    return res.json({
+      message: 'Účet bol zrušený.'
+    });
+
+  } catch (e) {
+    console.error('DELETE /api/users/self/:email error', e);
+    return res.status(500).json({ message: 'Chyba servera pri mazaní účtu.' });
+  }
+});
 
 /* ========= ADMIN: poznámka k používateľovi ========= */
 router.put('/:id/note', async (req, res) => {

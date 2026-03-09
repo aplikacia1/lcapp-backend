@@ -1,6 +1,36 @@
 // dashboard.js – konečná verzia (perzistentný profil + avatar)
 
 function $(s, r=document){ return r.querySelector(s); }
+// LC CONFIRM MODAL
+function lcConfirm(text) {
+
+  return new Promise((resolve) => {
+
+    const modal = document.getElementById("lcModal");
+    const txt = document.getElementById("lcModalText");
+    const ok = document.getElementById("lcModalOk");
+    const cancel = document.getElementById("lcModalCancel");
+
+    if(!modal){
+      resolve(confirm(text));
+      return;
+    }
+
+    txt.textContent = text;
+    modal.style.display = "flex";
+
+    ok.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+
+    cancel.onclick = () => {
+      modal.style.display = "none";
+      resolve(false);
+    };
+
+  });
+}
 function getEmail(){ const p = new URLSearchParams(window.location.search); return p.get('email') || ''; }
 const DEFAULT_AVATAR =
   'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -248,3 +278,37 @@ async function removeFriend(targetEmail){
 
   loadSocialLists(email);
 }
+// ZRUŠENIE ÚČTU
+document.getElementById("deleteAccountBtn")?.addEventListener("click", async () => {
+
+    const confirmDelete = await lcConfirm(
+      "Naozaj chcete natrvalo zrušiť účet?\n\nTáto akcia sa nedá vrátiť."
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+      const email = new URLSearchParams(window.location.search).get("email");
+
+      const res = await fetch(`/api/users/self/${encodeURIComponent(email)}`, {
+        method: "DELETE"
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Chyba pri rušení účtu.");
+        return;
+      }
+
+      alert("Účet bol zrušený.");
+
+      window.location.href = "/index.html";
+
+    } catch (err) {
+      console.error(err);
+      alert("Server neodpovedá.");
+    }
+
+  });

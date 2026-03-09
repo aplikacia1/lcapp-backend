@@ -185,7 +185,7 @@
         window.location.replace(onboarding.pathname + '?' + onboarding.searchParams.toString());
       } catch (err) {
         console.error('Register error', err);
-        showErr(emailErr(), 'Chyba pripojenia k serveru.');
+        showErr(emailErr(), 'Server momentálne neodpovedá. Skúste to o chvíľu.');
       } finally {
         btn && (btn.disabled = false);
       }

@@ -1,5 +1,22 @@
 // frontend/public/login.js
 (function () {
+  function lcAlert(text){
+  const modal = document.getElementById("lcModal");
+  const txt = document.getElementById("lcModalText");
+  const btn = document.getElementById("lcModalBtn");
+
+  if(!modal || !txt || !btn){
+    alert(text);
+    return;
+  }
+
+  txt.textContent = text;
+  modal.style.display = "flex";
+
+  btn.onclick = () => {
+    modal.style.display = "none";
+  };
+}
   function $(sel, root = document) { return root.querySelector(sel); }
   function pickEmailInput() {
     return $('#email') || $('input[type="email"]') || $('input[name="email"]');
@@ -62,7 +79,7 @@
       const password = passEl?.value || '';
 
       if (!email || !password) {
-        alert('Zadaj e-mail aj heslo.');
+        lcAlert('Zadaj e-mail aj heslo.');
         return;
       }
 
@@ -76,7 +93,7 @@
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          alert(data?.message || 'Nesprávny e-mail alebo heslo.');
+          lcAlert(data?.message || 'Nesprávny e-mail alebo heslo.');
           return;
         }
 
@@ -85,7 +102,7 @@
 
       } catch (err) {
         console.error('Login error', err);
-        alert('Chyba pri pripojení.');
+        lcAlert('Chyba pri pripojení.');
       }
     });
 
