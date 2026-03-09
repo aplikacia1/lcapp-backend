@@ -416,7 +416,7 @@ async function sendMessage(){
   if (!text) return;
 
   if (!currentOtherEmail && !$('#thread')?.dataset?.recipientEmail){
-    alert('Vyberte najprv konverzáciu vľavo.');
+    lcAlert('Vyberte najprv konverzáciu vľavo.');
     return;
   }
 
@@ -455,7 +455,7 @@ async function sendMessage(){
   const j = await r.json().catch(()=>({}));
 
   if (!r.ok){
-    alert(j?.message || 'Chyba pri odoslaní.');
+    lcAlert(j?.message || 'Chyba pri odoslaní.');
     const lastMeta = $('#thread')?.lastElementChild?.querySelector('.meta span:last-child');
     if (lastMeta) lastMeta.textContent = 'chyba odoslania';
     return;
@@ -493,10 +493,10 @@ async function deleteConversationUser(otherEmail, otherLabel){
     const res = await fetch(url, { method:'DELETE' });
     const data = await res.json().catch(()=>({}));
     if (!res.ok){
-      alert(data?.message || 'Mazanie zlyhalo.');
+      lcAlert(data?.message || 'Mazanie zlyhalo.');
       return;
     }
-    alert(`Vymazané správy: ${data.deleted ?? 0}`);
+    lcAlert(`Vymazané správy: ${data.deleted ?? 0}`);
 
     // Reset UI
     currentOtherEmail = null;
@@ -521,7 +521,7 @@ async function deleteConversationUser(otherEmail, otherLabel){
     // ✅ MOBILE: po vymazaní späť na zoznam
     showMobileList();
   }catch(e){
-    alert('Server neodpovedá.');
+    lcAlert('Server neodpovedá.');
   }
 }
 

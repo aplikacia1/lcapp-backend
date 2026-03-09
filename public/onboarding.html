@@ -1,196 +1,257 @@
 <!doctype html>
 <html lang="sk">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Vitajte v Lištobooku</title>
-  <meta name="description" content="Úvod po registrácii: čo je Lištobook, kde hodnotiť tovary, kde písať príspevky a ako poslať správu." />
-  <style>
-    :root{
-      --bg:#0a1029; --text:#ecf2ff; --muted:#a8b3d6; --border:rgba(255,255,255,.12);
-      --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.35);
-      --pad-card:18px; --icon:52px; --fs-h1:clamp(1.5rem,3.6vw,2.1rem); --fs-h2:1.12rem; --fs-body:16px; --gap:16px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%; overflow-x:hidden}
-    body{
-      margin:0; color:var(--text); font:var(--fs-body)/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial;
-      background:
-        radial-gradient(1100px 760px at 8% -10%, #13255d 0%, transparent 60%),
-        radial-gradient(900px 660px at 100% 0%, #0d1e4a 0%, transparent 60%),
-        radial-gradient(560px 420px at 50% 28%, rgba(255,255,255,.14) 0%, rgba(255,255,255,.08) 38%, rgba(255,255,255,.035) 65%, transparent 78%),
-        var(--bg);
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    }
-    .wrap{max-width:980px;margin:0 auto;padding:28px 18px 64px}
-    .hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-bottom:22px}
-    .hero-logo{height:100px;max-width:240px;object-fit:contain}
-    h1{font-size:var(--fs-h1);margin:0}
-    .lead{color:var(--muted);margin:8px 0 22px}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Vitajte v Lištobooku</title>
 
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap)}
-    .span12{grid-column:span 12}
-    /* default = 1 stĺpec (mobil); až od 720px dva stĺpce */
-    .span6{grid-column:span 12}
-    @media (min-width:720px){ .span6{grid-column:span 6} }
+<style>
 
-    .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
-      border:1px solid var(--border); border-radius:var(--radius); padding:var(--pad-card);
-      box-shadow:var(--shadow); backdrop-filter:blur(6px);
-    }
-    .iconline{display:flex;gap:12px;align-items:flex-start}
-    .icon{width:var(--icon);height:var(--icon);flex:0 0 var(--icon);border-radius:14px;background:rgba(77,163,255,.18);display:grid;place-items:center;border:1px solid var(--border)}
-    .icon svg{width:calc(var(--icon)*.5);height:calc(var(--icon)*.5)}
-    h2{font-size:var(--fs-h2);margin:0 0 6px}
-    .muted{color:var(--muted)}
-    .hr{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);margin:12px 0}
+:root{
+--bg:#0a1029;
+--text:#ecf2ff;
+--muted:#a8b3d6;
+--border:rgba(255,255,255,.12);
+--radius:18px;
+--shadow:0 10px 30px rgba(0,0,0,.35);
+--pad-card:18px;
+--icon:52px;
+--gap:16px;
+--max:820px;
+}
 
-    .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-    .btn{appearance:none;border:1px solid var(--border);cursor:pointer;padding:12px 16px;border-radius:14px;background:#1a2b59;color:var(--text);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:transform .05s ease, background .2s ease, border-color .2s ease}
-    .btn:hover{transform:translateY(-1px);background:#22336b;border-color:rgba(255,255,255,.2)}
-    .btn.primary{background:linear-gradient(135deg,#4da3ff,#7cd2ff);color:#0a1029;border:0}
-    .btn.good{background:linear-gradient(135deg,#22c55e,#86efac);color:#06220e;border:0}
-    .btn.warn{background:linear-gradient(135deg,#f59e0b,#fde68a);color:#3d2a05;border:0}
+*{box-sizing:border-box}
 
-    .steps{margin:8px 0 0;padding-left:18px}
-    .steps li{margin:6px 0;color:var(--muted)}
-    footer{margin-top:28px;color:var(--muted);font-size:.95rem;text-align:center}
+body{
+margin:0;
+font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
+color:var(--text);
+background:
+radial-gradient(1000px 700px at 10% -10%, #13255d 0%, transparent 60%),
+radial-gradient(800px 600px at 100% 0%, #0d1e4a 0%, transparent 60%),
+var(--bg);
+}
 
-    @media (max-width:430px){
-      :root{--pad-card:13px;--icon:38px;--fs-h1:1.32rem;--fs-h2:1rem;--fs-body:15px;--gap:12px;--radius:14px}
-      .wrap{padding:20px 12px 40px}
-      .hero-logo{height:72px;max-width:180px}
-      .cta-row .btn{width:100%;justify-content:center}
-    }
-    @media (max-width:360px){
-      :root{--pad-card:12px;--icon:34px;--fs-h1:1.24rem;--fs-h2:.97rem;--fs-body:14.5px;--gap:10px;--radius:12px}
-      .hero-logo{height:64px;max-width:160px}
-    }
-  </style>
+.wrap{
+max-width:var(--max);
+margin:auto;
+padding:30px 18px 60px;
+}
+
+.hero{
+text-align:center;
+margin-bottom:30px;
+}
+
+.hero img{
+height:90px;
+object-fit:contain;
+margin-bottom:10px;
+}
+
+h1{
+margin:0 0 10px;
+font-size:clamp(1.6rem,4vw,2.1rem);
+}
+
+.lead{
+color:var(--muted);
+max-width:650px;
+margin:auto;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr;
+gap:var(--gap);
+margin-top:25px;
+}
+
+.card{
+background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
+border:1px solid var(--border);
+border-radius:var(--radius);
+padding:var(--pad-card);
+box-shadow:var(--shadow);
+}
+
+.iconline{
+display:flex;
+gap:14px;
+align-items:flex-start;
+}
+
+.icon{
+width:var(--icon);
+height:var(--icon);
+border-radius:14px;
+background:rgba(77,163,255,.18);
+display:grid;
+place-items:center;
+border:1px solid var(--border);
+flex-shrink:0;
+font-size:22px;
+}
+
+h2{
+margin:0 0 6px;
+font-size:1.1rem;
+}
+
+.muted{
+color:var(--muted);
+}
+
+.cta{
+margin-top:30px;
+text-align:center;
+}
+
+.btn{
+display:inline-block;
+padding:14px 22px;
+border-radius:14px;
+font-weight:700;
+text-decoration:none;
+background:linear-gradient(135deg,#4da3ff,#7cd2ff);
+color:#081022;
+}
+
+footer{
+margin-top:40px;
+text-align:center;
+color:var(--muted);
+font-size:.9rem;
+}
+
+/* desktop grid */
+@media(min-width:720px){
+.grid{
+grid-template-columns:1fr 1fr;
+}
+}
+
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <header class="hero">
-      <img src="logo_lc.jpg" alt="Lištové centrum" class="hero-logo"/>
-      <div>
-        <h1>Vitajte v Lištobooku 👋</h1>
-        <p class="lead">Vaša sociálna sieť. Primárne pre obkladačov, ale vítaní sú všetci kutilovia.</p>
-      </div>
-    </header>
 
-    <section class="card span12" aria-labelledby="uvod">
-      <h2 id="uvod">O čo tu ide?</h2>
-      <p class="muted" style="margin:0">
-        Lištobook je miesto na <strong>zdieľanie práce</strong>, pýtanie sa na <strong>rady</strong> a hodnotenie <strong>tovarov</strong>.
-        Je to jednoduché – kliknite na veľké tlačidlá nižšie.
-      </p>
-    </section>
+<div class="wrap">
 
-    <div class="grid" style="margin-top:10px">
-      <section class="card span6" aria-labelledby="menu">
-        <div class="iconline">
-          <div class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-          </div>
-          <div>
-            <h2 id="menu">Ako sa pohybujem?</h2>
-            <p class="muted" style="margin:0">Vpravo hore je <strong>ikona menu</strong>. Odtiaľ sa dostanete do jednotlivých „<strong>centier</strong>“:</p>
-            <div class="hr"></div>
-            <ul class="steps">
-              <li><strong>Centrum hodnotenia</strong> – tu <u>hodnotíte tovary</u>.</li>
-              <li><strong>Centrum zábavy</strong> – krátky oddych a mini hry.</li>
-              <li><strong>Centrum zmeny účtu</strong> – nastavíte si <u>prezývku</u> a profil.</li>
-            </ul>
-          </div>
-        </div>
-      </section>
+<div class="hero">
+<img src="logo_lc.jpg" alt="Lištové centrum">
+<h1>Vitajte v Lištobooku</h1>
 
-      <section class="card span6" aria-labelledby="hodnotenia">
-        <div class="iconline">
-          <div class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.4L12 18l-5.8 3.1 1.1-6.4L2.6 9.8l6.5-.9L12 3z"/></svg>
-          </div>
-          <div>
-            <h2 id="hodnotenia">Chcem hodnotiť tovar</h2>
-            <p class="muted" style="margin:0">Otvorím <strong>Centrum hodnotenia</strong>, vyberiem produkt a dám mu <strong>hodnotenie</strong>.</p>
-            <div class="cta-row">
-              <!-- ☑ správna stránka: catalog.html -->
-              <a id="btn-products" class="btn good" href="/catalog.html">Hodnotiť produkty</a>
-            </div>
-          </div>
-        </div>
-      </section>
+<p class="lead">
+Lištobook je komunitná aplikácia pre majstrov, obkladačov a domácich kutilov.
+Slúži na zdieľanie skúseností z praxe, diskusiu o materiáloch a hodnotenie výrobkov používaných pri práci.
+</p>
 
-      <section class="card span6" aria-labelledby="listobook">
-        <div class="iconline">
-          <div class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12a8 8 0 1 0-15.5 3.5L3 21l5.5-2.5A8 8 0 0 0 21 12z"></path><path d="M8 10h8M8 14h6"></path></svg>
-          </div>
-          <div>
-            <h2 id="listobook">Chcem pridať príspevok</h2>
-            <p class="muted" style="margin:0">V <strong>Lištobooku</strong> píšete príspevky, pridávate fotky a komentujete iných.</p>
-            <p class="muted" style="margin:8px 0 0"><strong>Súkromná správa:</strong> v Lištobooku vľavo hore je <em>ikonka správy</em> – cez ňu napíšete konkrétnemu používateľovi.</p>
-            <div class="cta-row">
-              <!-- ☑ Lištobook = timeline.html -->
-              <a id="btn-timeline" class="btn" href="/timeline.html">Otvoriť Lištobook</a>
-              <!-- ☑ Správy -->
-              <a id="btn-messages" class="btn warn" href="/messages.html">Otvoriť správy</a>
-            </div>
-          </div>
-        </div>
-      </section>
+<p class="lead">
+Nie je to klasický e-shop. Produkty sú prepojené s naším e-shopom,
+kde si ich môžete následne objednať alebo zakúpiť.
+</p>
 
-      <section class="card span6" aria-labelledby="prezyvka">
-        <div class="iconline">
-          <div class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"></circle><path d="M4 20a8 8 0 0 1 16 0"></path></svg>
-          </div>
-          <div>
-            <h2 id="prezyvka">Dôležité: prezývka</h2>
-            <p class="muted" style="margin:0">Bez <strong>prezývky</strong> nemôžete <u>pridať príspevok</u>, <u>hodnotiť</u> ani <u>písať správy</u>. Nastavíte ju v <strong>Centre zmeny účtu</strong>.</p>
-            <div class="cta-row">
-              <!-- ☑ nastavenie prezývky = dashboard.html -->
-              <a id="btn-profile" class="btn primary" href="/dashboard.html">Nastaviť prezývku</a>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+</div>
 
-    <section class="card span12" style="margin-top:10px">
-      <h2>Rýchly plán na 30 sekúnd</h2>
-      <div class="hr"></div>
-      <ol class="steps">
-        <li>Otvorím <strong>Nastaviť prezývku</strong> a vyplním si ju.</li>
-        <li>Chcem <strong>hodnotiť</strong> → kliknem na <em>Hodnotiť produkty</em>.</li>
-        <li>Chcem <strong>písať príspevky</strong> → otvorím <em>Lištobook</em>.</li>
-        <li>Chcem <strong>správu</strong> → v Lištobooku kliknem na <em>ikonku správy</em> alebo otvorím <em>Správy</em>.</li>
-      </ol>
-    </section>
 
-    <footer>Ak si neviete rady, napíšte nám. Radi poradíme.</footer>
-  </div>
+<div class="grid">
 
-  <script>
-    // prenes email (a voliteľný ?next=) do odkazov
-    (function(){
-      const params = new URLSearchParams(location.search);
-      const email = params.get('email');
-      const next  = params.get('next');
-      if(!email) return;
+<div class="card">
+<div class="iconline">
+<div class="icon">👤</div>
+<div>
+<h2>Účet</h2>
+<p class="muted">
+Nastavenie vášho profilu, prezývky a základných údajov.
+Prezývka je potrebná na pridávanie príspevkov, hodnotení
+a komunikáciu s ostatnými používateľmi.
+</p>
+</div>
+</div>
+</div>
 
-      function addParams(href){
-        const url = new URL(href, location.origin);
-        url.searchParams.set('email', email);
-        if (next) url.searchParams.set('next', next);
-        return url.pathname + '?' + url.searchParams.toString();
-      }
-      ['btn-products','btn-timeline','btn-messages','btn-profile'].forEach(id=>{
-        const a = document.getElementById(id);
-        if(a){ a.setAttribute('href', addParams(a.getAttribute('href'))); }
-      });
-    })();
-  </script>
+
+<div class="card">
+<div class="iconline">
+<div class="icon">🎵</div>
+<div>
+<h2>Voľný čas</h2>
+<p class="muted">
+Oddychová sekcia aplikácie.
+Nájdete tu blog, malé hry a hudbu od Lištového centra –
+krátku pauzu od práce.
+</p>
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="iconline">
+<div class="icon">⭐</div>
+<div>
+<h2>Hodnotenie tovarov</h2>
+<p class="muted">
+Môžete hodnotiť materiály a výrobky,
+písať svoje skúsenosti a pomáhať ostatným majstrom
+pri výbere správneho riešenia.
+</p>
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="iconline">
+<div class="icon">📐</div>
+<div>
+<h2>Kalkulačky</h2>
+<p class="muted">
+Sekcia kalkulačiek pre výpočty materiálu a systémov.
+Táto časť je momentálne vo vývoji a bude dostupná
+v pripravovanej verzii <strong>Lištobook 2.0</strong>.
+</p>
+</div>
+</div>
+</div>
+
+</div>
+
+
+<div class="cta">
+
+<p class="muted">
+Najprv si nastavte svoju <strong>prezývku</strong> a profil v Dashboarde.
+</p>
+
+<br>
+
+<a id="btnDashboard" class="btn" href="/dashboard.html">
+Prejsť do Dashboardu
+</a>
+
+</div>
+
+
+<footer>
+© 2025 Lištové centrum
+</footer>
+
+</div>
+
+
+<script>
+
+const params = new URLSearchParams(location.search);
+const email = params.get("email");
+
+if(email){
+const btn = document.getElementById("btnDashboard");
+btn.href = "/dashboard.html?email=" + encodeURIComponent(email);
+}
+
+</script>
+
 </body>
 </html>

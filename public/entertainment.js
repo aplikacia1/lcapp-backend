@@ -1,7 +1,12 @@
 // public/entertainment.js
 const $ = (s, r = document) => r.querySelector(s);
+
 const params = new URLSearchParams(location.search);
 const userEmail = params.get('email') || '';
+
+if (!userEmail) {
+  location.href = "login.html";
+}
 
 /** YouTube Channel ID – môžeš nastaviť v /js/config.js ako window.__YT_CHANNEL_ID__ */
 const YT_CHANNEL_ID = (window.__YT_CHANNEL_ID__ || 'UCRsTMCPkTHHTLTYBeLbMUtw').trim(); // váš kanál

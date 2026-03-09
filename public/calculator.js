@@ -657,12 +657,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (backBtn) {
       backBtn.addEventListener("click", () => {
         const url = userEmail
-          ? `calc_index.html?email=${encodeURIComponent(userEmail)}`
-          : "calc_index.html";
+          ? `kalkulacky.html?email=${encodeURIComponent(userEmail)}`
+          : "kalkulacky.html";
         window.location.href = url;
       });
     }
-  }
+  } 
 
   function initShapeSwitch() {
     if (!shapeButtons.length) return;
