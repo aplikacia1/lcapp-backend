@@ -1,3 +1,13 @@
+/* ===== Lištobook APP LOCK ===== */
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+body {
+  touch-action: pan-y;
+}
 /* 🔵 VŠEOBECNÉ NASTAVENIA */
 body {
   margin: 0;
@@ -356,7 +366,7 @@ input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--lc-a
 
 /* === SPRÁVY (messages.html) =================== */
 .wrap {
-  max-width: 1100px;
+  max-width: 540px;
   margin: 10px auto 0;
   padding: 0 var(--gap);
   padding-bottom: 86px; /* miesto pre composer */

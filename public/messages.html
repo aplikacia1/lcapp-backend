@@ -76,7 +76,16 @@
     }
     .thread{ width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111; box-sizing:border-box; overflow-x:hidden; padding-bottom: calc(16px + var(--composer-h)); }
 
-    .msg{ background:#f7f9ff; border:1px solid #e6eaff; border-radius:16px; padding:10px 12px; max-width:76%; box-shadow:0 1px 0 rgba(0,0,0,.03); overflow-wrap:anywhere; word-break:break-word; }
+    .msg{
+      background:#f7f9ff;
+      border:1px solid #e6eaff;
+      border-radius:16px;
+      padding:10px 12px;
+      max-width:76%;
+      box-shadow:0 1px 0 rgba(0,0,0,.03);
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
     .msg.me{ align-self:flex-end; background:#e8f4ff; border-color:#d8ebff; }
     .msg .meta{ font-size:12px; color:#445; display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; }
 
@@ -134,10 +143,20 @@
     }
 
     #deleteConvBtn{
-      margin-left:8px; padding:2px 6px; font-size:12px; border-radius:6px;
-      border:1px solid #bcd6ff; background:#eef6ff; color:#0c1f4b; cursor:pointer;
+      margin-left:8px;
+      padding:4px 10px;
+      font-size:12px;
+      border-radius:8px;
+      border:1px solid #ff6b6b;
+      background:#ff6b6b;
+      color:#fff;
+      cursor:pointer;
     }
-    #deleteConvBtn:hover{ background:#ffdddd; border-color:#ffaaaa; color:#600; }
+
+    #deleteConvBtn:hover{
+      background:#ff4d4d;
+      border-color:#ff4d4d;
+    }
   </style>
 </head>
 
