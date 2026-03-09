@@ -1,0 +1,9 @@
+{
+  "appId": "sk.listobook.app",
+  "appName": "Listobook",
+  "webDir": "public",
+  "server": {
+    "url": "https://listobook.sk",
+    "cleartext": true
+  }
+}
