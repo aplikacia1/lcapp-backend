@@ -467,6 +467,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   refreshPresence();
   setInterval(refreshPresence, 10000);
   setComposerPadding();
+
+  if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(reg => {
+      console.log("Service Worker registered");
+    })
+    .catch(err => {
+      console.error("SW registration failed:", err);
+    });
+}
 });
 
 // =======================================================
