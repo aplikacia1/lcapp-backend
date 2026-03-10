@@ -633,3 +633,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     initAdPopup();
   });
 })();
+// =======================================================
+// PUSH NOTIFIKÁCIE – registrácia
+// =======================================================
+
+async function registerPush() {
+
+  if (!("serviceWorker" in navigator)) return;
+  if (!("PushManager" in window)) return;
+
+  try {
+
+    const reg = await navigator.serviceWorker.ready;
+
+    const permission = await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      console.log("Push zamietnuté");
+      return;
+    }
+
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: null
+    });
+
+    await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: userEmail,
+        subscription: sub
+      })
+    });
+
+    console.log("Push subscription uložený");
+
+  } catch (e) {
+    console.warn("Push registrácia zlyhala", e);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", registerPush);
