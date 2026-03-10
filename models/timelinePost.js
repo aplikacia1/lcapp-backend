@@ -27,6 +27,23 @@ const timelinePostSchema = new mongoose.Schema({
     heart: { type: Number, default: 0 }
   },
 
+  // 🆕 nový typ príspevku
+  isQuestion: {
+    type: Boolean,
+    default: false
+  },
+
+  // 🆕 prijatá odpoveď (comment ID)
+  acceptedAnswer: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null
+  },
+
+  // 🆕 sledovatelia diskusie
+  watchers: [{
+    type: String
+  }],
+
   comments: [{
     author: String,
 

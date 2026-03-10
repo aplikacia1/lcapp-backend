@@ -240,6 +240,7 @@ document.addEventListener("submit", async (e) => {
 
 // mazanie post/komentár + klik na používateľa (profil)
 document.addEventListener("click", async (e) => {
+  if (e.target.closest("#profileBackdrop")) return;
   const pBtn = e.target.closest(".post-delete");
   if (pBtn) {
     const id = pBtn.dataset.id;

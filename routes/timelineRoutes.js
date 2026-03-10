@@ -138,6 +138,7 @@ router.post('/comment/:postId', async (req, res) => {
       createdAt: new Date()
     });
     await post.save();
+    
     res.status(200).json({ message: 'Komentár pridaný' });
   } catch (e) {
     console.error('timeline comment error', e);
