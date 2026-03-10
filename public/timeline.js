@@ -636,7 +636,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 // =======================================================
 // PUSH NOTIFIKÁCIE – registrácia
 // =======================================================
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
 
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 async function registerPush() {
 
   if (!("serviceWorker" in navigator)) return;
@@ -655,7 +668,7 @@ async function registerPush() {
 
     const sub = await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: null
+      applicationServerKey: urlBase64ToUint8Array("BIThLJoQvlrSzamTtGD9fe2rpvgG9bh7gwArQd3LynCjtqot6vZobmESUdsJzM8w6nZMV-tTcBPquYT2Vmg3S6o")
     });
 
     await fetch("/api/push/subscribe", {
