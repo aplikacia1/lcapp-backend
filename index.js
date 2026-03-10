@@ -37,6 +37,14 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 
+const webpush = require("web-push");
+
+webpush.setVapidDetails(
+  "mailto:admin@listobook.sk",
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
 const app = express();
 
 /* --- Základ --- */
