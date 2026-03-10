@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>Lištobook – Info</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+:root{
+  --max-w:820px;
+  --gap:16px;
+  --hdr-h:96px;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  background:#061c47;
+  color:#fff;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  padding-top:var(--hdr-h);
+}
+
+/* ===== HLAVIČKA ===== */
+
+.app-header{
+  position:fixed;
+  inset:0 0 auto 0;
+  z-index:1000;
+  background:#0c1f4b;
+  border-bottom:1px solid rgba(255,255,255,.15);
+}
+
+.app-header-inner{
+  max-width:var(--max-w);
+  margin:0 auto;
+  padding:8px var(--gap);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+}
+
+/* šípka späť */
+
+.back-btn{
+  position:absolute;
+  left:12px;
+  top:10px;
+
+  width:40px;
+  height:40px;
+
+  border-radius:10px;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  color:#fff;
+  background:rgba(255,255,255,.10);
+  border:1px solid #ffffff33;
+
+  text-decoration:none;
+  backdrop-filter:blur(4px);
+}
+
+.back-btn svg{
+  width:22px;
+  height:22px;
+}
+
+.logo-small{
+  display:block;
+  height:40px;
+  object-fit:contain;
+  margin:2px auto 6px;
+}
+
+.user-chip{
+  color:#cfe2ff;
+  font-size:.95rem;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+/* ===== OBSAH ===== */
+
+.wrap{
+  max-width:var(--max-w);
+  margin:40px auto;
+  padding:0 var(--gap);
+  text-align:center;
+}
+
+h1{
+  margin-top:30px;
+}
+
+.info{
+  line-height:1.8;
+  font-size:16px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="app-header">
+<div class="app-header-inner">
+
+<a id="backBtn" class="back-btn" aria-label="Späť">
+<svg viewBox="0 0 24 24">
+<path d="M15 18l-6-6 6-6"
+fill="none"
+stroke="currentColor"
+stroke-width="2"
+stroke-linecap="round"
+stroke-linejoin="round"/>
+</svg>
+</a>
+
+<img src="logo_lc.jpg" class="logo-small" alt="Logo">
+
+<div class="user-chip">
+Lištobook – informácie
+</div>
+
+</div>
+</header>
+
+<main class="wrap">
+
+<h1>Lištobook</h1>
+
+<div class="info">
+
+<b>Verzia 1.0</b>
+
+<br><br>
+
+Prevádzkovateľ<br>
+
+<b>LIŠTOVÉ CENTRUM EU, s.r.o.</b><br>
+Sasinkova 13<br>
+010 01 Žilina<br>
+Slovakia
+
+<br><br>
+
+Vývoj<br>
+
+<b>MarSab s.r.o.</b><br>
+Karpatské námestie 10A<br>
+831 06 Bratislava
+
+<br><br>
+
+© 2026
+
+</div>
+
+</main>
+
+<script>
+(function(){
+
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get("email");
+
+  const backBtn = document.getElementById("backBtn");
+
+  if(backBtn){
+    backBtn.href = email
+      ? "dashboard.html?email=" + encodeURIComponent(email)
+      : "index.html";
+  }
+
+})();
+</script>
+
+</body>
+</html>

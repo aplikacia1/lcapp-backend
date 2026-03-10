@@ -408,12 +408,16 @@ async function openProfileCard(nick) {
     $("#profileAvatar").src = avatar;
 
     // tlačidlá
-    $("#profileMsgBtn").onclick = () => openMessages(nick);
+    $("#profileMsgBtn").onclick = (e) => {
+      e.stopPropagation();
+      openMessages(nick);
+    };
     // BLOKOVAŤ používateľa
-const blockBtn = $("#profileBlockBtn");
-if (blockBtn) {
-  blockBtn.onclick = async () => {
-    try {
+    const blockBtn = $("#profileBlockBtn");
+    if (blockBtn) {
+      blockBtn.onclick = async (e) => {
+      e.stopPropagation();
+      try {        
 
       const r = await fetch("/api/users/block", {
         method: "POST",

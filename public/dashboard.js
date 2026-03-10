@@ -47,6 +47,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const email = getEmail();
   if(!email){ window.location.href = 'index.html'; return; }
 
+    // INFO LINK
+  const infoLink = document.getElementById("infoLink");
+  if (infoLink && email) {
+    infoLink.href = "info.html?email=" + encodeURIComponent(email);
+  }
+
+  // jediné tlačidlo: späť na Lištobook (timeline)
+  $('#goTimelineBtn')?.addEventListener('click', () => {
+    window.location.href = `timeline.html?email=${encodeURIComponent(email)}`;
+  });
+
   // jediné tlačidlo: späť na Lištobook (timeline)
   $('#goTimelineBtn')?.addEventListener('click', () => {
     window.location.href = `timeline.html?email=${encodeURIComponent(email)}`;
