@@ -39,11 +39,15 @@ const fs = require('fs');
 
 const webpush = require("web-push");
 
-webpush.setVapidDetails(
-  "mailto:admin@listobook.sk",
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    "mailto:admin@listobook.sk",
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+} else {
+  console.log("⚠️ VAPID keys not set – push disabled (local dev)");
+}
 
 const app = express();
 
@@ -151,6 +155,7 @@ mountRoute('/api/admin',          './routes/adminRoutes');
 mountRoute('/api/admin',          './routes/adminDashboardStatsRoutes');
 
 mountRoute('/api/users',          './routes/userRoutes');
+mountRoute('/api/pin',            './routes/pinRoutes');
 mountRoute('/api/categories',     './routes/categoryRoutes');
 mountRoute('/api/products',       './routes/productRoutes');
 mountRoute('/api/orders',         './routes/orderRoutes');

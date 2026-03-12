@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nastavenie PIN</title>
+<link rel="stylesheet" href="style.css"/>
+
+<style>
+body {
+  background-color:#0c1f4b;
+  font-family: system-ui, sans-serif;
+}
+
+.auth-wrap{
+  max-width:420px;
+  margin:40px auto;
+  padding:16px;
+  text-align:center;
+}
+
+.logo{
+  display:block;
+  margin:24px auto 8px;
+  height:120px;
+}
+
+h1{
+  color:white;
+  margin-bottom:20px;
+}
+
+.pin-dots{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:30px;
+}
+
+.pin-btn.back {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+}
+
+.dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#cfe2ff40;
+}
+
+.dot.active{
+  background:white;
+}
+
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.key{
+  height:70px;
+  font-size:24px;
+  border-radius:14px;
+  border:1px solid #bcd6ff;
+  background:white;
+  color:#0c1f4b;
+  cursor:pointer;
+  transition:.12s;
+}
+
+.key:active{
+  transform:scale(.96);
+  box-shadow:0 0 10px #bcd6ff;
+}
+
+.actions{
+  margin-top:18px;
+}
+
+.skip{
+  color:#cfe2ff;
+  text-decoration:underline;
+  cursor:pointer;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-wrap">
+  <img src="logo_lc.jpg" class="logo">
+  <h1>Nastavte PIN</h1>
+
+  <div class="pin-dots">
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+    <div class="dot" id="d4"></div>
+  </div>
+
+  <div class="keypad">
+    <button class="key" onclick="press(1)">1</button>
+    <button class="key" onclick="press(2)">2</button>
+    <button class="key" onclick="press(3)">3</button>
+
+    <button class="key" onclick="press(4)">4</button>
+    <button class="key" onclick="press(5)">5</button>
+    <button class="key" onclick="press(6)">6</button>
+
+    <button class="key" onclick="press(7)">7</button>
+    <button class="key" onclick="press(8)">8</button>
+    <button class="key" onclick="press(9)">9</button>
+
+    <button class="key pin-btn-back" onclick="back()">←</button>
+    <button class="key" onclick="press(0)">0</button>
+  </div>
+
+  <div class="actions">
+    <div class="skip">Preskočiť</div>
+  </div>
+</div>
+
+<script>
+let pin = "";
+let confirmPin = "";
+let confirming = false;
+
+const dots = document.querySelectorAll(".dot");
+
+function updateDots(value){
+  dots.forEach(d => d.classList.remove("active"));
+  for(let i=0;i<value.length;i++){
+    dots[i].classList.add("active");
+  }
+}
+
+function back(){
+  if(!confirming){
+    pin = pin.slice(0,-1);
+    updateDots(pin);
+  } else {
+    confirmPin = confirmPin.slice(0,-1);
+    updateDots(confirmPin);
+  }
+}
+
+function press(n){
+  if(!confirming){
+    if(pin.length >= 4) return;
+    pin += n;
+    updateDots(pin);
+
+    if(pin.length === 4){
+      confirming = true;
+      setTimeout(()=>{
+        updateDots("");
+      },200);
+    }
+  } else {
+    if(confirmPin.length >= 4) return;
+    confirmPin += n;
+    updateDots(confirmPin);
+
+    if(confirmPin.length === 4){
+      if(pin !== confirmPin){
+        alert("PIN sa nezhoduje");
+        pin = "";
+        confirmPin = "";
+        confirming = false;
+        updateDots("");
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get("email");
+
+      fetch("/api/pin/set-pin",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ email, pin })
+      })
+      .then(r=>r.json())
+      .then(()=>{
+
+        // ⭐ označenie zariadenia ako trusted
+        localStorage.setItem("lb_device_trusted", "true");
+        localStorage.setItem("lb_has_pin", "true");
+        localStorage.setItem("lb_user_email", email);
+
+        window.location.href = "onboarding.html?email=" + encodeURIComponent(email);
+      });
+    }
+  }
+}
+
+document.querySelector(".skip").onclick = ()=>{
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get("email");
+  window.location.href = "onboarding.html?email=" + encodeURIComponent(email);
+};
+</script>
+
+</body>
+</html>

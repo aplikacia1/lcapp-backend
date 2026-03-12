@@ -283,6 +283,15 @@
   </div>
 
   <script>
+    // ===== PIN DEVICE CHECK =====
+(function () {
+  const trusted = localStorage.getItem("lb_device_trusted");
+  const hasPin = localStorage.getItem("lb_has_pin");
+
+  if (trusted === "true" && hasPin === "true") {
+    location.href = "pin_login.html";
+  }
+})();
     // bežné tlačidlá
     document.getElementById('goRegister').addEventListener('click', ()=> location.href = 'register.html');
     document.getElementById('goLogin').addEventListener('click', ()=> location.href = 'login.html');

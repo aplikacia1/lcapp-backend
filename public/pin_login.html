@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta name="theme-color" content="#0c1f4b">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Zadajte PIN</title>
+<link rel="stylesheet" href="style.css"/>
+
+<style>
+body {
+  background-color:#0c1f4b;
+  font-family: system-ui, sans-serif;
+}
+
+.auth-wrap{
+  max-width:420px;
+  margin:40px auto;
+  padding:16px;
+  text-align:center;
+}
+
+.logo{
+  display:block;
+  margin:24px auto 8px;
+  height:120px;
+}
+
+h1{
+  color:white;
+  margin-bottom:20px;
+}
+
+.pin-dots{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:30px;
+}
+
+.dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#cfe2ff40;
+}
+
+.dot.active{
+  background:white;
+}
+
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.key{
+  height:72px;
+  font-size:26px;
+  font-weight:600;
+  border-radius:14px;
+  border:1px solid #bcd6ff;
+  background:white;
+  color:#0c1f4b;
+  cursor:pointer;
+}
+
+.key:active{
+  transform:scale(.96);
+  box-shadow:0 0 10px #bcd6ff;
+}
+
+.skip{
+  margin-top:18px;
+  color:#cfe2ff;
+  cursor:pointer;
+  font-size:14px;
+  text-decoration:underline;
+}
+</style>
+</head>
+
+<body>
+
+<div class="auth-wrap">
+  <img src="logo_lc.jpg" class="logo">
+  <h1>Zadajte PIN</h1>
+
+  <div class="pin-dots">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div class="keypad">
+    <button class="key" onclick="press(1)">1</button>
+    <button class="key" onclick="press(2)">2</button>
+    <button class="key" onclick="press(3)">3</button>
+
+    <button class="key" onclick="press(4)">4</button>
+    <button class="key" onclick="press(5)">5</button>
+    <button class="key" onclick="press(6)">6</button>
+
+    <button class="key" onclick="press(7)">7</button>
+    <button class="key" onclick="press(8)">8</button>
+    <button class="key" onclick="press(9)">9</button>
+
+    <button class="key" onclick="back()">←</button>
+    <button class="key" onclick="press(0)">0</button>
+  </div>
+
+  <div class="skip" onclick="goToPasswordLogin()">Prihlásiť sa heslom</div>
+</div>
+
+<script>
+let pin = "";
+let tries = 0;
+
+const dots = document.querySelectorAll(".dot");
+
+function updateDots(){
+  dots.forEach(d => d.classList.remove("active"));
+  for(let i=0;i<pin.length;i++){
+    dots[i].classList.add("active");
+  }
+}
+
+function press(n){
+  if(pin.length >= 4) return;
+
+  pin += n;
+  updateDots();
+
+  if(pin.length === 4){
+    verifyPin();
+  }
+}
+
+function goToPasswordLogin(){
+  localStorage.removeItem("lb_device_trusted");
+  localStorage.removeItem("lb_has_pin");
+  localStorage.removeItem("lb_user_email");
+  window.location.href = "login.html";
+}
+
+function back(){
+  pin = pin.slice(0,-1);
+  updateDots();
+}
+
+function verifyPin(){
+  const params = new URLSearchParams(window.location.search);
+  let email = params.get("email");
+
+if (!email) {
+  email = localStorage.getItem("lb_user_email");
+}
+
+if (!email) {
+  alert("Relácia vypršala. Prihláste sa znova.");
+  window.location.href = "login.html";
+  return;
+}
+  const next = params.get("next") || "timeline.html";
+
+  fetch("/api/pin/verify-pin", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ email, pin })
+  })
+  .then(async r => {
+
+    if (!r.ok) {
+      tries++;
+
+      if (tries >= 3) {
+        alert("PIN zadaný nesprávne 3x. Prihláste sa heslom.");
+
+        // ⭐ zruš trusted device
+        localStorage.removeItem("lb_device_trusted");
+        localStorage.removeItem("lb_has_pin");
+        localStorage.removeItem("lb_user_email");
+
+        window.location.href = "login.html";
+        return;
+     }
+
+      pin = "";
+      updateDots();
+      return;
+    }
+
+    // success
+    tries = 0;
+
+    localStorage.setItem("lb_device_trusted", "true");
+    localStorage.setItem("lb_has_pin", "true");
+    localStorage.setItem("lb_user_email", email);
+
+    window.location.href = next + "?email=" + encodeURIComponent(email);
+
+  });
+}
+</script>
+
+</body>
+</html>

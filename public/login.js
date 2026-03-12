@@ -1,5 +1,6 @@
 // frontend/public/login.js
 (function () {
+  
   function lcAlert(text){
   const modal = document.getElementById("lcModal");
   const txt = document.getElementById("lcModalText");
@@ -96,6 +97,16 @@
           lcAlert(data?.message || 'Nesprávny e-mail alebo heslo.');
           return;
         }
+       // zisti či má user PIN v systéme
+            try {
+              const pinCheck = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+              const pinData = await pinCheck.json();
+
+              
+            } catch (e) {}
+
+            // uloženie emailu do zariadenia (pre PIN login)
+            localStorage.setItem("lb_user_email", email);
 
         // ✅ presmerovanie po úspechu: next + email (alebo fallback)
         redirectToNextWithEmail(email);
@@ -104,6 +115,7 @@
         console.error('Login error', err);
         lcAlert('Chyba pri pripojení.');
       }
+     
     });
 
     /* ----- FORGOT PASSWORD ----- */

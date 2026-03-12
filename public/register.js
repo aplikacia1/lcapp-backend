@@ -179,10 +179,10 @@
           return;
         }
 
-        const onboarding = new URL('onboarding.html', location.origin);
-        onboarding.searchParams.set('email', email);
+        const pin = new URL('pin.html', location.origin);
+        pin.searchParams.set('email', email);
 
-        window.location.replace(onboarding.pathname + '?' + onboarding.searchParams.toString());
+        window.location.replace(pin.pathname + '?' + pin.searchParams.toString());
       } catch (err) {
         console.error('Register error', err);
         showErr(emailErr(), 'Server momentálne neodpovedá. Skúste to o chvíľu.');

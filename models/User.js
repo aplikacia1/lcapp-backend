@@ -1,63 +1,56 @@
-// models/User.js
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema(
   {
-    email:    { type: String, required: true, unique: true, index: true },
+    email: { type: String, required: true, unique: true, index: true },
     password: { type: String, required: true },
 
     // verejné údaje profilu
-    name:      { type: String, default: '' },        // prezývka (zobrazujeme)
-    nameLower: { type: String, default: null },      // normalizované meno na jedinečnosť
-    note:      { type: String, default: '' },        // mesto
+    name: { type: String, default: '' },
+    nameLower: { type: String, default: null },
+    note: { type: String, default: '' },
 
-    // rozšírený profil (nové polia)
-    avatarUrl:   { type: String, default: '' },
-    fullName:    { type: String, default: '' },
-    bio:         { type: String, default: '' },
+    // rozšírený profil
+    avatarUrl: { type: String, default: '' },
+    fullName: { type: String, default: '' },
+    bio: { type: String, default: '' },
     companyName: { type: String, default: '' },
-    companyICO:  { type: String, default: '' },
-    companyDIC:  { type: String, default: '' },
-    companyICDPH:{ type: String, default: '' },
-    web:         { type: String, default: '' },
-    instagram:   { type: String, default: '' },
+    companyICO: { type: String, default: '' },
+    companyDIC: { type: String, default: '' },
+    companyICDPH: { type: String, default: '' },
+    web: { type: String, default: '' },
+    instagram: { type: String, default: '' },
 
     role: { type: String, default: 'user' },
 
-    // newsletter – voliteľný súhlas používateľa
     newsletter: { type: Boolean, default: false },
 
-    // ➕ bude vyplnené po prvom úspešnom odoslaní uvítacieho e-mailu
     profileWelcomeSentAt: { type: Date, default: null },
 
-    // pre online stav (panel používateľov)
-    lastSeen:  { type: Date, default: Date.now },
+    lastSeen: { type: Date, default: Date.now },
 
-    // --- Reset hesla ---
-    resetPasswordToken:   { type: String, default: null },
-    resetPasswordExpires: { type: Date,   default: null },
-    passwordChangedAt:    { type: Date,   default: null },
+    // Reset hesla
+    resetPasswordToken: { type: String, default: null },
+    resetPasswordExpires: { type: Date, default: null },
+    passwordChangedAt: { type: Date, default: null },
 
-    // =========================================
+    // =========================
+    // PIN LOGIN
+    // =========================
+    pinHash: { type: String, default: null },
+    pinEnabled: { type: Boolean, default: false },
+    pinChangedAt: { type: Date, default: null },
+
+    // =========================
     // MIKROKOMUNITY
-    // =========================================
-
-    // zoznam blokovaných používateľov (emaily)
-    blockedUsers: {
-      type: [String],
-      default: []
-    },
-
-    // zoznam priateľov (emaily)
-    friends: {
-      type: [String],
-      default: []
-    }
+    // =========================
+    blockedUsers: { type: [String], default: [] },
+    friends: { type: [String], default: [] }
   },
   { timestamps: true }
 );
 
-// Jedinečnosť prezývky len vtedy, keď je vyplnená
+// Jedinečnosť prezývky len keď je vyplnená
 userSchema.index(
   { nameLower: 1 },
   { unique: true, partialFilterExpression: { nameLower: { $type: 'string' } } }
