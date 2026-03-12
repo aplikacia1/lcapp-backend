@@ -125,6 +125,7 @@ h1{
 </div>
 
 <script>
+
 let pin = "";
 let confirmPin = "";
 let confirming = false;
@@ -183,8 +184,15 @@ function press(n){
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({ email, pin })
       })
-      .then(r=>r.json())
-      .then(()=>{
+      .then(r => r.json())
+      .then(data => {
+
+        console.log("PIN SAVE RESPONSE:", data);
+
+        if (!data || !data.success) {
+          alert("PIN sa nepodarilo uložiť");
+          return;
+        }
 
         // ⭐ označenie zariadenia ako trusted
         localStorage.setItem("lb_device_trusted", "true");

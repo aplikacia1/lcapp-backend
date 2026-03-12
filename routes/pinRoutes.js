@@ -121,3 +121,4 @@ router.post("/disable-pin", async (req, res) => {
   }
 });
 
+module.exports = router;
