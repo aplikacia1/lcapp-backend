@@ -534,10 +534,18 @@ async function safeRefresh(){
   try{
     inflight?.abort?.(); inflight = new AbortController();
     await refreshConversationsDiff();
-    if (currentOtherEmail){
-      const preserve = $('#composerText'); const saved = preserve ? preserve.value : '';
+    const isThreadVisible =
+      document.body.classList.contains('mobile-show-thread') ||
+      !isMobile();
+
+    if (currentOtherEmail && isThreadVisible){
+      const preserve = $('#composerText');
+      const saved = preserve ? preserve.value : '';
+
       await openThread(currentOtherEmail, currentOtherLabel);
-      if (preserve) preserve.value = saved; draftCache = saved;
+
+      if (preserve) preserve.value = saved;
+      draftCache = saved;
     }
   }catch{}
 }
