@@ -291,11 +291,21 @@ document.addEventListener("click", async (e) => {
 
   // klik na používateľa v pravej lište → PROFIL
   const li = e.target.closest(".presence-item");
-  if (li) {
-    const targetNick = (li.dataset.name || "").trim();
-    if (!targetNick) return;
-    openProfileCard(targetNick);
-  }
+    if (li) {
+      const targetNick = (li.dataset.name || "").trim();
+      if (!targetNick) return;
+    
+      // zavri offcanvas panely
+      document.body.classList.remove('open-nav','open-people');
+      document.body.classList.remove('no-scroll');
+    
+      // malý delay → nech sa DOM stabilizuje
+      setTimeout(() => {
+        openProfileCard(targetNick);
+      }, 120);
+
+      return;
+    S}
 });
 
 // ────────── Presence ──────────
