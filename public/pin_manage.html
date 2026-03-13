@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Správa PIN</title>
+
+<style>
+body{
+  background:#0c1f4b;
+  font-family:system-ui;
+  margin:0;
+}
+
+.wrap{
+  max-width:420px;
+  margin:40px auto;
+  padding:16px;
+  text-align:center;
+}
+
+.logo{
+  height:110px;
+  margin:20px auto;
+}
+
+h1{
+  color:white;
+  margin-bottom:25px;
+}
+
+.dots{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:30px;
+}
+
+.dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#cfe2ff40;
+}
+
+.dot.active{
+  background:white;
+}
+
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.key{
+  height:72px;
+  font-size:26px;
+  border-radius:14px;
+  border:1px solid #bcd6ff;
+  background:white;
+  color:#0c1f4b;
+}
+
+.actions{
+  margin-top:20px;
+}
+
+.btn{
+  display:block;
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:12px;
+  border:none;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.change{
+  background:white;
+  color:#0c1f4b;
+}
+
+.remove{
+  background:#ff4b4b;
+  color:white;
+}
+
+.hidden{
+  display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<img src="logo_lc.jpg" class="logo">
+
+<h1 id="title">Zadajte aktuálny PIN</h1>
+
+<div class="dots">
+<div class="dot"></div>
+<div class="dot"></div>
+<div class="dot"></div>
+<div class="dot"></div>
+</div>
+
+<div class="keypad">
+<button class="key" onclick="press(1)">1</button>
+<button class="key" onclick="press(2)">2</button>
+<button class="key" onclick="press(3)">3</button>
+
+<button class="key" onclick="press(4)">4</button>
+<button class="key" onclick="press(5)">5</button>
+<button class="key" onclick="press(6)">6</button>
+
+<button class="key" onclick="press(7)">7</button>
+<button class="key" onclick="press(8)">8</button>
+<button class="key" onclick="press(9)">9</button>
+
+<button class="key" onclick="back()">←</button>
+<button class="key" onclick="press(0)">0</button>
+</div>
+
+<div class="actions hidden" id="actions">
+<button class="btn change" onclick="startChange()">Zmeniť PIN</button>
+<button class="btn remove" onclick="startRemove()">Zrušiť PIN</button>
+</div>
+
+</div>
+
+<script>
+
+// ⭐ identita používateľa
+const params = new URLSearchParams(window.location.search);
+let email = params.get("email");
+
+if(!email){
+  email = localStorage.getItem("lb_user_email");
+}
+
+if(!email){
+  alert("Relácia vypršala. Prihláste sa znova.");
+  window.location.href = "login.html";
+}
+
+let mode = "verify";
+let pin = "";
+let newPin = "";
+let confirmPin = "";   // ⭐ PRIDAŤ TENTO RIADOK
+let confirming = false;
+
+const dots = document.querySelectorAll(".dot");
+
+function updateDots(val){
+  dots.forEach(d => d.classList.remove("active"));
+  for(let i=0;i<val.length;i++){
+    dots[i].classList.add("active");
+  }
+}
+
+function press(n){
+
+  if(mode === "verify"){
+    pin += n;
+    updateDots(pin);
+    }
+     
+
+    if(pin.length === 4){
+      setTimeout(()=>{
+        document.getElementById("title").innerText = "Vyberte akciu";
+        document.getElementById("actions").classList.remove("hidden");
+      },200);
+    }
+  }
+
+  if(mode === "change"){
+    if(!confirming){
+      newPin += n;
+      updateDots(newPin);
+
+      if(newPin.length === 4){
+        confirming = true;
+        document.getElementById("title").innerText = "Potvrďte nový PIN";
+        setTimeout(()=>updateDots(""),200);
+      }
+    }else{
+  confirmPin += n;
+  updateDots(confirmPin);
+
+  if(confirmPin.length === 4){
+
+    if(newPin !== confirmPin){
+      alert("PIN sa nezhoduje");
+      newPin = "";
+      confirmPin = "";
+      confirming = false;
+      updateDots("");
+      document.getElementById("title").innerText = "Zadajte nový PIN";
+      return;
+    }
+
+    alert("PIN zmenený (UI OK)");
+  }
+}
+
+  if(mode === "remove"){
+    pin += n;
+    updateDots(pin);
+
+    if(pin.length === 4){
+      alert("PIN zrušený (UI)");
+    }
+  }
+}
+
+function back(){
+  if(mode === "verify"){
+    pin = pin.slice(0,-1);
+    updateDots(pin);
+  }
+}
+
+function startChange(){
+  mode = "change";
+  pin = "";
+  newPin = "";
+  confirmPin = "";   // ⭐ PRIDAŤ
+  confirming = false;
+  updateDots("");
+  document.getElementById("title").innerText = "Zadajte nový PIN";
+}
+
+function startRemove(){
+  mode = "remove";
+  pin = "";
+  updateDots("");
+  document.getElementById("title").innerText = "Potvrďte zrušenie PIN";
+}
+
+</script>
+
+</body>
+</html>

@@ -100,6 +100,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   loadSocialLists(email);
 
+  // PIN správa
+  document.getElementById("pinManageBtn")?.addEventListener("click", () => {
+    const email = new URLSearchParams(window.location.search).get("email");
+    window.location.href = "pin_manage.html?email=" + encodeURIComponent(email);
+  });
+
   // ========== 2) Upload avatara (+ okamžité uloženie avatarUrl) ==========
   avatarFile?.addEventListener('change', async (ev)=>{
     const f = ev.target.files && ev.target.files[0];
@@ -208,6 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error(err);
       msg.textContent = 'Chyba pri komunikácii so serverom.'; msg.style.color='red';
     }
+    
   });
 });
 // =============================

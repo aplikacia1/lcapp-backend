@@ -64,41 +64,80 @@
 
     .thread-panel{ display:flex; flex-direction:column; min-height:0; min-width:0; }
     .thread-wrap{
-      flex:1 1 auto; overflow:auto; overflow-x:hidden; width:100%;
+     flex:1 1 auto;
+      overflow:auto;
+      overflow-x:hidden;
+      width:100%;
       background:
-        radial-gradient(240px 240px at 20% -20%, rgba(255,255,255,.08), transparent 60%),
-        radial-gradient(220px 220px at 90% 0%, rgba(255,255,255,.06), transparent 60%),
-        #ffffff;
-      border-top:1px solid #eee;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(16px + var(--composer-h));
-      position:relative; z-index:0;
+        radial-gradient(600px 600px at 20% -20%, rgba(0,150,255,.15), transparent 60%),
+        radial-gradient(600px 600px at 90% 0%, rgba(0,80,180,.12), transparent 60%),
+        #061427;
+      padding:20px;
+      padding-bottom: calc(20px + var(--composer-h));
+      position:relative;
     }
-    .thread{ width:100%; max-width:100%; margin:0; padding:14px; display:flex; flex-direction:column; gap:10px; color:#111; box-sizing:border-box; overflow-x:hidden; padding-bottom: calc(16px + var(--composer-h)); }
-
-    .msg{
-      background:#f7f9ff;
-      border:1px solid #e6eaff;
-      border-radius:16px;
-      padding:10px 12px;
-      max-width:76%;
-      box-shadow:0 1px 0 rgba(0,0,0,.03);
-      overflow-wrap:anywhere;
-      word-break:break-word;
+    .thread{
+      width:100%;
+      max-width:720px;
+      margin:0;   /* ← toto je kľúč */
+      padding:40px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      color:#fff;
+      box-sizing:border-box;
     }
-    .msg.me{ align-self:flex-end; background:#e8f4ff; border-color:#d8ebff; }
-    .msg .meta{ font-size:12px; color:#445; display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; }
+    
+    .msg .meta{
+  font-size:12px;
+  opacity:.5;
+  margin-bottom:2px;
+  color:#fff;
+}
 
     .composer-bar{
-      position:fixed; left:0; right:0; bottom:0; z-index:950; background:#0c1f4b;
-      border-top:1px solid var(--panel-border); display:flex; justify-content:center;
-      padding:10px 12px; padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:950;
+      background:rgba(6,20,39,.95);
+      backdrop-filter: blur(12px);
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex;
+      justify-content:center;
+      padding:14px;
     }
-    .composer-wrap{ width:100%; max-width:var(--max-w); padding:0 var(--gap); }
-    .composer{ background:#fff; border:1px solid #eee; border-radius:14px; padding:10px; }
+    .composer-wrap{
+      width:100%;
+      max-width:900px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:10px;
+    }
+    .composer{
+  flex:1;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
     .composer-row{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; }
     .input-group{ display:flex; align-items:center; gap:8px; width:100%; background:#eef6ff; border:1px solid #bcd6ff; border-radius:12px; padding:6px 8px; box-sizing:border-box; }
-    #composerText{ flex:1 1 auto; min-width:0; height:28px; border:none; background:transparent; outline:none; color:#111; font-weight:500; resize:none; }
+    #composerText{
+      flex:1;
+      min-height:40px;
+      max-height:140px;
+      background:transparent;
+      border:none;
+      outline:none;
+      color:#fff;
+      font-size:14px;
+      resize:none;
+    }
     #composerCount{ font-size:12px; color:#667; white-space:nowrap; }
     .button{ height:40px; padding:0 12px; border:1px solid #bcd6ff; border-radius:12px; background:#eef6ff; color:#0c1f4b; cursor:pointer; }
     .button:hover{ background:#e3f0ff; }
@@ -157,6 +196,46 @@
       background:#ff4d4d;
       border-color:#ff4d4d;
     }
+
+.msg{
+  color:#fff;
+  font-size:15px;
+  line-height:1.5;
+  padding:0;
+  margin:0;
+  max-width:100%;
+  background:none;
+  border:none;
+}
+
+.msg-text{
+  font-weight:400;
+  letter-spacing:.2px;
+}
+
+.msg{
+  color:#fff;
+  font-size:15px;
+  line-height:1.5;
+  padding:0;
+  margin:0;
+  max-width:100%;
+  background:none;
+  border:none;
+}
+
+.msg-text{
+  font-weight:400;
+  letter-spacing:.2px;
+}
+
+.msg .meta{
+  font-size:12px;
+  opacity:.5;
+  margin-bottom:2px;
+  color:#fff;
+}
+
   </style>
 </head>
 
@@ -207,7 +286,9 @@
           <div id="threadTitle" style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Vyberte konverzáciu</div>
         </div>
       </div>
-      <div class="thread-wrap"><div id="thread" class="thread"></div></div>
+      <div class="thread-wrap">
+         <div id="thread" class="thread"></div>
+      </div>
     </section>
   </div>
 

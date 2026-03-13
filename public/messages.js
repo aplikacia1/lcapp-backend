@@ -372,7 +372,7 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
 
       const isMe = String(m.fromEmail).toLowerCase()===String(userEmail).toLowerCase();
       const el = document.createElement('div');
-      el.className = 'msg' + (isMe ? ' me' : '');
+      el.className = 'msg';
       el.dataset.key = key;
 
       const when = m.createdAt ? new Date(m.createdAt).toLocaleString('sk-SK') : '';
@@ -383,12 +383,16 @@ async function openThread(otherEmail, otherLabel, { reset=false } = {}){
                              : ( (userProfile?.name || '').trim() || 'Ty' );
 
       el.innerHTML = `
-        <div class="meta">
-          <span>${esc(fromLabel)} → ${esc(toLabel)}</span>
-          <span>${when}</span>
-        </div>
-        <div>${esc(m.text || '')}</div>
-      `;
+      <div class="meta">
+        ${esc(fromLabel)}
+      </div>
+      <div class="meta-time">
+        ${esc(when)}
+      </div>
+      <div class="msg-text">
+        ${esc(m.text || '')}
+      </div>
+    `;
       frag.appendChild(el);
 
       const ts = m.createdAt ? new Date(m.createdAt).getTime() : Date.now();
