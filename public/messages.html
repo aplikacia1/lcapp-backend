@@ -41,7 +41,20 @@
     @media (max-width: 900px){ .wrap{ grid-template-columns: 1fr; } }
 
     .card{ background:rgba(255,255,255,.04); border:1px solid var(--panel-border); border-radius:14px; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
-    .card .head{ padding:10px 12px; font-weight:700; border-bottom:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .card .head{
+      padding:10px 12px;
+      font-weight:700;
+      border-bottom:1px solid var(--panel-border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+ 
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:#0c1f4b;
+    }
     .card .body{ flex:1 1 auto; overflow:auto; min-height:0; }
 
     .list-panel{ background:#0c1f4b !important; border:none !important; }
@@ -62,9 +75,15 @@
     .conv-name .badge{ min-width:18px; height:18px; padding:0 6px; border-radius:999px; background:#ffcc00; color:#111; font-weight:800; font-size:12px; display:inline-flex; align-items:center; justify-content:center; }
     .conv-last{ opacity:.85; font-size:13px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    .thread-panel{ display:flex; flex-direction:column; min-height:0; min-width:0; }
+    .thread-panel{
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      min-width:0;
+      overflow:hidden;
+    }
     .thread-wrap{
-     flex:1 1 auto;
+      flex:1 1 auto;
       overflow:auto;
       overflow-x:hidden;
       width:100%;
@@ -74,7 +93,6 @@
         #061427;
       padding:20px;
       padding-bottom: calc(20px + var(--composer-h));
-      position:relative;
     }
     .thread{
       width:100%;
