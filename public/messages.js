@@ -532,8 +532,18 @@ async function deleteConversationUser(otherEmail, otherLabel){
 /* ---------- SAFE REFRESH ---------- */
 async function safeRefresh(){
   try{
-    inflight?.abort?.(); inflight = new AbortController();
+    inflight?.abort?.();
+    inflight = new AbortController();
+
     await refreshConversationsDiff();
+
+    // 🧠 MOBILE FIX — ak je zobrazený zoznam, thread nenačítavať
+    const mobileListVisible =
+      isMobile() &&
+      document.body.classList.contains('mobile-show-list');
+
+    if (mobileListVisible) return;
+
     const isThreadVisible =
       document.body.classList.contains('mobile-show-thread') ||
       !isMobile();
@@ -547,6 +557,7 @@ async function safeRefresh(){
       if (preserve) preserve.value = saved;
       draftCache = saved;
     }
+
   }catch{}
 }
 

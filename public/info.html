@@ -88,23 +88,19 @@ body{
 
 .wrap{
   max-width:var(--max-w);
-  margin:40px auto;
+  margin:30px auto;
   padding:0 var(--gap);
   text-align:center;
 }
 
 h1{
-  margin-top:30px;
+  margin-top:20px;
 }
 
-.info{
-  line-height:1.8;
-  font-size:16px;
-  margin-bottom:40px;
-}
+/* ===== PHILOSOPHY ===== */
 
 .philosophy{
-  margin-top:40px;
+  margin-top:30px;
   font-size:14px;
   line-height:1.7;
   color:#cfe2ff;
@@ -116,6 +112,47 @@ h1{
 
 .philosophy b{
   color:#fff;
+}
+
+/* ===== COMPANY ROW ===== */
+
+.company-row{
+  margin-top:40px;
+  display:flex;
+  gap:30px;
+  justify-content:center;
+  text-align:left;
+  font-size:15px;
+  line-height:1.7;
+}
+
+.company-col{
+  flex:1;
+  max-width:280px;
+}
+
+.company-title{
+  color:#9ecbff;
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  margin-bottom:6px;
+}
+
+/* ===== MOBILE ===== */
+
+@media (max-width:640px){
+  .company-row{
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+  }
+}
+
+.footer-copy{
+  margin-top:30px;
+  font-size:13px;
+  color:#9ecbff;
 }
 
 </style>
@@ -150,32 +187,9 @@ Lištobook – informácie
 
 <h1>Lištobook</h1>
 
-<div class="info">
-
 <b>Verzia 1.0</b>
 
-<br><br>
-
-Prevádzkovateľ<br>
-
-<b>LIŠTOVÉ CENTRUM EU, s.r.o.</b><br>
-Sasinkova 13<br>
-010 01 Žilina<br>
-Slovakia
-
-<br><br>
-
-Vývoj<br>
-
-<b>MarSab s.r.o.</b><br>
-Karpatské námestie 10A<br>
-831 06 Bratislava
-
-<br><br>
-
-© 2026
-
-</div>
+<!-- ===== PHILOSOPHY FIRST ===== -->
 
 <div class="philosophy">
 
@@ -196,6 +210,31 @@ Týmto zabezpečujeme:
 
 Listobook je živý pracovný nástroj.
 
+</div>
+
+<!-- ===== COMPANY ROW ===== -->
+
+<div class="company-row">
+
+<div class="company-col">
+<div class="company-title">Prevádzkovateľ</div>
+<b>LIŠTOVÉ CENTRUM EU, s.r.o.</b><br>
+Sasinkova 13<br>
+010 01 Žilina<br>
+Slovakia
+</div>
+
+<div class="company-col">
+<div class="company-title">Vývoj</div>
+<b>MarSab s.r.o.</b><br>
+Karpatské námestie 10A<br>
+831 06 Bratislava
+</div>
+
+</div>
+
+<div class="footer-copy">
+© 2026
 </div>
 
 </main>
