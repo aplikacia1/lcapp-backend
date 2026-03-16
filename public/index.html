@@ -287,9 +287,10 @@
 (function () {
   const trusted = localStorage.getItem("lb_device_trusted");
   const hasPin = localStorage.getItem("lb_has_pin");
+  const email = localStorage.getItem("lb_user_email");
 
-  if (trusted === "true" && hasPin === "true") {
-    location.href = "pin_login.html";
+  if (trusted === "true" && hasPin === "true" && email) {
+    location.href = "pin_login.html?email=" + encodeURIComponent(email);
   }
 })();
     // bežné tlačidlá

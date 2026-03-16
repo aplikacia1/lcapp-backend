@@ -97,6 +97,27 @@ router.post("/set-pin", async (req, res) => {
     res.status(500).json({ message: "Chyba servera." });
   }
 });
+router.get("/status", async (req, res) => {
+  try {
+    const email = req.query.email;
+
+    if (!email) {
+      return res.status(400).json({ error: "missing email" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.json({ hasPin: false });
+    }
+
+    res.json({ hasPin: !!user.pin });
+
+  } catch (err) {
+    console.error("PIN STATUS ERROR:", err);
+    res.status(500).json({ error: "server error" });
+  }
+});
 
 
 // ❌ DISABLE PIN

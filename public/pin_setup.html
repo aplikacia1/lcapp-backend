@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nastavenie PIN</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body style="background:#0c1f4b;color:white;display:flex;align-items:center;justify-content:center;height:100vh;">
+
+  <div style="background:#102a63;padding:40px;border-radius:12px;width:320px;text-align:center;">
+    <h2>Nastav PIN</h2>
+
+    <input id="pin1" type="password" maxlength="4" placeholder="Zadaj PIN"
+      style="width:100%;padding:12px;margin-top:20px;border-radius:8px;border:none;text-align:center;font-size:18px;"/>
+
+    <input id="pin2" type="password" maxlength="4" placeholder="Zopakuj PIN"
+      style="width:100%;padding:12px;margin-top:10px;border-radius:8px;border:none;text-align:center;font-size:18px;"/>
+
+    <button id="saveBtn"
+      style="margin-top:20px;width:100%;padding:12px;border:none;border-radius:8px;background:#2ea0ff;color:white;font-weight:bold;">
+      Uložiť PIN
+    </button>
+
+    <p id="msg" style="margin-top:15px;color:#ffaaaa;"></p>
+  </div>
+
+<script>
+document.getElementById("saveBtn").onclick = () => {
+  const p1 = document.getElementById("pin1").value.trim();
+  const p2 = document.getElementById("pin2").value.trim();
+  const msg = document.getElementById("msg");
+
+  if (!/^[0-9]{4}$/.test(p1)) {
+    msg.textContent = "PIN musí mať 4 čísla";
+    return;
+  }
+
+  if (p1 !== p2) {
+    msg.textContent = "PINy sa nezhodujú";
+    return;
+  }
+
+  localStorage.setItem("lc_pin", p1);
+
+  window.location.href = "/dashboard.html";
+};
+</script>
+
+</body>
+</html>

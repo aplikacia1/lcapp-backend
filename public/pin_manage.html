@@ -29,52 +29,20 @@ h1{
   margin-bottom:25px;
 }
 
-.dots{
-  display:flex;
-  justify-content:center;
-  gap:12px;
-  margin-bottom:30px;
-}
-
-.dot{
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  background:#cfe2ff40;
-}
-
-.dot.active{
-  background:white;
-}
-
-.keypad{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-
-.key{
-  height:72px;
-  font-size:26px;
-  border-radius:14px;
-  border:1px solid #bcd6ff;
-  background:white;
-  color:#0c1f4b;
-}
-
-.actions{
-  margin-top:20px;
-}
-
 .btn{
   display:block;
   width:100%;
-  padding:14px;
-  margin-top:10px;
-  border-radius:12px;
+  padding:16px;
+  margin-top:12px;
+  border-radius:14px;
   border:none;
   font-size:16px;
   cursor:pointer;
+}
+
+.enable{
+  background:white;
+  color:#0c1f4b;
 }
 
 .change{
@@ -99,147 +67,69 @@ h1{
 
 <img src="logo_lc.jpg" class="logo">
 
-<h1 id="title">Zadajte aktuálny PIN</h1>
+<h1>Správa PIN</h1>
 
-<div class="dots">
-<div class="dot"></div>
-<div class="dot"></div>
-<div class="dot"></div>
-<div class="dot"></div>
+<div id="enableBox" class="hidden">
+  <button class="btn enable" onclick="enablePin()">Zapnúť PIN</button>
 </div>
 
-<div class="keypad">
-<button class="key" onclick="press(1)">1</button>
-<button class="key" onclick="press(2)">2</button>
-<button class="key" onclick="press(3)">3</button>
-
-<button class="key" onclick="press(4)">4</button>
-<button class="key" onclick="press(5)">5</button>
-<button class="key" onclick="press(6)">6</button>
-
-<button class="key" onclick="press(7)">7</button>
-<button class="key" onclick="press(8)">8</button>
-<button class="key" onclick="press(9)">9</button>
-
-<button class="key" onclick="back()">←</button>
-<button class="key" onclick="press(0)">0</button>
-</div>
-
-<div class="actions hidden" id="actions">
-<button class="btn change" onclick="startChange()">Zmeniť PIN</button>
-<button class="btn remove" onclick="startRemove()">Zrušiť PIN</button>
+<div id="manageBox" class="hidden">
+  <button class="btn change" onclick="changePin()">Zmeniť PIN</button>
+  <button class="btn remove" onclick="removePin()">Vypnúť PIN</button>
 </div>
 
 </div>
 
 <script>
 
-// ⭐ identita používateľa
 const params = new URLSearchParams(window.location.search);
-let email = params.get("email");
+let email = params.get("email") || localStorage.getItem("lb_user_email");
 
 if(!email){
-  email = localStorage.getItem("lb_user_email");
-}
-
-if(!email){
-  alert("Relácia vypršala. Prihláste sa znova.");
+  alert("Relácia vypršala");
   window.location.href = "login.html";
 }
 
-let mode = "verify";
-let pin = "";
-let newPin = "";
-let confirmPin = "";   // ⭐ PRIDAŤ TENTO RIADOK
-let confirming = false;
+// ✅ správny endpoint
+fetch("/api/pin/has-pin?email=" + encodeURIComponent(email))
+.then(r => r.json())
+.then(data => {
 
-const dots = document.querySelectorAll(".dot");
-
-function updateDots(val){
-  dots.forEach(d => d.classList.remove("active"));
-  for(let i=0;i<val.length;i++){
-    dots[i].classList.add("active");
-  }
-}
-
-function press(n){
-
-  if(mode === "verify"){
-    pin += n;
-    updateDots(pin);
-    }
-     
-
-    if(pin.length === 4){
-      setTimeout(()=>{
-        document.getElementById("title").innerText = "Vyberte akciu";
-        document.getElementById("actions").classList.remove("hidden");
-      },200);
-    }
+  if(data.hasPin){
+    document.getElementById("manageBox").classList.remove("hidden");
+  } else {
+    document.getElementById("enableBox").classList.remove("hidden");
   }
 
-  if(mode === "change"){
-    if(!confirming){
-      newPin += n;
-      updateDots(newPin);
+});
 
-      if(newPin.length === 4){
-        confirming = true;
-        document.getElementById("title").innerText = "Potvrďte nový PIN";
-        setTimeout(()=>updateDots(""),200);
-      }
-    }else{
-  confirmPin += n;
-  updateDots(confirmPin);
-
-  if(confirmPin.length === 4){
-
-    if(newPin !== confirmPin){
-      alert("PIN sa nezhoduje");
-      newPin = "";
-      confirmPin = "";
-      confirming = false;
-      updateDots("");
-      document.getElementById("title").innerText = "Zadajte nový PIN";
-      return;
-    }
-
-    alert("PIN zmenený (UI OK)");
-  }
+function enablePin(){
+  window.location.href = "pin_setup.html?email=" + encodeURIComponent(email);
 }
 
-  if(mode === "remove"){
-    pin += n;
-    updateDots(pin);
-
-    if(pin.length === 4){
-      alert("PIN zrušený (UI)");
-    }
-  }
+function changePin(){
+  window.location.href = "pin_change.html?email=" + encodeURIComponent(email);
 }
 
-function back(){
-  if(mode === "verify"){
-    pin = pin.slice(0,-1);
-    updateDots(pin);
-  }
-}
+function removePin(){
 
-function startChange(){
-  mode = "change";
-  pin = "";
-  newPin = "";
-  confirmPin = "";   // ⭐ PRIDAŤ
-  confirming = false;
-  updateDots("");
-  document.getElementById("title").innerText = "Zadajte nový PIN";
-}
+  if(!confirm("Naozaj chcete vypnúť PIN?")) return;
 
-function startRemove(){
-  mode = "remove";
-  pin = "";
-  updateDots("");
-  document.getElementById("title").innerText = "Potvrďte zrušenie PIN";
+  // ✅ správny endpoint
+  fetch("/api/pin/disable-pin",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ email })
+  })
+  .then(r => r.json())
+  .then(() => {
+
+    localStorage.removeItem("lb_has_pin");
+
+    alert("PIN bol vypnutý");
+    location.reload();
+
+  });
 }
 
 </script>

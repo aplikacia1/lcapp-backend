@@ -101,9 +101,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSocialLists(email);
 
   // PIN správa
-  document.getElementById("pinManageBtn")?.addEventListener("click", () => {
+  document.getElementById("pinManageBtn")?.addEventListener("click", async () => {
+
     const email = new URLSearchParams(window.location.search).get("email");
-    window.location.href = "pin_manage.html?email=" + encodeURIComponent(email);
+
+    const res = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+
+    if (data.hasPin) {
+      window.location.href = "pin_manage.html?email=" + encodeURIComponent(email);
+    } else {
+      window.location.href = "pin_setup.html?email=" + encodeURIComponent(email);
+    }
+
   });
 
   // ========== 2) Upload avatara (+ okamžité uloženie avatarUrl) ==========
