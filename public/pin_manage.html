@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
+<meta name="theme-color" content="#0c1f4b">
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Správa PIN</title>
 
 <style>
-body{
-  background:#0c1f4b;
-  font-family:system-ui;
-  margin:0;
+body {
+  background-color:#0c1f4b;
+  font-family: system-ui, sans-serif;
 }
 
-.wrap{
+.auth-wrap{
   max-width:420px;
   margin:40px auto;
   padding:16px;
@@ -20,68 +20,93 @@ body{
 }
 
 .logo{
-  height:110px;
-  margin:20px auto;
+  display:block;
+  margin:24px auto 8px;
+  height:120px;
 }
 
 h1{
   color:white;
-  margin-bottom:25px;
+  margin-bottom:20px;
+}
+
+.menu{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  margin-top:30px;
 }
 
 .btn{
-  display:block;
-  width:100%;
-  padding:16px;
-  margin-top:12px;
+  height:72px;
+  font-size:20px;
+  font-weight:600;
   border-radius:14px;
-  border:none;
-  font-size:16px;
+  border:1px solid #bcd6ff;
+  background:white;
+  color:#0c1f4b;
   cursor:pointer;
 }
 
-.enable{
-  background:white;
-  color:#0c1f4b;
-}
-
-.change{
-  background:white;
-  color:#0c1f4b;
-}
-
-.remove{
+.btn.danger{
   background:#ff4b4b;
   color:white;
+  border:none;
+}
+
+.btn:active{
+  transform:scale(.97);
+  box-shadow:0 0 12px #bcd6ff;
 }
 
 .hidden{
   display:none;
 }
+.back-btn{
+  position:absolute;
+  left:12px;
+  top:10px;
+
+  width:44px;
+  height:44px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:1px solid #ffffff33;
+  border-radius:10px;
+
+  color:#e7eefc;
+  cursor:pointer;
+
+  background: transparent;
+}
+
 </style>
 </head>
 
 <body>
-
-<div class="wrap">
-
-<img src="logo_lc.jpg" class="logo">
-
-<h1>Správa PIN</h1>
-
-<div id="enableBox" class="hidden">
-  <button class="btn enable" onclick="enablePin()">Zapnúť PIN</button>
+<div class="back-btn" onclick="goBack()">
+<svg viewBox="0 0 24 24">
+<path d="M15 18l-6-6 6-6"/>
+</svg>
 </div>
+<div class="auth-wrap">
+  <img src="logo_lc.jpg" class="logo">
+  <h1>Správa PIN</h1>
 
-<div id="manageBox" class="hidden">
-  <button class="btn change" onclick="changePin()">Zmeniť PIN</button>
-  <button class="btn remove" onclick="removePin()">Vypnúť PIN</button>
-</div>
+  <div id="enableBox" class="menu hidden">
+    <button class="btn" onclick="enablePin()">Zapnúť PIN</button>
+  </div>
 
+  <div id="manageBox" class="menu hidden">
+    <button class="btn" onclick="changePin()">Zmeniť PIN</button>
+    <button class="btn danger" onclick="removePin()">Vypnúť PIN</button>
+  </div>
 </div>
 
 <script>
-
 const params = new URLSearchParams(window.location.search);
 let email = params.get("email") || localStorage.getItem("lb_user_email");
 
@@ -90,7 +115,6 @@ if(!email){
   window.location.href = "login.html";
 }
 
-// ✅ správny endpoint
 fetch("/api/pin/has-pin?email=" + encodeURIComponent(email))
 .then(r => r.json())
 .then(data => {
@@ -111,11 +135,14 @@ function changePin(){
   window.location.href = "pin_change.html?email=" + encodeURIComponent(email);
 }
 
+function goBack(){
+  window.location.href = "dashboard.html?email=" + encodeURIComponent(email);
+}
+
 function removePin(){
 
   if(!confirm("Naozaj chcete vypnúť PIN?")) return;
 
-  // ✅ správny endpoint
   fetch("/api/pin/disable-pin",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
@@ -131,7 +158,6 @@ function removePin(){
 
   });
 }
-
 </script>
 
 </body>

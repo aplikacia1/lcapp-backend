@@ -4,12 +4,12 @@
 <meta name="theme-color" content="#0c1f4b">
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Nastavte PIN</title>
+<title>Zmena PIN</title>
 
 <style>
-body {
-  background-color:#0c1f4b;
-  font-family: system-ui, sans-serif;
+body{
+  background:#0c1f4b;
+  font-family:system-ui,sans-serif;
 }
 
 .auth-wrap{
@@ -20,9 +20,9 @@ body {
 }
 
 .logo{
-  display:block;
-  margin:24px auto 8px;
   height:120px;
+  margin:24px auto 8px;
+  display:block;
 }
 
 h1{
@@ -71,9 +71,10 @@ h1{
 }
 
 .msg{
-  margin-top:15px;
+  margin-top:16px;
   color:#ffaaaa;
 }
+
 .lb-back{
   position:absolute;
   top:20px;
@@ -86,8 +87,8 @@ h1{
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  backdrop-filter: blur(6px);
 }
+
 .lb-back svg{
   width:18px;
   height:18px;
@@ -97,14 +98,16 @@ h1{
 </head>
 
 <body>
+
 <div class="lb-back" onclick="goBack()">
 <svg viewBox="0 0 24 24">
 <path d="M15 18l-6-6 6-6"/>
 </svg>
 </div>
+
 <div class="auth-wrap">
   <img src="logo_lc.jpg" class="logo">
-  <h1>Nastavte PIN</h1>
+  <h1>Zmena PIN</h1>
 
   <div class="pin-dots">
     <div class="dot"></div>
@@ -136,7 +139,8 @@ h1{
 <script>
 let step = 1;
 let pin = "";
-let firstPin = "";
+let oldPin = "";
+let newPin = "";
 
 const dots = document.querySelectorAll(".dot");
 const msg = document.getElementById("msg");
@@ -145,8 +149,9 @@ const params = new URLSearchParams(window.location.search);
 let email = params.get("email") || localStorage.getItem("lb_user_email");
 
 function goBack(){
-  window.location.href = "dashboard.html?email=" + encodeURIComponent(email);
+  window.location.href = "pin_manage.html?email=" + encodeURIComponent(email);
 }
+
 function updateDots(){
   dots.forEach(d => d.classList.remove("active"));
   for(let i=0;i<pin.length;i++){
@@ -161,7 +166,7 @@ function press(n){
   updateDots();
 
   if(pin.length === 4){
-    processPin();
+    process();
   }
 }
 
@@ -170,46 +175,75 @@ function back(){
   updateDots();
 }
 
-function processPin(){
+function process(){
 
   if(step === 1){
-    firstPin = pin;
+    oldPin = pin;
     pin = "";
     step = 2;
     updateDots();
-    msg.textContent = "Zopakujte PIN";
+    msg.textContent = "Zadajte nový PIN";
     return;
   }
 
   if(step === 2){
+    newPin = pin;
+    pin = "";
+    step = 3;
+    updateDots();
+    msg.textContent = "Zopakujte nový PIN";
+    return;
+  }
 
-    if(pin !== firstPin){
+  if(step === 3){
+
+    if(pin !== newPin){
       msg.textContent = "PINy sa nezhodujú";
       pin = "";
-      firstPin = "";
-      step = 1;
+      newPin = "";
+      step = 2;
       updateDots();
       return;
     }
-    function goBack(){
-      window.location.href = "dashboard.html?email=" + encodeURIComponent(email);
+
+    changePin();
+  }
 }
+
+function changePin(){
+
+  fetch("/api/pin/verify-pin",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ email, pin: oldPin })
+  })
+  .then(r => {
+
+    if(!r.ok){
+      msg.textContent = "Starý PIN je nesprávny";
+      step = 1;
+      pin = "";
+      updateDots();
+      return;
+    }
 
     fetch("/api/pin/set-pin",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ email, pin })
+      body: JSON.stringify({ email, pin: newPin })
     })
-    .then(r => r.json())
-    .then(() => {
+    .then(()=>{
 
-      localStorage.setItem("lb_has_pin", "true");
+      msg.style.color = "#8fff9f";
+      msg.textContent = "PIN bol zmenený";
 
-      window.location.href = "pin_manage.html?email=" + encodeURIComponent(email);
+      setTimeout(()=>{
+        window.location.href = "pin_manage.html?email=" + encodeURIComponent(email);
+      },1200);
 
     });
 
-  }
+  });
 }
 </script>
 
