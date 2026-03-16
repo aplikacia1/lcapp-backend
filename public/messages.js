@@ -122,10 +122,19 @@ function wireHeader(){
   });
 
   // pri zmene šírky (otočenie, resize) udržať správny view
-  mqMobile.addEventListener?.('change', ensureMobileModeOnResize);
-  window.addEventListener('resize', ensureMobileModeOnResize);
-}
+    mqMobile.addEventListener?.('change', () => {
+    if (!isMobile()){
+      document.body.classList.remove('mobile-show-list','mobile-show-thread');
+    }
+  });
 
+  // ❗ resize na mobile ignorujeme
+  window.addEventListener('resize', () => {
+    if (!isMobile()){
+      document.body.classList.remove('mobile-show-list','mobile-show-thread');
+    }
+  });
+} 
 /* ---------- LOAD SELF + ADMIN ---------- */
 async function loadSelf(){
   const labelEl = document.getElementById('userChip') || document.getElementById('userLabel');
