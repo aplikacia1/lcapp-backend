@@ -1,39 +1,59 @@
-// backend/utils/timeBrain.js
+// utils/timeBrain.js
 
-// 🇸🇰 Slovenské fixné sviatky
-const FIXED_HOLIDAYS = [
-  "01-01",
-  "01-06",
-  "05-01",
-  "05-08",
-  "07-05",
-  "08-29",
-  "09-01",
-  "09-15",
-  "11-01",
-  "11-17",
-  "12-24",
-  "12-25",
-  "12-26"
-];
+// Slovenský čas
+function nowSK() {
+  return new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Europe/Bratislava" })
+  );
+}
 
-// 🐣 Výpočet Veľkej noci (algoritmus)
-function getEasterDate(year) {
-  const f = Math.floor;
-  const G = year % 19;
-  const C = f(year / 100);
-  const H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30;
-  const I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11));
-  const J = (year + f(year / 4) + I + 2 - C + f(C / 4)) % 7;
-  const L = I - J;
-  const month = 3 + f((L + 40) / 44);
-  const day = L + 28 - 31 * f(month / 4);
+function isWeekend(date) {
+  const d = date.getDay();
+  return d === 0 || d === 6;
+}
+
+function isFriday(date) {
+  return date.getDay() === 5;
+}
+
+function isSilvester(date) {
+  return date.getDate() === 31 && date.getMonth() === 11;
+}
+
+function isNewYear(date) {
+  return date.getDate() === 1 && date.getMonth() === 0;
+}
+
+function isChristmas(date) {
+  const d = date.getDate();
+  const m = date.getMonth();
+
+  return (
+    (d === 24 && m === 11) ||
+    (d === 25 && m === 11) ||
+    (d === 26 && m === 11)
+  );
+}
+
+// jednoduchý výpočet Veľkej noci (gregoriánsky)
+function getEaster(year) {
+  const f = Math.floor,
+    G = year % 19,
+    C = f(year / 100),
+    H =
+      (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) %
+      30,
+    I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11)),
+    J = (year + f(year / 4) + I + 2 - C + f(C / 4)) % 7,
+    L = I - J,
+    month = 3 + f((L + 40) / 44),
+    day = L + 28 - 31 * f(month / 4);
+
   return new Date(year, month - 1, day);
 }
 
-// 🐣 Pohyblivé sviatky SR
-function getEasterHolidays(year) {
-  const easter = getEasterDate(year);
+function isEaster(date) {
+  const easter = getEaster(date.getFullYear());
 
   const goodFriday = new Date(easter);
   goodFriday.setDate(easter.getDate() - 2);
@@ -41,65 +61,64 @@ function getEasterHolidays(year) {
   const easterMonday = new Date(easter);
   easterMonday.setDate(easter.getDate() + 1);
 
-  return [goodFriday, easterMonday];
+  return (
+    sameDay(date, goodFriday) ||
+    sameDay(date, easter) ||
+    sameDay(date, easterMonday)
+  );
 }
 
-// 📅 helper
-function formatDateMMDD(date) {
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  return `${mm}-${dd}`;
+function sameDay(a, b) {
+  return (
+    a.getDate() === b.getDate() &&
+    a.getMonth() === b.getMonth() &&
+    a.getFullYear() === b.getFullYear()
+  );
 }
 
-// 🧠 core objekt
-const timeBrain = {
+function shouldSendMorningJoke(adminClosed = false) {
+  const now = nowSK();
 
-  now() {
-    return new Date();
-  },
+  if (adminClosed) return false;
 
-  isWeekend() {
-    const d = this.now().getDay();
-    return d === 0 || d === 6;
-  },
+  if (isSilvester(now)) return false; // ráno nie
+  if (isNewYear(now)) return false;
 
-  isFixedHoliday() {
-    const today = formatDateMMDD(this.now());
-    return FIXED_HOLIDAYS.includes(today);
-  },
+  if (isWeekend(now)) return false;
+  if (isChristmas(now)) return false;
+  if (isEaster(now)) return false;
 
-  isEasterHoliday() {
-    const year = this.now().getFullYear();
-    const easterDays = getEasterHolidays(year);
+  return true;
+}
 
-    return easterDays.some(d =>
-      d.toDateString() === this.now().toDateString()
-    );
-  },
+function shouldSendEveningStats(adminClosed = false) {
+  const now = nowSK();
 
-  isHoliday() {
-    return this.isFixedHoliday() || this.isEasterHoliday();
-  },
+  if (adminClosed) return false;
 
-  isWorkingDay() {
-    return !this.isWeekend() && !this.isHoliday();
-  },
+  if (isWeekend(now)) return false;
+  if (isFriday(now)) return false;
 
-  isWorkingHours() {
-    const h = this.now().getHours();
-    return h >= 8 && h < 17;
-  },
+  if (isChristmas(now)) return false;
+  if (isEaster(now)) return false;
+  if (isNewYear(now)) return false;
+  if (isSilvester(now)) return false;
 
-  isWorkingMorning() {
-    const h = this.now().getHours();
-    return this.isWorkingDay() && h >= 6 && h < 10;
-  },
+  return true;
+}
 
-  isEvening() {
-    const h = this.now().getHours();
-    return h >= 18 && h < 22;
-  }
+function isSpecialMidnight() {
+  const now = nowSK();
 
+  if (isSilvester(now)) return "silvester";
+  if (isChristmas(now)) return "vianoce";
+
+  return null;
+}
+
+module.exports = {
+  nowSK,
+  shouldSendMorningJoke,
+  shouldSendEveningStats,
+  isSpecialMidnight
 };
-
-module.exports = timeBrain;
