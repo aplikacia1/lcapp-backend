@@ -39,6 +39,8 @@ const fs = require('fs');
 const session = require("express-session");
 
 const webpush = require("web-push");
+// 🧹 lifecycle cleanup
+const lifecycleCleanup = require('./jobs/lifecycleCleanup');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -195,9 +197,27 @@ if (!MONGO_URI) {
 mongoose.connect(MONGO_URI)
   .then(() => {
     console.log('🟢 MongoDB connected to DB:', mongoose.connection.name);
+
+    // 🧠 naplánovanie lifecycle mazania (raz denne o 03:00)
+    function scheduleLifecycle() {
+      const now = new Date();
+      const next = new Date();
+
+      next.setHours(3, 0, 0, 0);
+
+      if (now > next) {
+        next.setDate(next.getDate() + 1);
+      }
+
+      const delay = next - now;
+
+      setTimeout(() => {
+        lifecycleCleanup();
+        setInterval(lifecycleCleanup, 24 * 60 * 60 * 1000);
+      }, delay);
+    }
+
+    scheduleLifecycle();
+
     app.listen(PORT, () => console.log(`🚀 Server beží na porte ${PORT}`));
   })
-  .catch(err => {
-    console.error('🔴 MongoDB error:', err?.message || err);
-    process.exit(1);
-  });

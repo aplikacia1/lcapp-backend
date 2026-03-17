@@ -27,19 +27,16 @@ const timelinePostSchema = new mongoose.Schema({
     heart: { type: Number, default: 0 }
   },
 
-  // 🆕 nový typ príspevku
   isQuestion: {
     type: Boolean,
     default: false
   },
 
-  // 🆕 prijatá odpoveď (comment ID)
   acceptedAnswer: {
     type: mongoose.Schema.Types.ObjectId,
     default: null
   },
 
-  // 🆕 sledovatelia diskusie
   watchers: [{
     type: String
   }],
@@ -57,14 +54,26 @@ const timelinePostSchema = new mongoose.Schema({
     createdAt: {
       type: Date,
       default: Date.now
+    },
+
+    lastActivityAt: {
+      type: Date,
+      default: Date.now
     }
   }],
 
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
 
+  lastActivityAt: {
+    type: Date,
+    default: Date.now
+  }
 });
+
+// 🔥 dôležitý index pre lifecycle mazanie
+timelinePostSchema.index({ lastActivityAt: 1 });
 
 module.exports = mongoose.model('TimelinePost', timelinePostSchema);
