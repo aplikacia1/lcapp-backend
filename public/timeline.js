@@ -74,7 +74,7 @@ function initComposer() {
 
   const up = () => {
     cnt.textContent = `${text.value.length} / ${MAX}`;
-    btn.disabled = !text.value.trim() && !selected;
+    btn.disabled = !text.value.trim() && selected.length === 0;
   };
 
   add.addEventListener("click", () => file.click());
@@ -319,7 +319,7 @@ document.addEventListener("click", async (e) => {
       }, 120);
 
       return;
-    S}
+    }
 });
 
 // ────────── Presence ──────────
@@ -730,32 +730,42 @@ document.addEventListener("click", e => {
   if (!img) return;
 
   const galleryId = img.dataset.gallery;
+  const index = Number(img.dataset.index || 0);
+
   const post = window._posts?.find(p => p._id === galleryId);
   if (!post) return;
 
-  openGallery(post.imageUrls);
+  openGallery(post.imageUrls, index);
 });
 
-function openGallery(images){
+function openGallery(images, startIndex = 0){
+
+  let index = startIndex;
+
   const overlay = document.createElement("div");
   overlay.style = `
     position:fixed;
     inset:0;
-    background:#000;
+    background:black;
     display:flex;
     align-items:center;
     justify-content:center;
     z-index:9999;
   `;
 
-  let index = 0;
-
   const img = document.createElement("img");
   img.src = images[index];
   img.style = "max-width:95%; max-height:95%; border-radius:12px;";
   overlay.appendChild(img);
 
-  overlay.onclick = () => overlay.remove();
+  overlay.onclick = () => {
+    index++;
+    if(index >= images.length){
+      overlay.remove();
+      return;
+    }
+    img.src = images[index];
+  };
 
   document.body.appendChild(overlay);
 }
