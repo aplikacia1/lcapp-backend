@@ -168,7 +168,14 @@ async function loadPosts(opts = {}) {
           ${canDel ? `<button class="link-btn post-delete" data-id="${p._id}">Zmazať</button>` : ""}
         </div>
         ${text ? `<p>${text}</p>` : ""}
-        ${p.imageUrl ? `<img src="${p.imageUrl}" class="post-image" alt="Obrázok príspevku" loading="lazy">` : ""}
+        ${Array.isArray(p.images) && p.images.length
+          ? `<div class="post-images">
+              ${p.images.map(url => `<img src="${url}" class="post-image" alt="Obrázok príspevku" loading="lazy">`).join("")}
+             </div>`
+          : (p.imageUrl
+              ? `<img src="${p.imageUrl}" class="post-image" alt="Obrázok príspevku" loading="lazy">`
+              : "")
+        }
         <div class="comments">
           <ul>
             ${(comments || []).map(c => {

@@ -13,6 +13,7 @@ function safeName(original = '') {
   const base = String(original).replace(/[^a-z0-9.\-_]/gi, '_').toLowerCase();
   return `${Date.now()}-${Math.round(Math.random() * 1e9)}-${base}`;
 }
+
 function unlinkIfExistsByUrl(app, relUrl) {
   if (!relUrl || !/^\/uploads\//.test(relUrl)) return;
   const base = path.basename(relUrl);
@@ -30,54 +31,91 @@ const storage = multer.diskStorage({
   filename: (_req, file, cb) => cb(null, safeName(file.originalname))
 });
 
-// limit + filter (z tvojho kódu)
+// limit + filter
 const upload = multer({
   storage,
-  limits: { fileSize: 7 * 1024 * 1024 }, // max 7 MB
+  limits: {
+    fileSize: 7 * 1024 * 1024, // max 7 MB na 1 súbor
+    files: 3                   // max 3 obrázky
+  },
   fileFilter: (_req, file, cb) => {
     const okTypes = [
       'image/jpeg', 'image/png', 'image/webp',
       'image/gif', 'image/heic', 'image/heif'
     ];
-    cb(okTypes.includes(file.mimetype) ? null : new Error('Nepodporovaný typ súboru.'), okTypes.includes(file.mimetype));
+    cb(
+      okTypes.includes(file.mimetype) ? null : new Error('Nepodporovaný typ súboru.'),
+      okTypes.includes(file.mimetype)
+    );
   }
 });
 
 /* ===== Vulgarizmy – zachované ===== */
 const bannedWords = ['idiot','debil','sprostý','hlúpy','nadávka','kokot','kkt','piča','hajzel'];
-const containsBannedWords = (t = '') => bannedWords.some(w => String(t).toLowerCase().includes(w));
+const containsBannedWords = (t = '') =>
+  bannedWords.some(w => String(t).toLowerCase().includes(w));
 
 /* ➕ Pridanie príspevku */
-router.post('/add', upload.single('image'), async (req, res) => {
+router.post('/add', upload.array('images', 3), async (req, res) => {
   try {
     const { email, text } = req.body;
+
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'Používateľ nenájdený' });
-    if (!user.name?.trim()) return res.status(400).json({ message: 'Chýba prezývka.' });
-    if (!text && !req.file) return res.status(400).json({ message: 'Prázdny príspevok.' });
-    if (containsBannedWords(text)) return res.status(400).json({ message: 'Text obsahuje nevhodné slová.' });
+    if (!user) {
+      return res.status(404).json({ message: 'Používateľ nenájdený' });
+    }
+
+    if (!user.name?.trim()) {
+      return res.status(400).json({ message: 'Chýba prezývka.' });
+    }
+
+    if (!text && (!req.files || req.files.length === 0)) {
+      return res.status(400).json({ message: 'Prázdny príspevok.' });
+    }
+
+    if (containsBannedWords(text)) {
+      return res.status(400).json({ message: 'Text obsahuje nevhodné slová.' });
+    }
+
+    const imageUrls = req.files
+      ? req.files.map(f => `/uploads/${f.filename}`)
+      : [];
 
     const post = new TimelinePost({
       author: user.name,
       authorCompany: user.companyName || '',
       text: text || '',
-      imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
-      createdAt: new Date()
+      imageUrls,
+      createdAt: new Date(),
+      lastActivityAt: new Date()
     });
 
     await post.save();
     res.status(201).json({ message: 'Príspevok uložený' });
   } catch (e) {
     console.error('timeline/add error', e);
+
+    if (e instanceof multer.MulterError) {
+      if (e.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'Jeden obrázok je príliš veľký. Maximum je 7 MB.' });
+      }
+      if (e.code === 'LIMIT_FILE_COUNT') {
+        return res.status(400).json({ message: 'Môžeš pridať maximálne 3 obrázky.' });
+      }
+      return res.status(400).json({ message: 'Chyba pri nahrávaní obrázkov.' });
+    }
+
+    if (e?.message === 'Nepodporovaný typ súboru.') {
+      return res.status(400).json({ message: 'Nepodporovaný typ súboru.' });
+    }
+
     res.status(500).json({ message: 'Chyba servera' });
   }
 });
 
 router.get('/', async (req, res) => {
   try {
-
     const email = req.query?.email;
-
     const posts = await TimelinePost.find().sort({ createdAt: -1 });
 
     // ak nie je prihlásený používateľ → zobraz všetko
@@ -94,7 +132,7 @@ router.get('/', async (req, res) => {
     // získať mená blokovaných používateľov
     const blockedUsers = await User.find({
       email: { $in: user.blockedUsers }
-    }).select("name");
+    }).select('name');
 
     const blockedNames = blockedUsers.map(u => String(u.name));
 
@@ -102,7 +140,6 @@ router.get('/', async (req, res) => {
     const filteredPosts = posts
       .filter(p => !blockedNames.includes(p.author))
       .map(p => {
-
         if (!Array.isArray(p.comments)) return p;
 
         // filtrovať komentáre
@@ -111,7 +148,6 @@ router.get('/', async (req, res) => {
       });
 
     res.status(200).json(filteredPosts);
-
   } catch (e) {
     console.error('timeline list error', e);
     res.status(500).json({ message: 'Chyba pri načítaní' });
@@ -122,11 +158,14 @@ router.get('/', async (req, res) => {
 router.post('/comment/:postId', async (req, res) => {
   try {
     const { email, text } = req.body;
+
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený' });
     if (!user.name?.trim()) return res.status(400).json({ message: 'Chýba prezývka.' });
     if (!text?.trim()) return res.status(400).json({ message: 'Prázdny komentár.' });
-    if (containsBannedWords(text)) return res.status(400).json({ message: 'Komentár obsahuje nevhodné slová.' });
+    if (containsBannedWords(text)) {
+      return res.status(400).json({ message: 'Komentár obsahuje nevhodné slová.' });
+    }
 
     const post = await TimelinePost.findById(req.params.postId);
     if (!post) return res.status(404).json({ message: 'Príspevok nenájdený' });
@@ -135,10 +174,13 @@ router.post('/comment/:postId', async (req, res) => {
       author: user.name,
       authorCompany: user.companyName || user.company || '',
       text: text.trim(),
-      createdAt: new Date()
+      createdAt: new Date(),
+      lastActivityAt: new Date()
     });
+
+    post.lastActivityAt = new Date();
+
     await post.save();
-    
     res.status(200).json({ message: 'Komentár pridaný' });
   } catch (e) {
     console.error('timeline comment error', e);
@@ -151,12 +193,16 @@ router.post('/react/:postId', async (req, res) => {
   try {
     const { type } = req.body;
     const post = await TimelinePost.findById(req.params.postId);
+
     if (!post) return res.status(404).json({ message: 'Príspevok nenájdený' });
-    if (!['fire','devil','heart'].includes(type)) {
+    if (!['fire', 'devil', 'heart'].includes(type)) {
       return res.status(400).json({ message: 'Neplatný typ reakcie' });
     }
+
     post.reactions = post.reactions || { fire: 0, devil: 0, heart: 0 };
     post.reactions[type] = (post.reactions[type] || 0) + 1;
+    post.lastActivityAt = new Date();
+
     await post.save();
     res.status(200).json({ message: 'Reakcia pridaná' });
   } catch (e) {
@@ -165,7 +211,7 @@ router.post('/react/:postId', async (req, res) => {
   }
 });
 
-/* 🗑️ Zmazať príspevok (iba autor) + zmazať súbor z persistent disku */
+/* 🗑️ Zmazať príspevok (iba autor) + zmazať súbory z persistent disku */
 router.delete('/:postId', async (req, res) => {
   try {
     const email = req.body?.email || req.query?.email;
@@ -176,11 +222,21 @@ router.delete('/:postId', async (req, res) => {
 
     const post = await TimelinePost.findById(req.params.postId);
     if (!post) return res.status(404).json({ message: 'Príspevok nenájdený' });
+
     if (String(post.author) !== String(user.name)) {
       return res.status(403).json({ message: 'Nemáte oprávnenie.' });
     }
 
-    unlinkIfExistsByUrl(req.app, post.imageUrl);
+    // nové multi obrázky
+    if (Array.isArray(post.imageUrls) && post.imageUrls.length > 0) {
+      post.imageUrls.forEach(url => unlinkIfExistsByUrl(req.app, url));
+    }
+
+    // fallback pre staré historické príspevky
+    if (post.imageUrl) {
+      unlinkIfExistsByUrl(req.app, post.imageUrl);
+    }
+
     await post.deleteOne();
     res.status(200).json({ message: 'Príspevok zmazaný' });
   } catch (e) {
@@ -194,6 +250,7 @@ router.delete('/comment/:postId/:commentId', async (req, res) => {
   try {
     const email = req.body?.email || req.query?.email;
     if (!email) return res.status(400).json({ message: 'Chýba email.' });
+
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'Používateľ nenájdený' });
 
@@ -204,6 +261,7 @@ router.delete('/comment/:postId/:commentId', async (req, res) => {
     const idx = Array.isArray(post.comments)
       ? post.comments.findIndex(c => String(c._id) === String(commentId))
       : -1;
+
     if (idx === -1) return res.status(404).json({ message: 'Komentár nenájdený' });
 
     const comment = post.comments[idx];

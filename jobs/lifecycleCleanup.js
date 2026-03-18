@@ -6,16 +6,21 @@ async function lifecycleCleanup() {
     console.log("🧹 Lifecycle cleanup start");
 
     const now = new Date();
-    const cutoff = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
-    // 🧵 Mazanie starých príspevkov
+    // 🧵 60 dní pre timeline
+    const cutoffPosts = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+    // ✉️ 30 dní pre správy
+    const cutoffMessages = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // 🧵 Mazanie starých príspevkov (iba neaktívne)
     const postResult = await TimelinePost.deleteMany({
-      lastActivityAt: { $lt: cutoff }
+      lastActivityAt: { $lt: cutoffPosts }
     });
 
     // ✉️ Mazanie starých správ
     const msgResult = await Message.deleteMany({
-      createdAt: { $lt: cutoff }
+      createdAt: { $lt: cutoffMessages }
     });
 
     console.log(`🧵 Deleted posts: ${postResult.deletedCount}`);

@@ -16,9 +16,9 @@ const timelinePostSchema = new mongoose.Schema({
     required: false
   },
 
-  imageUrl: {
-    type: String,
-    required: false
+  imageUrls: {
+    type: [String],
+    default: []
   },
 
   reactions: {
@@ -43,19 +43,15 @@ const timelinePostSchema = new mongoose.Schema({
 
   comments: [{
     author: String,
-
     authorCompany: {
       type: String,
       default: ''
     },
-
     text: String,
-
     createdAt: {
       type: Date,
       default: Date.now
     },
-
     lastActivityAt: {
       type: Date,
       default: Date.now
@@ -73,7 +69,6 @@ const timelinePostSchema = new mongoose.Schema({
   }
 });
 
-// 🔥 dôležitý index pre lifecycle mazanie
 timelinePostSchema.index({ lastActivityAt: 1 });
 
 module.exports = mongoose.model('TimelinePost', timelinePostSchema);
