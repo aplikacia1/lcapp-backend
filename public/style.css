@@ -543,3 +543,19 @@ input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--lc-a
     height: 260px;
   }
 }
+
+.img-wrap{
+  position:relative;
+}
+
+.img-count{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  background:rgba(0,0,0,0.7);
+  color:white;
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:600;
+}
