@@ -77,7 +77,7 @@ router.post('/add', upload.array('images', 3), async (req, res) => {
       return res.status(400).json({ message: 'Text obsahuje nevhodné slová.' });
     }
 
-    const imageUrls = req.files
+    const images = req.files
       ? req.files.map(f => `/uploads/${f.filename}`)
       : [];
 
@@ -85,7 +85,7 @@ router.post('/add', upload.array('images', 3), async (req, res) => {
       author: user.name,
       authorCompany: user.companyName || '',
       text: text || '',
-      imageUrls,
+      images,
       createdAt: new Date(),
       lastActivityAt: new Date()
     });
@@ -228,8 +228,8 @@ router.delete('/:postId', async (req, res) => {
     }
 
     // nové multi obrázky
-    if (Array.isArray(post.imageUrls) && post.imageUrls.length > 0) {
-      post.imageUrls.forEach(url => unlinkIfExistsByUrl(req.app, url));
+    if (Array.isArray(post.images) && post.images.length > 0) {
+      post.images.forEach(url => unlinkIfExistsByUrl(req.app, url));
     }
 
     // fallback pre staré historické príspevky

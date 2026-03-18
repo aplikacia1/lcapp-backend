@@ -109,7 +109,7 @@ function initComposer() {
     const fd = new FormData();
     fd.append("email", userEmail);
     fd.append("text", t);
-    if (img) fd.append("image", img);
+    if (img) fd.append("images", img);
 
     btn.disabled = true;
     try {
