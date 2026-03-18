@@ -758,14 +758,31 @@ function openGallery(images, startIndex = 0){
   img.style = "max-width:95%; max-height:95%; border-radius:12px;";
   overlay.appendChild(img);
 
-  overlay.onclick = () => {
-    index++;
-    if(index >= images.length){
-      overlay.remove();
+  overlay.addEventListener("click", (e) => {
+    const w = window.innerWidth;
+    const x = e.clientX;
+
+    if(x < w * 0.4){
+      // ← späť
+      if(index > 0){
+        index--;
+        img.src = images[index];
+      }
       return;
     }
-    img.src = images[index];
-  };
+
+    if(x > w * 0.6){
+      // → dopredu
+      if(index < images.length - 1){
+        index++;
+        img.src = images[index];
+      }
+      return;
+    }
+
+    // stred = zavrie
+    overlay.remove();
+  });
 
   document.body.appendChild(overlay);
 }
