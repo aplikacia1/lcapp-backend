@@ -171,8 +171,12 @@ async function loadPosts(opts = {}) {
         ${text ? `<p>${text}</p>` : ""}
         ${Array.isArray(p.imageUrls) && p.imageUrls.length
           ? `<div class="post-images stack">
-            ${p.imageUrls.map(url => `
-              <img src="${url}" class="post-image" loading="lazy">
+            ${p.imageUrls.map((url,i) => `
+              <img src="${url}" 
+                   class="post-image stacked" 
+                   data-gallery="${p._id}" 
+                   data-index="${i}" 
+                   loading="lazy">
             `).join("")}
           </div>`
           : (p.imageUrl)
