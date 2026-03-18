@@ -148,6 +148,7 @@ async function loadPosts(opts = {}) {
   try {
     const r = await fetch(`/api/timeline?email=${encodeURIComponent(userEmail)}`);
     const posts = await r.json();
+    window._posts = posts;
     feed.innerHTML = "";
 
     posts.forEach(p => {
@@ -171,7 +172,7 @@ async function loadPosts(opts = {}) {
         ${Array.isArray(p.imageUrls) && p.imageUrls.length
           ? `<div class="post-images stack">
               ${p.imageUrls.map((url,i) => `
-                <img src="${url}" class="post-image stacked" data-index="${i}" loading="lazy">
+                <img src="${url}" class="post-image stacked" data-index="${i}" data-gallery="${p._id}" loading="lazy">
               `).join("")}
              </div>`
           : (p.imageUrl)
@@ -481,7 +482,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadUserInfo();
   if (!isAdmin) initComposer();
   await loadPosts();
-
+  
   startPresenceHeartbeat();
   refreshPresence();
   setInterval(refreshPresence, 10000);
@@ -719,3 +720,38 @@ async function registerPush() {
 }
 
 document.addEventListener("DOMContentLoaded", registerPush);
+
+document.addEventListener("click", e => {
+  const img = e.target.closest(".post-image.stacked");
+  if (!img) return;
+
+  const galleryId = img.dataset.gallery;
+  const post = window._posts?.find(p => p._id === galleryId);
+  if (!post) return;
+
+  openGallery(post.imageUrls);
+});
+
+function openGallery(images){
+  const overlay = document.createElement("div");
+  overlay.style = `
+    position:fixed;
+    inset:0;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+  `;
+
+  let index = 0;
+
+  const img = document.createElement("img");
+  img.src = images[index];
+  img.style = "max-width:95%; max-height:95%; border-radius:12px;";
+  overlay.appendChild(img);
+
+  overlay.onclick = () => overlay.remove();
+
+  document.body.appendChild(overlay);
+}

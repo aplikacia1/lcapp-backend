@@ -490,21 +490,56 @@ input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--lc-a
   pointer-events:auto;
 }
 
+/* ================= STACKED POST IMAGES ================= */
+
 .post-images.stack {
   position: relative;
-  width: 120px;
-  height: 90px;
+  width: 100%;
+  max-width: 620px;   /* väčšie */
+  margin: 20px auto;  /* presný stred */
+  height: 360px;      /* vyššie */
 }
 
 .post-images.stack img {
   position: absolute;
-  width: 120px;
-  height: 90px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+  transition: transform .25s ease, box-shadow .25s ease;
 }
 
-.post-images.stack img:nth-child(1){ top:0; left:0; z-index:3; }
-.post-images.stack img:nth-child(2){ top:6px; left:6px; z-index:2; }
-.post-images.stack img:nth-child(3){ top:12px; left:12px; z-index:1; }
+/* najspodnejšia */
+.post-images.stack img:nth-child(3) {
+  transform: translateY(20px) scale(.92);
+  opacity: .7;
+  z-index: 1;
+}
+
+/* stredná */
+.post-images.stack img:nth-child(2) {
+  transform: translateY(10px) scale(.96);
+  opacity: .85;
+  z-index: 2;
+}
+
+/* vrchná dominantná */
+.post-images.stack img:nth-child(1) {
+  transform: translateY(0px) scale(1);
+  z-index: 3;
+}
+
+/* hover efekt (desktop) */
+.post-images.stack img:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+}
+
+/* MOBILE FIX */
+@media (max-width: 600px) {
+  .post-images.stack {
+    max-width: 96%;
+    height: 260px;
+  }
+}
