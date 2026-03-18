@@ -81,11 +81,15 @@ router.post('/add', upload.array('images', 3), async (req, res) => {
       ? req.files.map(f => `/uploads/${f.filename}`)
       : [];
 
+    const imageUrls = req.files
+      ? req.files.map(f => `/uploads/${f.filename}`)
+      : [];
+
     const post = new TimelinePost({
       author: user.name,
       authorCompany: user.companyName || '',
       text: text || '',
-      images,
+      imageUrls,
       createdAt: new Date(),
       lastActivityAt: new Date()
     });
@@ -228,8 +232,8 @@ router.delete('/:postId', async (req, res) => {
     }
 
     // nové multi obrázky
-    if (Array.isArray(post.images) && post.images.length > 0) {
-      post.images.forEach(url => unlinkIfExistsByUrl(req.app, url));
+    if (Array.isArray(post.imageUrls) && post.imageUrls.length > 0) {
+      post.imageUrls.forEach(url => unlinkIfExistsByUrl(req.app, url));
     }
 
     // fallback pre staré historické príspevky
