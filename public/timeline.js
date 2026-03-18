@@ -169,14 +169,14 @@ async function loadPosts(opts = {}) {
         </div>
         ${text ? `<p>${text}</p>` : ""}
         ${Array.isArray(p.imageUrls) && p.imageUrls.length
-          ? <div class="post-images stack">
+          ? `<div class="post-images stack">
               ${p.imageUrls.map((url,i) => `
                 <img src="${url}" class="post-image stacked" data-index="${i}" loading="lazy">
               `).join("")}
-            </div>
-          : (p.imageUrl
-              ? `<img src="${p.imageUrl}" class="post-image" alt="Obrázok príspevku" loading="lazy">`
-              : "")
+             </div>`
+          : (p.imageUrl)
+            ? `<img src="${p.imageUrl}" class="post-image" alt="Obrázok príspevku" loading="lazy">`
+            : ""
         }
         <div class="comments">
           <ul>
