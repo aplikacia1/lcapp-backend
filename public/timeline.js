@@ -69,7 +69,7 @@ function initComposer() {
     btn = $("#postSubmit"),
     cnt = $("#composerCount");
 
-  let selected = null;
+  let selected = [];
   const MAX = 300;
 
   const up = () => {
@@ -80,7 +80,7 @@ function initComposer() {
   add.addEventListener("click", () => file.click());
 
   file.addEventListener("change", () => {
-    selected = file.files?.[0] || null;
+    selected = Array.from(file.files || []).slice(0,3);
     up();
     setComposerPadding();
   });
@@ -101,7 +101,7 @@ function initComposer() {
       alert("Na príspevok potrebuješ prezývku.");
       return;
     }
-    if (!t && !img) {
+    if (!t && selected.length === 0) {
       alert("Prázdny príspevok.");
       return;
     }
@@ -109,7 +109,7 @@ function initComposer() {
     const fd = new FormData();
     fd.append("email", userEmail);
     fd.append("text", t);
-    if (img) fd.append("images", img);
+    selected.forEach(f => fd.append("images", f));
 
     btn.disabled = true;
     try {
@@ -118,7 +118,7 @@ function initComposer() {
       if (r.ok) {
         text.value = "";
         file.value = "";
-        selected = null;
+        selected = [];
         up();
         loadPosts({ preserve: true });
       } else {
