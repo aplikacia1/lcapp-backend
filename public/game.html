@@ -256,12 +256,10 @@ Lištobook © Lištové centrum EU
 <script src="banners.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', ()=>{
-  mountBannerMobileOnly?.('bannerSlot',{
-    fixed:true,
-    position:'bottom',
-    pushContent:true,
-    height:160,
-    heightMobile:120,
+  mountBanner?.('bannerSlot',{
+    fixed:false,
+    height:140,
+    heightMobile:110,
     interval:5000
   });
 });
