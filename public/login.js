@@ -63,7 +63,20 @@
     window.location.replace(nextUrl);
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    // AUTO PIN LOGIN
+    const trusted = localStorage.getItem("lb_device_trusted");
+    const email = localStorage.getItem("lb_user_email");
+
+    if (trusted === "true" && email) {
+      const res = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+
+      if (data.hasPin) {
+        window.location.href = "pin_login.html?email=" + encodeURIComponent(email);
+        return;
+      }
+    }
     /* ----- LOGIN ----- */
     const form = pickForm();
     if (!form) {
@@ -107,6 +120,8 @@
 
             // uloženie emailu do zariadenia (pre PIN login)
             localStorage.setItem("lb_user_email", email);
+            localStorage.setItem("lb_has_pin", "true");
+            localStorage.setItem("lb_device_trusted", "true");   
 
         // ✅ presmerovanie po úspechu: next + email (alebo fallback)
         redirectToNextWithEmail(email);

@@ -9,7 +9,6 @@
 <style>
 :root{
   --hdr-h: 72px;
-  --desk-footer-h: 36px;
 }
 
 body{
@@ -17,9 +16,12 @@ body{
   color:#fff;
   margin:0;
   font-family:Arial, sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
 }
 
-/* ===== HEADER (nový jednoduchý) ===== */
+/* HEADER */
 .app-header{
   position:fixed;
   inset:0 0 auto 0;
@@ -49,47 +51,31 @@ body{
   border:1px solid #ffffff33;
   border-radius:10px;
   color:#e7eefc;
-  stroke:#ffffff;
   background:transparent;
   cursor:pointer;
-}
-
-.icon-btn svg{
-  stroke:#ffffff;
-  stroke-width:2.5;
-}
-
-.icon-btn svg path{
-  stroke:#ffffff;
 }
 
 .logo-small{
   height:48px;
   margin:2px auto 6px;
-  display:block;
 }
 
 .user-chip{
   color:#cfe2ff;
   font-size:.95rem;
   margin-bottom:8px;
-  text-align:center;
 }
-/* ===== BANNER SLOT ===== */
-#bannerSlot{ margin-top:var(--hdr-h); }
 
-/* ===== WRAP ===== */
+/* CENTER GAME */
 .wrap{
-  max-width:820px;
-  margin:16px auto;
-  padding:0 16px;
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding-top:var(--hdr-h);
 }
 
-@media (min-width: 992px){
-  .wrap{ padding-bottom: calc(var(--desk-footer-h) + 16px); }
-}
-
-/* ===== BOARD ===== */
+/* BOARD */
 .board{
   width:360px;
   max-width:92vw;
@@ -97,7 +83,7 @@ body{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:12px;
-  margin:0 auto 16px;
+  margin-bottom:20px;
 }
 
 .tile{
@@ -117,7 +103,7 @@ body{
   border:2px dashed rgba(255,255,255,.25);
 }
 
-/* ===== PANEL ===== */
+/* PANEL */
 .panel{
   max-width:420px;
   margin:0 auto;
@@ -152,7 +138,7 @@ body{
   font-weight:600;
 }
 
-/* ===== MODAL (nový štýl) ===== */
+/* MODAL */
 .modal{
   position:fixed;
   inset:0;
@@ -176,74 +162,34 @@ body{
   box-shadow:0 24px 60px rgba(0,0,0,.9);
 }
 
-.modal-card h2{ margin:0 0 8px; }
-.modal-card p{ opacity:.9; }
-
-.modal-card .btn{
-  margin-top:10px;
-}
-
-/* ===== FOOTER PC ===== */
-#desktopFooter{ display:none; }
-
-@media (min-width: 992px){
-  #desktopFooter{
-    display:block;
-    position:fixed;
-    left:0; right:0; bottom:0;
-    height:var(--desk-footer-h);
-    background:rgba(7,18,44,.92);
-    border-top:1px solid rgba(255,255,255,.12);
-    font-size:12px;
-    line-height:var(--desk-footer-h);
-    text-align:center;
-  }
-}
-
-#bannerSlot{
-  margin-top:var(--hdr-h);
-  min-height:140px;
-}
-
 </style>
 </head>
 
 <body>
 
-<header class="app-header" role="banner">
+<header class="app-header">
   <div class="app-header-inner">
-    <button class="icon-btn" id="backBtn" aria-label="Späť">
-      <svg viewBox="0 0 24 24" width="26" height="26">
-        <path d="M15 18l-6-6 6-6"
-              stroke="#ffffff"
-              stroke-width="3.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              fill="none"/>
-      </svg>
-    </button>
-
-    <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
-
+    <button class="icon-btn" id="backBtn">←</button>
+    <img src="logo_lc.jpg" class="logo-small">
     <div class="user-chip" id="userChip"></div>
   </div>
 </header>
 
-<div id="bannerSlot"></div>
-
 <main class="wrap">
-  <div id="board" class="board"></div>
+  <div>
+    <div id="board" class="board"></div>
 
-  <section class="panel">
-    <div class="panel-row">
-      <strong>Hra 8-puzzle</strong>
-      <div>
-        <span class="badge">Ťahy: <span id="moves">0</span></span>
-        <span class="badge">Čas: <span id="time">00:00</span></span>
+    <section class="panel">
+      <div class="panel-row">
+        <strong>Hra 8-puzzle</strong>
+        <div>
+          <span class="badge">Ťahy: <span id="moves">0</span></span>
+          <span class="badge">Čas: <span id="time">00:00</span></span>
+        </div>
       </div>
-    </div>
-    <button id="shuffleBtn" class="btn">Zamiešať</button>
-  </section>
+      <button id="shuffleBtn" class="btn">Zamiešať</button>
+    </section>
+  </div>
 </main>
 
 <div id="winModal" class="modal">
@@ -255,22 +201,7 @@ body{
   </div>
 </div>
 
-<div id="desktopFooter">
-Lištobook © Lištové centrum EU
-</div>
-
-<script src="banners.js"></script>
 <script>
-
-document.addEventListener('DOMContentLoaded', ()=>{
-  mountBannerRotator?.('bannerSlot',{
-    fixed:false,
-    height:140,
-    heightMobile:110,
-    interval:5000
-  });
-});
-
 (function(){
   const header = document.querySelector('.app-header');
   function setHdrH(){
@@ -284,7 +215,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   setHdrH();
   window.addEventListener('resize', setHdrH);
 })();
-
 </script>
 
 <script src="game.js"></script>
