@@ -199,6 +199,12 @@ body{
     text-align:center;
   }
 }
+
+#bannerSlot{
+  margin-top:var(--hdr-h);
+  min-height:140px;
+}
+
 </style>
 </head>
 
@@ -255,8 +261,9 @@ Lištobook © Lištové centrum EU
 
 <script src="banners.js"></script>
 <script>
+
 document.addEventListener('DOMContentLoaded', ()=>{
-  mountBanner?.('bannerSlot',{
+  mountBannerRotator?.('bannerSlot',{
     fixed:false,
     height:140,
     heightMobile:110,
