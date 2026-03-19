@@ -97,10 +97,28 @@
       position:relative;
       z-index:1
     }
+    @media (min-width: 992px){
+
+    .layout{
+      display:flex;
+      justify-content:center;
+    }
+
+    .main-content{
+      margin:0;
+    }
+
+    .presence-panel{
+      position:relative;
+      right:auto;
+      margin-left:24px;
+    }
+
+    }
 
     /* pravý panel – účastníci */
     .presence-panel{
-      position:fixed;right:24px;top:calc(var(--hdr-h) + 16px);
+      position:fixed;right:24px;top:calc(var(--hdr-h) + 16px);      
       width:260px;max-height:calc(100vh - var(--hdr-h) - 120px);overflow:auto;
       background:#fff;border:1px solid #e8e8e8;border-radius:12px;
       box-shadow:0 2px 10px rgba(0,0,0,.06);padding:10px;
@@ -546,10 +564,11 @@
   </aside>
 
   <!-- OBSAH -->
-  <div class="main-content">
+  <div class="layout">
+      <div class="main-content">
     <div class="post-feed" id="postFeed"></div>
   </div>
-
+</div>
   <!-- SPODNÁ LIŠTA -->
   <div class="composer-bar" id="composerBar">
     <div class="composer-wrap">
