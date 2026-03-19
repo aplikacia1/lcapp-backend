@@ -14,7 +14,14 @@
       --pad-x:12px; --nav-gap:8px; --visible:3;
     }
     html,body{margin:0;padding:0}
-    body{background:linear-gradient(135deg,#0c1f4b 0%,#061c47 50%,#0c1f4b 100%);color:#fff;padding-top:var(--hdr-h)}
+    body{
+      background:linear-gradient(135deg,#0c1f4b 0%,#061c47 50%,#0c1f4b 100%);
+      color:#fff;
+      padding-top:var(--hdr-h);
+
+      display:flex;
+      justify-content:center;
+    }
     body.no-scroll{overflow:hidden}
 
     /* HLAVIČKA */
@@ -83,7 +90,15 @@
     }
 
     /* OBSAH */
-    .main-content{width:100%;max-width:var(--max-w);margin:24px auto;padding:0 var(--gap);padding-bottom:200px;position:relative;z-index:1}
+    .main-content{
+      width:100%;
+      max-width:var(--max-w);
+      margin:24px 0;
+      padding:0 var(--gap);
+      padding-bottom:200px;
+      position:relative;
+      z-index:1
+    }
 
     /* pravý panel – účastníci */
     .presence-panel{

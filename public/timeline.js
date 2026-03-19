@@ -164,7 +164,12 @@ async function loadPosts(opts = {}) {
         <div class="post-head">
           <div class="post-author">
             <img class="avatar" src="/img/avatar_default.png" alt="" data-author="${esc(p.author || 'Anonym')}">
-            <strong>${author}</strong>
+            <strong>
+              ${author}
+              ${Array.isArray(p.imageUrls) && p.imageUrls.length > 1 
+                ? ` <span class="photo-count">(${p.imageUrls.length} fotky)</span>` 
+                : ""}
+            </strong>
           </div>
           ${canDel ? `<button class="link-btn post-delete" data-id="${p._id}">Zmazať</button>` : ""}
         </div>
