@@ -75,7 +75,7 @@
       if (position === 'top') {
         wrap.style.top = '0';
         document.documentElement.style.setProperty('--banner-h', `${h}px`);
-        if (pushContent) document.body.style.paddingTop = `calc(var(--hdr-h, 0px) + ${h}px)`;
+        // if (pushContent) document.body.style.paddingTop = `calc(var(--hdr-h, 0px) + ${h}px)`;
       } else {
         wrap.style.bottom = '0';
         document.documentElement.style.setProperty('--banner-h', `${h}px`);
