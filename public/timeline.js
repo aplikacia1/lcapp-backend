@@ -161,49 +161,51 @@ async function loadPosts(opts = {}) {
       el.className = "post";
       el.dataset.id = p._id;
       el.innerHTML = `
-        <div class="post-head">
-          <div class="post-author">
-            <img class="avatar" src="/img/avatar_default.png" alt="" data-author="${esc(p.author || 'Anonym')}">
-            <strong>
-              ${author}
-              ${Array.isArray(p.imageUrls) && p.imageUrls.length > 1 
-                ? ` <span class="photo-count">(${p.imageUrls.length} fotky)</span>` 
-                : ""}
-            </strong>
-          </div>
-          ${canDel ? `<button class="link-btn post-delete" data-id="${p._id}">Zmazať</button>` : ""}
+      <div class="post-head">
+        <div class="post-author">
+          <img class="avatar" src="/img/avatar_default.png" alt="" data-author="${esc(p.author || 'Anonym')}">
+          <strong>${author}</strong>
         </div>
-        ${text ? `<p>${text}</p>` : ""}
-        ${Array.isArray(p.imageUrls) && p.imageUrls.length
-          ? `<div class="post-images stack">
-            ${p.imageUrls.map((url,i) => `
-              <img src="${url}" 
-                   class="post-image stacked" 
-                   data-gallery="${p._id}" 
-                   data-index="${i}" 
-                   loading="lazy">
-            `).join("")}
-          </div>`
-          : (p.imageUrl)
-            ? `<img src="${p.imageUrl}" class="post-image" alt="Obrázok príspevku" loading="lazy">`
-            : ""
-        }
-        <div class="comments">
-          <ul>
-            ${(comments || []).map(c => {
-              const cDel = (isAdmin || (userData?.name && userData.name === c.author)) && c._id;
-              return `<li>
-                <span class="comment-text"><strong>${esc(c.author || "Anonym")}</strong>: ${esc(c.text || "")}</span>
-                <span class="comment-actions">${cDel ? `<button class="link-btn comment-delete" data-post="${p._id}" data-id="${c._id}">Zmazať</button>` : ""}</span>
-              </li>`;
-            }).join("")}
-          </ul>
-          ${(!isAdmin && userData?.name) ? `
-            <form class="commentForm" data-id="${p._id}">
-              <input type="text" name="comment" placeholder="Komentár..." required maxlength="300">
-              <button type="submit">Pridať</button>
-            </form>` : (isAdmin ? "" : `<p>Len prihlásení s prezývkou môžu komentovať.</p>`)}
-        </div>`;
+      </div>
+
+      ${text ? `<p>${text}</p>` : ""}
+
+      ${Array.isArray(p.imageUrls) && p.imageUrls.length
+        ? `<div class="post-images stack">
+              ${p.imageUrls.length > 1 
+                ? `<div class="photo-count-badge">📷 ${p.imageUrls.length}</div>` 
+                : ""}
+
+              ${p.imageUrls.map((url,i) => `
+                <img src="${url}" 
+                     class="post-image stacked" 
+                     data-gallery="${p._id}" 
+                     data-index="${i}" 
+                     loading="lazy">
+              `).join("")}
+           </div>`
+        : (p.imageUrl)
+          ? `<img src="${p.imageUrl}" class="post-image" loading="lazy">`
+          : ""
+      }
+
+      <div class="comments">
+        <ul>
+          ${(comments || []).map(c => {
+            const cDel = (isAdmin || (userData?.name && userData.name === c.author)) && c._id;
+            return `<li>
+              <span class="comment-text"><strong>${esc(c.author || "Anonym")}</strong>: ${esc(c.text || "")}</span>
+              <span class="comment-actions">${cDel ? `<button class="link-btn comment-delete" data-post="${p._id}" data-id="${c._id}">Zmazať</button>` : ""}</span>
+            </li>`;
+          }).join("")}
+        </ul>
+        ${(!isAdmin && userData?.name) ? `
+         <form class="commentForm" data-id="${p._id}">
+            <input type="text" name="comment" placeholder="Komentár..." required maxlength="300">
+            <button type="submit">Pridať</button>
+          </form>` : (isAdmin ? "" : `<p>Len prihlásení s prezývkou môžu komentovať.</p>`)}
+      </div>
+      `;
 
       feed.appendChild(el);
     });
