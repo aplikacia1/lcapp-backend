@@ -166,6 +166,12 @@ async function loadPosts(opts = {}) {
           <img class="avatar" src="/img/avatar_default.png" alt="" data-author="${esc(p.author || 'Anonym')}">
           <strong>${author}</strong>
         </div>
+          ${canDel ? `
+            <button class="link-btn post-delete" data-id="${p._id}">
+              Vymazať
+            </button>
+          ` : ""}
+        </div>
       </div>
 
       ${text ? `<p>${text}</p>` : ""}
@@ -263,27 +269,35 @@ document.addEventListener("submit", async (e) => {
 document.addEventListener("click", async (e) => {
   if (e.target.closest("#profileBackdrop")) return;
   const pBtn = e.target.closest(".post-delete");
-  if (pBtn) {
-    const id = pBtn.dataset.id;
-    if (!confirm("Zmazať tento príspevok?")) return;
-    const url = isAdmin ? `/api/admin/timeline/posts/${id}` : `/api/timeline/${id}`;
-    try {
-      const r = await fetch(url, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: isAdmin ? undefined : JSON.stringify({ email: userEmail })
-      });
-      const d = await r.json().catch(() => ({}));
-      if (r.ok) {
-        loadPosts({ preserve: true });
-      } else {
-        alert(d.message || "Mazanie zlyhalo.");
-      }
-    } catch {
-      alert("Server neodpovedá.");
+if (pBtn) {
+  const id = pBtn.dataset.id;
+
+  if (!confirm("Zmazať tento príspevok?")) return;
+
+  const url = isAdmin
+    ? `/api/admin/timeline/posts/${id}`
+    : `/api/timeline/${id}`;
+
+  try {
+    const r = await fetch(url, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: isAdmin ? undefined : JSON.stringify({ email: userEmail })
+    });
+
+    const d = await r.json().catch(() => ({}));
+
+    if (r.ok) {
+      loadPosts({ preserve: true });
+    } else {
+      alert(d.message || "Mazanie zlyhalo.");
     }
-    return;
+  } catch {
+    alert("Server neodpovedá.");
   }
+
+  return;
+}
 
   const cBtn = e.target.closest(".comment-delete");
   if (cBtn) {
