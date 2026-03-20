@@ -41,6 +41,7 @@ const session = require("express-session");
 const webpush = require("web-push");
 // 🧹 lifecycle cleanup
 const lifecycleCleanup = require('./jobs/lifecycleCleanup');
+const startPushEngine = require('./jobs/pushEngine');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -218,6 +219,7 @@ mongoose.connect(MONGO_URI)
     }
 
     scheduleLifecycle();
+    startPushEngine();
 
     app.listen(PORT, () => console.log(`🚀 Server beží na porte ${PORT}`));
   })
