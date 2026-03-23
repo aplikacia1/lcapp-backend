@@ -40,3 +40,7 @@ uploads/**/*
 # --- Lokálne backupy a pomocné priečinky ---
 backup/
 git/
+
+# Firebase secret
+firebase-key.json
+listobook-*.json

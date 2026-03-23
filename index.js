@@ -39,6 +39,7 @@ const fs = require('fs');
 const session = require("express-session");
 
 const webpush = require("web-push");
+const admin = require("./firebaseAdmin");
 // 🧹 lifecycle cleanup
 const lifecycleCleanup = require('./jobs/lifecycleCleanup');
 const startPushEngine = require('./jobs/pushEngine');
