@@ -1,4 +1,5 @@
 // routes/messageRoutes.js
+const PushToken = require('../models/PushToken');
 const express   = require('express');
 const mongoose  = require('mongoose');
 const router    = express.Router();
@@ -55,6 +56,7 @@ async function maybeSendAdminAutoReply(toEmail, toNiceName) {
   }).save();
 }
 
+
 /* ---------------- Autocomplete podľa prezývky ---------------- */
 router.get('/search-users', async (req, res) => {
   try {
@@ -107,6 +109,32 @@ router.post('/send', async (req, res) => {
       text     : String(text).slice(0, 2000),
       isRead   : false
     }).save();
+    // 🔥 PUSH NOTIFICATION
+try {
+  const tokens = await PushToken.find({ email: norm(toEmail) });
+
+  const tokenList = tokens.map(t => t.token);
+
+  if (tokenList.length) {
+    const admin = require('firebase-admin');
+
+    await admin.messaging().sendEachForMulticast({
+      tokens: tokenList,
+      notification: {
+        title: fromNice,
+        body: text.slice(0, 100)
+      }
+    });
+
+    console.log("✅ PUSH sent to:", toEmail);
+  } else {
+    console.log("⚠️ No tokens for:", toEmail);
+  }
+
+} catch (err) {
+  console.error("❌ PUSH error:", err);
+}
+    
 
     if (ADMIN_EMAIL && toLowerSk(toEmail) === toLowerSk(ADMIN_EMAIL)) {
       await maybeSendAdminAutoReply(norm(fromEmail), fromNice);
