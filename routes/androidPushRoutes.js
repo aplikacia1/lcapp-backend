@@ -12,10 +12,10 @@ router.post('/register', async (req, res) => {
     }
 
     await PushToken.findOneAndUpdate(
-      { token },
-      { token, email: email || 'sabla.marcel@gmail.com' }
-      { upsert: true, new: true }
-    );
+  { token },
+  { token, email: email || 'sabla.marcel@gmail.com' },
+  { upsert: true, new: true }
+);
 
     res.json({ ok: true });
   } catch (e) {
