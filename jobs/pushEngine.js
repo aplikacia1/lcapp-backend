@@ -13,15 +13,48 @@ const {
 
 // ======= jednoduché vtipy =======
 const JOKES = [
-  "Majster: Prečo si prišiel neskoro? Pomocník: Čakal som, kým sa káva sama zamieša.",
-  "Kutil bez vodováhy je ako ryba bez vody.",
-  "Dnes sa nič nepokazilo… ešte si nezačal.",
-  "Majster nikdy nemešká. Len prichádza v inom časovom profile.",
-  "Keď niečo nejde… použi väčšie kladivo."
+  "Tip na dnes: Ak to nefunguje, zober väčšie kladivo.",
+  "Tip na dnes: Keď to drží, nechaj to tak.",
+  "Tip na dnes: Dvakrát meraj. Potom aj tak ešte raz.",
+  "Tip na dnes: Keď niečo nesedí, chyba nie je v materiáli… väčšinou.",
+  "Tip na dnes: Ráno nezačínaj prácou. Začni kávou.",
+  "Tip na dnes: Keď to ide hladko, priprav sa na problém.",
+  "Tip na dnes: Najlepšie riešenie je to, ktoré funguje.",
+  "Tip na dnes: Ak si si istý, skontroluj to ešte raz.",
+  "Tip na dnes: Každá chyba je skúsenosť. Niekedy drahá.",
+  "Tip na dnes: Keď nevieš čo ďalej, zastav sa. A premysli.",
+  "Tip na dnes: Náradie si váž. Ono si pamätá.",
+  "Tip na dnes: Čo sa dá spraviť jednoducho, nerob zložito.",
+  "Tip na dnes: Keď to nejde silou, ide to väčšou silou.",
+  "Tip na dnes: Aj malá odchýlka je veľký problém.",
+  "Tip na dnes: Poriadok na stole = pokoj v hlave.",
+  "Tip na dnes: Najprv rozmýšľaj, potom rež.",
+  "Tip na dnes: Keď to vyzerá dobre, ešte to nemusí byť dobre.",
+  "Tip na dnes: Lepšie pomaly a presne ako rýchlo a zle.",
+  "Tip na dnes: Každý problém má riešenie. Len ho treba nájsť.",
+  "Tip na dnes: Keď niečo nesedí, nesedí to.",
+  "Tip na dnes: Najväčšie chyby vznikajú z malých detailov.",
+  "Tip na dnes: Dobrý začiatok je polovica práce.",
+  "Tip na dnes: Keď sa ponáhľaš, spravíš to dvakrát.",
+  "Tip na dnes: Aj rovná stena vie prekvapiť.",
+  "Tip na dnes: Kto sa nepýta, robí podľa seba.",
+  "Tip na dnes: Keď to nepasuje, niečo si prehliadol.",
+  "Tip na dnes: Lepšie opraviť hneď ako neskôr.",
+  "Tip na dnes: Každý materiál má svoju náladu.",
+  "Tip na dnes: Dnes sprav aspoň jednu vec poriadne.",
+  "Tip na dnes: Aj improvizácia má svoje pravidlá."
 ];
 
+let lastIndex = -1;
+
 function randomJoke() {
-  return JOKES[Math.floor(Math.random() * JOKES.length)];
+  let i;
+  do {
+    i = Math.floor(Math.random() * JOKES.length);
+  } while (i === lastIndex);
+
+  lastIndex = i;
+  return JOKES[i];
 }
 
 // ======= send to all =======
@@ -45,14 +78,14 @@ async function broadcast(title, body, url = "/", type = "general") {
 async function runMorning() {
   if (!shouldSendMorningJoke()) return;
 
-  console.log("☀️ sending morning joke");
+  console.log("☀️ sending tip na dnes");
 
   await broadcast(
-    "Lištobook ráno",
-    randomJoke(),
-    "/timeline.html",
-    "morning"
-  );
+  "☀️ Tip na dnes",
+  randomJoke(),
+  "/timeline.html",
+  "morning"
+);
 }
 
 // ======= večerná štatistika =======
