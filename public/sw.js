@@ -50,7 +50,10 @@ self.addEventListener('push', (event) => {
     body: data.body || 'Máte novú správu.',
     icon: data.icon || '/icons/icon-192.png',
     badge: data.badge || '/icons/icon-192.png',
-    data: { url: data.url || '/' }
+    data: { 
+      url: data.url || '/',
+      type: data.type || 'general'
+    }
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -59,19 +62,24 @@ self.addEventListener('push', (event) => {
 /* Klik na notifikáciu → zaostri otvorené okno alebo otvor nové */
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || '/';
+
+  const data = event.notification.data || {};
+  let targetUrl = data.url || '/timeline.html';
+
+  // 👉 ak je to správa → messages
+  if (data.type === "message") {
+    targetUrl = "/messages.html";
+  }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((list) => {
         for (const c of list) {
-          if ('focus' in c) {
-            // ak je už otvorené, naviguj a fokusni
-            c.navigate(url);
+          if (c.url.includes(targetUrl) && 'focus' in c) {
             return c.focus();
           }
         }
-        return clients.openWindow(url);
+        return clients.openWindow(targetUrl);
       })
   );
 });

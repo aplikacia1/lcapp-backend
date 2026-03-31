@@ -123,6 +123,10 @@ try {
       notification: {
         title: fromNice,
         body: text.slice(0, 100)
+      },
+      data: {
+        url: "/messages.html",
+        type: "message"
       }
     });
 

@@ -1,6 +1,8 @@
 const webpush = require("web-push");
 const PushSubscription = require("../models/PushSubscription");
 const User = require("../models/User");
+const Rating = require("../models/rating");
+const Product = require("../models/product");
 
 const {
   nowSK,
@@ -23,10 +25,10 @@ function randomJoke() {
 }
 
 // ======= send to all =======
-async function broadcast(title, body, url = "/") {
+async function broadcast(title, body, url = "/", type = "general") {
   const subs = await PushSubscription.find().lean();
 
-  const payload = JSON.stringify({ title, body, url });
+  const payload = JSON.stringify({ title, body, url, type });
 
   for (const s of subs) {
     try {
@@ -48,7 +50,8 @@ async function runMorning() {
   await broadcast(
     "Lištobook ráno",
     randomJoke(),
-    "/timeline.html"
+    "/timeline.html",
+    "morning"
   );
 }
 
@@ -56,13 +59,41 @@ async function runMorning() {
 async function runEvening() {
   if (!shouldSendEveningStats()) return;
 
-  console.log("🌙 sending evening stats");
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
 
   const newUsersToday = await User.countDocuments({
-    createdAt: { $gte: new Date().setHours(0,0,0,0) }
+    createdAt: { $gte: startOfToday }
   });
 
-  const body = `Dnes sa pridalo ${newUsersToday} nových používateľov`;
+  const newRatingsToday = await Rating.countDocuments({
+    createdAt: { $gte: startOfToday }
+  });
+
+  const newProductsToday = await Product.countDocuments({
+    createdAt: { $gte: startOfToday }
+  });
+
+  // 👉 ak je všetko 0, nič neposielame
+  if (newUsersToday === 0 && newRatingsToday === 0 && newProductsToday === 0) {
+    console.log("🌙 evening skipped – no activity");
+    return;
+  }
+
+  console.log("🌙 sending evening stats");
+
+  const parts = [];
+  if (newUsersToday > 0) {
+    parts.push(`${newUsersToday} nových používateľov`);
+  }
+  if (newRatingsToday > 0) {
+    parts.push(`${newRatingsToday} nových hodnotení`);
+  }
+  if (newProductsToday > 0) {
+    parts.push(`${newProductsToday} nových produktov`);
+  }
+
+  const body = `Dnes pribudlo: ${parts.join(", ")}`;
 
   await broadcast(
     "Lištobook večer",
