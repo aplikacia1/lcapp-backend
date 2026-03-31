@@ -41,7 +41,16 @@ function showView(which) {
 document.addEventListener('DOMContentLoaded', () => {
   // user chip
   const chip = $('#userChip');
-  if (chip) chip.textContent = `Prihlásený: ${userEmail || '—'}`;
+  if (chip) {
+  fetch(`/api/users/${encodeURIComponent(userEmail)}`)
+    .then(res => res.json())
+    .then(user => {
+      chip.textContent = `Prihlásený: ${user.name || userEmail}`;
+    })
+    .catch(() => {
+      chip.textContent = `Prihlásený: ${userEmail}`;
+    });
+}
 
   // späť v hlavičke → timeline (zachovaj email)
   $('#backBtn')?.addEventListener('click', () => {
