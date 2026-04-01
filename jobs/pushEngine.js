@@ -74,6 +74,29 @@ async function broadcast(title, body, url = "/", type = "general") {
   }
 }
 
+// 👇 SEM PRESNE VLOŽ
+
+async function sendPush(email, body) {
+  const subs = await PushSubscription.find({ email }).lean();
+
+  const payload = JSON.stringify({
+    title: "Lištobook",
+    body,
+    url: "/timeline.html",
+    type: "comment"
+  });
+
+  for (const s of subs) {
+    try {
+      await webpush.sendNotification(s.sub, payload);
+    } catch (err) {
+      if (err.statusCode === 410 || err.statusCode === 404) {
+        await PushSubscription.deleteOne({ endpoint: s.endpoint });
+      }
+    }
+  }
+}
+
 // ======= ranný vtip =======
 async function runMorning() {
   if (!shouldSendMorningJoke()) return;
@@ -173,4 +196,7 @@ function startPushEngine() {
   }, 60000);
 }
 
-module.exports = startPushEngine;
+module.exports = {
+  startPushEngine,
+  sendPush
+};

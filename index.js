@@ -42,7 +42,7 @@ const webpush = require("web-push");
 const admin = require("./firebaseAdmin");
 // 🧹 lifecycle cleanup
 const lifecycleCleanup = require('./jobs/lifecycleCleanup');
-const startPushEngine = require('./jobs/pushEngine');
+const { startPushEngine, sendPush } = require('./jobs/pushEngine');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -55,6 +55,7 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
 }
 
 const app = express();
+app.set('sendPush', sendPush);
 
 /* --- Základ --- */
 app.set('trust proxy', 1); // Render/reverse proxy

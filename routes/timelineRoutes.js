@@ -188,12 +188,18 @@ router.post('/comment/:postId', async (req, res) => {
     // 🔔 PUSH – test (len pre teba)
 try {
   const sendPush = req.app.get('sendPush');
+
+  console.log("PUSH DEBUG:", !!sendPush);
+
   if (sendPush) {
     await sendPush(
       "sabla.marcel@gmail.com",
       "💬 Niekto komentoval príspevok"
     );
+  } else {
+    console.log("❌ sendPush je undefined");
   }
+
 } catch (err) {
   console.error("push comment error", err);
 }
