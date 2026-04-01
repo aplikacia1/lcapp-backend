@@ -588,7 +588,7 @@ input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--lc-a
 }
 /* ===== TIMELINE FIX – override starého dizajnu ===== */
 
-body {
+body.timeline-page {
   display: block !important;
   align-items: unset !important;
 }
@@ -628,3 +628,15 @@ body {
   padding: 0;
 }
 
+/* ===== TIMELINE ONLY FIX ===== */
+
+.post-feed {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.post {
+  width: 100%;
+  box-sizing: border-box;
+}
