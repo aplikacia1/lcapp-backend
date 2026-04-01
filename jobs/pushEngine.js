@@ -66,6 +66,7 @@ async function broadcast(title, body, url = "/", type = "general") {
   for (const s of subs) {
     try {
       await webpush.sendNotification(s.sub, payload);
+      
     } catch (err) {
       if (err.statusCode === 410 || err.statusCode === 404) {
         await PushSubscription.deleteOne({ endpoint: s.endpoint });
@@ -79,22 +80,40 @@ async function broadcast(title, body, url = "/", type = "general") {
 async function sendPush(email, body) {
   const subs = await PushSubscription.find({ email }).lean();
 
-  const payload = JSON.stringify({
-    title: "Lištobook",
-    body,
-    url: "/timeline.html",
-    type: "comment"
-  });
+const payload = JSON.stringify({
+  title: "Lištobook",
+  body,
+  url: "/timeline.html",
+  type: "comment"
+});
 
-  for (const s of subs) {
-    try {
-      await webpush.sendNotification(s.sub, payload);
-    } catch (err) {
-      if (err.statusCode === 410 || err.statusCode === 404) {
-        await PushSubscription.deleteOne({ endpoint: s.endpoint });
-      }
+for (const s of subs) {
+  try {
+    // PWA push
+    await webpush.sendNotification(s.sub, payload);
+
+    // ANDROID push
+    if (s.token) {
+      const message = {
+        token: s.token,
+        notification: {
+          title: "Lištobook",
+          body
+        },
+        data: {
+          url: "/timeline.html"
+        }
+      };
+
+      await require("../firebaseAdmin").messaging().send(message);
+    }
+
+  } catch (err) {
+    if (err.statusCode === 410 || err.statusCode === 404) {
+      await PushSubscription.deleteOne({ endpoint: s.endpoint });
     }
   }
+}
 }
 
 // ======= ranný vtip =======
