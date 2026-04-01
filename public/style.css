@@ -615,3 +615,29 @@ body {
 .post-feed {
   max-width: 100% !important;
 }
+/* ===== TIMELINE – scroll komentárov ===== */
+
+.post .comments {
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding-right: 6px;
+}
+
+/* jemný scrollbar (desktop) */
+.post .comments::-webkit-scrollbar {
+  width: 6px;
+}
+
+.post .comments::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.25);
+  border-radius: 6px;
+}
+
+/* ak nie sú komentáre */
+.no-comments {
+  font-size: 13px;
+  color: #777;
+  font-style: italic;
+  padding: 6px 0;
+}
