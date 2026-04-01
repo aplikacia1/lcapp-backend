@@ -595,8 +595,8 @@ body {
 
 .main-content {
   max-width: 820px !important;
-  margin: 80px auto 24px !important; /* 👈 TU JE FIX */
-  padding: 0 16px !important;
+  margin: 80px auto 24px !important;
+  padding: 0 16px 120px !important; /* 👈 pridaj toto */
 }
 .container {
   max-width: unset !important;
