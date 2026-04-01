@@ -151,7 +151,25 @@
     }
 
     /* feed */
-    .post{background:#fff;border:1px solid #eee;border-radius:12px;padding:12px;margin-bottom:12px;color:#111}
+    .post{
+      background:#fff;
+      border:1px solid #eee;
+      border-radius:12px;
+      padding:12px;
+      margin:0 auto 16px auto;
+
+      width:100%;
+      max-width:620px; /* 🔥 KĽÚČOVÉ */
+
+      color:#111;
+    }
+    .post img{
+      width:100%;
+      height:auto;
+      max-height:420px; /* 🔥 STOP proti natiahnutiu */
+      object-fit:cover;
+      border-radius:12px;
+    }
     .post strong{color:#0c1f4b}
     
     .post-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
