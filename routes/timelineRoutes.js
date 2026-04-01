@@ -185,6 +185,18 @@ router.post('/comment/:postId', async (req, res) => {
     post.lastActivityAt = new Date();
 
     await post.save();
+    // 🔔 PUSH – test (len pre teba)
+try {
+  const sendPush = req.app.get('sendPush');
+  if (sendPush) {
+    await sendPush(
+      "sabla.marcel@gmail.com",
+      "💬 Niekto komentoval príspevok"
+    );
+  }
+} catch (err) {
+  console.error("push comment error", err);
+}
     res.status(200).json({ message: 'Komentár pridaný' });
   } catch (e) {
     console.error('timeline comment error', e);
