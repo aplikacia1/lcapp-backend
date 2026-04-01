@@ -78,42 +78,58 @@ async function broadcast(title, body, url = "/", type = "general") {
 // 👇 SEM PRESNE VLOŽ
 
 async function sendPush(email, body) {
+
+  // ===== PWA =====
   const subs = await PushSubscription.find({ email }).lean();
 
-const payload = JSON.stringify({
-  title: "Lištobook",
-  body,
-  url: "/timeline.html",
-  type: "comment"
-});
+  const payload = JSON.stringify({
+    title: "Lištobook",
+    body,
+    url: "/timeline.html",
+    type: "comment"
+  });
 
-for (const s of subs) {
+  for (const s of subs) {
+    try {
+      await webpush.sendNotification(s.sub, payload);
+    } catch (err) {
+      if (err.statusCode === 410 || err.statusCode === 404) {
+        await PushSubscription.deleteOne({ endpoint: s.endpoint });
+      }
+    }
+  }
+
+  // ===== ANDROID (🔥 toto je to čo ti chýba) =====
   try {
-    // PWA push
-    await webpush.sendNotification(s.sub, payload);
+    const PushToken = require("../models/PushToken");
 
-    // ANDROID push
-    if (s.token) {
-      const message = {
-        token: s.token,
+    const tokens = await PushToken.find({ email });
+
+    const tokenList = tokens.map(t => t.token);
+
+    if (tokenList.length) {
+      const admin = require("firebase-admin");
+
+      await admin.messaging().sendEachForMulticast({
+        tokens: tokenList,
         notification: {
           title: "Lištobook",
           body
         },
         data: {
-          url: "/timeline.html"
+          url: "/timeline.html",
+          type: "comment"
         }
-      };
+      });
 
-      await require("../firebaseAdmin").messaging().send(message);
+      console.log("✅ ANDROID PUSH sent to:", email);
+    } else {
+      console.log("⚠️ No Android tokens for:", email);
     }
 
   } catch (err) {
-    if (err.statusCode === 410 || err.statusCode === 404) {
-      await PushSubscription.deleteOne({ endpoint: s.endpoint });
-    }
+    console.error("❌ Android PUSH error:", err);
   }
-}
 }
 
 // ======= ranný vtip =======
