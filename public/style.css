@@ -586,3 +586,32 @@ input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--lc-a
   color:#666;
   margin-left:6px;
 }
+/* ===== TIMELINE FIX – override starého dizajnu ===== */
+
+body {
+  display: block !important;
+  align-items: unset !important;
+}
+
+.main-content {
+  max-width: 820px !important;
+  margin: 24px auto !important;
+  padding: 0 16px !important;
+}
+
+.container {
+  max-width: unset !important;
+}
+
+/* vypni starý composer */
+#timelineForm {
+  position: static !important;
+  bottom: unset !important;
+  transform: none !important;
+  width: 100% !important;
+}
+
+/* nový layout nech má kontrolu */
+.post-feed {
+  max-width: 100% !important;
+}
