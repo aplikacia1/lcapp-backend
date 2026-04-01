@@ -595,10 +595,9 @@ body {
 
 .main-content {
   max-width: 820px !important;
-  margin: 24px auto !important;
+  margin: 80px auto 24px !important; /* 👈 TU JE FIX */
   padding: 0 16px !important;
 }
-
 .container {
   max-width: unset !important;
 }
@@ -624,20 +623,8 @@ body {
   padding-right: 6px;
 }
 
-/* jemný scrollbar (desktop) */
-.post .comments::-webkit-scrollbar {
-  width: 6px;
+.post .comments ul {
+  margin: 0;
+  padding: 0;
 }
 
-.post .comments::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.25);
-  border-radius: 6px;
-}
-
-/* ak nie sú komentáre */
-.no-comments {
-  font-size: 13px;
-  color: #777;
-  font-style: italic;
-  padding: 6px 0;
-}
