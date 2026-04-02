@@ -108,3 +108,10 @@ $('#tileBlog')?.addEventListener('keydown', (e) => {
   // štart: zobraz dve dlaždice
   showView('tiles');
 });
+// 🔥 ZATVORENIE MENU PO KLIKU
+document.querySelectorAll('.nav-track .pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const toggle = document.getElementById('menuToggle');
+    if (toggle) toggle.checked = false;
+  });
+});

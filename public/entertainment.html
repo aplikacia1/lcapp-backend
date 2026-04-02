@@ -170,20 +170,67 @@
         z-index:930;
       }
     }
+    /* ===== HAMBURGER MENU (mobile) ===== */
+
+.nav-toggle{ display:none; }
+
+.nav-scroller{
+  position: fixed;
+  top: var(--hdr-h);
+  left: 0;
+  width: min(80vw, 320px);
+  height: 100vh;
+  background: #0c1f4b;
+  padding: 88px 16px 16px;
+  transform: translateX(-100%);
+  transition: transform .25s ease;
+  z-index: 1000;
+}
+
+/* keď klikneš hamburger → vysunie sa */
+.nav-toggle:checked ~ .app-header .nav-scroller{
+  transform: translateX(0);
+}
+
+/* tlačítka v menu pod sebou */
+.nav-track{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pill{
+  width: 100%;
+  height: 44px;
+  border-radius: 14px;
+}
   </style>
 </head>
 <body>
+  <input type="checkbox" id="menuToggle" class="nav-toggle" />
   <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-      <button class="icon-btn" id="backBtn" aria-label="Späť">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
-      </button>
+      <label for="menuToggle" class="icon-btn" aria-label="Menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 6h18M3 12h18M3 18h18"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"/>
+      </svg>
+    </label>
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userChip">Prihlásený:</div>
     </div>
+    <nav class="nav-scroller">
+  <div class="nav-track">
+    <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
+    <button class="pill" id="timelineBtn">⬅️ Lištobook</button>
+    <button class="pill" id="calcBtn">📐 Kalkulačky</button>
+    <button class="pill" id="messagesBtn">💬 Správy</button>
+    <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť</button>
+  </div>
+</nav>
   </header>
 
   <!-- PC ONLY: party beams -->
