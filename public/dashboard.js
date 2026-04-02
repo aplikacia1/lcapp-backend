@@ -58,10 +58,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = `timeline.html?email=${encodeURIComponent(email)}`;
   });
 
-  // jediné tlačidlo: späť na Lištobook (timeline)
-  $('#goTimelineBtn')?.addEventListener('click', () => {
-    window.location.href = `timeline.html?email=${encodeURIComponent(email)}`;
-  });
+  $('#goCatalogBtn')?.addEventListener('click', () => {
+  window.location.href = `catalog.html?email=${encodeURIComponent(email)}`;
+});
+
+$('#goMessagesBtn')?.addEventListener('click', () => {
+  window.location.href = `messages.html?email=${encodeURIComponent(email)}`;
+});
 
   const avatarImg  = $('#avatarPreview');
   const avatarFile = $('#avatarFile');
