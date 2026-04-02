@@ -15,6 +15,9 @@ async function init(){
   bindHeader();
   await showUser();
   loadCategories();
+
+  refreshMessagesUnread(); // 🔥 toto pridaj
+  setInterval(refreshMessagesUnread, 5000); // 🔥 toto pridaj
 }
 
 function bindHeader(){
@@ -27,6 +30,9 @@ function bindHeader(){
   $('#timelineBtn')?.addEventListener('click', () => nav('timeline.html'));
   $('#backBtn')?.addEventListener('click', () => nav('dashboard.html'));
   $('#logoutBtn')?.addEventListener('click', () => window.location.href = 'index.html');
+  $('#funBtn')?.addEventListener('click', () => nav('entertainment.html'));
+  $('#calcBtn')?.addEventListener('click', () => nav('kalkulacky.html'));
+  $('#messagesBtn')?.addEventListener('click', () => nav('messages.html'));
 
   $('#searchInput')?.addEventListener('input', ()=>{
     filterCards($('#searchInput').value.trim().toLowerCase());
@@ -102,4 +108,35 @@ function filterCards(query){
   }
   const filtered = _categories.filter(c => (c?.name || '').toLowerCase().includes(query));
   renderCards(filtered);
+}
+async function refreshMessagesUnread(){
+  if (!email) return;
+
+  const badgeEl = document.getElementById('messagesBadge');
+  const messagesBtn = document.getElementById('messagesBtn');
+
+  if (!badgeEl || !messagesBtn) return;
+
+  try{
+    const r = await fetch(`/api/messages/conversations/${encodeURIComponent(email)}`);
+    if (!r.ok) return;
+
+    const list = await r.json();
+
+    let total = 0;
+    (list || []).forEach(item => {
+      total += item.unread || 0;
+    });
+
+    if (total > 0){
+      messagesBtn.style.display = 'inline-flex';
+      badgeEl.textContent = total > 9 ? '9+' : String(total);
+      badgeEl.style.display = 'inline-flex';
+    } else {
+      messagesBtn.style.display = 'none';
+      badgeEl.textContent = '';
+      badgeEl.style.display = 'none';
+    }
+
+  }catch{}
 }

@@ -222,6 +222,20 @@
         z-index:930;
       }
     }
+    .pill-badge{
+      margin-left:4px;
+      min-width:18px;
+      height:18px;
+      padding:0 6px;
+      border-radius:999px;
+      background:#ffcc00;
+      color:#111;
+      font-weight:800;
+      font-size:12px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+    }
   </style>
 </head>
 <body>
@@ -245,6 +259,14 @@
         <div class="nav-track">
           <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
           <button class="pill" id="timelineBtn">⬅️ Lištobook</button>
+          <button class="pill" id="funBtn">🎲 Voľný čas</button>
+          <button class="pill" id="calcBtn">📐 Kalkulačky</button>
+
+          <button class="pill" id="messagesBtn" style="display:none;">
+            💬 Správy
+            <span id="messagesBadge" class="pill-badge"></span>
+          </button>
+
           <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť sa</button>
         </div>
       </nav>
