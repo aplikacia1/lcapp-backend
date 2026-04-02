@@ -130,11 +130,6 @@
   z-index: 1000;
 }
 
-/* OTVORENIE */
-#menuToggle:checked + .neon-beams + .app-header .nav-scroller{
-  transform: translateX(0);
-}
-
 /* položky menu zvisle */
 .nav-track{
   flex-direction: column;
@@ -145,10 +140,42 @@
 .pill{
   width:100%;
 }
+@media (max-width:767.98px){
+  body.open-nav .nav-scroller{
+    transform: translateX(0);
+  }
+}
+@media (min-width:768px){
+
+  .burger{
+    display:none;
+  }
+
+  .nav-scroller{
+    position: static;
+    height: auto;
+    width: 100%;
+    transform: none !important;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .nav-track{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-direction:row;
+  }
+
+  .pill{
+    width:auto !important;
+  }
+
+}
   </style>
 </head>
 <body>
-<input type="checkbox" id="menuToggle" class="nav-toggle" aria-hidden="true" />
+
   <!-- PC okraje -->
   <div class="neon-beams" aria-hidden="true">
     <span class="beam left"></span>
@@ -160,14 +187,14 @@
   <header class="app-header" role="banner">
     <div class="app-header-inner">
       <!-- 🔥 SEM TO IDE -->
-  <label for="menuToggle" class="burger" aria-label="Menu">
+  <button type="button" class="burger" id="burgerBtn" aria-label="Menu">
     <svg viewBox="0 0 24 24">
       <path d="M3 6h18M3 12h18M3 18h18"
         stroke="currentColor"
         stroke-width="2"
         stroke-linecap="round"/>
     </svg>
-  </label>
+  </button>
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userLabel">Prihlásený: …</div>
 
@@ -339,14 +366,14 @@
   <script src="/js/cookies.js"></script>
   <!-- LC MODAL -->
 <div id="lcModal" style="
-position:fixed;
-inset:0;
-display:none;
-align-items:center;
-justify-content:center;
-background:rgba(0,0,0,.55);
-z-index:9999;
-">
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.55);
+    z-index:9999;
+    ">
 
   <div style="
     width:100%;
@@ -366,15 +393,15 @@ z-index:9999;
     <div style="display:flex;gap:10px;justify-content:center">
 
       <button id="lcModalCancel" style="
-      height:38px;
-      padding:0 16px;
-      border-radius:999px;
-      border:1px solid #cbd5e1;
-      background:#ffffff;
-      color:#0c1f4b;
-      cursor:pointer;
-      ">
-      Zrušiť
+          height:38px;
+          padding:0 16px;
+          border-radius:999px;
+          border:1px solid #cbd5e1;
+          background:#ffffff;
+          color:#0c1f4b;
+          cursor:pointer;
+          ">
+          Zrušiť
       </button>
 
       <button id="lcModalOk" style="
@@ -394,5 +421,23 @@ z-index:9999;
 
   </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const burgerBtn = document.getElementById('burgerBtn');
+
+  burgerBtn?.addEventListener('click', () => {
+    document.body.classList.toggle('open-nav');
+  });
+
+  // 🔥 ZATVORENIE MENU PO KLIKNUTÍ
+  document.querySelectorAll('.nav-track button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.body.classList.remove('open-nav');
+    });
+  });
+
+});
+</script>
 </body>
 </html>
