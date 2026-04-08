@@ -11,7 +11,7 @@
 
     /* HLAVIČKA – sticky (neprekryje obsah) */
     .app-header{
-      position: sticky; top: 0; z-index: 1000;
+      position: fixed; top: 0; z-index: 1000;
       background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
     }
     .app-header-inner{
@@ -29,15 +29,20 @@
     .nav-scroller{ padding:0 var(--pad-x); width:100%; }
     .nav-track{ display:flex; gap:8px; justify-content:center; }
     .pill{
+      position:relative;
+      flex:0 0 calc((100% - (var(--gap) * (var(--visible) - 1))) / var(--visible));
       height:38px;
-      padding:6px 20px;
+      padding:8px 14px;
       border-radius:16px;
       border:1px solid rgba(255,255,255,.35);
       background:#fff;
       color:#0c1f4b;
       cursor:pointer;
-      font-size:14px;
-      font-weight:600;
+      white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
     }
 
     /* OBSAH */
@@ -102,7 +107,7 @@
 .burger{
   position:absolute;
   left:12px;
-  top:12px; /* 🔥 pevná pozícia hore */
+  top:10px; /* 🔥 pevná pozícia hore */
   width:44px;
   height:44px;
   display:flex;

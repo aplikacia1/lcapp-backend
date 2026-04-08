@@ -212,7 +212,6 @@
     }
     /* ===== HAMBURGER MENU (mobile) ===== */
 
-.nav-toggle{ display:none; }
 
 .nav-scroller{
   position: fixed;
@@ -227,27 +226,21 @@
   z-index: 1000;
 }
 
-/* keď klikneš hamburger → vysunie sa */
-.nav-toggle:checked ~ .app-header .nav-scroller{
-  transform: translateX(0);
-}
-
 /* tlačítka v menu pod sebou */
 .nav-track{
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
-.pill{
-  width: 100%;
-  height: 44px;
-  border-radius: 14px;
+@media (max-width: 767.98px){
+  .nav-track .pill{
+    width:100% !important;
+  }
 }
   </style>
 </head>
 <body>
-  <input type="checkbox" id="menuToggle" class="nav-toggle" />
+  
   <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
@@ -415,5 +408,20 @@
       });
     });
   </script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const burgerBtn = document.querySelector('.icon-btn');
+
+  burgerBtn?.addEventListener('click', () => {
+    document.body.classList.toggle('open-nav');
+  });
+
+  document.querySelectorAll('.nav-track button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.body.classList.remove('open-nav');
+    });
+  });
+});
+</script>
 </body>
 </html>
