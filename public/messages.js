@@ -561,7 +561,7 @@ async function safeRefresh(){
       const preserve = $('#composerText');
       const saved = preserve ? preserve.value : '';
 
-      await openThread(currentOtherEmail, currentOtherLabel);
+      await openThread(currentOtherEmail, currentOtherLabel, { reset:false });
 
       if (preserve) preserve.value = saved;
       draftCache = saved;

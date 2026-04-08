@@ -105,13 +105,20 @@ $('#tileBlog')?.addEventListener('keydown', (e) => {
     goBlog();
   }
 });
-  // štart: zobraz dve dlaždice
-  showView('tiles');
+// NAVIGÁCIA (rovnaká ako timeline)
+const go = (page) => {
+  location.href = userEmail
+    ? `${page}?email=${encodeURIComponent(userEmail)}`
+    : page;
+};
+
+$('#accountBtn')?.addEventListener('click', () => go('dashboard.html'));
+$('#timelineBtn')?.addEventListener('click', () => go('timeline.html'));
+$('#calcBtn')?.addEventListener('click', () => go('kalkulacky.html'));
+$('#messagesBtn')?.addEventListener('click', () => go('messages.html'));
+$('#logoutBtn')?.addEventListener('click', () => go('index.html'));
+
+// štart: zobraz dve dlaždice
+showView('tiles');
 });
-// 🔥 ZATVORENIE MENU PO KLIKU
-document.querySelectorAll('.nav-track .pill').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const toggle = document.getElementById('menuToggle');
-    if (toggle) toggle.checked = false;
-  });
-});
+

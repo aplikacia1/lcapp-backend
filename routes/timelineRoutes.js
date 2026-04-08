@@ -87,6 +87,7 @@ router.post('/add', upload.array('images', 3), async (req, res) => {
 
     const post = new TimelinePost({
       author: user.name,
+      authorEmail: user.email,
       authorCompany: user.companyName || '',
       text: text || '',
       imageUrls,
@@ -185,24 +186,29 @@ router.post('/comment/:postId', async (req, res) => {
     post.lastActivityAt = new Date();
 
     await post.save();
-    // 🔔 PUSH – test (len pre teba)
-try {
-  const sendPush = req.app.get('sendPush');
+    // 🔔 PUSH – reálny (autor príspevku)
+    try {
+      const sendPush = req.app.get('sendPush');
 
-  console.log("PUSH DEBUG:", !!sendPush);
+      if (sendPush) {
 
-  if (sendPush) {
-    await sendPush(
-      "sabla.marcel@gmail.com",
-      "💬 Niekto komentoval príspevok"
-    );
-  } else {
-    console.log("❌ sendPush je undefined");
-  }
+        // nájdi autora príspevku podľa mena
+        const postAuthorEmail = post.authorEmail;
+ 
+        // neposielaj push sám sebe
+        if (postAuthorEmail && postAuthorEmail !== user.email) {
+          await sendPush(
+            postAuthorEmail,
+            "💬 Nový komentár",
+            `${user.name}: ${text}`
+          );
+        }
+    
+      }
 
-} catch (err) {
-  console.error("push comment error", err);
-}
+    } catch (err) {
+      console.error("push comment error", err);
+    }
     res.status(200).json({ message: 'Komentár pridaný' });
   } catch (e) {
     console.error('timeline comment error', e);
