@@ -221,7 +221,9 @@
   height: 100vh;
   background: #0c1f4b;
   padding: 88px 16px 16px;
-  transform: translateX(-100%);
+
+  transform: translateX(-100%); /* 🔥 toto je kľúč */
+
   transition: transform .25s ease;
   z-index: 1000;
 }
@@ -237,6 +239,11 @@
     width:100% !important;
   }
 }
+@media (max-width: 767.98px){
+  body.open-nav .nav-scroller{
+    transform: translateX(0);
+  }
+}
   </style>
 </head>
 <body>
@@ -244,14 +251,14 @@
   <!-- HEADER -->
   <header class="app-header" role="banner">
     <div class="app-header-inner">
-      <button type="button" class="icon-btn" aria-label="Menu">
+      <button type="button" class="icon-btn" id="burgerBtn" aria-label="Menu">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M3 6h18M3 12h18M3 18h18"
           stroke="currentColor"
           stroke-width="2"
           stroke-linecap="round"/>
       </svg>
-    </label>
+    </button>
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="userChip">Prihlásený:</div>
     </div>
@@ -409,19 +416,19 @@
     });
   </script>
   <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const burgerBtn = document.querySelector('.icon-btn');
+    document.addEventListener('DOMContentLoaded', () => {
+      const burger = document.getElementById('burgerBtn');
 
-  burgerBtn?.addEventListener('click', () => {
-    document.body.classList.toggle('open-nav');
-  });
+      burger?.addEventListener('click', () => {
+        document.body.classList.toggle('open-nav');
+      });
 
-  document.querySelectorAll('.nav-track button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.body.classList.remove('open-nav');
-    });
-  });
-});
+      document.querySelectorAll('.nav-track button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.body.classList.remove('open-nav');
+        });
+      });
+   });
 </script>
 </body>
 </html>
