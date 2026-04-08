@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>Dopyt na tovar</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+:root{
+  --max-w:820px;
+  --gap:16px;
+  --hdr-h:96px;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  background:#061c47;
+  color:#fff;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  padding-top:var(--hdr-h);
+}
+
+.app-header{
+  position:fixed;
+  inset:0 0 auto 0;
+  z-index:1000;
+  background:#0c1f4b;
+  border-bottom:1px solid rgba(255,255,255,.15);
+}
+
+.app-header-inner{
+  max-width:var(--max-w);
+  margin:0 auto;
+  padding:8px var(--gap);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+}
+
+.back-btn{
+  position:absolute;
+  left:12px;
+  top:10px;
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  background:rgba(255,255,255,.10);
+  border:1px solid #ffffff33;
+  text-decoration:none;
+}
+
+.logo-small{
+  height:40px;
+  margin-bottom:6px;
+}
+
+.user-chip{
+  color:#cfe2ff;
+  font-size:.95rem;
+}
+
+.wrap{
+  max-width:var(--max-w);
+  margin:30px auto;
+  padding:0 var(--gap);
+}
+
+.form-card{
+  background:rgba(255,255,255,0.04);
+  padding:20px;
+  border-radius:14px;
+}
+
+input, textarea{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  margin-top:15px;
+  width:100%;
+  padding:12px;
+  background:#0a1e50;
+  color:white;
+  border:none;
+  border-radius:30px;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header class="app-header">
+<div class="app-header-inner">
+
+<a id="backBtn" class="back-btn">←</a>
+
+<img src="logo_lc.jpg" class="logo-small">
+
+<div class="user-chip">
+Lištobook – dopyt na tovar
+</div>
+
+</div>
+</header>
+
+<main class="wrap">
+
+<div class="form-card">
+
+<div id="productTitle">Dopyt na tovar</div>
+
+<input type="text" id="name" placeholder="Vaše meno">
+<input type="email" id="email" placeholder="Váš email">
+<textarea id="message" placeholder="Správa"></textarea>
+
+<button onclick="sendRequest()">Odoslať dopyt</button>
+
+</div>
+
+</main>
+
+<script>
+
+// INIT
+(function(){
+
+  const params = new URLSearchParams(window.location.search);
+  const product = params.get("product");
+
+  if(product){
+    document.getElementById("productTitle").innerText =
+      "Dopyt na produkt: " + product;
+  }
+
+  // BACK BUTTON
+  const backBtn = document.getElementById("backBtn");
+
+  if(backBtn){
+    backBtn.onclick = () => {
+
+      if(document.referrer.includes("preobkladacov.sk")){
+        window.history.back();
+      } else {
+        window.location.href = "https://preobkladacov.sk";
+      }
+
+    };
+  }
+
+})();
+
+
+// SEND
+function sendRequest(){
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const message = document.getElementById("message").value.trim();
+
+  const params = new URLSearchParams(window.location.search);
+  const product = params.get("product");
+
+  if(!name || !email){
+    showModal("Vyplňte meno a email");
+    return;
+  }
+
+  fetch("/api/inquiry/send", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name,
+      email,
+      message,
+      product
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success){
+      alert("Dopyt bol odoslaný 👍");
+    }else{
+      alert("Chyba pri odosielaní");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Server neodpovedá");
+  });
+
+}
+
+function showModal(text){
+  alert(text); // zatiaľ len premostenie
+}
+
+</script>
+
+</body>
+</html>

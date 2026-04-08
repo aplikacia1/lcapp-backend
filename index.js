@@ -55,6 +55,8 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
 }
 
 const app = express();
+const inquiryRoutes = require("./routes/inquiryRoutes");
+app.use("/api/inquiry", inquiryRoutes);
 app.set('sendPush', sendPush);
 
 /* --- Základ --- */
