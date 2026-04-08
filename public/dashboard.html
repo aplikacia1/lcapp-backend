@@ -120,12 +120,33 @@
   background:transparent;
   z-index:1001;
 }
+.icon-btn{
+  position:absolute;
+  left:12px;
+  top:10px;
+  width:44px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #ffffff33;
+  border-radius:10px;
+  color:#e7eefc;
+  background:transparent;
+  cursor:pointer;
+  z-index:1001;
+}
+
+.icon-btn svg{
+  width:22px;
+  height:22px;
+}
 
 /* 🔥 LEN MOBILE */
 @media (min-width:768px){
-  .burger{
+  .icon-btn{
     display:none !important;
-     }
+  }
 }
 
 .burger svg{
@@ -201,30 +222,31 @@
     <span class="glow right"></span>
   </div>
 
+    <!-- HEADER -->
   <header class="app-header" role="banner">
-    <div class="app-header-inner">
-      <!-- 🔥 SEM TO IDE -->
-  <button type="button" class="burger" id="burgerBtn" aria-label="Menu">
-    <svg viewBox="0 0 24 24">
-      <path d="M3 6h18M3 12h18M3 18h18"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"/>
-    </svg>
-  </button>
-      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
-      <div class="user-chip" id="userLabel">Prihlásený: …</div>
+  <div class="app-header-inner">
+    <button type="button" class="icon-btn" aria-label="Menu" id="burgerBtn">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 6h18M3 12h18M3 18h18"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
 
-      <!-- *** JEDNOTNÁ NAVIGÁCIA so smajlíkmi *** -->
-      <nav class="nav-scroller" aria-label="Hlavné sekcie">
+    <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
+    <div class="user-chip" id="loggedUser">Prihlásený ako:</div>
+
+    <nav class="nav-scroller">
       <div class="nav-track">
-        <button class="pill" id="goTimelineBtn">⬅️ Lištobook</button>
-        <button class="pill" id="goCatalogBtn">📦 Katalóg</button>
-        <button class="pill" id="goMessagesBtn">💬 Správy</button>
+        <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
+        <button class="pill" id="funBtn">🎲 Voľný čas</button>
+        <button class="pill" id="rateBtn">⭐ Hodnotenie tovarov</button>
+        <button class="pill" id="calcBtn">📐 Kalkulačky</button>
+        <button class="pill" id="messagesBtn">💬 Správy</button>
+        <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť sa</button>
       </div>
     </nav>
-    </div>
-  </header>
+  </div>
+</header>
 
   <div id="nickWarning" class="warn" role="alert">
     <strong>Najprv si zvoľ prezývku.</strong> Až potom sprístupníme ostatné sekcie.

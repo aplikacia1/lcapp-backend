@@ -21,20 +21,7 @@
     .app-header-inner{ max-width:var(--max-w); margin:0 auto; padding:8px var(--gap); display:flex; flex-direction:column; align-items:center; position:relative; }
     .logo-small{ height:48px; margin:2px auto 6px; display:block; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
-    .icon-btn{
-  position:absolute;
-  top:10px;
-  left:12px;
-  width:44px;
-  height:44px;
-  display:grid;
-  place-content:center;
-  border:1px solid #ffffff33;
-  border-radius:10px;
-  color:#e7eefc;
-  background:transparent;
-  cursor:pointer;
-}
+    
   @media (min-width: 768px){
 
   /* skry hamburger */
@@ -250,28 +237,29 @@
   
   <!-- HEADER -->
   <header class="app-header" role="banner">
-    <div class="app-header-inner">
-      <button type="button" class="icon-btn" id="burgerBtn" aria-label="Menu">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
+  <div class="app-header-inner">
+    <button type="button" class="icon-btn" aria-label="Menu" id="burgerBtn">
+      <svg viewBox="0 0 24 24">
         <path d="M3 6h18M3 12h18M3 18h18"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"/>
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
-      <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
-      <div class="user-chip" id="userChip">Prihlásený:</div>
-    </div>
+
+    <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
+    <div class="user-chip" id="loggedUser">Prihlásený ako:</div>
+
     <nav class="nav-scroller">
-  <div class="nav-track">
-    <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
-    <button class="pill" id="timelineBtn">⬅️ Lištobook</button>
-    <button class="pill" id="calcBtn">📐 Kalkulačky</button>
-    <button class="pill" id="messagesBtn">💬 Správy</button>
-    <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť</button>
+      <div class="nav-track">
+        <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
+        <button class="pill" id="funBtn">🎲 Voľný čas</button>
+        <button class="pill" id="rateBtn">⭐ Hodnotenie tovarov</button>
+        <button class="pill" id="calcBtn">📐 Kalkulačky</button>
+        <button class="pill" id="messagesBtn">💬 Správy</button>
+        <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť sa</button>
+      </div>
+    </nav>
   </div>
-</nav>
-  </header>
+</header>
 
   <!-- PC ONLY: party beams -->
   <div class="party-beams" aria-hidden="true">
