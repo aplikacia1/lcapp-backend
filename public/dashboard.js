@@ -52,20 +52,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (infoLink && email) {
     infoLink.href = "info.html?email=" + encodeURIComponent(email);
   }
+document.getElementById('accountBtn')?.addEventListener('click', () => {
+  window.location.href = `dashboard.html?email=${encodeURIComponent(email)}`;
+});
 
-  // jediné tlačidlo: späť na Lištobook (timeline)
-  $('#goTimelineBtn')?.addEventListener('click', () => {
-    window.location.href = `timeline.html?email=${encodeURIComponent(email)}`;
-  });
+document.getElementById('funBtn')?.addEventListener('click', () => {
+  window.location.href = `entertainment.html?email=${encodeURIComponent(email)}`;
+});
 
-  $('#goCatalogBtn')?.addEventListener('click', () => {
+document.getElementById('rateBtn')?.addEventListener('click', () => {
   window.location.href = `catalog.html?email=${encodeURIComponent(email)}`;
 });
 
-$('#goMessagesBtn')?.addEventListener('click', () => {
+document.getElementById('calcBtn')?.addEventListener('click', () => {
+  window.location.href = `calc.html?email=${encodeURIComponent(email)}`;
+});
+
+document.getElementById('messagesBtn')?.addEventListener('click', () => {
   window.location.href = `messages.html?email=${encodeURIComponent(email)}`;
 });
 
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+  window.location.href = `index.html`;
+});
+  
   const avatarImg  = $('#avatarPreview');
   const avatarFile = $('#avatarFile');
   if (avatarImg) avatarImg.src = DEFAULT_AVATAR;
