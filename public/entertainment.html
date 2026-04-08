@@ -35,13 +35,33 @@
   background:transparent;
   cursor:pointer;
 }
-    @media (min-width: 768px){
-  .nav-scroller{
+  @media (min-width: 768px){
+
+  /* skry hamburger */
+  .icon-btn{
     display: none !important;
   }
 
-  .icon-btn{
-    display: none !important;
+  /* nav nech je normálne hore */
+  .nav-scroller{
+    position: static;
+    transform: none !important;
+    height: auto;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+  }
+
+  .nav-track{
+    display:flex;
+    flex-direction: row;
+    justify-content:center;
+    gap:8px;
+  }
+
+  .pill{
+    width:auto;
+    height:38px;
   }
 }
    
