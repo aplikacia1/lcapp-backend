@@ -123,6 +123,10 @@
             localStorage.setItem("lb_has_pin", "true");
             localStorage.setItem("lb_device_trusted", "true");   
 
+            if (window.Android && email) {
+              window.Android.saveEmail(email);
+           }
+
         // ✅ presmerovanie po úspechu: next + email (alebo fallback)
         redirectToNextWithEmail(email);
 
