@@ -127,6 +127,10 @@
               window.Android.saveEmail(email);
            }
 
+           if (window.Android && window.Android.refreshToken) {
+             window.Android.refreshToken();
+           }
+
         // ✅ presmerovanie po úspechu: next + email (alebo fallback)
         redirectToNextWithEmail(email);
 
