@@ -74,8 +74,10 @@
     font-size:13px;
     border-radius:16px;
     border:1px solid rgba(255,255,255,.35);
-    background:#ffffff;
-    color:#0c1f4b;
+
+    background:#ffffff !important;
+    color:#0c1f4b !important;
+
     cursor:pointer;
     white-space:nowrap;
     display:inline-flex;
@@ -285,24 +287,32 @@
   }
 
 }
- /* ===== MOBILE HEADER FIX ===== */
-  @media (max-width: 767.98px){
-    .app-header-inner{
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-    }
+/* ===== MOBILE HEADER FIX ===== */
+@media (max-width: 767.98px){
+  .app-header-inner{
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
 
-    .logo-small{
-      height:32px;
-      margin:0;
-    }
+  .icon-btn{
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 
-    .user-chip{
-      color:#cfe2ff;
-      font-size:12px;
-      margin:0;
-    }
+  .logo-small{
+    height:32px;
+    margin:0;
+  }
+
+  .user-chip{
+    color:#cfe2ff;
+    font-size:12px;
+    margin-top:2px;
+  }
 }
   </style>
 </head>
