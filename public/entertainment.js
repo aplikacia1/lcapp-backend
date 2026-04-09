@@ -115,6 +115,7 @@ const go = (page) => {
 $('#accountBtn')?.addEventListener('click', () => go('dashboard.html'));
 $('#timelineBtn')?.addEventListener('click', () => go('timeline.html'));
 $('#calcBtn')?.addEventListener('click', () => go('kalkulacky.html'));
+$('#rateBtn')?.addEventListener('click', () => go('catalog.html'));
 $('#messagesBtn')?.addEventListener('click', () => go('messages.html'));
 $('#logoutBtn')?.addEventListener('click', () => go('index.html'));
 

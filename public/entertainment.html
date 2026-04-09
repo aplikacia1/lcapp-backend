@@ -21,7 +21,28 @@
     .app-header-inner{ max-width:var(--max-w); margin:0 auto; padding:8px var(--gap); display:flex; flex-direction:column; align-items:center; position:relative; }
     .logo-small{ height:48px; margin:2px auto 6px; display:block; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
-    
+    .icon-btn{
+      position: absolute;
+      left: 12px;
+      top: 12px;
+
+      width: 40px;
+      height: 40px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      background: transparent;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .icon-btn svg{
+      width: 24px;
+      height: 24px;
+    }
   @media (min-width: 768px){
 
   /* skry hamburger */
@@ -66,9 +87,7 @@
     color:white;
     border:none;
   } 
-    .icon-btn svg{ width:22px; height:22px; }
-  }
-
+   } 
     /* LAYOUT */
     .wrap{
       max-width:var(--max-w); margin:0 auto; padding:16px;
@@ -222,7 +241,7 @@
   width: min(80vw, 320px);
   height: 100vh;
   background: #0c1f4b;
-  padding: 88px 16px 16px;
+  padding: 60px 16px 16px;
 
   transform: translateX(-100%); /* 🔥 toto je kľúč */
 
@@ -265,6 +284,23 @@
   }
 
 }
+ /* ===== MOBILE HEADER FIX ===== */
+  @media (max-width: 767.98px){
+    .app-header-inner{
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-small{
+      height: 32px;
+      margin: 0;
+    }
+
+    .user-chip{
+      display:none;
+    }
+  }
   </style>
 </head>
 <body>
