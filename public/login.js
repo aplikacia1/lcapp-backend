@@ -65,10 +65,10 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     // AUTO PIN LOGIN
-    const trusted = localStorage.getItem("lb_device_trusted");
     const email = localStorage.getItem("lb_user_email");
+    const trusted = localStorage.getItem("lb_device_trusted_" + email);
 
-    if (trusted === "true" && email) {
+    if (trusted === "true" && email && localStorage.getItem("lb_has_pin_" + email) === "true") {
       const res = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
       const data = await res.json();
 
@@ -110,18 +110,21 @@
           lcAlert(data?.message || 'Nesprávny e-mail alebo heslo.');
           return;
         }
+        // 🔥 reset zariadenia pri zmene používateľa
+        localStorage.removeItem("lb_device_auth");
        // zisti či má user PIN v systéme
-            try {
-              const pinCheck = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
-              const pinData = await pinCheck.json();
+       let hasPin = false;
 
-              
-            } catch (e) {}
+       try {
+         const pinCheck = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+         const pinData = await pinCheck.json();
+         hasPin = pinData.hasPin;
+       } catch (e) {}
 
-            // uloženie emailu do zariadenia (pre PIN login)
-            localStorage.setItem("lb_user_email", email);
-            localStorage.setItem("lb_has_pin", "true");
-            localStorage.setItem("lb_device_trusted", "true");   
+       // uloženie emailu do zariadenia (pre PIN login)
+       localStorage.setItem("lb_user_email", email);
+       localStorage.setItem("lb_has_pin_" + email, hasPin ? "true" : "false");
+       localStorage.setItem("lb_device_trusted_" + email, "true"); 
 
             if (window.Android && email) {
               window.Android.saveEmail(email);
