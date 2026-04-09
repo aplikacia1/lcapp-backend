@@ -18,7 +18,15 @@
 
     /* HEADER */
     .app-header{ position:fixed; inset:0 0 auto 0; z-index:1000; background:#0c1f4b; border-bottom:1px solid var(--panel-border); }
-    .app-header-inner{ max-width:var(--max-w); margin:0 auto; padding:8px var(--gap); display:flex; flex-direction:column; align-items:center; position:relative; }
+    .app-header-inner{
+      max-width:var(--max-w);
+      margin:0 auto;
+      padding:8px var(--gap);
+      display:flex;
+      flex-direction:row;
+      align-items:center;
+      justify-content:space-between;
+    }
     .logo-small{ height:48px; margin:2px auto 6px; display:block; }
     .user-chip{ color:#cfe2ff; font-size:.95rem; margin-bottom:8px; text-align:center; }
     .icon-btn{
@@ -292,22 +300,7 @@
       align-items: center;
     }
 
-    .logo-small{
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      height: 32px;
-    }
-
-    .user-chip{
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 12px;
-      margin-top: 4px;
-   }
-}
+      }
   </style>
 </head>
 <body>
