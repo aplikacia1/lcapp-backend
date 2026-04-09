@@ -40,7 +40,7 @@ function showView(which) {
 /* init */
 document.addEventListener('DOMContentLoaded', () => {
   // user chip
-  const chip = $('#userChip');
+  const chip = $('#loggedUser');
   if (chip) {
   fetch(`/api/users/${encodeURIComponent(userEmail)}`)
     .then(res => res.json())

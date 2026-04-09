@@ -52,8 +52,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (infoLink && email) {
     infoLink.href = "info.html?email=" + encodeURIComponent(email);
   }
-document.getElementById('accountBtn')?.addEventListener('click', () => {
-  window.location.href = `dashboard.html?email=${encodeURIComponent(email)}`;
+document.getElementById('timelineBtn')?.addEventListener('click', () => {
+  window.location.href = `timeline.html?email=${encodeURIComponent(email)}`;
 });
 
 document.getElementById('funBtn')?.addEventListener('click', () => {
@@ -91,7 +91,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
     const u = await res.json();
 
     // štítok v hlavičke
-    $('#userLabel').textContent = `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
+    $('#loggedUser').textContent = `Prihlásený: ${u?.name?.trim?.() ? u.name : (u?.email || email)}`;
 
     // vyplniť polia
     set('#name',        u?.name);
@@ -198,7 +198,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
         return;
       }
 
-      $('#userLabel').textContent = `Prihlásený: ${payload.name || email}`;
+      $('#loggedUser').textContent = `Prihlásený: ${payload.name || email}`;
       alert('Profil bol uložený.');
     }catch(err){
       console.error(err);

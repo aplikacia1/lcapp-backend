@@ -11,8 +11,14 @@
 
     /* HLAVIČKA – sticky (neprekryje obsah) */
     .app-header{
-      position: fixed; top: 0; z-index: 1000;
-      background:#0c1f4b; border-bottom:1px solid rgba(255,255,255,.15);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;   /* 🔥 toto je kľúč */
+      width: 100%; /* 🔥 istota */
+      z-index: 1000;
+      background:#0c1f4b;
+      border-bottom:1px solid rgba(255,255,255,.15);
     }
     .app-header-inner{
       max-width:980px;
@@ -237,11 +243,11 @@
 
     <nav class="nav-scroller">
       <div class="nav-track">
-        <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
+        <button class="pill" id="timelineBtn">🧱 Lištobook</button>
         <button class="pill" id="funBtn">🎲 Voľný čas</button>
         <button class="pill" id="rateBtn">⭐ Hodnotenie tovarov</button>
         <button class="pill" id="calcBtn">📐 Kalkulačky</button>
-        <button class="pill" id="messagesBtn">💬 Správy</button>
+        
         <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť sa</button>
       </div>
     </nav>

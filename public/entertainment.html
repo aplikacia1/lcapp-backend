@@ -47,12 +47,27 @@
   }
 
   .pill{
-    width:auto;
-    height:38px;
+    height:32px;
+    padding:6px 12px;
+    font-size:13px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.35);
+    background:#ffffff;
+    color:#0c1f4b;
+    cursor:pointer;
+    white-space:nowrap;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
   }
-}
-   
+  .pill-danger{
+    background:#ff4d6d;
+    color:white;
+    border:none;
+  } 
     .icon-btn svg{ width:22px; height:22px; }
+  }
 
     /* LAYOUT */
     .wrap{
@@ -231,6 +246,25 @@
     transform: translateX(0);
   }
 }
+@media (min-width: 768px){
+
+  .nav-scroller{
+    position: static !important;
+    transform: none !important;
+    height: auto !important;
+    width: 100% !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .nav-track{
+    display:flex;
+    flex-direction: row !important;
+    justify-content:center;
+    gap:8px;
+  }
+
+}
   </style>
 </head>
 <body>
@@ -251,10 +285,10 @@
     <nav class="nav-scroller">
       <div class="nav-track">
         <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
-        <button class="pill" id="funBtn">🎲 Voľný čas</button>
+        <button class="pill" id="timelineBtn">📋 Lištobook</button>
         <button class="pill" id="rateBtn">⭐ Hodnotenie tovarov</button>
         <button class="pill" id="calcBtn">📐 Kalkulačky</button>
-        <button class="pill" id="messagesBtn">💬 Správy</button>
+        
         <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť sa</button>
       </div>
     </nav>
