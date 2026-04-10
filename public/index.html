@@ -348,6 +348,11 @@
 
       });
   })();
+  navigator.serviceWorker.addEventListener("message", (event) => {
+  if (event.data?.type === "SET_REDIRECT") {
+    localStorage.setItem("afterLoginRedirect", event.data.url);
+  }
+});
   </script>
 
   <!-- Cookies (len info/súhlas, nič s prihlásením) -->

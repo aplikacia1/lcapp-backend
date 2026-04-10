@@ -60,13 +60,12 @@ self.addEventListener('push', (event) => {
 });
 
 /* Klik na notifikáciu → zaostri otvorené okno alebo otvor nové */
-self.addEventListener('notificationclick', (event) => {
+  self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   const data = event.notification.data || {};
   let targetUrl = data.url || '/timeline.html';
 
-  // 👉 ak je to správa → messages
   if (data.type === "message") {
     targetUrl = "/messages.html";
   }
@@ -74,12 +73,23 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((list) => {
+
+        // 🔥 uloženie redirectu
+        list.forEach(client => {
+          client.postMessage({
+            type: "SET_REDIRECT",
+            url: targetUrl
+          });
+        });
+
         for (const c of list) {
           if (c.url.includes(targetUrl) && 'focus' in c) {
             return c.focus();
           }
         }
+
         return clients.openWindow(targetUrl);
       })
   );
 });
+

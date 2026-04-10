@@ -34,34 +34,45 @@
 
   // ✅ Presmerovanie na next s doplneným email= (ak chýba)
   function redirectToNextWithEmail(email) {
-    const params = new URLSearchParams(window.location.search);
-    const nextRaw = params.get('next');
 
-    // fallback keď nie je next
-    const fallback = `timeline.html?email=${encodeURIComponent(email)}`;
+  // 🔥 NOVÉ – push redirect má prioritu
+  const storedRedirect = localStorage.getItem("afterLoginRedirect");
 
-    if (!nextRaw) {
-      window.location.replace(fallback);
-      return;
-    }
+  if (storedRedirect) {
+    localStorage.removeItem("afterLoginRedirect");
 
-    let nextUrl = '';
-    try {
-      nextUrl = decodeURIComponent(nextRaw);
-    } catch {
-      nextUrl = nextRaw;
-    }
-
-    // Ak next je len cesta bez query, nič nevadí
-    const join = nextUrl.includes('?') ? '&' : '?';
-
-    // nepridávaj, ak už email je
-    if (!/[\?&]email=/.test(nextUrl)) {
-      nextUrl = nextUrl + join + 'email=' + encodeURIComponent(email);
-    }
-
-    window.location.replace(nextUrl);
+    const join = storedRedirect.includes('?') ? '&' : '?';
+    window.location.replace(
+      storedRedirect + join + 'email=' + encodeURIComponent(email)
+    );
+    return;
   }
+
+  const params = new URLSearchParams(window.location.search);
+  const nextRaw = params.get('next');
+
+  const fallback = `timeline.html?email=${encodeURIComponent(email)}`;
+
+  if (!nextRaw) {
+    window.location.replace(fallback);
+    return;
+  }
+
+  let nextUrl = '';
+  try {
+    nextUrl = decodeURIComponent(nextRaw);
+  } catch {
+    nextUrl = nextRaw;
+  }
+
+  const join = nextUrl.includes('?') ? '&' : '?';
+
+  if (!/[\?&]email=/.test(nextUrl)) {
+    nextUrl = nextUrl + join + 'email=' + encodeURIComponent(email);
+  }
+
+  window.location.replace(nextUrl);
+}
 
   document.addEventListener('DOMContentLoaded', async () => {
     // AUTO PIN LOGIN
