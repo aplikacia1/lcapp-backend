@@ -59,19 +59,24 @@ function randomJoke() {
 
 // ======= send to all =======
 async function broadcast(title, body, url = "/", type = "general") {
-  const subs = await PushSubscription.find().lean();
+  try {
+    const subs = await PushSubscription.find().lean();
 
-  const payload = JSON.stringify({ title, body, url, type });
+    const payload = JSON.stringify({ title, body, url, type });
 
-  for (const s of subs) {
-    try {
-      await webpush.sendNotification(s.sub, payload);
-      
-    } catch (err) {
-      if (err.statusCode === 410 || err.statusCode === 404) {
-        await PushSubscription.deleteOne({ endpoint: s.endpoint });
+    for (const s of subs) {
+      try {
+        await webpush.sendNotification(s.sub, payload);
+      } catch (err) {
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          await PushSubscription.deleteOne({ endpoint: s.endpoint });
+        } else {
+          console.error("❌ PUSH ERROR:", err);
+        }
       }
     }
+  } catch (err) {
+    console.error("❌ BROADCAST ERROR:", err);
   }
 }
 
@@ -212,25 +217,28 @@ function startPushEngine() {
   console.log("🚀 Push engine started");
 
   setInterval(async () => {
-    const now = nowSK();
-    const h = now.getHours();
-    const m = now.getMinutes();
+    try {
+      const now = nowSK();
+      const h = now.getHours();
+      const m = now.getMinutes();
 
-    if (h === 7 && m === 0) {
-      await runMorning();
+      if (h === 7 && m === 0) {
+        await runMorning();
+      }
+
+      if (h === 19 && m === 0) {
+        await runEvening();
+      }
+
+      if (h === 0 && m === 0) {
+        await runMidnightSpecial();
+      }
+
+    } catch (err) {
+      console.error("❌ PUSH ENGINE ERROR:", err);
     }
-
-    if (h === 19 && m === 0) {
-      await runEvening();
-    }
-
-    if (h === 0 && m === 0) {
-      await runMidnightSpecial();
-    }
-
   }, 60000);
 }
-
 module.exports = {
   startPushEngine,
   sendPush

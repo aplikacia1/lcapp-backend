@@ -39,6 +39,8 @@ function ensureMobileModeOnResize(){
 /* ---------- globals ---------- */
 let userProfile = null;
 let ADMIN = { email:'', name:'Lištové centrum' };
+let isTyping = false;
+let typingTimer = null;
 const ADMIN_FALLBACK = { email:'bratislava@listovecentrum.sk', name:'Lištové centrum' };
 window.__ADMIN_EMAIL__ = ADMIN_FALLBACK.email; // pre HTML "Admin (broadcast)"
 
@@ -491,10 +493,18 @@ function wireComposerKeys(){
   area?.addEventListener('keydown', (e)=>{
     if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
   });
-  area?.addEventListener('input', ()=>{ draftCache = area.value; syncCount(); });
+  area?.addEventListener('input', ()=>{
+  draftCache = area.value;
   syncCount();
-}
 
+  isTyping = true;
+
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(() => {
+    isTyping = false;
+  }, 1200);
+});
+}
 /* ---------- DELETE CONVERSATION (user) ---------- */
 async function deleteConversationUser(otherEmail, otherLabel){
   if (!otherEmail) return;
@@ -540,6 +550,7 @@ async function deleteConversationUser(otherEmail, otherLabel){
 
 /* ---------- SAFE REFRESH ---------- */
 async function safeRefresh(){
+  if (isTyping) return;
   try{
     inflight?.abort?.();
     inflight = new AbortController();
