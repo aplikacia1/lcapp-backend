@@ -861,11 +861,15 @@
       // backdrop – zavrie panely
       ocBackdrop?.addEventListener('click', closeAll, {passive:true});
 
-      // mobil banner mount
-      mountBannerMobileOnly('miniBannerSlot', {
-        fixed:false, interval:7000,
-        height:80, heightMobile:90
-      });
+      // mobil banner mount (len malé mobily)
+      if (window.innerWidth <= 600) {
+        mountBannerMobileOnly('miniBannerSlot', {
+          fixed:false,
+          interval:5000,
+          height:80,
+          heightMobile:90
+        });
+      }
 
       // bočné bannery na PC
       mountSideBannersDesktopOnly('desktopBannerLeft','desktopBannerRight',{
