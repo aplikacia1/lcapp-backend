@@ -569,13 +569,11 @@ async function safeRefresh(){
       !isMobile();
 
     if (currentOtherEmail && isThreadVisible){
-      const preserve = $('#composerText');
-      const saved = preserve ? preserve.value : '';
+
+      // ⛔ KEĎ PÍŠEM → nič nerob
+      if (isTyping) return;
 
       await openThread(currentOtherEmail, currentOtherLabel, { reset:false });
-
-      if (preserve) preserve.value = saved;
-      draftCache = saved;
     }
 
   }catch{}
