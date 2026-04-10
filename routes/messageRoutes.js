@@ -3,6 +3,7 @@ const PushToken = require('../models/PushToken');
 const express   = require('express');
 const mongoose  = require('mongoose');
 const router    = express.Router();
+const { nowSK } = require('../utils/timeBrain');
 
 const Message   = require('../models/message');
 const User      = require('../models/User');
@@ -17,7 +18,8 @@ const norm      = (s = '') => String(s).trim();
 const toLowerSk = (s = '') => norm(s).toLocaleLowerCase('sk');
 
 // Pracovná doba Po–Pi 08:00–16:00
-function isWorkHours(d = new Date()) {
+function isWorkHours() {
+  const d = nowSK(); // 🔥 slovenský čas
   const day = d.getDay();  // 0=Ne .. 6=So
   const hr  = d.getHours();
   const weekday = day >= 1 && day <= 5;
@@ -121,7 +123,7 @@ try {
     await admin.messaging().sendEachForMulticast({
       tokens: tokenList,
       notification: {
-        title: fromNice,
+        title: "Lištobook • " + fromNice,
         body: text.slice(0, 100)
       },
       data: {
