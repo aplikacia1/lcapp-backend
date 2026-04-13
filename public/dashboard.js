@@ -355,22 +355,15 @@ document.getElementById("deleteAccountBtn")?.addEventListener("click", async () 
   });
 function openNotifSettings(){
 
-  console.log("Capacitor:", window.Capacitor);
-  console.log("Plugins:", window.Capacitor?.Plugins);
-
   try{
 
-    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    if (window.Android && window.Android.openAppSettings) {
 
-      if (window.Capacitor.Plugins?.App?.openSettings) {
-        window.Capacitor.Plugins.App.openSettings();
-      } else {
-        lcConfirm("Plugin App nie je dostupný.");
-      }
+      window.Android.openAppSettings(); // 🔥 TOTO JE SPRÁVNE
 
     } else {
 
-      lcConfirm("Nie je natívna appka.");
+      lcConfirm("Otvor nastavenia telefónu → aplikácie → Lištobook → upozornenia");
 
     }
 
