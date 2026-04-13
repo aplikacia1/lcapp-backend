@@ -807,3 +807,7 @@ function openGallery(images, startIndex = 0){
 
   document.body.appendChild(overlay);
 }
+document.getElementById("refreshBtn")?.addEventListener("click", async () => {
+  if (window.toast) toast.info("Načítavam nové príspevky...");
+  await loadPosts();
+});
