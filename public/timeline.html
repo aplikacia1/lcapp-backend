@@ -539,6 +539,26 @@
   box-shadow: 0 4px 14px rgba(0,0,0,.25);
   z-index: 5;
 }
+.refresh-btn{
+  position:absolute;
+  top:10px;
+  right:64px; /* medzi burger a people */
+  width:44px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #ffffff33;
+  border-radius:10px;
+  color:#e7eefc;
+  background:transparent;
+  cursor:pointer;
+}
+
+.refresh-btn svg{
+  width:22px;
+  height:22px;
+}
   </style>
 
   <link rel="stylesheet" href="/css/timeline.comment-fix.css?v=fixA1">
@@ -566,6 +586,15 @@
           <circle cx="17" cy="10" r="2" stroke="currentColor" stroke-width="2"/>
           <path d="M14 20c0-2.2 1.8-4 4-4"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <button type="button" class="refresh-btn" aria-label="Obnoviť" id="refreshBtn">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 4v6h6M20 20v-6h-6"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M20 8a8 8 0 0 0-14-2M4 16a8 8 0 0 0 14 2"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
 
@@ -612,13 +641,6 @@
   <!-- OBSAH -->
   <div class="layout">
   <div class="main-content">
-
-    <!-- 🔄 REFRESH TLAČÍTKO -->
-    <div id="refreshWrap" style="display:flex;justify-content:center;margin-bottom:12px;">
-      <button id="refreshBtn" class="button" style="max-width:300px;">
-        🔄 Načítať nové príspevky
-      </button>
-    </div>
 
     <div class="post-feed" id="postFeed"></div>
 

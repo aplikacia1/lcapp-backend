@@ -31,8 +31,6 @@ function openMessages(toName = null) {
   location.href = url;
 }
 
-// toast (light verzia – môžeš nahradiť window.toast)
-const toast = (msg) => alert(msg);
 
 // ────────── Načítanie užívateľa ──────────
 async function loadUserInfo() {
