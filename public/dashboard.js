@@ -353,17 +353,22 @@ document.getElementById("deleteAccountBtn")?.addEventListener("click", async () 
     }
 
   });
-function openNotifSettings(){
+async function openNotifSettings(){
 
-  try{
-    if (window.Capacitor && window.Capacitor.Plugins?.App) {
-      window.Capacitor.Plugins.App.openSettings();
-    } else {
-      alert("Otvor nastavenia telefónu → aplikácie → Lištobook → upozornenia");
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+
+    try{
+      const { App } = await import('@capacitor/app');
+      await App.openSettings();
+    }catch(e){
+      console.error(e);
+      await lcConfirm("Nepodarilo sa otvoriť nastavenia.");
     }
-  }catch(e){
-    console.error(e);
-    alert("Nepodarilo sa otvoriť nastavenia.");
+
+  } else {
+    await lcConfirm(
+      "Otvor nastavenia telefónu → aplikácie → Lištobook → upozornenia"
+    );
   }
 
 }
