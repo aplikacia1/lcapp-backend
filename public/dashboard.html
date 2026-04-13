@@ -7,7 +7,13 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     :root{ --pad-x:12px; --gap:8px; --desk-footer-h:36px; }
-    body{ margin:0; background:#0c1f4b; color:#fff; }
+    body{
+      margin:0;
+      background:#0c1f4b;
+      color:#fff;
+      padding-top: var(--hdr-h);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
 
     /* HLAVIČKA – sticky (neprekryje obsah) */
     .app-header{

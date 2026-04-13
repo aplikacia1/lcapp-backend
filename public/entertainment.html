@@ -14,7 +14,12 @@
       --desk-footer-h: 36px; /* výška PC info pásika */
     }
     html,body{margin:0;padding:0;height:100%}
-    body{ background:#0c1f4b; color:#fff; padding-top:var(--hdr-h); }
+    body{
+      background:#0c1f4b;
+      color:#fff;
+      padding-top:var(--hdr-h);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
 
     /* HEADER */
     .app-header{ position:fixed; inset:0 0 auto 0; z-index:1000; background:#0c1f4b; border-bottom:1px solid var(--panel-border); }

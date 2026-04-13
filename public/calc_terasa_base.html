@@ -34,6 +34,7 @@
       background: radial-gradient(circle at top, #1b2b68 0, #050c22 55%, #020617 100%);
       color: #ffffff;
       padding-top: var(--hdr-h);
+      padding-bottom: env(safe-area-inset-bottom);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -115,7 +116,7 @@
     .wrap {
       max-width: var(--max-w);
       margin: 0 auto;
-      padding: 18px 16px 80px;
+      padding: 18px 16px calc(80px + env(safe-area-inset-bottom));
       position: relative;
       z-index: 1;
     }
