@@ -353,3 +353,17 @@ document.getElementById("deleteAccountBtn")?.addEventListener("click", async () 
     }
 
   });
+function openNotifSettings(){
+
+  try{
+    if (window.Capacitor && window.Capacitor.Plugins?.App) {
+      window.Capacitor.Plugins.App.openSettings();
+    } else {
+      alert("Otvor nastavenia telefónu → aplikácie → Lištobook → upozornenia");
+    }
+  }catch(e){
+    console.error(e);
+    alert("Nepodarilo sa otvoriť nastavenia.");
+  }
+
+}
