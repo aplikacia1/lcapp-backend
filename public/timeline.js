@@ -519,9 +519,78 @@ document.addEventListener("DOMContentLoaded", async () => {
     .catch(err => {
       console.error("SW registration failed:", err);
     });
-}
-});
 
+  }
+setTimeout(showPushPromptOnce, 3000);
+});
+// =======================================================
+// NOTIFIKÁCIE – popup len raz
+// =======================================================
+function showPushPromptOnce() {
+
+  if (localStorage.getItem("pushPromptShown") === "1") return;
+
+    localStorage.setItem("pushPromptShown", "1");
+
+  const overlay = document.createElement("div");
+  overlay.style = `
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:99999;
+  `;
+
+  const box = document.createElement("div");
+  box.style = `
+    background:#0c1f4b;
+    color:white;
+    padding:20px;
+    border-radius:16px;
+    max-width:320px;
+    width:90%;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+  `;
+
+  box.innerHTML = `
+    <h3 style="margin-bottom:12px;">🔔 Notifikácie</h3>
+    <p style="margin-bottom:16px;">Chceš dostávať upozornenia?</p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button id="pushYes" style="
+        background:#2563eb;
+        color:white;
+        border:none;
+        padding:10px 16px;
+        border-radius:10px;
+        cursor:pointer;
+      ">Zapnúť</button>
+
+      <button id="pushNo" style="
+        background:#334155;
+        color:white;
+        border:none;
+        padding:10px 16px;
+        border-radius:10px;
+        cursor:pointer;
+      ">Nie teraz</button>
+    </div>
+  `;
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  box.querySelector("#pushYes").onclick = async () => {
+    overlay.remove();
+    await registerPush(); // 🔥 použiješ existujúcu funkciu
+  };
+
+  box.querySelector("#pushNo").onclick = () => {
+    overlay.remove();
+  };
+}
 // =======================================================
 // Reklamný popup – spoločná logika pre timeline
 // =======================================================
@@ -742,7 +811,6 @@ async function registerPush() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", registerPush);
 
 document.addEventListener("click", e => {
   const img = e.target.closest(".post-image.stacked");
