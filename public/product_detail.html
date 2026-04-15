@@ -33,7 +33,10 @@
       --star:#ffc107;
     }
     html, body { margin:0; padding:0; background:#061c47; color:#fff; font-family:Arial, sans-serif; }
-    body{ padding-top: var(--hdr-h); }
+    body{
+      padding-top: var(--hdr-h);
+      padding-bottom: calc(100px + env(safe-area-inset-bottom));
+    }
 
     /* ===== HLAVIČKA ===== */
     .app-header{
@@ -180,7 +183,8 @@
 
     /* fixný dolný hodnotiaci panel */
     .rate-bar{
-      position:fixed; left:0; right:0; bottom:0; z-index:60;
+      position:fixed; left:0; right:0; bottom:env(safe-area-inset-bottom); z-index:60;
+       
       background:#0c1f4b; border-top:1px solid rgba(255,255,255,.12);
       display:flex; justify-content:center; padding:8px 10px;
     }

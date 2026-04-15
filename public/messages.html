@@ -51,11 +51,15 @@
       padding:10px 12px;
       font-weight:700;
       border-bottom:1px solid var(--panel-border);
+    
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:8px;
+
       background:#0c1f4b;
+
+      flex-wrap: wrap;            /* 🔥 KĽÚČ */
     }
     .card .body{ flex:1 1 auto; overflow:auto; min-height:0; }
 
@@ -202,7 +206,7 @@
     }
 
     #deleteConvBtn{
-      margin-left:8px;
+      margin-left:auto;
       padding:4px 10px;
       font-size:12px;
       border-radius:8px;
@@ -211,7 +215,12 @@
       color:#fff;
       cursor:pointer;
     }
-
+    @media (max-width: 767.98px){
+      #deleteConvBtn{
+        width:100%;
+       margin-top:6px;
+      }
+    }
     #deleteConvBtn:hover{
       background:#ff4d4d;
       border-color:#ff4d4d;
