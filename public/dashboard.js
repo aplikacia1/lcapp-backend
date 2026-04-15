@@ -65,7 +65,7 @@ document.getElementById('rateBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('calcBtn')?.addEventListener('click', () => {
-  window.location.href = `calc.html?email=${encodeURIComponent(email)}`;
+  window.location.href = `kalkulacky.html?email=${encodeURIComponent(email)}`;
 });
 
 document.getElementById('messagesBtn')?.addEventListener('click', () => {

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dnešný tip</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg, #1d2347 0%, #ffffff 100%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.card{
+  width:90%;
+  max-width:420px;
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  text-align:center;
+}
+
+h1{
+  margin:0 0 10px;
+  color:#0c1f4b;
+}
+
+.tip{
+  font-size:18px;
+  color:#333;
+  margin:15px 0;
+}
+
+.btn{
+  display:inline-block;
+  margin-top:20px;
+  padding:12px 20px;
+  border-radius:999px;
+  background:#0c1f4b;
+  color:white;
+  text-decoration:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1>🌞 Dnešný tip</h1>
+
+  <div class="tip" id="tipText">
+    Načítavam...
+  </div>
+
+  <a href="/" class="btn">
+    Otvoriť Lištobook
+  </a>
+
+</div>
+
+<script>
+
+const tips = [
+  "Skontroluj vodováhu skôr než začneš 😉",
+  "Aj majster potrebuje pauzu 👍",
+  "Dnes to urob poriadne 🔥",
+  "Správne lepidlo = menej nervov 😄"
+];
+
+const params = new URLSearchParams(window.location.search);
+const textFromPush = params.get("text");
+
+if (textFromPush) {
+  document.getElementById("tipText").innerText = textFromPush;
+} else {
+  const random = tips[Math.floor(Math.random()*tips.length)];
+  document.getElementById("tipText").innerText = random;
+}
+
+</script>
+
+</body>
+</html>

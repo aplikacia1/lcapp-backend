@@ -143,10 +143,12 @@ async function runMorning() {
 
   console.log("☀️ sending tip na dnes");
 
-  await broadcast(
+  const joke = randomJoke();
+
+await broadcast(
   "☀️ Tip na dnes",
-  randomJoke(),
-  "/timeline.html",
+  joke,
+  `/tip.html?text=${encodeURIComponent(joke)}`,
   "morning"
 );
 }
@@ -192,10 +194,11 @@ async function runEvening() {
   const body = `Dnes pribudlo: ${parts.join(", ")}`;
 
   await broadcast(
-    "Lištobook večer",
-    body,
-    "/timeline.html"
-  );
+  "🌙 Dnešná štatistika",
+  body,
+  `/stats.html?text=${encodeURIComponent(body)}`,
+  "evening"
+);
 }
 
 // ======= špeciálne polnoci =======

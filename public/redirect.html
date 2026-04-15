@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script>
+const params = new URLSearchParams(window.location.search);
+const to = params.get("to") || "/";
+
+// uloží kam má ísť po login
+localStorage.setItem("afterLoginRedirect", to);
+
+// presmeruj na appku
+window.location.href = "/";
+</script>
+</head>
+<body></body>
+</html>

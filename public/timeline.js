@@ -579,14 +579,17 @@ function showPushPromptOnce() {
     </div>
   `;
 
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-
-  box.querySelector("#pushYes").onclick = () => {
-  overlay.remove();
-
+  box.querySelector("#pushYes").onclick = async () => {
   const email = new URLSearchParams(window.location.search).get("email");
 
+  // 🔥 NAJPRV browser permission
+  try {
+    await registerPush();
+  } catch(e) {}
+
+  overlay.remove();
+
+  // 🔥 POTOM redirect
   if (email) {
     window.location.href = `dashboard.html?email=${encodeURIComponent(email)}#notifSection`;
   } else {

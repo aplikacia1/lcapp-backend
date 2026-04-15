@@ -74,7 +74,7 @@ self.addEventListener('push', (event) => {
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((list) => {
 
-        // 🔥 uloženie redirectu
+        // pošli info otvoreným oknám (ak existujú)
         list.forEach(client => {
           client.postMessage({
             type: "SET_REDIRECT",
@@ -82,14 +82,8 @@ self.addEventListener('push', (event) => {
           });
         });
 
-        for (const c of list) {
-          if (c.url.includes(targetUrl) && 'focus' in c) {
-            return c.focus();
-          }
-        }
-
-        return clients.openWindow(targetUrl);
+        // 🔥 JEDINÉ otvorenie – cez redirect.html
+        return clients.openWindow(`/redirect.html?to=${encodeURIComponent(targetUrl)}`);
       })
   );
 });
-

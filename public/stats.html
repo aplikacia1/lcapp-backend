@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dnešná štatistika</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg, #0c1f4b 0%, #ffffff 100%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+
+.card{
+  width:90%;
+  max-width:420px;
+  background:white;
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  text-align:center;
+}
+
+h1{
+  margin:0 0 10px;
+  color:#0c1f4b;
+}
+
+.stats{
+  font-size:18px;
+  color:#333;
+  margin:15px 0;
+  line-height:1.6;
+}
+
+.btn{
+  display:inline-block;
+  margin-top:20px;
+  padding:12px 20px;
+  border-radius:999px;
+  background:#0c1f4b;
+  color:white;
+  text-decoration:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1>🌙 Večerná štatistika</h1>
+
+  <div class="stats" id="statsText">
+    Načítavam...
+  </div>
+
+  <a href="/" class="btn">
+    Otvoriť Lištobook
+  </a>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const text = params.get("text");
+
+if (text) {
+  document.getElementById("statsText").innerText = text;
+} else {
+  document.getElementById("statsText").innerText = "Dnes sa nič zvláštne nestalo 🙂";
+}
+
+</script>
+
+</body>
+</html>
