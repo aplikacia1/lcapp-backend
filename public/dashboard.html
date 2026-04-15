@@ -373,7 +373,7 @@
   </button>
   
 </div>
-<h3 class="section-title">Upozornenia</h3>
+<h3 id="notifSection" class="section-title">Upozornenia</h3>
 
 <div style="
   background:#0b1b3e;
@@ -520,6 +520,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.location.hash === "#notifSection") {
+    const el = document.getElementById("notifSection");
+
+    if (el) {
+      setTimeout(() => {
+        window.scrollTo({
+          top: el.offsetTop - 80,
+          behavior: "smooth"
+        });
+      }, 400);
+    }
+  }
 });
 </script>
 </body>

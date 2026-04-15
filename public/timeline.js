@@ -582,14 +582,17 @@ function showPushPromptOnce() {
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 
-  box.querySelector("#pushYes").onclick = async () => {
-    overlay.remove();
-    await registerPush(); // 🔥 použiješ existujúcu funkciu
-  };
+  box.querySelector("#pushYes").onclick = () => {
+  overlay.remove();
 
-  box.querySelector("#pushNo").onclick = () => {
-    overlay.remove();
-  };
+  const email = new URLSearchParams(window.location.search).get("email");
+
+  if (email) {
+    window.location.href = `dashboard.html?email=${encodeURIComponent(email)}#notifSection`;
+  } else {
+    window.location.href = "dashboard.html#notifSection";
+  }
+};
 }
 // =======================================================
 // Reklamný popup – spoločná logika pre timeline
