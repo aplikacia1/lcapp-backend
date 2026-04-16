@@ -60,7 +60,7 @@ self.addEventListener('push', (event) => {
 });
 
 /* Klik na notifikáciu → zaostri otvorené okno alebo otvor nové */
-  self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   const data = event.notification.data || {};
@@ -72,18 +72,19 @@ self.addEventListener('push', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((list) => {
+      .then((clientList) => {
 
-        // pošli info otvoreným oknám (ak existujú)
-        list.forEach(client => {
-          client.postMessage({
-            type: "SET_REDIRECT",
-            url: targetUrl
-          });
-        });
+        // 🔵 ak už je appka otvorená → len ju prepneme
+        for (const client of clientList) {
+          if (client.url && 'focus' in client) {
+            return client.focus().then(() => client.navigate(targetUrl));
+          }
+        }
 
-        // 🔥 JEDINÉ otvorenie – cez redirect.html
-        return clients.openWindow(`/redirect.html?to=${encodeURIComponent(targetUrl)}`);
+        // 🟢 ak nie je otvorená → otvoríme ju PRIAMO
+        if (clients.openWindow) {
+          return clients.openWindow(targetUrl);
+        }
       })
   );
 });
