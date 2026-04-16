@@ -144,11 +144,17 @@ Lištobook – dopyt na tovar
 
   const params = new URLSearchParams(window.location.search);
   const product = params.get("product");
+  const variant = params.get("variant");
+  const productName = params.get("name");
 
-  if(product){
+  if(product || productName || variant){
     document.getElementById("productTitle").innerText =
-      "Dopyt na produkt: " + product;
+      "Dopyt na produkt: " + (productName || variant || product)
   }
+  if(!document.getElementById("message").value){
+  document.getElementById("message").value =
+    "Dobrý deň, chcem sa informovať o dostupnosti produktu: " + (productName || variant || product);
+}
 
   // BACK BUTTON
   const backBtn = document.getElementById("backBtn");
@@ -177,6 +183,8 @@ function sendRequest(){
 
   const params = new URLSearchParams(window.location.search);
   const product = params.get("product");
+  const variant = params.get("variant");
+  const productName = params.get("name");
 
   if(!name || !email){
     showModal("Vyplňte meno a email");
@@ -192,13 +200,19 @@ function sendRequest(){
       name,
       email,
       message,
-      product
+      product,
+      variant,
+      productName
     })
   })
   .then(res => res.json())
   .then(data => {
-    if(data.success){
-      showModal("Dopyt bol odoslaný 👍");
+  if(data.success){
+    showModal("Dopyt bol odoslaný 👍");
+
+    document.getElementById("name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("message").value = "";
     }else{
       alert("Chyba pri odosielaní");
     }
