@@ -30,7 +30,7 @@
   }
 
   // Voláme relatívne cesty (backend beží na rovnakom pôvode).
-  const API_BASE = '';
+  const API_BASE = 'https://listobook.sk';
 
   // ✅ Presmerovanie na next s doplneným email= (ak chýba)
   function redirectToNextWithEmail(email) {
