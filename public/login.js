@@ -121,6 +121,9 @@
           lcAlert(data?.message || 'Nesprávny e-mail alebo heslo.');
           return;
         }
+        // ULOŽÍME SI LOGIN DO ZARIADENIA (pre appku)
+        localStorage.setItem("lb_logged_in", "true");
+        localStorage.setItem("lb_user_email", email);
         // 🔥 reset zariadenia pri zmene používateľa
         localStorage.removeItem("lb_device_auth");
        // zisti či má user PIN v systéme
@@ -152,6 +155,7 @@
         console.error('Login error', err);
         lcAlert('Chyba pri pripojení.');
       }
+      
      
     });
 
