@@ -97,69 +97,67 @@ if (trusted === "true" && email && localStorage.getItem("lb_has_pin_" + email) =
       return;
     }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const emailEl = pickEmailInput();
-      const passEl  = pickPasswordInput();
+    const loginBtn = document.getElementById("loginBtn");
 
-      const email = (emailEl?.value || '').trim();
-      const password = passEl?.value || '';
+loginBtn.addEventListener("click", async (e) => {
+  e.preventDefault();
 
-      if (!email || !password) {
-        lcAlert('Zadaj e-mail aj heslo.');
-        return;
-      }
+  const emailEl = pickEmailInput();
+  const passEl  = pickPasswordInput();
 
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json().catch(() => ({}));
+  const email = (emailEl?.value || '').trim();
+  const password = passEl?.value || '';
 
-        if (!res.ok) {
-          lcAlert(data?.message || 'Nesprávny e-mail alebo heslo.');
-          return;
-        }
-        // ULOŽÍME SI LOGIN DO ZARIADENIA (pre appku)
-        localStorage.setItem("lb_logged_in", "true");
-        localStorage.setItem("lb_user_email", email);
-        // 🔥 reset zariadenia pri zmene používateľa
-        localStorage.removeItem("lb_device_auth");
-       // zisti či má user PIN v systéme
-       let hasPin = false;
+  if (!email || !password) {
+    lcAlert('Zadaj e-mail aj heslo.');
+    return;
+  }
 
-       try {
-         const pinCheck = await fetch(`${API_BASE}/api/pin/has-pin?email=${encodeURIComponent(email)}`);
-         const pinData = await pinCheck.json();
-         hasPin = pinData.hasPin;
-       } catch (e) {}
-
-       // uloženie emailu do zariadenia (pre PIN login)
-       localStorage.setItem("lb_user_email", email);
-       localStorage.setItem("lb_has_pin_" + email, hasPin ? "true" : "false");
-       localStorage.setItem("lb_device_trusted_" + email, "true"); 
-
-            if (window.Android && email) {
-              window.Android.saveEmail(email);
-           }
-
-           if (window.Android && window.Android.refreshToken) {
-             window.Android.refreshToken();
-           }
-
-        // ✅ presmerovanie po úspechu: next + email (alebo fallback)
-        redirectToNextWithEmail(email);
-
-      } catch (err) {
-        console.error('Login error', err);
-        lcAlert('Chyba pri pripojení.');
-      }
-      
-     
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password })
     });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      lcAlert(data?.message || 'Nesprávny e-mail alebo heslo.');
+      return;
+    }
+
+    localStorage.setItem("lb_logged_in", "true");
+    localStorage.setItem("lb_user_email", email);
+    localStorage.removeItem("lb_device_auth");
+
+    let hasPin = false;
+
+    try {
+      const pinCheck = await fetch(`${API_BASE}/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+      const pinData = await pinCheck.json();
+      hasPin = pinData.hasPin;
+    } catch (e) {}
+
+    localStorage.setItem("lb_has_pin_" + email, hasPin ? "true" : "false");
+    localStorage.setItem("lb_device_trusted_" + email, "true");
+
+    if (window.Android && email) {
+      window.Android.saveEmail(email);
+    }
+
+    if (window.Android && window.Android.refreshToken) {
+      window.Android.refreshToken();
+    }
+
+    redirectToNextWithEmail(email);
+
+  } catch (err) {
+    console.error('Login error', err);
+    lcAlert('Chyba pri pripojení.');
+  }
+});
 
     /* ----- FORGOT PASSWORD ----- */
     const forgotLink = $('#forgotLink');
