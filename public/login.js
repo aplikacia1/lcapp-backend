@@ -143,13 +143,16 @@ loginBtn.addEventListener("click", async (e) => {
     localStorage.setItem("lb_has_pin_" + email, hasPin ? "true" : "false");
     localStorage.setItem("lb_device_trusted_" + email, "true");
 
-    if (window.Android && email) {
-      window.Android.saveEmail(email);
-    }
+    // ANDROID CALLS – DOČASNE VYPNUTÉ
+/*
+if (window.Android && email) {
+  window.Android.saveEmail(email);
+}
 
-    if (window.Android && window.Android.refreshToken) {
-      window.Android.refreshToken();
-    }
+if (window.Android && window.Android.refreshToken) {
+  window.Android.refreshToken();
+}
+*/
 
     redirectToNextWithEmail(email);
 
