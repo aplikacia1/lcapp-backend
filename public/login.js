@@ -75,21 +75,29 @@
 }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // AUTO PIN LOGIN – DOČASNE VYPNUTÉ
-/*
-const email = localStorage.getItem("lb_user_email");
-const trusted = localStorage.getItem("lb_device_trusted_" + email);
+   // AUTO PIN LOGIN – bezpečná verzia
+try {
+  const email = localStorage.getItem("lb_user_email");
+  const trusted = localStorage.getItem("lb_device_trusted_" + email);
+  const hasPinLocal = localStorage.getItem("lb_has_pin_" + email);
 
-if (trusted === "true" && email && localStorage.getItem("lb_has_pin_" + email) === "true") {
-  const res = await fetch(`${API_BASE}/api/pin/has-pin?email=${encodeURIComponent(email)}`);
-  const data = await res.json();
+  if (trusted === "true" && email && hasPinLocal === "true") {
 
-  if (data.hasPin) {
-    window.location.href = "pin_login.html?email=" + encodeURIComponent(email);
-    return;
+    const res = await fetch(`${API_BASE}/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+
+    if (!res.ok) throw new Error("PIN check fail");
+
+    const data = await res.json();
+
+    if (data.hasPin) {
+      window.location.href = "pin_login.html?email=" + encodeURIComponent(email);
+      return;
+    }
   }
+
+} catch (e) {
+  console.log("PIN skip – pokračujem normálne");
 }
-*/
     /* ----- LOGIN ----- */
     const form = pickForm();
     if (!form) {

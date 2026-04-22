@@ -61,9 +61,9 @@ h1{
     Načítavam...
   </div>
 
-  <a href="/timeline.html" class="btn">
-    Otvoriť Lištobook
-  </a>
+  <button class="btn" onclick="closeApp()">
+    Zavrieť
+  </button>
 
 </div>
 
@@ -85,7 +85,19 @@ if (textFromPush) {
   const random = tips[Math.floor(Math.random()*tips.length)];
   document.getElementById("tipText").innerText = random;
 }
+function closeApp() {
+  // Android appka
+  if (window.Android && window.Android.closeApp) {
+    window.Android.closeApp();
+    return;
+  }
 
+  // prehliadač (Chrome / PWA)
+  window.close();
+
+  // fallback (ak window.close nefunguje)
+  window.location.href = "about:blank";
+}
 </script>
 
 </body>

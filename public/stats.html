@@ -62,9 +62,9 @@ h1{
     Načítavam...
   </div>
 
-  <a href="/timeline.html" class="btn">
-    Otvoriť Lištobook
-  </a>
+  <button class="btn" onclick="closeApp()">
+    Zavrieť
+  </button>
 
 </div>
 
@@ -78,7 +78,19 @@ if (text) {
 } else {
   document.getElementById("statsText").innerText = "Dnes sa nič zvláštne nestalo 🙂";
 }
+function closeApp() {
+  // Android appka
+  if (window.Android && window.Android.closeApp) {
+    window.Android.closeApp();
+    return;
+  }
 
+  // prehliadač
+  window.close();
+
+  // fallback
+  window.location.href = "about:blank";
+}
 </script>
 
 </body>
