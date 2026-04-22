@@ -75,19 +75,21 @@
 }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    // AUTO PIN LOGIN
-    const email = localStorage.getItem("lb_user_email");
-    const trusted = localStorage.getItem("lb_device_trusted_" + email);
+    // AUTO PIN LOGIN – DOČASNE VYPNUTÉ
+/*
+const email = localStorage.getItem("lb_user_email");
+const trusted = localStorage.getItem("lb_device_trusted_" + email);
 
-    if (trusted === "true" && email && localStorage.getItem("lb_has_pin_" + email) === "true") {
-      const res = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
-      const data = await res.json();
+if (trusted === "true" && email && localStorage.getItem("lb_has_pin_" + email) === "true") {
+  const res = await fetch(`${API_BASE}/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+  const data = await res.json();
 
-      if (data.hasPin) {
-        window.location.href = "pin_login.html?email=" + encodeURIComponent(email);
-        return;
-      }
-    }
+  if (data.hasPin) {
+    window.location.href = "pin_login.html?email=" + encodeURIComponent(email);
+    return;
+  }
+}
+*/
     /* ----- LOGIN ----- */
     const form = pickForm();
     if (!form) {
@@ -130,7 +132,7 @@
        let hasPin = false;
 
        try {
-         const pinCheck = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+         const pinCheck = await fetch(`${API_BASE}/api/pin/has-pin?email=${encodeURIComponent(email)}`);
          const pinData = await pinCheck.json();
          hasPin = pinData.hasPin;
        } catch (e) {}
