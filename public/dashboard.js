@@ -353,18 +353,38 @@ document.getElementById("deleteAccountBtn")?.addEventListener("click", async () 
     }
 
   });
-function openNotifSettings(){
+async function openNotifSettings(){
 
   try{
 
+    // 📱 ANDROID – necháme nedotknutý
     if (window.Android && window.Android.openAppSettings) {
+      window.Android.openAppSettings();
+      return;
+    }
 
-      window.Android.openAppSettings(); // 🔥 TOTO JE SPRÁVNE
+    // 🌐 PWA / PC
+    if (!("Notification" in window)) {
+      lcConfirm("Tento prehliadač nepodporuje notifikácie.");
+      return;
+    }
 
-    } else {
+    // 👉 iba zobrazíme Chrome popup (nič viac!)
+    if (Notification.permission === "default") {
+      await Notification.requestPermission();
+      return;
+    }
 
-      lcConfirm("Otvor nastavenia telefónu → aplikácie → Lištobook → upozornenia");
+    if (Notification.permission === "granted") {
+      lcConfirm("Notifikácie už máš zapnuté 👍");
+      return;
+    }
 
+    if (Notification.permission === "denied") {
+      lcConfirm(
+        "Notifikácie sú zablokované.\n\nKlikni na 🔒 vedľa adresy a povoľ ich."
+      );
+      return;
     }
 
   }catch(e){
@@ -373,3 +393,4 @@ function openNotifSettings(){
   }
 
 }
+
