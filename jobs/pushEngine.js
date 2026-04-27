@@ -10,6 +10,11 @@ const {
   shouldSendEveningStats,
   isSpecialMidnight
 } = require("../utils/timeBrain");
+let lastRun = {
+  morning: null,
+  evening: null,
+  midnight: null
+};
 
 // ======= jednoduché vtipy =======
 const JOKES = [
@@ -75,6 +80,35 @@ async function broadcast(title, body, url = "/", type = "general") {
         }
       }
     }
+    // ===== ANDROID BROADCAST =====
+try {
+  const PushToken = require("../models/PushToken");
+  const admin = require("firebase-admin");
+
+  const tokens = await PushToken.find().lean();
+  const tokenList = tokens.map(t => t.token);
+
+  if (tokenList.length) {
+    await admin.messaging().sendEachForMulticast({
+      tokens: tokenList,
+      notification: {
+        title,
+        body
+      },
+      data: {
+        url,
+        type
+      }
+    });
+
+    console.log("📲 ANDROID BROADCAST sent:", tokenList.length);
+  } else {
+    console.log("⚠️ No Android tokens");
+  }
+
+} catch (err) {
+  console.error("❌ Android broadcast error:", err);
+}
   } catch (err) {
     console.error("❌ BROADCAST ERROR:", err);
   }
@@ -225,17 +259,25 @@ function startPushEngine() {
       const h = now.getHours();
       const m = now.getMinutes();
 
-      if (h === 7 && m === 0) {
-        await runMorning();
-      }
+      const today = now.toLocaleDateString("sv-SE");
 
-      if (h === 19 && m === 0) {
-        await runEvening();
-      }
+// ☀️ RÁNO
+if (h === 7 && m < 5 && lastRun.morning !== today) {
+  lastRun.morning = today;
+  await runMorning();
+}
 
-      if (h === 0 && m === 0) {
-        await runMidnightSpecial();
-      }
+// 🌙 VEČER
+if (h === 19 && m < 5 && lastRun.evening !== today) {
+  lastRun.evening = today;
+  await runEvening();
+}
+
+// 🎆 POLNOC
+if (h === 0 && m < 5 && lastRun.midnight !== today) {
+  lastRun.midnight = today;
+  await runMidnightSpecial();
+}
 
     } catch (err) {
       console.error("❌ PUSH ENGINE ERROR:", err);
