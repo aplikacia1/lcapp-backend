@@ -86,17 +86,18 @@ if (textFromPush) {
   document.getElementById("tipText").innerText = random;
 }
 function closeApp() {
-  // Android appka
+  // Android appka (toto je TOP – funguje správne)
   if (window.Android && window.Android.closeApp) {
     window.Android.closeApp();
     return;
   }
 
-  // prehliadač (Chrome / PWA)
+  // PWA / Chrome
+  // Skús zavrieť (funguje len niekedy)
   window.close();
 
-  // fallback (ak window.close nefunguje)
-  window.location.href = "about:blank";
+  // NIC viac nerob
+  // necháme používateľa na stránke – dá späť
 }
 </script>
 

@@ -79,17 +79,16 @@ if (text) {
   document.getElementById("statsText").innerText = "Dnes sa nič zvláštne nestalo 🙂";
 }
 function closeApp() {
-  // Android appka
+  // Android appka (správne zavretie)
   if (window.Android && window.Android.closeApp) {
     window.Android.closeApp();
     return;
   }
 
-  // prehliadač
+  // PWA / Chrome
   window.close();
 
-  // fallback
-  window.location.href = "about:blank";
+  // nič viac – žiadny fallback
 }
 </script>
 
