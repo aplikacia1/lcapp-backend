@@ -77,11 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // dlaždica YT → prepnúť na prehrávač a nastaviť embed len pre náš kanál
   const openYT = () => {
-    const uploads = uploadsPlaylistId(YT_CHANNEL_ID);
-    const src = uploads ? playlistEmbedUrl(uploads) : '';
-    $('#ytPlayer').src = src;
-    showView('yt');
-  };
+  const url = `https://www.youtube.com/channel/${YT_CHANNEL_ID}`;
+
+  // otvorí YouTube (appka alebo Chrome)
+  window.location.assign(url);
+};
   $('#tileYoutube')?.addEventListener('click', openYT);
   $('#tileYoutube')?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
