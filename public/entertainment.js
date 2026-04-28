@@ -75,27 +75,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // dlaždica YT → prepnúť na prehrávač a nastaviť embed len pre náš kanál
-  const openYT = () => {
+  // dlaždica YT → otvorí YouTube mimo appky, ale nechá Lištobook na pozadí
+const openYT = () => {
   const url = `https://www.youtube.com/channel/${YT_CHANNEL_ID}`;
 
-  // otvorí YouTube (appka alebo Chrome)
-  window.location.assign(url);
+  window.open(url, '_system');
 };
-  $('#tileYoutube')?.addEventListener('click', openYT);
-  $('#tileYoutube')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openYT();
-    }
-  });
+
+$('#tileYoutube')?.addEventListener('click', openYT);
+$('#tileYoutube')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    openYT();
+  }
+});
 
   // späť z prehrávača na dlaždice
   $('#backToTiles')?.addEventListener('click', () => showView('tiles'));
 
   // BLOG – otvorí externý blog v novej karte
 const goBlog = () => {
-  window.open('https://listovecentrumeu.blogspot.com/', '_blank');
+  window.open('https://listovecentrumeu.blogspot.com/', '_system');
 };
 
 $('#tileBlog')?.addEventListener('click', goBlog);
