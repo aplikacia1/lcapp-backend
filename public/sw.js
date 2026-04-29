@@ -73,8 +73,8 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   if (data.type === "message") {
-    targetUrl = "https://listobook.sk/messages.html";
-  }
+  targetUrl = "https://listobook.sk/messages.html?next=/messages.html";
+}
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })

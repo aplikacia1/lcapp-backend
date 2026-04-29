@@ -197,7 +197,8 @@ function verifyPin(){
     localStorage.setItem("lb_has_pin", "true");
     localStorage.setItem("lb_user_email", email);
 
-    window.location.href = next + "?email=" + encodeURIComponent(email);
+    const separator = next.includes("?") ? "&" : "?";
+    window.location.href = next + separator + "email=" + encodeURIComponent(email);
   });
 }
 </script>
