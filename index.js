@@ -141,6 +141,9 @@ app.set('UPLOADS_DIR', uploadsDir);
 // public (HTML/JS/CSS)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 🔥 ANDROID APP LINKS FIX
+app.use('/.well-known', express.static(path.join(__dirname, 'public/.well-known')));
+
 // /uploads: primárne persistent disk, potom fallbacky pre staré umiestnenia
 app.use('/uploads', express.static(uploadsDir, { fallthrough: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads'), { fallthrough: true }));
