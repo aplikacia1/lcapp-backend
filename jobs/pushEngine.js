@@ -67,7 +67,14 @@ async function broadcast(title, body, url = "/", type = "general") {
   try {
     const subs = await PushSubscription.find().lean();
 
-    const payload = JSON.stringify({ title, body, url, type });
+    const payload = JSON.stringify({
+  title: title,
+  body: body,
+  data: {
+    url: url,
+    type: type
+  }
+});
 
     for (const s of subs) {
       try {
@@ -123,9 +130,11 @@ async function sendPush(email, body) {
 
   const payload = JSON.stringify({
   title: "Lištobook",
-  body,
-  url: "https://listobook.sk/messages.html?next=/messages.html",
-  type: "message"
+  body: body,
+  data: {
+    url: "https://listobook.sk/messages.html?next=/messages.html",
+    type: "message"
+  }
 });
 
   for (const s of subs) {
