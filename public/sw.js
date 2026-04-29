@@ -64,24 +64,28 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   const data = event.notification.data || {};
-  let targetUrl = data.url || '/timeline.html';
+
+  let targetUrl = data.url || 'https://listobook.sk/';
+
+  // 🔒 FORCE DOMÉNA (kľúčový fix)
+  if (!targetUrl.startsWith('http')) {
+    targetUrl = 'https://listobook.sk' + targetUrl;
+  }
 
   if (data.type === "message") {
-    targetUrl = "/messages.html";
+    targetUrl = "https://listobook.sk/messages.html";
   }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
 
-        // 🔵 ak už je appka otvorená → len ju prepneme
         for (const client of clientList) {
           if (client.url && 'focus' in client) {
             return client.focus().then(() => client.navigate(targetUrl));
           }
         }
 
-        // 🟢 ak nie je otvorená → otvoríme ju PRIAMO
         if (clients.openWindow) {
           return clients.openWindow(targetUrl);
         }
