@@ -122,11 +122,11 @@ async function sendPush(email, body) {
   const subs = await PushSubscription.find({ email }).lean();
 
   const payload = JSON.stringify({
-    title: "Lištobook",
-    body,
-    url: "/timeline.html",
-    type: "comment"
-  });
+  title: "Lištobook",
+  body,
+  url: "https://listobook.sk/messages.html?next=/messages.html",
+  type: "message"
+});
 
   for (const s of subs) {
     try {
@@ -156,8 +156,8 @@ async function sendPush(email, body) {
           body
         },
         data: {
-          url: "/timeline.html",
-          type: "comment"
+          url: "https://listobook.sk/messages.html?next=/messages.html",
+          type: "message"
         }
       });
 
