@@ -182,7 +182,7 @@ async function runMorning() {
 await broadcast(
   "☀️ Tip na dnes",
   joke,
-  `https://listobook.sk/tip.html?text=${encodeURIComponent(joke)}`,
+  `/tip.html?text=${encodeURIComponent(joke)}`,
   "morning"
 );
 }

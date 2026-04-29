@@ -79,18 +79,7 @@ if (text) {
   document.getElementById("statsText").innerText = "Dnes sa nič zvláštne nestalo 🙂";
 }
 function closeApp() {
-  // Android appka
-  if (window.Android && window.Android.closeApp) {
-    window.Android.closeApp();
-    return;
-  }
-
-  // PWA / browser fallback
-  if (document.referrer && document.referrer.includes(location.origin)) {
-    history.back();
-  } else {
-    window.location.href = "/index.html";
-  }
+  window.location.href = "/timeline.html";
 }
 </script>
 
