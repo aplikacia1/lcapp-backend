@@ -63,7 +63,7 @@ h1{
   </div>
 
   <button class="btn" onclick="closeApp()">
-    Zavrieť
+    Späť do Lištobooku
   </button>
 
 </div>
@@ -79,16 +79,18 @@ if (text) {
   document.getElementById("statsText").innerText = "Dnes sa nič zvláštne nestalo 🙂";
 }
 function closeApp() {
-  // Android appka (správne zavretie)
+  // Android appka
   if (window.Android && window.Android.closeApp) {
     window.Android.closeApp();
     return;
   }
 
-  // PWA / Chrome
-  window.close();
-
-  // nič viac – žiadny fallback
+  // PWA / browser fallback
+  if (document.referrer && document.referrer.includes(location.origin)) {
+    history.back();
+  } else {
+    window.location.href = "/index.html";
+  }
 }
 </script>
 

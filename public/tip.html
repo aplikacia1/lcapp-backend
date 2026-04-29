@@ -62,7 +62,7 @@ h1{
   </div>
 
   <button class="btn" onclick="closeApp()">
-    Zavrieť
+    Späť do Lištobooku
   </button>
 
 </div>
@@ -86,18 +86,18 @@ if (textFromPush) {
   document.getElementById("tipText").innerText = random;
 }
 function closeApp() {
-  // Android appka (toto je TOP – funguje správne)
+  // Android appka
   if (window.Android && window.Android.closeApp) {
     window.Android.closeApp();
     return;
   }
 
-  // PWA / Chrome
-  // Skús zavrieť (funguje len niekedy)
-  window.close();
-
-  // NIC viac nerob
-  // necháme používateľa na stránke – dá späť
+  // PWA / browser fallback
+  if (document.referrer && document.referrer.includes(location.origin)) {
+    history.back();
+  } else {
+    window.location.href = "/index.html";
+  }
 }
 </script>
 
