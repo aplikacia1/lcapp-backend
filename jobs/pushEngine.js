@@ -98,14 +98,12 @@ try {
   if (tokenList.length) {
     await admin.messaging().sendEachForMulticast({
       tokens: tokenList,
-      notification: {
-        title,
-        body
-      },
       data: {
-        url,
-        type
-      }
+  title: title,
+  body: body,
+  url: url,
+  type: type
+}
     });
 
     console.log("📲 ANDROID BROADCAST sent:", tokenList.length);
@@ -159,16 +157,14 @@ async function sendPush(email, body) {
       const admin = require("firebase-admin");
 
       await admin.messaging().sendEachForMulticast({
-        tokens: tokenList,
-        notification: {
-          title: "Lištobook",
-          body
-        },
-        data: {
-          url: "https://listobook.sk/messages.html?next=/messages.html",
-          type: "message"
-        }
-      });
+  tokens: tokenList,
+  data: {
+    title: "Lištobook",
+    body: body,
+    url: "https://listobook.sk/messages.html?next=/messages.html",
+    type: "message"
+  }
+});
 
       console.log("✅ ANDROID PUSH sent to:", email);
     } else {
