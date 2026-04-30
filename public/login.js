@@ -152,11 +152,12 @@ loginBtn.addEventListener("click", async (e) => {
     localStorage.setItem("lb_device_trusted_" + email, "true");
 
     // ANDROID CALLS – DOČASNE VYPNUTÉ
-/*
+
 if (window.Android && email) {
   window.Android.saveEmail(email);
+  window.Android.refreshToken();
 }
-
+/*
 if (window.Android && window.Android.refreshToken) {
   window.Android.refreshToken();
 }
