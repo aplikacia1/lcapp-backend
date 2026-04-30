@@ -153,9 +153,16 @@ loginBtn.addEventListener("click", async (e) => {
 
     // ANDROID CALLS – DOČASNE VYPNUTÉ
 
-if (window.Android && email) {
-  window.Android.saveEmail(email);
-  window.Android.refreshToken();
+try {
+  if (window.Android && window.Android.saveEmail) {
+    window.Android.saveEmail(email);
+  }
+
+  if (window.Android && window.Android.refreshToken) {
+    window.Android.refreshToken();
+  }
+} catch (e) {
+  console.log("Android bridge skip");
 }
 /*
 if (window.Android && window.Android.refreshToken) {
