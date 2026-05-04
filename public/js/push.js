@@ -2,7 +2,10 @@
 (function(){
   // musí byť na stránke s ?email=
   const params = new URLSearchParams(location.search);
-  const email = params.get('email') || '';
+  const email =
+  params.get('email') ||
+  localStorage.getItem('lb_user_email') ||
+  '';
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !email) return;
 
   // pomocník: base64 public key -> Uint8Array

@@ -11,18 +11,20 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Token required' });
     }
 
-    // 🔥 DEBUG ak chýba email
+    // 🔥 ak chýba email → neuložíme
     if (!email) {
-      console.warn("⚠️ Android token bez emailu:", token);
+      console.warn("❌ Android token bez emailu – neukladám:", token);
+      return res.status(400).json({ message: 'Email required' });
     }
 
     await PushToken.findOneAndUpdate(
       { token },
-      { token, email: email || "unknown" }, // 🔥 FIX
+      { token, email },
       { upsert: true, new: true }
     );
 
     res.json({ ok: true });
+
   } catch (e) {
     console.error('android push register', e);
     res.status(500).json({ message: 'Register failed' });
