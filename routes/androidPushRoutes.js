@@ -7,6 +7,8 @@ router.post('/register', async (req, res) => {
   try {
     const { token, email } = req.body;
 
+    console.log("📲 ANDROID REGISTER BODY:", req.body);
+
     if (!token) {
       return res.status(400).json({ message: 'Token required' });
     }
