@@ -175,9 +175,25 @@
         const next = urlParams.get('next');
 
         if (next) {
-          redirectToNextWithEmail(email);
-          return;
-        }
+
+  try {
+    if (window.Android && window.Android.saveEmail) {
+      window.Android.saveEmail(email);
+    }
+
+    if (window.Android && window.Android.refreshToken) {
+      window.Android.refreshToken();
+    }
+  } catch (e) {
+    console.log("Android bridge skip");
+  }
+
+  setTimeout(() => {
+    redirectToNextWithEmail(email);
+  }, 1500);
+
+  return;
+}
 
         const pin = new URL('pin.html', location.origin);
         pin.searchParams.set('email', email);

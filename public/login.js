@@ -138,6 +138,17 @@ loginBtn.addEventListener("click", async (e) => {
 
     localStorage.setItem("lb_logged_in", "true");
     localStorage.setItem("lb_user_email", email);
+    try {
+  if (window.Android && window.Android.saveEmail) {
+    window.Android.saveEmail(email);
+  }
+
+  if (window.Android && window.Android.refreshToken) {
+    window.Android.refreshToken();
+  }
+} catch (e) {
+  console.log("Android bridge skip");
+}
     localStorage.removeItem("lb_device_auth");
 
     let hasPin = false;
@@ -153,17 +164,6 @@ loginBtn.addEventListener("click", async (e) => {
 
     // ANDROID CALLS – DOČASNE VYPNUTÉ
 
-try {
-  if (window.Android && window.Android.saveEmail) {
-    window.Android.saveEmail(email);
-  }
-
-  if (window.Android && window.Android.refreshToken) {
-    window.Android.refreshToken();
-  }
-} catch (e) {
-  console.log("Android bridge skip");
-}
 /*
 if (window.Android && window.Android.refreshToken) {
   window.Android.refreshToken();
