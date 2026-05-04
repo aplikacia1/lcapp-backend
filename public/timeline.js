@@ -521,16 +521,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   }
-setTimeout(showPushPromptOnce, 3000);
+setTimeout(() => showPushPromptSmart(), 3000);
 });
 // =======================================================
 // NOTIFIKÁCIE – popup len raz
 // =======================================================
-function showPushPromptOnce() {
+async function showPushPromptSmart() {
 
-  if (localStorage.getItem("pushPromptShown") === "1") return;
+  // 👉 ak už má subscription → nič nerob
+  if ("serviceWorker" in navigator) {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) return;
+  }
 
-    localStorage.setItem("pushPromptShown", "1");
+  const now = Date.now();
+  const last = parseInt(localStorage.getItem("pushPromptLast") || "0");
+
+  const oneWeek = 7 * 24 * 60 * 60 * 1000;
+
+  if (now - last < oneWeek) return;
+
+  localStorage.setItem("pushPromptLast", now);
 
   const overlay = document.createElement("div");
   overlay.style = `

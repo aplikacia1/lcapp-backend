@@ -11,11 +11,16 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'Token required' });
     }
 
+    // 🔥 DEBUG ak chýba email
+    if (!email) {
+      console.warn("⚠️ Android token bez emailu:", token);
+    }
+
     await PushToken.findOneAndUpdate(
-  { token },
-  { token, email: email || 'sabla.marcel@gmail.com' },
-  { upsert: true, new: true }
-);
+      { token },
+      { token, email: email || "unknown" }, // 🔥 FIX
+      { upsert: true, new: true }
+    );
 
     res.json({ ok: true });
   } catch (e) {
