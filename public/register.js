@@ -169,24 +169,26 @@
         }
 
         // ✅ ÚSPECH:
-        // Ak existuje next -> preskoč onboarding a choď rovno na next + email
-        // Ak next nie je -> pôvodné správanie: onboarding.html?email=...
-        const urlParams = new URLSearchParams(location.search);
-        const next = urlParams.get('next');
+
+// 👉 VŽDY ulož email do Androidu
+try {
+  if (window.Android && window.Android.saveEmail) {
+    window.Android.saveEmail(email);
+  }
+
+  if (window.Android && window.Android.refreshToken) {
+    window.Android.refreshToken();
+  }
+} catch (e) {
+  console.log("Android bridge skip");
+}
+
+const urlParams = new URLSearchParams(location.search);
+const next = urlParams.get('next');
 
         if (next) {
 
-  try {
-    if (window.Android && window.Android.saveEmail) {
-      window.Android.saveEmail(email);
-    }
-
-    if (window.Android && window.Android.refreshToken) {
-      window.Android.refreshToken();
-    }
-  } catch (e) {
-    console.log("Android bridge skip");
-  }
+  
 
   setTimeout(() => {
     redirectToNextWithEmail(email);

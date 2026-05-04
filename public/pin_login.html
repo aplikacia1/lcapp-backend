@@ -197,6 +197,19 @@ function verifyPin(){
     localStorage.setItem("lb_has_pin", "true");
     localStorage.setItem("lb_user_email", email);
 
+    // 👉 ANDROID TOKEN FIX
+try {
+  if (window.Android && window.Android.saveEmail) {
+    window.Android.saveEmail(email);
+  }
+
+  if (window.Android && window.Android.refreshToken) {
+    window.Android.refreshToken();
+  }
+} catch (e) {
+  console.log("Android bridge skip");
+}
+
     const separator = next.includes("?") ? "&" : "?";
     window.location.href = next + separator + "email=" + encodeURIComponent(email);
   });
