@@ -170,7 +170,9 @@ if (window.Android && window.Android.refreshToken) {
 }
 */
 
-    redirectToNextWithEmail(email);
+    setTimeout(() => {
+  redirectToNextWithEmail(email);
+}, 1500);
 
   } catch (err) {
     console.error('Login error', err);
