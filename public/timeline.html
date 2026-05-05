@@ -45,6 +45,9 @@
     .burger{left:12px}.people{right:12px}
     .burger svg,.people svg{width:22px;height:22px}
     @media (max-width:767.98px){.burger,.people{display:flex}}
+    @media (min-width:768px){
+      .notif-btn{display:none}
+    }
 
     /* pills */
     .nav-scroller{padding:0 var(--pad-x);width:100%}
@@ -584,6 +587,22 @@
   width:22px;
   height:22px;
 }
+.notif-btn{
+  position:absolute;
+  top:10px;
+  right:118px; /* medzi burger a refresh */
+  width:44px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #ffffff33;
+  border-radius:10px;
+  color:#e7eefc;
+  background:transparent;
+  cursor:pointer;
+  font-size:18px;
+}
   </style>
 
   <link rel="stylesheet" href="/css/timeline.comment-fix.css?v=fixA1">
@@ -612,6 +631,10 @@
           <path d="M14 20c0-2.2 1.8-4 4-4"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
+      </button>
+      
+      <button type="button" class="notif-btn" aria-label="Notifikácie" id="notifBtn">
+        🔔
       </button>
 
       <button type="button" class="refresh-btn" aria-label="Obnoviť" id="refreshBtn">

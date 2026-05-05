@@ -895,3 +895,13 @@ document.getElementById("refreshBtn")?.addEventListener("click", async () => {
   if (window.toast) toast.info("Načítavam nové príspevky...");
   await loadPosts();
 });
+
+document.getElementById("notifBtn")?.addEventListener("click", () => {
+  const email = new URLSearchParams(window.location.search).get("email");
+
+  const target = email
+    ? `dashboard.html?email=${encodeURIComponent(email)}#notifSection`
+    : `dashboard.html#notifSection`;
+
+  window.location.href = target;
+});
