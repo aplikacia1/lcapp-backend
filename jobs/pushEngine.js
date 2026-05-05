@@ -98,12 +98,14 @@ try {
   if (tokenList.length) {
     await admin.messaging().sendEachForMulticast({
       tokens: tokenList,
+      notification: {
+        title: title,
+        body: body
+      },
       data: {
-  title: title,
-  body: body,
-  url: url,
-  type: type
-}
+        url: url,
+        type: type
+      }
     });
 
     console.log("📲 ANDROID BROADCAST sent:", tokenList.length);
@@ -157,14 +159,16 @@ async function sendPush(email, body) {
       const admin = require("firebase-admin");
 
       await admin.messaging().sendEachForMulticast({
-  tokens: tokenList,
-  data: {
-    title: "Lištobook",
-    body: body,
-    url: "https://listobook.sk/messages.html?next=/messages.html",
-    type: "message"
-  }
-});
+        tokens: tokenList,
+        notification: {
+          title: "Lištobook",
+          body: body
+        },
+        data: {
+          url: "https://listobook.sk/messages.html?next=/messages.html",
+          type: "message"
+        }
+      });
 
       console.log("✅ ANDROID PUSH sent to:", email);
     } else {
@@ -267,19 +271,19 @@ function startPushEngine() {
       const today = now.toLocaleDateString("sv-SE");
 
 // ☀️ RÁNO
-if (h === 7 && m < 5 && lastRun.morning !== today) {
+if (h === 7 && m === 0 && lastRun.morning !== today) {
   lastRun.morning = today;
   await runMorning();
 }
 
 // 🌙 VEČER
-if (h === 19 && m < 5 && lastRun.evening !== today) {
+if (h === 19 && m === 0 && lastRun.evening !== today) {
   lastRun.evening = today;
   await runEvening();
 }
 
 // 🎆 POLNOC
-if (h === 0 && m < 5 && lastRun.midnight !== today) {
+if (h === 0 && m === 0 && lastRun.midnight !== today) {
   lastRun.midnight = today;
   await runMidnightSpecial();
 }
