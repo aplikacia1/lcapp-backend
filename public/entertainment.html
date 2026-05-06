@@ -24,13 +24,16 @@
     /* HEADER */
     .app-header{ position:fixed; inset:0 0 auto 0; z-index:1000; background:#0c1f4b; border-bottom:1px solid var(--panel-border); }
     .app-header-inner{
-      max-width:var(--max-w);
-      margin:0 auto;
-      padding:8px var(--gap);
-      display:flex;
-      flex-direction:row;
-      align-items:center;
-      justify-content:space-between;
+  width:100%;
+  box-sizing:border-box;
+
+  max-width:var(--max-w);
+  margin:0 auto;
+  padding:8px var(--gap);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
 }
        .icon-btn{
           position: static;
@@ -49,53 +52,54 @@
       width: 24px;
       height: 24px;
     }
-  @media (min-width: 768px){
+  @media (min-width:768px){
 
-  /* skry hamburger */
   .icon-btn{
-    display: none !important;
+    display:none !important;
   }
 
-  /* nav nech je normálne hore */
   .nav-scroller{
-    position: static;
-    transform: none !important;
-    height: auto;
-    width: 100%;
-    padding: 0;
-    background: transparent;
+    width:100%;
+    padding:0 var(--gap);
   }
 
   .nav-track{
-    display:flex;
-    flex-direction: row;
-    justify-content:center;
-    gap:8px;
-  }
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  overflow:visible;
+}
 
   .pill{
-    height:32px;
-    padding:6px 12px;
-    font-size:13px;
+    flex:0 0 auto;
+    width:auto !important;
+
+    height:38px;
+    padding:8px 14px;
+
     border-radius:16px;
     border:1px solid rgba(255,255,255,.35);
 
-    background:#ffffff !important;
-    color:#0c1f4b !important;
+    background:#fff;
+    color:#0c1f4b;
 
-    cursor:pointer;
-    white-space:nowrap;
     display:inline-flex;
     align-items:center;
     justify-content:center;
     gap:8px;
+
+    cursor:pointer;
+    white-space:nowrap;
   }
+
   .pill-danger{
     background:#ff4d6d;
-    color:white;
-    border:none;
-  } 
-   } 
+    color:#fff;
+    border-color:#ff4d6d;
+  }
+}
     /* LAYOUT */
     .wrap{
       max-width:var(--max-w); margin:0 auto; padding:16px;
@@ -261,10 +265,12 @@
 }
 
 /* tlačítka v menu pod sebou */
-.nav-track{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+@media (max-width: 767.98px){
+  .nav-track{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
 }
 @media (max-width: 767.98px){
   .nav-track .pill{
