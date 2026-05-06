@@ -82,7 +82,14 @@ self.addEventListener('notificationclick', (event) => {
 
         for (const client of clientList) {
           if (client.url && 'focus' in client) {
-            return client.focus().then(() => client.navigate(targetUrl));
+
+            // Android Capacitor fix
+            client.postMessage({
+              type: 'OPEN_URL',
+              url: targetUrl
+            });
+
+            return client.focus();
           }
         }
 
