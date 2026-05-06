@@ -640,3 +640,72 @@ body.timeline-page {
   width: 100%;
   box-sizing: border-box;
 }
+
+/* ===== ANDROID SAFE FIX ===== */
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  overflow-x:hidden;
+  max-width:100%;
+}
+
+/* bezpečné okraje */
+body{
+  padding-left:max(10px, env(safe-area-inset-left));
+  padding-right:max(10px, env(safe-area-inset-right));
+}
+
+/* HLAVIČKA */
+.header-global{
+  left:0;
+  right:0;
+  width:auto !important;
+
+  padding-left:max(16px, env(safe-area-inset-left));
+  padding-right:max(16px, env(safe-area-inset-right));
+}
+
+/* hamburger / tlačidlá v hlavičke */
+.header-global button,
+.header-global .menu-btn,
+.header-global .hamburger{
+  min-width:44px;
+  min-height:44px;
+  padding:10px;
+}
+
+/* FOOTER */
+.footer{
+  left:0;
+  right:0;
+  width:auto !important;
+
+  padding-left:max(10px, env(safe-area-inset-left));
+  padding-right:max(10px, env(safe-area-inset-right));
+  padding-bottom:max(20px, env(safe-area-inset-bottom));
+}
+
+/* composer správ */
+.composer{
+  padding-bottom:max(8px, env(safe-area-inset-bottom));
+}
+
+/* timeline composer */
+#timelineForm{
+  width:auto !important;
+  left:10px !important;
+  right:10px !important;
+  transform:none !important;
+  bottom:max(85px, env(safe-area-inset-bottom)) !important;
+}
+
+/* inputy nech nepretečú */
+input,
+textarea,
+button{
+  max-width:100%;
+}
