@@ -89,6 +89,34 @@
   transform: translateY(0);
   pointer-events: auto;
 }
+.password-wrap{
+  position:relative;
+}
+
+.password-wrap input{
+  width:100%;
+  padding-right:46px;
+  box-sizing:border-box;
+}
+
+.toggle-password{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  background:transparent !important;
+  border:none !important;
+  cursor:pointer;
+  font-size:18px;
+  color:#0c1f4b;
+  padding:0;
+  width:auto;
+  height:auto;
+  appearance:none;
+  -webkit-appearance:none;
+  box-shadow:none;
+  outline:none;
+}
   </style>
 </head>
 <body>
@@ -100,7 +128,13 @@
       <input id="email" type="email" placeholder="E-mail" autocomplete="username" required aria-describedby="emailErr" />
       <small id="emailErr" class="err" role="alert" aria-live="polite" data-target="#email"></small>
 
-      <input id="password" type="password" placeholder="Heslo (min. 6 znakov)" autocomplete="new-password" minlength="6" required aria-describedby="passErr" />
+      <div class="password-wrap">
+  <input id="password" type="password" placeholder="Heslo (min. 6 znakov)" autocomplete="new-password" minlength="6" required aria-describedby="passErr" />
+
+  <button type="button" class="toggle-password" id="togglePassword">
+    👁️
+  </button>
+</div>
       <small id="passErr" class="err" role="alert" aria-live="polite" data-target="#password"></small>
 
       <button id="registerBtn" type="submit">Registrovať</button>
@@ -123,5 +157,16 @@
     <em>tvorca digitálneho priestoru pre komunity</em>
   </div>
 </div>
+<script>
+  const togglePassword = document.getElementById("togglePassword");
+  const passwordInput = document.getElementById("password");
+
+  togglePassword?.addEventListener("click", () => {
+    const isPassword = passwordInput.type === "password";
+
+    passwordInput.type = isPassword ? "text" : "password";
+    togglePassword.textContent = isPassword ? "🙈" : "👁️";
+  });
+</script>
 </body>
 </html>

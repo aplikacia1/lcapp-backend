@@ -85,6 +85,35 @@
   transform: translateY(0);
   pointer-events: auto;
 }
+
+.password-wrap{
+  position:relative;
+}
+
+.password-wrap input{
+  width:100%;
+  padding-right:46px;
+  box-sizing:border-box;
+}
+
+.toggle-password{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  background:transparent !important;
+  border:none !important;
+  cursor:pointer;
+  font-size:18px;
+  color:#0c1f4b;
+  padding:0;
+  width:auto;
+  height:auto;
+  appearance:none;
+  -webkit-appearance:none;
+  box-shadow:none;
+  outline:none;
+}
   </style>
 </head>
 <body>
@@ -94,7 +123,13 @@
 
     <form id="loginForm" novalidate>
       <input id="email" type="email" placeholder="E-mail" autocomplete="username" required />
-      <input id="password" type="password" placeholder="Heslo" autocomplete="current-password" required />
+      <div class="password-wrap">
+  <input id="password" type="password" placeholder="Heslo" autocomplete="current-password" required />
+
+  <button type="button" class="toggle-password" id="togglePassword">
+    👁️
+  </button>
+</div>
       <button id="loginBtn" type="submit">Prihlásiť sa</button>
 
       <div class="link-row">Nemáte účet? <a href="register.html">Zaregistrovať</a></div>
@@ -161,5 +196,17 @@ z-index:9999;
 
   </div>
 </div>
+<script>
+  const togglePassword = document.getElementById("togglePassword");
+  const passwordInput = document.getElementById("password");
+
+  togglePassword?.addEventListener("click", () => {
+    const isPassword = passwordInput.type === "password";
+
+    passwordInput.type = isPassword ? "text" : "password";
+    togglePassword.textContent = isPassword ? "🙈" : "👁️";
+  });
+</script>
+
 </body>
 </html>
