@@ -89,7 +89,7 @@ self.addEventListener('notificationclick', (event) => {
               url: targetUrl
             });
 
-            return client.focus();
+            return client.navigate(targetUrl).then(() => client.focus());
           }
         }
 
