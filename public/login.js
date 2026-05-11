@@ -81,7 +81,21 @@ try {
   const trusted = localStorage.getItem("lb_device_trusted_" + email);
   const hasPinLocal = localStorage.getItem("lb_has_pin_" + email);
 
-  if (trusted === "true" && email && hasPinLocal === "true") {
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches;
+
+  const isMobile =
+    /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  const allowPin =
+    isStandalone || isMobile;
+
+  if (
+  allowPin &&
+  trusted === "true" &&
+  email &&
+  hasPinLocal === "true"
+) {
 
     const res = await fetch(`${API_BASE}/api/pin/has-pin?email=${encodeURIComponent(email)}`);
 
@@ -90,8 +104,13 @@ try {
     const data = await res.json();
 
     if (data.hasPin) {
-      window.location.href = "pin_login.html?email=" + encodeURIComponent(email);
-      return;
+      const currentParams = window.location.search || "";
+
+      window.location.href =
+        "pin_login.html?email=" +
+        encodeURIComponent(email) +
+        currentParams.replace("?", "&");
+          return;
     }
   }
 
