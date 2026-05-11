@@ -84,12 +84,12 @@ self.addEventListener('notificationclick', (event) => {
           if (client.url && 'focus' in client) {
 
             client.focus();
-            client.postMessage({
-              type: 'OPEN_URL',
-              url: targetUrl
-            });
 
-             return;
+            if ('navigate' in client) {
+              return client.navigate(targetUrl);
+            }
+
+            return;
           }
         }
 
