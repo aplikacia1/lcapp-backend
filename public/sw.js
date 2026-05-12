@@ -72,10 +72,6 @@ self.addEventListener('notificationclick', (event) => {
     targetUrl = 'https://listobook.sk' + targetUrl;
   }
 
-  if (data.type === "message") {
-  targetUrl = "https://listobook.sk/messages.html?next=/messages.html";
-}
-
   event.waitUntil(
   clients.openWindow(targetUrl)
 );
