@@ -77,25 +77,7 @@ self.addEventListener('notificationclick', (event) => {
 }
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((clientList) => {
+  clients.openWindow(targetUrl)
+);
 
-        for (const client of clientList) {
-          if (client.url && 'focus' in client) {
-
-            client.focus();
-
-            if ('navigate' in client) {
-              return client.navigate(targetUrl);
-            }
-
-            return;
-          }
-        }
-
-        if (clients.openWindow) {
-          return clients.openWindow(targetUrl);
-        }
-      })
-  );
 });
