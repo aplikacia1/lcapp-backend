@@ -47,7 +47,27 @@ const JOKES = [
   "Tip na dnes: Lepšie opraviť hneď ako neskôr.",
   "Tip na dnes: Každý materiál má svoju náladu.",
   "Tip na dnes: Dnes sprav aspoň jednu vec poriadne.",
-  "Tip na dnes: Aj improvizácia má svoje pravidlá."
+  "Tip na dnes: Aj improvizácia má svoje pravidlá.",
+  "Tip na dnes: Vec, ktorú hľadáš 20 minút, býva väčšinou vo vrecku.",
+  "Tip na dnes: Ak dnes nič nepokazíš, asi si nič nerobil.",
+  "Tip na dnes: Každý kábel je krátky presne o 10 centimetrov.",
+  "Tip na dnes: Keď zákazník povie ‚len sa pozerám‘, priprav sa na hodinovú debatu.",
+  "Tip na dnes: Meter sa nikdy nestratí sám.",
+  "Tip na dnes: Najdrahšie býva ‚to nejako spravíme‘.",
+  "Tip na dnes: Každá robota má fázu ‚čo sme to spravili?!‘.",
+  "Tip na dnes: Silikón patrí všade. Hlavne na ruky.",
+  "Tip na dnes: Keď to ide podozrivo dobre, niečo si zabudol.",
+  "Tip na dnes: Niektoré problémy vyrieši spánok. Iné flexa.",
+  "Tip na dnes: Človek vydrží veľa. Hlavne po káve.",
+  "Tip na dnes: Najlepší plán je ten, čo prežije pondelok ráno.",
+  "Tip na dnes: Keď niečo opravíš izolačkou, ešte to nie je profesionálne.",
+  "Tip na dnes: Každý projekt začína optimizmom a končí silikónom.",
+  "Tip na dnes: Aj skúsený majster občas nadáva na vlastnú robotu.",
+  "Tip na dnes: Ak sa dnes všetko kazí, aspoň nie si sám.",
+  "Tip na dnes: Každá stavba má svoje záhady.",
+  "Tip na dnes: Keď sa ti dnes nechce, tvár sa profesionálne.",
+  "Tip na dnes: Všetko je rovné, kým nepriložíš vodováhu.",
+  "Tip na dnes: Najväčší nepriateľ poriadku je veta ‚potom to upracem‘."
 ];
 
 let lastIndex = -1;
