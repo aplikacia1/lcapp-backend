@@ -65,7 +65,7 @@ self.addEventListener('notificationclick', (event) => {
 
   const data = event.notification.data || {};
 
-  let targetUrl = data.url || 'https://listobook.sk/';
+  let targetUrl = 'https://listobook.sk/tip.html?text=TEST';
 
   // 🔒 FORCE DOMÉNA (kľúčový fix)
   if (!targetUrl.startsWith('http')) {
