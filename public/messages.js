@@ -10,7 +10,25 @@ const esc = (s='') => String(s).replace(/[&<>"']/g, m => (
 const params = new URLSearchParams(location.search);
 const userEmail = params.get('email') || '';
 const toParam   = params.get('to') || '';
-if (!userEmail) location.href = 'index.html';
+if (!userEmail) {
+
+  const trustedEmail = localStorage.getItem("lb_user_email");
+
+  if (trustedEmail) {
+
+    const next = encodeURIComponent("/messages.html");
+
+    location.href =
+      `pin_login.html?email=${encodeURIComponent(trustedEmail)}&next=${next}`;
+
+  } else {
+
+    const next = encodeURIComponent("/messages.html");
+
+    location.href =
+      `login.html?next=${next}`;
+  }
+}
 
 /* ---------- MOBILE VIEW (len dizajn/UX) ---------- */
 const mqMobile = window.matchMedia('(max-width: 900px)');
