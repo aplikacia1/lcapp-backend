@@ -73,7 +73,21 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   event.waitUntil(
-  clients.openWindow(targetUrl)
+
+  fetch('/api/push/debug', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      step: 'notificationclick',
+      targetUrl: targetUrl,
+      ts: Date.now()
+    })
+  }).catch(() => {})
+
+  .then(() => clients.openWindow(targetUrl))
+
 );
 
 });

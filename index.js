@@ -188,6 +188,7 @@ mountRoute('/api/push',           './routes/pushRoutes');
 mountRoute('/api/android-push', './routes/androidPushRoutes');
 mountRoute('/api/ads',            './routes/adRoutes');
 mountRoute('/api/uploads',        './routes/uploadRoutes'); // ping/debug
+mountRoute('/api/push',           './routes/pushDebugRoutes');
 
 // ✅ PDF routes (test + html->pdf) – obe pod /api/pdf
 mountRoute('/api/pdf',            './routes/pdfTestRoutes');
