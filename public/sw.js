@@ -51,8 +51,8 @@ self.addEventListener('push', (event) => {
     icon: data.icon || '/icons/icon-192.png',
     badge: data.badge || '/icons/icon-192.png',
     data: { 
-      url: data.url || '/',
-      type: data.type || 'general'
+      url: data.data?.url || '/',
+      type: data.data?.type || 'general'
     }
   };
 
