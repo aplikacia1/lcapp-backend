@@ -29,7 +29,7 @@
     banner.style.position = "fixed";
     banner.style.left = "0";
     banner.style.right = "0";
-    banner.style.bottom = "0";
+    banner.style.bottom = "78px";
     banner.style.zIndex = "9999";
     banner.style.background = "rgba(6, 28, 71, 0.97)";
     banner.style.color = "#ffffff";
