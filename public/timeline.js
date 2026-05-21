@@ -545,7 +545,9 @@ document.addEventListener("visibilitychange", () => {
 
       localStorage.removeItem("pendingPushUrl");
 
-      window.location.replace(pendingUrl);
+      setTimeout(() => {
+  window.location.replace(pendingUrl);
+}, 700);
     }
   }
   });
