@@ -98,8 +98,12 @@ self.addEventListener('notificationclick', (event) => {
 
     const client = allClients[0];
 
-    await client.navigate(targetUrl);
-    return client.focus();
+    client.postMessage({
+  type: "SAVE_PENDING_URL",
+  url: targetUrl
+});
+
+return client.focus();
       }
 
   // inak otvor nové okno

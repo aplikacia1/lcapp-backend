@@ -521,7 +521,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   }
+  navigator.serviceWorker.addEventListener("message", (event) => {
+
+  if (event.data?.type === "SAVE_PENDING_URL") {
+
+    console.log("Pending push URL:", event.data.url);
+
+    localStorage.setItem("pendingPushUrl", event.data.url);
+  }
+});
 setTimeout(() => showPushPromptSmart(), 3000);
+// 🔥 Android resume fix
+document.addEventListener("visibilitychange", () => {
+
+  // appka sa vrátila do popredia
+  if (!document.hidden) {
+
+    const pendingUrl = localStorage.getItem("pendingPushUrl");
+
+    if (pendingUrl) {
+
+      console.log("Resume redirect:", pendingUrl);
+
+      localStorage.removeItem("pendingPushUrl");
+
+      window.location.replace(pendingUrl);
+    }
+  }
+  });
 });
 // =======================================================
 // NOTIFIKÁCIE – popup len raz
