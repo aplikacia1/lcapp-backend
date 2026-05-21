@@ -98,13 +98,9 @@ self.addEventListener('notificationclick', (event) => {
 
     const client = allClients[0];
 
-    client.postMessage({
-      type: "OPEN_URL",
-      url: targetUrl
-    });
-
+    await client.navigate(targetUrl);
     return client.focus();
-  }
+      }
 
   // inak otvor nové okno
   return clients.openWindow(targetUrl);
