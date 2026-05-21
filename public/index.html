@@ -349,8 +349,24 @@
       });
   })();
   navigator.serviceWorker.addEventListener("message", (event) => {
+
+  // pôvodný redirect systém
   if (event.data?.type === "SET_REDIRECT") {
     localStorage.setItem("afterLoginRedirect", event.data.url);
+  }
+
+  // 🔥 PUSH otvorenie konkrétnej stránky
+  if (event.data?.type === "OPEN_URL") {
+
+    const target = event.data.url;
+
+    if (target) {
+
+      console.log("SW redirect:", target);
+
+      // natvrdo prepni stránku
+      window.location.replace(target);
+    }
   }
 });
   </script>

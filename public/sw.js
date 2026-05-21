@@ -86,7 +86,30 @@ self.addEventListener('notificationclick', (event) => {
     })
   }).catch(() => {})
 
-  .then(() => clients.openWindow(targetUrl))
+  .then(async () => {
+
+  const allClients = await clients.matchAll({
+    type: "window",
+    includeUncontrolled: true
+  });
+
+  // ak už appka existuje → pošli jej správu
+  if (allClients && allClients.length > 0) {
+
+    const client = allClients[0];
+
+    client.postMessage({
+      type: "OPEN_URL",
+      url: targetUrl
+    });
+
+    return client.focus();
+  }
+
+  // inak otvor nové okno
+  return clients.openWindow(targetUrl);
+
+})
 
 );
 
