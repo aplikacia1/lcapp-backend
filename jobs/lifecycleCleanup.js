@@ -7,11 +7,11 @@ async function lifecycleCleanup() {
 
     const now = new Date();
 
-    // 🧵 60 dní pre timeline
-    const cutoffPosts = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+    // 🧵 30 dní pre timeline
+    const cutoffPosts = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    // ✉️ 30 dní pre správy
-    const cutoffMessages = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    // ✉️ 15 dní pre správy
+    const cutoffMessages = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000);
 
     // 🧵 Mazanie starých príspevkov (iba neaktívne)
     const postResult = await TimelinePost.deleteMany({
