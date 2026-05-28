@@ -79,6 +79,16 @@ const tips = [
 const params = new URLSearchParams(window.location.search);
 const textFromPush = params.get("text");
 
+fetch("/api/push/opened", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    page: "tip"
+  })
+}).catch(() => {});
+
 if (textFromPush) {
   document.getElementById("tipText").innerText = textFromPush;
 } else {

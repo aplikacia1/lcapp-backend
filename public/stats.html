@@ -73,6 +73,16 @@ h1{
 const params = new URLSearchParams(window.location.search);
 const text = params.get("text");
 
+fetch("/api/push/opened", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    page: "stats"
+  })
+}).catch(() => {});
+
 if (text) {
   document.getElementById("statsText").innerText = text;
 } else {
