@@ -253,7 +253,10 @@ async function startCamera() {
       await navigator.mediaDevices.getUserMedia({
 
         video: {
-          facingMode: "environment"
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          focusMode: "continuous"
         }
 
       });
@@ -374,6 +377,34 @@ captureBtn?.addEventListener(
         captureCanvas.height
 
       );
+
+      const imageData =
+  ctx.getImageData(
+    0,
+    0,
+    captureCanvas.width,
+    captureCanvas.height
+  );
+
+const data =
+  imageData.data;
+
+for (let i = 0; i < data.length; i += 4) {
+
+  const avg =
+    (
+      data[i] +
+      data[i + 1] +
+      data[i + 2]
+    ) / 3;
+
+  data[i] = avg;
+  data[i + 1] = avg;
+  data[i + 2] = avg;
+
+}
+
+ctx.putImageData(imageData, 0, 0);
 
       const codeReader =
         new ZXingBrowser.BrowserMultiFormatReader();
