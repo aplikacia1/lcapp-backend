@@ -89,6 +89,15 @@ const productDescription =
 const resetBtn =
   document.getElementById("resetBtn");
 
+  const captureBtn =
+  document.getElementById("captureBtn");
+
+const captureCanvas =
+  document.getElementById("captureCanvas");
+
+const video =
+  document.getElementById("camera");
+
 function setWarehouse(warehouse) {
 
   selectedWarehouse = warehouse;
@@ -272,8 +281,8 @@ async function startCamera() {
 function startBarcodeScanner(video) {
 
   if (
-    !window.ZXing ||
-    !ZXing.BrowserMultiFormatReader
+    !window.ZXingBrowser ||
+    !ZXingBrowser.BrowserMultiFormatReader
   ) {
 
     console.warn(
@@ -284,7 +293,7 @@ function startBarcodeScanner(video) {
   }
 
   const codeReader =
-    new ZXing.BrowserMultiFormatReader();
+    new ZXingBrowser.BrowserMultiFormatReader();
 
   codeReader.decodeFromVideoElementContinuously(
 
@@ -326,6 +335,90 @@ function startBarcodeScanner(video) {
 }
 
 startCamera();
+
+captureBtn?.addEventListener(
+
+  "click",
+
+  async function() {
+
+    try {
+
+      if (
+        !window.ZXingBrowser ||
+        !ZXingBrowser.BrowserMultiFormatReader
+      ) {
+
+        alert(
+          "ZXing nie je načítaný."
+        );
+
+        return;
+      }
+
+      const ctx =
+        captureCanvas.getContext("2d");
+
+      captureCanvas.width =
+        video.videoWidth;
+
+      captureCanvas.height =
+        video.videoHeight;
+
+      ctx.drawImage(
+
+        video,
+        0,
+        0,
+        captureCanvas.width,
+        captureCanvas.height
+
+      );
+
+      const codeReader =
+        new ZXingBrowser.BrowserMultiFormatReader();
+
+      const imageDataUrl =
+  captureCanvas.toDataURL("image/png");
+
+const result =
+  await codeReader.decodeFromImageUrl(
+    imageDataUrl
+  );
+
+      if (
+        result &&
+        result.text
+      ) {
+
+        scanInput.value =
+          result.text;
+
+        await showProductByCode(
+          result.text
+        );
+
+      } else {
+
+        alert(
+          "Čiarový kód sa nenašiel."
+        );
+
+      }
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert(
+        "Nepodarilo sa načítať čiarový kód."
+      );
+
+    }
+
+  }
+
+);
 
 resetBtn.addEventListener(
 
