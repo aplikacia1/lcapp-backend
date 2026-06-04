@@ -24,6 +24,8 @@ const shuffleBtn = document.getElementById('shuffleBtn');
 const winModal = document.getElementById('winModal');
 const playAgainBtn = document.getElementById('playAgainBtn');
 const goRateBtn = document.getElementById('goRateBtn');
+const bestScoresEl =
+  document.getElementById('bestScores');
 
 let tiles = [];     // array of 9 numbers: 1..8 and 0 as empty
 let moves = 0;
@@ -127,7 +129,13 @@ function shuffle(times = 100) {
 }
 
 // --- win modal ---
-function showWin() { winModal.style.display = 'flex'; }
+function showWin() {
+
+  saveBestScore();
+
+  winModal.style.display = 'flex';
+
+}
 function hideWin() { winModal.style.display = 'none'; }
 
 playAgainBtn?.addEventListener('click', () => { hideWin(); shuffle(120); });
@@ -151,3 +159,85 @@ document.addEventListener('keydown', (e) => {
 // --- init ---
 shuffleBtn?.addEventListener('click', () => shuffle(120));
 shuffle(60); // initial shuffle
+function formatDate(dateString){
+
+  const d = new Date(dateString);
+
+  return d.toLocaleDateString('sk-SK');
+
+}
+
+function renderBestScores(){
+
+  const scores =
+    JSON.parse(
+      localStorage.getItem('puzzleBestScores') || '[]'
+    );
+
+  if(scores.length === 0){
+
+    bestScoresEl.innerHTML =
+      'Zatiaľ bez rekordov 🙂';
+
+    return;
+  }
+
+  bestScoresEl.innerHTML =
+    '<strong>🏆 Najlepšie hry</strong><br>';
+
+  scores.forEach((s, i) => {
+
+    bestScoresEl.innerHTML +=
+      `${i + 1}. `
+      + `${s.moves} ťahov • `
+      + `${s.time} • `
+      + `${formatDate(s.date)}`
+      + '<br>';
+
+  });
+
+}
+
+function saveBestScore(){
+
+  const score = {
+
+    moves,
+
+    time: timeEl.textContent,
+
+    seconds,
+
+    date: new Date().toISOString()
+
+  };
+
+  let scores =
+    JSON.parse(
+      localStorage.getItem('puzzleBestScores') || '[]'
+    );
+
+  scores.push(score);
+
+  scores.sort((a, b) => {
+
+    if(a.moves !== b.moves){
+      return a.moves - b.moves;
+    }
+
+    return a.seconds - b.seconds;
+
+  });
+
+  scores = scores.slice(0, 3);
+
+  localStorage.setItem(
+    'puzzleBestScores',
+    JSON.stringify(scores)
+  );
+
+  renderBestScores();
+
+}
+
+renderBestScores();

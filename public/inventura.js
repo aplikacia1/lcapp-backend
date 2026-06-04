@@ -50,7 +50,12 @@ async function checkInventoryAccess(){
 
 checkInventoryAccess();
 
-     async function startCamera() {
+     let barcodeDetector = null;
+let scanningActive = false;
+let lastScannedCode = "";
+let lastScanTime = 0;
+
+async function startCamera() {
 
   try {
 
@@ -60,19 +65,124 @@ checkInventoryAccess();
       }
     });
 
-    const video = document.getElementById("camera");
+    const video =
+      document.getElementById("camera");
 
     video.srcObject = stream;
 
+    await video.play();
+
+    startBarcodeScanner(video);
+
   } catch (err) {
 
-    console.error("Kamera sa nepodarila spustiť:", err);
+    console.error(
+      "Kamera sa nepodarila spustiť:",
+      err
+    );
 
   }
 
 }
 
 startCamera();
+function startBarcodeScanner(video) {
+
+  if (!("BarcodeDetector" in window)) {
+
+    console.warn(
+      "BarcodeDetector nie je podporovaný."
+    );
+
+    return;
+  }
+
+  try {
+
+    barcodeDetector =
+      new BarcodeDetector({
+        formats: [
+          "ean_13",
+          "ean_8",
+          "code_128",
+          "code_39",
+          "upc_a",
+          "upc_e"
+        ]
+      });
+
+  } catch (err) {
+
+    console.error(err);
+
+    return;
+  }
+
+  scanningActive = true;
+
+  async function scanLoop() {
+
+    if (!scanningActive) return;
+
+    try {
+
+      if (
+        video.readyState >= 2
+      ) {
+
+        const codes =
+          await barcodeDetector.detect(video);
+
+        if (
+          codes &&
+          codes.length > 0
+        ) {
+
+          const code =
+            codes[0].rawValue;
+
+          const now =
+            Date.now();
+
+          if (
+            code &&
+            (
+              code !== lastScannedCode ||
+              now - lastScanTime > 2500
+            )
+          ) {
+
+            lastScannedCode = code;
+            lastScanTime = now;
+
+            scanInput.value = code;
+
+            const product =
+              await findProduct(code);
+
+            if (product) {
+              showProduct(product);
+            }
+
+          }
+
+        }
+
+      }
+
+    } catch (err) {
+
+      console.error(err);
+
+    }
+
+    requestAnimationFrame(scanLoop);
+
+  }
+
+  scanLoop();
+
+}
 let selectedWarehouse = "BA";
 function setWarehouse(warehouse) {
 
@@ -105,12 +215,7 @@ window.addEventListener("load", () => {
   setWarehouse("BA");
 
 });
-    const products = [
-      { code: "Q110E", name: "Schlüter QUADEC Q110E", stock: -10 },
-      { code: "JOLLY-AE10", name: "Schlüter JOLLY AE 10", stock: 25 },
-      { code: "DILEX-BWS", name: "Schlüter DILEX BWS", stock: 0 }
-    ];
-
+    
     let currentProduct = null;
 
     const scanInput = document.getElementById("scanInput");

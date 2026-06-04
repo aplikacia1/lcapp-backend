@@ -4,6 +4,18 @@ const params =
 const currentEmail =
   params.get("email") || "";
 
+const backBtn =
+  document.getElementById("backBtn");
+
+backBtn?.addEventListener("click", () => {
+
+  location.href =
+    currentEmail
+      ? `timeline.html?email=${encodeURIComponent(currentEmail)}`
+      : "timeline.html";
+
+});
+
 async function checkInventoryAccess(){
 
   try{
@@ -47,38 +59,11 @@ async function checkInventoryAccess(){
 
 checkInventoryAccess();
 
-async function startCamera() {
-
-  try {
-
-    const stream =
-      await navigator.mediaDevices.getUserMedia({
-
-        video: {
-          facingMode: "environment"
-        }
-
-      });
-
-    const video =
-      document.getElementById("camera");
-
-    video.srcObject = stream;
-
-  } catch (err) {
-
-    console.error(
-      "Kamera sa nepodarila spustiť:",
-      err
-    );
-
-  }
-
-}
-
-startCamera();
-
 let selectedWarehouse = "BA";
+let barcodeDetector = null;
+let scanningActive = false;
+let lastScannedCode = "";
+let lastScanTime = 0;
 
 const scanInput =
   document.getElementById("scanInput");
@@ -179,71 +164,210 @@ async function findProduct(code) {
 
 }
 
+async function showProductByCode(code) {
+
+  const cleanCode =
+    String(code || "").trim();
+
+  if (cleanCode.length < 3) return;
+
+  const product =
+    await findProduct(cleanCode);
+
+  if (!product) {
+
+    productName.textContent =
+      "Produkt sa nenašiel";
+
+    productCode.textContent =
+      "Kód: " + cleanCode;
+
+    stockBA.textContent =
+      "BA sklad: —";
+
+    stockZA.textContent =
+      "ZA sklad: —";
+
+    productPrice.textContent =
+      "Cena: —";
+
+    productDescription.textContent =
+      "Produkt zatiaľ neexistuje.";
+
+    return;
+  }
+
+  productName.textContent =
+    product.name || "Bez názvu";
+
+  productCode.textContent =
+    "Kód: " + product.code;
+
+  stockBA.textContent =
+    "BA sklad: "
+    + (product.stockBA ?? 0)
+    + " ks";
+
+  stockZA.textContent =
+    "ZA sklad: "
+    + (product.stockZA ?? 0)
+    + " ks";
+
+  productPrice.textContent =
+    "Cena: "
+    + Number(product.price || 0).toFixed(2)
+    + " €";
+
+  productDescription.textContent =
+    product.description
+    || "Bez popisu.";
+
+}
+
 scanInput.addEventListener(
 
   "input",
 
   async function() {
 
-    const code =
-      scanInput.value.trim();
-
-    if (code.length < 3) return;
-
-    const product =
-      await findProduct(code);
-
-    if (!product) {
-
-      productName.textContent =
-        "Produkt sa nenašiel";
-
-      productCode.textContent =
-        "Kód: " + code;
-
-      stockBA.textContent =
-        "BA sklad: —";
-
-      stockZA.textContent =
-        "ZA sklad: —";
-
-      productPrice.textContent =
-        "Cena: —";
-
-      productDescription.textContent =
-        "Produkt zatiaľ neexistuje.";
-
-      return;
-    }
-
-    productName.textContent =
-      product.name || "Bez názvu";
-
-    productCode.textContent =
-      "Kód: " + product.code;
-
-    stockBA.textContent =
-      "BA sklad: "
-      + (product.stockBA ?? 0)
-      + " ks";
-
-    stockZA.textContent =
-      "ZA sklad: "
-      + (product.stockZA ?? 0)
-      + " ks";
-
-    productPrice.textContent =
-      "Cena: "
-      + Number(product.price || 0).toFixed(2)
-      + " €";
-
-    productDescription.textContent =
-      product.description
-      || "Bez popisu.";
+    await showProductByCode(scanInput.value);
 
   }
 
 );
+
+async function startCamera() {
+
+  try {
+
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video: {
+          facingMode: "environment"
+        }
+
+      });
+
+    const video =
+      document.getElementById("camera");
+
+    video.srcObject = stream;
+
+    await video.play();
+
+    startBarcodeScanner(video);
+
+  } catch (err) {
+
+    console.error(
+      "Kamera sa nepodarila spustiť:",
+      err
+    );
+
+  }
+
+}
+
+function startBarcodeScanner(video) {
+
+  if (!("BarcodeDetector" in window)) {
+
+    console.warn(
+      "BarcodeDetector nie je v tomto zariadení podporovaný."
+    );
+
+    return;
+  }
+
+  try {
+
+    barcodeDetector =
+      new BarcodeDetector({
+        formats: [
+          "ean_13",
+          "ean_8",
+          "code_128",
+          "code_39",
+          "qr_code",
+          "upc_a",
+          "upc_e"
+        ]
+      });
+
+  } catch (err) {
+
+    console.error(
+      "Čítačka čiarových kódov sa nepodarila spustiť:",
+      err
+    );
+
+    return;
+  }
+
+  scanningActive = true;
+
+  async function scanLoop() {
+
+    if (!scanningActive) return;
+
+    try {
+
+      if (
+        video.readyState >= 2 &&
+        barcodeDetector
+      ) {
+
+        const codes =
+          await barcodeDetector.detect(video);
+
+        if (codes && codes.length > 0) {
+
+          const code =
+            codes[0].rawValue;
+
+          const now =
+            Date.now();
+
+          if (
+            code &&
+            (
+              code !== lastScannedCode ||
+              now - lastScanTime > 2500
+            )
+          ) {
+
+            lastScannedCode = code;
+            lastScanTime = now;
+
+            scanInput.value = code;
+
+            await showProductByCode(code);
+
+          }
+
+        }
+
+      }
+
+    } catch (err) {
+
+      console.error(
+        "Chyba pri čítaní čiarového kódu:",
+        err
+      );
+
+    }
+
+    requestAnimationFrame(scanLoop);
+
+  }
+
+  scanLoop();
+
+}
+
+startCamera();
 
 resetBtn.addEventListener(
 
@@ -270,6 +394,9 @@ resetBtn.addEventListener(
 
     productDescription.textContent =
       "—";
+
+    lastScannedCode = "";
+    lastScanTime = 0;
 
     scanInput.focus();
 
