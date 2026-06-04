@@ -603,6 +603,15 @@
   cursor:pointer;
   font-size:18px;
 }
+.internal-tool-btn{
+
+  box-shadow:
+    0 0 12px rgba(88,173,255,.35);
+
+  border:
+    1px solid rgba(255,255,255,.25);
+
+}
   </style>
 
   <link rel="stylesheet" href="/css/timeline.comment-fix.css?v=fixA1">
@@ -645,6 +654,25 @@
             stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
+      <button
+  type="button"
+  class="notif-btn internal-tool-btn"
+  aria-label="Overenie cien"
+  id="priceCheckBtn"
+  style="display:none; left:108px;"
+>
+  💰
+</button>
+
+<button
+  type="button"
+  class="refresh-btn internal-tool-btn"
+  aria-label="Inventúra"
+  id="inventoryBtn"
+  style="display:none; right:116px;"
+>
+  📦
+</button>
 
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="loggedUser">Prihlásený ako:</div>
@@ -879,6 +907,53 @@
       document.getElementById('calcBtn')?.addEventListener('click', ()=> go('kalkulacky.html'));
       document.getElementById('messagesBtn')?.addEventListener('click', ()=> go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', ()=> go('index.html'));
+      const allowedInventoryUsers = [
+
+  "sabla.marcel@gmail.com",
+
+  "info@listovecentrum.sk"
+
+];
+
+if (
+  allowedInventoryUsers.includes(email)
+) {
+
+  const inventoryBtn =
+    document.getElementById(
+      'inventoryBtn'
+    );
+
+  const priceCheckBtn =
+    document.getElementById(
+      'priceCheckBtn'
+    );
+
+  if (inventoryBtn) {
+
+    inventoryBtn.style.display =
+      'flex';
+
+    inventoryBtn.addEventListener(
+      'click',
+      () => go('inventury.html')
+    );
+
+  }
+
+  if (priceCheckBtn) {
+
+    priceCheckBtn.style.display =
+      'flex';
+
+    priceCheckBtn.addEventListener(
+      'click',
+      () => go('check_product.html')
+    );
+
+  }
+
+}
 
       // žltý badge pre Správy – načítanie neprečítaných
       const badgeEl = document.getElementById('messagesBadge');

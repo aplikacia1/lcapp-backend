@@ -196,6 +196,13 @@ mountRoute('/api/android-push', './routes/androidPushRoutes');
 mountRoute('/api/ads',            './routes/adRoutes');
 mountRoute('/api/uploads',        './routes/uploadRoutes'); // ping/debug
 mountRoute('/api/push',           './routes/pushDebugRoutes');
+mountRoute('/api/inventura',      './routes/inventoryRoutes');
+mountRoute(
+  "/api/inventory",
+  "./routes/inventorySettingsRoutes"
+);
+mountRoute("/api/inventura",      "./routes/inventoryImportRoutes");
+mountRoute("/api/transfers",      "./routes/transferRoutes");
 
 // ✅ PDF routes (test + html->pdf) – obe pod /api/pdf
 mountRoute('/api/pdf',            './routes/pdfTestRoutes');

@@ -1,0 +1,302 @@
+const params =
+  new URLSearchParams(window.location.search);
+
+const currentEmail =
+  params.get("email") || "";
+
+  const sessionId =
+  params.get("id") || "";
+
+async function checkInventoryAccess(){
+
+  try{
+
+    const res = await fetch(
+      "/api/inventory/settings"
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+      location.href =
+        `timeline.html?email=${encodeURIComponent(currentEmail)}`;
+
+      return;
+    }
+
+    const allowedUsers =
+      data.allowedUsers || [];
+
+    if(
+      !allowedUsers.includes(currentEmail)
+    ){
+
+      location.href =
+        `timeline.html?email=${encodeURIComponent(currentEmail)}`;
+
+      return;
+    }
+
+  }catch(err){
+
+    console.error(err);
+
+    location.href =
+      `timeline.html?email=${encodeURIComponent(currentEmail)}`;
+  }
+
+}
+
+checkInventoryAccess();
+
+     async function startCamera() {
+
+  try {
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment"
+      }
+    });
+
+    const video = document.getElementById("camera");
+
+    video.srcObject = stream;
+
+  } catch (err) {
+
+    console.error("Kamera sa nepodarila spustiť:", err);
+
+  }
+
+}
+
+startCamera();
+let selectedWarehouse = "BA";
+function setWarehouse(warehouse) {
+
+  selectedWarehouse = warehouse;
+
+  const btnBA =
+    document.getElementById("warehouseBA");
+
+  const btnZA =
+    document.getElementById("warehouseZA");
+
+  if (warehouse === "BA") {
+
+    btnBA.style.background = "#18a558";
+    btnZA.style.background = "#13284d";
+
+  } else {
+
+    btnZA.style.background = "#18a558";
+    btnBA.style.background = "#13284d";
+
+  }
+
+  scanInput.focus();
+
+}
+
+window.addEventListener("load", () => {
+
+  setWarehouse("BA");
+
+});
+    const products = [
+      { code: "Q110E", name: "Schlüter QUADEC Q110E", stock: -10 },
+      { code: "JOLLY-AE10", name: "Schlüter JOLLY AE 10", stock: 25 },
+      { code: "DILEX-BWS", name: "Schlüter DILEX BWS", stock: 0 }
+    ];
+
+    let currentProduct = null;
+
+    const scanInput = document.getElementById("scanInput");
+    const countInput = document.getElementById("countInput");
+    const saveBtn = document.getElementById("saveBtn");
+    const message = document.getElementById("message");
+
+    const productName = document.getElementById("productName");
+    const productCode = document.getElementById("productCode");
+    const productStock = document.getElementById("productStock");
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = "message " + type;
+    }
+
+    function clearMessage() {
+      message.textContent = "";
+      message.className = "message";
+    }
+
+    async function findProduct(code) {
+
+  try {
+
+    const response = await fetch(
+
+  "/api/inventura/product/" +
+
+  encodeURIComponent(code) +
+
+  "?warehouse=" +
+
+  selectedWarehouse
+
+);
+
+    const data = await response.json();
+
+    if (!data.success) {
+      return null;
+    }
+
+    return data.product;
+
+  } catch (err) {
+
+    console.error(err);
+
+    return null;
+
+  }
+
+}
+
+    function showProduct(product) {
+      currentProduct = product;
+      productName.textContent = product.name;
+      productCode.textContent = "Kód: " + product.code;
+      productStock.textContent = "Systémový stav: " + product.stock + " ks";
+      countInput.value = "";
+      countInput.focus();
+      clearMessage();
+    }
+
+    scanInput.addEventListener("input", async function() {
+
+  const code = scanInput.value.trim();
+
+  if (code.length < 3) return;
+
+  const product = await findProduct(code);
+
+  if (!product) {
+
+    currentProduct = null;
+
+    productName.textContent = "Produkt sa nenašiel";
+
+    productCode.textContent = "Kód: " + code;
+
+    productStock.textContent = "Systémový stav: —";
+
+    showMessage(
+      "Produkt zatiaľ nie je v testovacom zozname.",
+      "err"
+    );
+
+    return;
+  }
+
+  showProduct(product);
+
+});
+
+    saveBtn.addEventListener("click", async function() {
+
+  if (!currentProduct) {
+
+    showMessage("Najprv naskenuj alebo napíš produkt.", "err");
+
+    scanInput.focus();
+
+    return;
+  }
+
+  if (countInput.value === "") {
+
+    showMessage("Zadaj reálny počet.", "err");
+
+    countInput.focus();
+
+    return;
+  }
+
+  try {
+
+    const response = await fetch("/api/inventura/save", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+
+        sessionId,
+
+        warehouse: selectedWarehouse,
+
+        productCode: currentProduct.code,
+
+        productName: currentProduct.name,
+
+        systemStock: currentProduct.stock,
+
+        countedQty: Number(countInput.value),
+
+        countedBy: "Marcel"
+
+      })
+
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+
+      showMessage("Nepodarilo sa uložiť inventúru.", "err");
+
+      return;
+    }
+
+    showMessage(
+      "Uložené: " + currentProduct.code,
+      "ok"
+    );
+
+    currentProduct = null;
+
+    scanInput.value = "";
+
+    countInput.value = "";
+
+    productName.textContent = "Čakám na ďalší produkt…";
+
+    productCode.textContent = "Kód: —";
+
+    productStock.textContent = "Systémový stav: —";
+
+    setTimeout(() => {
+
+      clearMessage();
+
+      scanInput.focus();
+
+    }, 900);
+
+  } catch (err) {
+
+    console.error(err);
+
+    showMessage("Chyba servera.", "err");
+
+  }
+
+});
+  

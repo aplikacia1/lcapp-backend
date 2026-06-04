@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin inventúra</title>
+
+<style>
+
+body{
+  margin:0;
+  padding:20px;
+  background:#08142b;
+  font-family:Arial;
+  color:white;
+}
+
+h1{
+  margin-bottom:30px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:#10203d;
+  border-radius:18px;
+  padding:20px;
+  cursor:pointer;
+  transition:.2s;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.card:hover{
+  transform:translateY(-3px);
+  background:#16305a;
+}
+
+.card h2{
+  margin-top:0;
+  font-size:20px;
+}
+
+.card p{
+  opacity:.7;
+  margin-bottom:0;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>📦 Admin inventúra</h1>
+
+<div style="
+  background:#10203d;
+  padding:20px;
+  border-radius:18px;
+  margin-bottom:24px;
+  border:1px solid rgba(255,255,255,.08);
+">
+
+  <h2 style="margin-top:0;">
+    🔐 Povolené interné účty
+  </h2>
+
+  <p style="
+    opacity:.7;
+    margin-bottom:14px;
+  ">
+    Tieto účty uvidia Inventúru a Overenie cien.
+  </p>
+
+  <textarea
+    id="allowedUsersInput"
+    style="
+      width:100%;
+      min-height:120px;
+      background:#08142b;
+      color:white;
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:12px;
+      padding:12px;
+      resize:vertical;
+    "
+    placeholder="jeden email na riadok"
+  ></textarea>
+
+  <br><br>
+
+  <button
+    onclick="saveAllowedUsers()"
+    style="
+      background:#18a558;
+      color:white;
+      border:0;
+      border-radius:12px;
+      padding:12px 18px;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    💾 Uložiť povolené účty
+  </button>
+
+</div>
+
+<div class="grid">
+
+ <div class="card" onclick="openUpload('BA')">
+   <h2>📁 Sklad BA</h2>
+   <p>Import skladu Bratislava</p>
+</div>
+
+  <div class="card" onclick="openUpload('ZA')">
+    <h2>📁 Sklad ZA</h2>
+    <p>Import skladu Žilina</p>
+  </div>
+
+  <div class="card" onclick="openTransferUpload('OUT','BA')">
+    <h2>📁 Výdajky BA</h2>
+    <p>Import výdajok Bratislava</p>
+  </div>
+
+  <div class="card" onclick="openTransferUpload('IN','BA')">
+    <h2>📁 Príjemky BA</h2>
+    <p>Import príjemiek Bratislava</p>
+  </div>
+
+  <div class="card" onclick="openTransferUpload('OUT','ZA')">
+    <h2>📁 Výdajky ZA</h2>
+    <p>Import výdajok Žilina</p>
+  </div>
+
+  <div class="card" onclick="openTransferUpload('IN','ZA')">
+    <h2>📁 Príjemky ZA</h2>
+    <p>Import príjemiek Žilina</p>
+  </div>
+
+  <div class="card">
+    <h2>📁 Faktúry BA</h2>
+    <p>Kontrola VS a dokladov</p>
+  </div>
+
+  <div class="card">
+    <h2>📁 Faktúry ZA</h2>
+    <p>Kontrola VS a dokladov</p>
+  </div>
+
+</div>
+
+<script>
+
+function openUpload(warehouse){
+
+  const html = `
+
+    <div id="uploadModal" style="
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.7);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    ">
+
+      <div style="
+        background:#10203d;
+        padding:30px;
+        border-radius:18px;
+        width:400px;
+        max-width:90%;
+      ">
+
+        <h2>📦 Import skladu ${warehouse}</h2>
+
+        <input type="file" id="xlsxFile">
+
+        <br><br>
+
+        <button onclick="uploadXlsx('${warehouse}')">
+          Nahrať XLSX
+        </button>
+
+        <button onclick="closeModal()"
+          style="margin-left:10px;background:#555;">
+          Zavrieť
+        </button>
+
+        <div id="uploadResult"
+          style="margin-top:20px;"></div>
+
+      </div>
+
+    </div>
+
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", html);
+}
+
+function closeModal(){
+
+  const modal = document.getElementById("uploadModal");
+
+  if(modal) modal.remove();
+}
+
+function openTransferUpload(type, warehouse){
+
+  const label =
+    type === "OUT"
+      ? "Výdajky"
+      : "Príjemky";
+
+  const html = `
+
+    <div id="uploadModal" style="
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.7);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    ">
+
+      <div style="
+        background:#10203d;
+        padding:30px;
+        border-radius:18px;
+        width:400px;
+        max-width:90%;
+      ">
+
+        <h2>📦 ${label} ${warehouse}</h2>
+
+        <input type="file" id="xlsxFile">
+
+        <br><br>
+
+        <button onclick="uploadTransfer('${type}','${warehouse}')">
+          Nahrať XLSX
+        </button>
+
+        <button onclick="closeModal()"
+          style="margin-left:10px;background:#555;">
+          Zavrieť
+        </button>
+
+        <div id="uploadResult"
+          style="margin-top:20px;"></div>
+
+      </div>
+
+    </div>
+
+  `;
+
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    html
+  );
+}
+
+async function uploadTransfer(type, warehouse){
+
+  const fileInput = document.getElementById("xlsxFile");
+
+  if(!fileInput.files.length){
+
+    alert("Vyber XLSX súbor.");
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append("file", fileInput.files[0]);
+
+  formData.append("type", type);
+
+  formData.append("warehouse", warehouse);
+
+  try{
+
+    const res = await fetch("/api/transfers/upload", {
+
+      method:"POST",
+
+      body:formData
+
+    });
+
+    const data = await res.json();
+
+    document.getElementById("uploadResult").innerHTML = `
+      ✅ Import hotový<br>
+      Počet dokladov: ${data.imported}
+    `;
+
+  }catch(err){
+
+    console.error(err);
+
+    document.getElementById("uploadResult").innerHTML = `
+      ❌ Chyba importu
+    `;
+  }
+}
+
+async function uploadXlsx(warehouse){
+
+  const fileInput = document.getElementById("xlsxFile");
+
+  if(!fileInput.files.length){
+
+    alert("Vyber XLSX súbor.");
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append("file", fileInput.files[0]);
+  formData.append("warehouse", warehouse);
+
+  try{
+
+    const res = await fetch("/api/inventura/upload-xlsx", {
+
+      method:"POST",
+      body:formData
+
+    });
+
+    const data = await res.json();
+
+    document.getElementById("uploadResult").innerHTML = `
+      ✅ Import hotový<br>
+      Počet položiek: ${data.imported}
+    `;
+
+  }catch(err){
+
+    console.error(err);
+
+    document.getElementById("uploadResult").innerHTML = `
+      ❌ Chyba importu
+    `;
+  }
+}
+
+async function loadAllowedUsers(){
+
+  try{
+
+    const res = await fetch(
+      "/api/inventory/settings"
+    );
+
+    const data = await res.json();
+
+    if(!data.success) return;
+
+    document.getElementById(
+      "allowedUsersInput"
+    ).value =
+      (data.allowedUsers || []).join("\n");
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+async function saveAllowedUsers(){
+
+  const value =
+    document.getElementById(
+      "allowedUsersInput"
+    ).value;
+
+  const users =
+    value
+      .split("\n")
+      .map(v => v.trim())
+      .filter(Boolean);
+
+  try{
+
+    const res = await fetch(
+
+      "/api/inventory/settings",
+
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+          allowedUsers: users
+
+        })
+
+      }
+
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+      alert("Nepodarilo sa uložiť účty.");
+      return;
+
+    }
+
+    alert(
+      "Povolené účty uložené."
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+    alert(
+      "Chyba servera."
+    );
+
+  }
+
+}
+
+window.addEventListener(
+  "load",
+  loadAllowedUsers
+);
+
+</script>
+
+</body>
+</html>

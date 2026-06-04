@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Inventúry | Lištobook</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial,sans-serif;
+    }
+
+    body{
+      background:#1d2347;
+      min-height:100vh;
+      color:white;
+      padding:14px;
+    }
+
+    .app{
+      max-width:850px;
+      margin:0 auto;
+    }
+
+    .topbar{
+
+      background:#13204a;
+
+      border-radius:20px;
+
+      padding:18px;
+
+      display:flex;
+
+      justify-content:space-between;
+
+      align-items:center;
+
+      gap:12px;
+
+      margin-bottom:18px;
+
+      border:1px solid rgba(255,255,255,.08);
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+
+    }
+
+    .top-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .back-btn{
+
+      width:46px;
+      height:46px;
+
+      border-radius:14px;
+
+      border:1px solid rgba(255,255,255,.15);
+
+      background:rgba(255,255,255,.08);
+
+      color:white;
+
+      font-size:24px;
+
+      cursor:pointer;
+    }
+
+    .title{
+      font-size:28px;
+      font-weight:800;
+    }
+
+    .subtitle{
+      font-size:13px;
+      opacity:.7;
+      margin-top:2px;
+    }
+
+    .new-btn{
+
+      width:100%;
+
+      border:0;
+
+      border-radius:18px;
+
+      background:#18a558;
+
+      color:white;
+
+      font-size:20px;
+
+      font-weight:800;
+
+      padding:20px;
+
+      cursor:pointer;
+
+      margin-bottom:18px;
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+
+    }
+
+    .section-title{
+
+      font-size:18px;
+
+      font-weight:800;
+
+      margin-bottom:12px;
+
+      opacity:.9;
+    }
+
+    .inventory-list{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .inventory-card{
+
+      background:#13204a;
+
+      border-radius:20px;
+
+      padding:18px;
+
+      border:1px solid rgba(255,255,255,.08);
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+
+    }
+
+    .inventory-top{
+
+      display:flex;
+
+      justify-content:space-between;
+
+      align-items:flex-start;
+
+      gap:10px;
+
+      margin-bottom:12px;
+
+    }
+
+    .inventory-name{
+
+      font-size:22px;
+
+      font-weight:800;
+
+      margin-bottom:4px;
+
+    }
+
+    .inventory-meta{
+
+      font-size:14px;
+
+      opacity:.72;
+
+      line-height:1.5;
+    }
+
+    .badge{
+
+      padding:8px 12px;
+
+      border-radius:999px;
+
+      font-size:12px;
+
+      font-weight:800;
+
+      white-space:nowrap;
+    }
+
+    .badge.test{
+      background:#8b5cf6;
+    }
+
+    .badge.real{
+      background:#18a558;
+    }
+
+    .inventory-actions{
+
+      display:flex;
+
+      gap:10px;
+
+      flex-wrap:wrap;
+
+      margin-top:14px;
+
+    }
+
+    .action-btn{
+
+      flex:1;
+
+      min-width:120px;
+
+      border:0;
+
+      border-radius:14px;
+
+      background:#1c3363;
+
+      color:white;
+
+      padding:14px;
+
+      font-weight:700;
+
+      cursor:pointer;
+
+      transition:.15s;
+    }
+
+    .action-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .action-btn.primary{
+      background:#18a558;
+    }
+
+    @media(max-width:560px){
+
+      .topbar{
+        align-items:flex-start;
+      }
+
+      .title{
+        font-size:24px;
+      }
+
+      .inventory-top{
+        flex-direction:column;
+      }
+
+      .inventory-actions{
+        flex-direction:column;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <header class="topbar">
+
+      <div class="top-left">
+
+        <button
+          class="back-btn"
+          onclick="
+window.location.href=
+'timeline.html?email=' +
+encodeURIComponent(currentEmail)
+"
+        >
+          ←
+        </button>
+
+        <div>
+
+          <div class="title">
+            📦 Inventúry
+          </div>
+
+          <div class="subtitle">
+            Lištobook skladový systém
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <button
+      class="new-btn"
+      onclick="startNewInventory()"
+    >
+      ➕ ŠTART NOVEJ INVENTÚRY
+    </button>
+
+    <div class="section-title">
+      Aktívne inventúry
+    </div>
+
+    <section
+  class="inventory-list"
+  id="inventoryList"
+>
+
+</section>
+
+  </main>
+
+  <script>
+
+const params =
+  new URLSearchParams(window.location.search);
+
+const currentEmail =
+  params.get("email") || "";
+
+async function checkInventoryAccess(){
+
+  try{
+
+    const res = await fetch(
+      "/api/inventory/settings"
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+      location.href =
+        `timeline.html?email=${encodeURIComponent(currentEmail)}`;
+
+      return;
+    }
+
+    const allowedUsers =
+      data.allowedUsers || [];
+
+    if(
+      !allowedUsers.includes(currentEmail)
+    ){
+
+      location.href =
+        `timeline.html?email=${encodeURIComponent(currentEmail)}`;
+
+      return;
+    }
+
+  }catch(err){
+
+    console.error(err);
+
+    location.href =
+      `timeline.html?email=${encodeURIComponent(currentEmail)}`;
+  }
+
+}
+
+checkInventoryAccess();
+
+    function openInventory(id){
+
+      window.location.href =
+       "inventura.html?id=" +
+        id +
+        "&email=" +
+        encodeURIComponent(currentEmail);
+
+    }
+
+    async function startNewInventory(){
+
+  try{
+
+    const res = await fetch(
+
+      "/api/inventura/session/create",
+
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+          createdBy: currentEmail
+
+        })
+
+      }
+
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+      alert("Nepodarilo sa vytvoriť inventúru.");
+      return;
+
+    }
+
+    window.location.href =
+
+      "inventura.html?id=" +
+      data.session.id +
+      "&email=" +
+      encodeURIComponent(currentEmail);
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("Chyba servera.");
+
+  }
+
+}
+
+async function loadInventorySessions(){
+
+  try{
+
+    const res = await fetch(
+      "/api/inventura/sessions"
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+      return;
+    }
+
+    const inventoryList =
+      document.getElementById(
+        "inventoryList"
+      );
+
+    inventoryList.innerHTML = "";
+
+    data.sessions.forEach(session => {
+
+      const card =
+        document.createElement("article");
+
+      card.className =
+        "inventory-card";
+
+      const started =
+        new Date(session.startedAt)
+          .toLocaleString("sk-SK");
+
+      card.innerHTML = `
+
+        <div class="inventory-top">
+
+          <div>
+
+            <div class="inventory-name">
+              ${session.name}
+            </div>
+
+            <div class="inventory-meta">
+              📅 ${started}<br>
+              👤 ${session.createdByEmail}<br>
+              🏢 ${session.warehouse}
+            </div>
+
+          </div>
+
+          <div class="badge real">
+            ACTIVE
+          </div>
+
+        </div>
+
+        <div class="inventory-actions">
+
+  <button
+    class="action-btn primary"
+    onclick="openInventory('${session._id}')"
+  >
+    ▶ Pokračovať
+  </button>
+
+  <button
+    class="action-btn"
+    onclick="exportInventory('${session._id}')"
+  >
+    📄 Výstup
+  </button>
+
+  <button
+    class="action-btn"
+    onclick="deleteInventory('${session._id}')"
+  >
+    🗑 Vymazať
+  </button>
+
+</div>
+
+      `;
+
+      inventoryList.appendChild(card);
+
+    });
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+loadInventorySessions();
+
+  
+async function deleteInventory(id){
+
+  const confirmed =
+    confirm(
+      "Naozaj chceš vymazať inventúru?"
+    );
+
+  if(!confirmed){
+    return;
+  }
+
+  try{
+
+    const res = await fetch(
+
+      "/api/inventura/session/delete/" + id,
+
+      {
+        method: "DELETE"
+      }
+
+    );
+
+    const data = await res.json();
+
+    if(!data.success){
+
+      alert("Nepodarilo sa vymazať inventúru.");
+      return;
+
+    }
+
+    loadInventorySessions();
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("Chyba servera.");
+
+  }
+
+}
+
+function exportInventory(id){
+
+  alert(
+    "Export inventúry pripravíme v ďalšom kroku 🙂"
+  );
+
+}
+</script>
+</body>
+</html>

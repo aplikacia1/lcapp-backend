@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lištobook Inventúra</title>
+
+  <style>
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:Arial,sans-serif;
+    }
+
+    body{
+      min-height:100vh;
+      background:#1d2347;
+      color:white;
+      padding:14px;
+    }
+
+    .app{
+      max-width:760px;
+      margin:0 auto;
+    }
+
+    .topbar{
+      background:#13204a;
+      border-radius:18px;
+      padding:14px 16px;
+      margin-bottom:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .top-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .back-btn{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.08);
+      color:white;
+      font-size:22px;
+      cursor:pointer;
+    }
+
+    .title{
+      font-size:24px;
+      font-weight:800;
+    }
+
+    .user{
+      font-size:13px;
+      opacity:.75;
+      text-align:right;
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .small-btn{
+      flex:1;
+      min-width:110px;
+      border:0;
+      border-radius:14px;
+      background:#13284d;
+      color:white;
+      padding:13px 10px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.15s;
+    }
+
+    .small-btn:hover{
+      transform:translateY(-1px);
+    }
+
+    .scanner{
+      background:#13204a;
+      border-radius:20px;
+      padding:18px;
+      margin-bottom:14px;
+      border:1px solid rgba(255,255,255,.08);
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .scanner-title{
+      font-size:22px;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .camera-box{
+      height:180px;
+      border:2px dashed rgba(255,255,255,.18);
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:rgba(255,255,255,.65);
+      margin-bottom:14px;
+      overflow:hidden;
+      position:relative;
+      background:rgba(0,0,0,.08);
+    }
+
+    .manual-label{
+      font-size:14px;
+      opacity:.8;
+      margin-bottom:8px;
+    }
+
+    .scan-input{
+      width:100%;
+      height:60px;
+      border:0;
+      outline:0;
+      border-radius:16px;
+      background:#1c3363;
+      color:white;
+      font-size:24px;
+      padding:0 16px;
+      text-transform:uppercase;
+    }
+
+    .product-card{
+      background:#13204a;
+      border-radius:20px;
+      padding:18px;
+      border:1px solid rgba(255,255,255,.08);
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .status{
+      font-size:13px;
+      opacity:.65;
+      margin-bottom:10px;
+      letter-spacing:.5px;
+    }
+
+    .product-name{
+      font-size:28px;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .product-code{
+      font-size:15px;
+      opacity:.8;
+      margin-bottom:10px;
+    }
+
+    .stock{
+      font-size:22px;
+      margin-bottom:14px;
+    }
+
+    .count-input{
+      width:100%;
+      height:66px;
+      border:0;
+      outline:0;
+      border-radius:16px;
+      background:#1c3363;
+      color:white;
+      font-size:30px;
+      padding:0 16px;
+      margin-bottom:12px;
+    }
+
+    .save-btn{
+      width:100%;
+      height:68px;
+      border:0;
+      border-radius:16px;
+      background:#18a558;
+      color:white;
+      font-size:22px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .message{
+      margin-top:12px;
+      background:#102a4f;
+      border-radius:12px;
+      padding:12px;
+      font-size:14px;
+      display:none;
+    }
+
+    .message.ok{
+      display:block;
+      background:#143f2b;
+    }
+
+    .message.err{
+      display:block;
+      background:#4a1820;
+    }
+
+    @media(max-width:520px){
+
+      body{
+        padding:10px;
+      }
+
+      .topbar{
+        align-items:flex-start;
+      }
+
+      .title{
+        font-size:21px;
+      }
+
+      .user{
+        font-size:12px;
+      }
+
+      .camera-box{
+        height:150px;
+      }
+
+      .product-name{
+        font-size:22px;
+      }
+
+      .save-btn{
+        font-size:18px;
+      }
+
+      .actions{
+        flex-direction:column;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <header class="topbar">
+
+      <div class="top-left">
+
+        <button
+          class="back-btn"
+          onclick="
+window.location.href=
+'inventury.html?email=' +
+encodeURIComponent(currentEmail)
+"
+        >
+          ←
+        </button>
+
+        <div class="title">
+          📦 Inventúra
+        </div>
+
+      </div>
+
+      <div class="user">
+        Prihlásený:<br>
+        <strong>Marcel</strong>
+      </div>
+
+    </header>
+
+    <div class="actions">
+
+      <button
+        id="warehouseBA"
+        class="small-btn"
+        onclick="setWarehouse('BA')"
+      >
+        🏢 BA
+      </button>
+
+      <button
+        id="warehouseZA"
+        class="small-btn"
+        onclick="setWarehouse('ZA')"
+      >
+        🏢 ZA
+      </button>
+
+      <button class="small-btn">
+        📄 Výstup
+      </button>
+
+      <button class="small-btn">
+        🔍 Kontrola
+      </button>
+
+      <button class="small-btn">
+        ⚙ Admin
+      </button>
+
+    </div>
+
+    <section class="scanner">
+
+      <div class="scanner-title">
+        Zosnímaj produkt
+      </div>
+
+      <div class="camera-box">
+
+        <video
+          id="camera"
+          autoplay
+          playsinline
+          muted
+        ></video>
+
+      </div>
+
+      <div class="manual-label">
+        Alebo napíš kód ručne
+      </div>
+
+      <input
+        id="scanInput"
+        class="scan-input"
+        placeholder="napr. Q110E"
+        autofocus
+      />
+
+    </section>
+
+    <section class="product-card">
+
+      <div class="status">
+        AKTUÁLNE NÁJDENÝ PRODUKT
+      </div>
+
+      <div id="productName" class="product-name">
+        Čakám na produkt…
+      </div>
+
+      <div id="productCode" class="product-code">
+        Kód: —
+      </div>
+
+      <div id="productStock" class="stock">
+        Systémový stav: —
+      </div>
+
+      <input
+        id="countInput"
+        class="count-input"
+        type="number"
+        placeholder="Reálny počet"
+      />
+
+      <button
+        id="saveBtn"
+        class="save-btn"
+      >
+        ✔ POTVRDIŤ A POKRAČOVAŤ
+      </button>
+
+      <div id="message" class="message"></div>
+
+    </section>
+
+  </main>
+
+  <script src="inventura.js"></script>
+
+</body>
+</html>
