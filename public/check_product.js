@@ -271,99 +271,57 @@ async function startCamera() {
 
 function startBarcodeScanner(video) {
 
-  if (!("BarcodeDetector" in window)) {
+  if (
+    !window.ZXing ||
+    !ZXing.BrowserMultiFormatReader
+  ) {
 
     console.warn(
-      "BarcodeDetector nie je v tomto zariadení podporovaný."
+      "ZXing sa nepodarilo načítať."
     );
 
     return;
   }
 
-  try {
+  const codeReader =
+    new ZXing.BrowserMultiFormatReader();
 
-    barcodeDetector =
-      new BarcodeDetector({
-        formats: [
-          "ean_13",
-          "ean_8",
-          "code_128",
-          "code_39",
-          "qr_code",
-          "upc_a",
-          "upc_e"
-        ]
-      });
+  codeReader.decodeFromVideoElementContinuously(
 
-  } catch (err) {
+    video,
 
-    console.error(
-      "Čítačka čiarových kódov sa nepodarila spustiť:",
-      err
-    );
+    (result, err) => {
 
-    return;
-  }
+      if (result) {
 
-  scanningActive = true;
+        const code =
+          result.text;
 
-  async function scanLoop() {
+        const now =
+          Date.now();
 
-    if (!scanningActive) return;
+        if (
+          code &&
+          (
+            code !== lastScannedCode ||
+            now - lastScanTime > 2500
+          )
+        ) {
 
-    try {
+          lastScannedCode = code;
+          lastScanTime = now;
 
-      if (
-        video.readyState >= 2 &&
-        barcodeDetector
-      ) {
+          scanInput.value = code;
 
-        const codes =
-          await barcodeDetector.detect(video);
-
-        if (codes && codes.length > 0) {
-
-          const code =
-            codes[0].rawValue;
-
-          const now =
-            Date.now();
-
-          if (
-            code &&
-            (
-              code !== lastScannedCode ||
-              now - lastScanTime > 2500
-            )
-          ) {
-
-            lastScannedCode = code;
-            lastScanTime = now;
-
-            scanInput.value = code;
-
-            await showProductByCode(code);
-
-          }
+          showProductByCode(code);
 
         }
 
       }
 
-    } catch (err) {
-
-      console.error(
-        "Chyba pri čítaní čiarového kódu:",
-        err
-      );
-
     }
 
-    requestAnimationFrame(scanLoop);
-
-  }
-
-  scanLoop();
+  );
 
 }
 
