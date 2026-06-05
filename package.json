@@ -4,9 +4,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "seed:lcapp": "node copy-test-to-lcapp.js"
-  },
+  "start": "node index.js",
+  "seed:lcapp": "node copy-test-to-lcapp.js",
+  "postinstall": "npx puppeteer browsers install chrome"
+},
   "engines": {
     "node": ">=18"
   },
