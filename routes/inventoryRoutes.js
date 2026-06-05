@@ -167,13 +167,25 @@ router.get("/product/:code", async (req, res) => {
 
     const product = await InventoryRecord.findOne({
 
-      warehouse: req.query.warehouse || "BA",
+  warehouse: req.query.warehouse || "BA",
 
+  $or: [
+
+    {
       productCode: {
         $regex: new RegExp("^" + code + "$", "i")
       }
+    },
 
-    });
+    {
+      barcode: {
+        $regex: new RegExp("^" + code + "$", "i")
+      }
+    }
+
+  ]
+
+});
 
     if (!product) {
 
@@ -221,16 +233,31 @@ router.get("/check-product/:code", async (req, res) => {
       req.params.code.trim();
 
     const records =
-      await InventoryRecord.find({
+  await InventoryRecord.find({
 
+    $or: [
+
+      {
         productCode: {
           $regex: new RegExp(
             "^" + code + "$",
             "i"
           )
         }
+      },
 
-      });
+      {
+        barcode: {
+          $regex: new RegExp(
+            "^" + code + "$",
+            "i"
+          )
+        }
+      }
+
+    ]
+
+  });
 
     if (!records.length) {
 
