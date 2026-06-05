@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
   "start": "node index.js",
-  "seed:lcapp": "node copy-test-to-lcapp.js",
-  "postinstall": "npx puppeteer browsers install chrome"
+  "seed:lcapp": "node copy-test-to-lcapp.js"
 },
   "engines": {
     "node": ">=18"
