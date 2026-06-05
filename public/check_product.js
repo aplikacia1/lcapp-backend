@@ -298,42 +298,43 @@ function startBarcodeScanner(video) {
   const codeReader =
     new ZXingBrowser.BrowserMultiFormatReader();
 
-  codeReader.decodeFromVideoElementContinuously(
+  codeReader.decodeFromVideoDevice(
 
-    video,
+  undefined,
+  video,
 
-    (result, err) => {
+  (result, err) => {
 
-      if (result) {
+    if (result) {
 
-        const code =
-          result.text;
+      const code =
+        result.text;
 
-        const now =
-          Date.now();
+      const now =
+        Date.now();
 
-        if (
-          code &&
-          (
-            code !== lastScannedCode ||
-            now - lastScanTime > 2500
-          )
-        ) {
+      if (
+        code &&
+        (
+          code !== lastScannedCode ||
+          now - lastScanTime > 2500
+        )
+      ) {
 
-          lastScannedCode = code;
-          lastScanTime = now;
+        lastScannedCode = code;
+        lastScanTime = now;
 
-          scanInput.value = code;
+        scanInput.value = code;
 
-          showProductByCode(code);
-
-        }
+        showProductByCode(code);
 
       }
 
     }
 
-  );
+  }
+
+);
 
 }
 
