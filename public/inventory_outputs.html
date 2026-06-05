@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+
+<meta charset="UTF-8" />
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
+
+<title>Výstupy inventúry</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#1d2347;
+  min-height:100vh;
+  color:white;
+  padding:14px;
+}
+
+.app{
+  max-width:850px;
+  margin:0 auto;
+}
+
+.topbar{
+
+  background:#13204a;
+
+  border-radius:20px;
+
+  padding:18px;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+  margin-bottom:18px;
+
+  border:1px solid rgba(255,255,255,.08);
+
+}
+
+.back-btn{
+
+  width:46px;
+  height:46px;
+
+  border-radius:14px;
+
+  border:1px solid rgba(255,255,255,.15);
+
+  background:rgba(255,255,255,.08);
+
+  color:white;
+
+  font-size:24px;
+
+  cursor:pointer;
+
+}
+
+.title{
+  font-size:28px;
+  font-weight:800;
+}
+
+.subtitle{
+  font-size:13px;
+  opacity:.7;
+  margin-top:2px;
+}
+
+.section{
+
+  background:#13204a;
+
+  border-radius:20px;
+
+  padding:18px;
+
+  margin-bottom:16px;
+
+  border:1px solid rgba(255,255,255,.08);
+
+}
+
+.section-title{
+
+  font-size:22px;
+
+  font-weight:800;
+
+  margin-bottom:10px;
+
+}
+
+.section-desc{
+
+  opacity:.75;
+
+  line-height:1.5;
+
+  margin-bottom:16px;
+
+}
+
+.actions{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+}
+
+.action-btn{
+
+  flex:1;
+
+  min-width:220px;
+
+  border:0;
+
+  border-radius:14px;
+
+  background:#1c3363;
+
+  color:white;
+
+  padding:16px;
+
+  font-size:16px;
+
+  font-weight:700;
+
+  cursor:pointer;
+
+}
+
+.action-btn.primary{
+  background:#18a558;
+}
+
+@media(max-width:560px){
+
+  .actions{
+    flex-direction:column;
+  }
+
+  .title{
+    font-size:24px;
+  }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<main class="app">
+
+  <header class="topbar">
+
+    <button
+      class="back-btn"
+      onclick="goBack()"
+    >
+      ←
+    </button>
+
+    <div>
+
+      <div class="title">
+        📄 Výstupy inventúry
+      </div>
+
+      <div class="subtitle">
+        Lištobook skladový systém
+      </div>
+
+    </div>
+
+  </header>
+
+  <section class="section">
+
+    <div class="section-title">
+      📘 Počiatočný stav skladu
+    </div>
+
+    <div class="section-desc">
+
+      Vygenerovanie PDF dokumentu
+      s očakávanými množstvami zo systému.
+
+    </div>
+
+    <div class="actions">
+
+      <button
+  class="action-btn primary"
+  onclick="generateStartPdf()"
+>
+  📄 Vygenerovať PDF
+</button>
+
+      <button
+  class="action-btn"
+  onclick="sendStartStateEmail()"
+>
+  ✉ Poslať mailom
+</button>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      📗 Konečný stav inventúry
+    </div>
+
+    <div class="section-desc">
+
+      PDF report s reálnymi množstvami,
+      rozdielmi a hodnotou inventúry.
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        class="action-btn primary"
+      >
+        📄 Vygenerovať PDF
+      </button>
+
+      <button
+        class="action-btn"
+      >
+        ✉ Poslať mailom
+      </button>
+
+    </div>
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-title">
+      📊 Oberon export
+    </div>
+
+    <div class="section-desc">
+
+      Export inventúry vo formáte XLSX
+      pripravený pre systém Oberon.
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        class="action-btn primary"
+      >
+        📥 Stiahnuť XLSX
+      </button>
+
+      <button
+        class="action-btn"
+      >
+        ✉ Poslať mailom
+      </button>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const params =
+  new URLSearchParams(window.location.search);
+
+const currentEmail =
+  params.get("email") || "";
+
+  const inventoryId =
+  params.get("id") || "";
+
+  const warehouse =
+  params.get("warehouse") || "BA";
+
+function goBack(){
+
+  window.location.href =
+
+    "inventury.html?email=" +
+    encodeURIComponent(currentEmail);
+
+}
+
+function generateStartPdf(){
+
+  window.open(
+
+    "/api/inventura/pdf/start-state/" +
+    inventoryId +
+    "/" +
+    warehouse,
+
+    "_blank"
+
+  );
+
+}
+
+async function sendStartStateEmail(){
+
+  try{
+
+    const res = await fetch(
+
+      "/api/inventura/pdf/send-start-state-email/" +
+inventoryId +
+"/" +
+warehouse,
+
+      {
+        method: "POST"
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    if(!data.success){
+
+      alert(
+        "Nepodarilo sa odoslať email."
+      );
+
+      return;
+    }
+
+    alert(
+      "Email bol odoslaný 🙂"
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+    alert(
+      "Chyba servera."
+    );
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>

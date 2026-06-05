@@ -11,8 +11,9 @@ const InventorySession =
   try{
 
     const {
-      createdBy
-    } = req.body;
+  createdBy,
+  warehouse
+} = req.body;
 
     const expiresAt =
       new Date(
@@ -27,7 +28,8 @@ const InventorySession =
     "Inventúra " +
     new Date().toLocaleDateString("sk-SK"),
 
-  warehouse: "BA",
+  warehouse:
+  warehouse || "BA",
 
   createdByEmail:
     createdBy,

@@ -204,6 +204,11 @@ mountRoute(
 mountRoute("/api/inventura",      "./routes/inventoryImportRoutes");
 mountRoute("/api/transfers",      "./routes/transferRoutes");
 
+mountRoute(
+  "/api/inventura/pdf",
+  "./routes/inventoryPdfRoutes"
+);
+
 // ✅ PDF routes (test + html->pdf) – obe pod /api/pdf
 mountRoute('/api/pdf',            './routes/pdfTestRoutes');
 mountRoute('/api/pdf',            './routes/pdfHtmlRoutes');

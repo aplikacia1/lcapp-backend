@@ -266,6 +266,133 @@
 
     }
 
+    .warehouse-modal{
+
+  position:fixed;
+
+  inset:0;
+
+  background:rgba(0,0,0,.6);
+
+  display:none;
+
+  align-items:center;
+
+  justify-content:center;
+
+  z-index:9999;
+
+  padding:20px;
+
+}
+
+.warehouse-modal.show{
+  display:flex;
+}
+
+.warehouse-box{
+
+  width:100%;
+
+  max-width:420px;
+
+  background:#13204a;
+
+  border-radius:24px;
+
+  padding:24px;
+
+  border:1px solid rgba(255,255,255,.08);
+
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.45);
+
+}
+
+.warehouse-title{
+
+  font-size:24px;
+
+  font-weight:800;
+
+  margin-bottom:8px;
+
+}
+
+.warehouse-subtitle{
+
+  opacity:.7;
+
+  margin-bottom:20px;
+
+  line-height:1.5;
+
+}
+
+.warehouse-buttons{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:12px;
+
+}
+
+.warehouse-btn{
+
+  border:0;
+
+  border-radius:18px;
+
+  background:#1c3363;
+
+  color:white;
+
+  padding:18px;
+
+  font-size:18px;
+
+  font-weight:800;
+
+  cursor:pointer;
+
+  transition:.15s;
+
+}
+
+.warehouse-btn:hover{
+  transform:translateY(-1px);
+}
+
+.warehouse-btn.ba{
+  background:#18a558;
+}
+
+.warehouse-btn.za{
+  background:#3158d3;
+}
+
+.warehouse-close{
+
+  margin-top:16px;
+
+  width:100%;
+
+  border:0;
+
+  border-radius:14px;
+
+  background:rgba(255,255,255,.08);
+
+  color:white;
+
+  padding:14px;
+
+  cursor:pointer;
+
+}
+
   </style>
 </head>
 
@@ -321,7 +448,49 @@ encodeURIComponent(currentEmail)
 >
 
 </section>
+<div
+  class="warehouse-modal"
+  id="warehouseModal"
+>
 
+  <div class="warehouse-box">
+
+    <div class="warehouse-title">
+      📦 Nová inventúra
+    </div>
+
+    <div class="warehouse-subtitle">
+      Vyber sklad pre novú inventúru.
+    </div>
+
+    <div class="warehouse-buttons">
+
+      <button
+        class="warehouse-btn ba"
+        onclick="createInventory('BA')"
+      >
+        🏢 Bratislava
+      </button>
+
+      <button
+        class="warehouse-btn za"
+        onclick="createInventory('ZA')"
+      >
+        🏢 Žilina
+      </button>
+
+    </div>
+
+    <button
+      class="warehouse-close"
+      onclick="closeWarehouseModal()"
+    >
+      Zavrieť
+    </button>
+
+  </div>
+
+</div>
   </main>
 
   <script>
@@ -385,7 +554,23 @@ checkInventoryAccess();
 
     }
 
-    async function startNewInventory(){
+   function startNewInventory(){
+
+  document
+    .getElementById("warehouseModal")
+    .classList.add("show");
+
+}
+
+function closeWarehouseModal(){
+
+  document
+    .getElementById("warehouseModal")
+    .classList.remove("show");
+
+}
+
+async function createInventory(warehouse){
 
   try{
 
@@ -403,7 +588,9 @@ checkInventoryAccess();
 
         body: JSON.stringify({
 
-          createdBy: currentEmail
+          createdBy: currentEmail,
+
+          warehouse
 
         })
 
@@ -505,7 +692,7 @@ async function loadInventorySessions(){
 
   <button
     class="action-btn"
-    onclick="exportInventory('${session._id}')"
+    onclick="exportInventory('${session._id}', '${session.warehouse}')"
   >
     📄 Výstup
   </button>
@@ -580,11 +767,16 @@ async function deleteInventory(id){
 
 }
 
-function exportInventory(id){
+function exportInventory(id, warehouse){
 
-  alert(
-    "Export inventúry pripravíme v ďalšom kroku 🙂"
-  );
+  window.location.href =
+
+    "inventory_outputs.html?id=" +
+    id +
+    "&warehouse=" +
+    encodeURIComponent(warehouse) +
+    "&email=" +
+    encodeURIComponent(currentEmail);
 
 }
 </script>
