@@ -78,7 +78,7 @@ function initComposer() {
 
   add.addEventListener("click", () => {
 
-  alert("SPINKA FUNGUJE");
+
 
   file.click();
 
