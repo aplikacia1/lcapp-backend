@@ -1,3 +1,4 @@
+console.log("TIMELINE TEST 444");
 // ────────── Pomôcky ──────────
 function getEmailFromURL() {
   const p = new URLSearchParams(location.search);
@@ -75,7 +76,13 @@ function initComposer() {
     btn.disabled = !text.value.trim() && selected.length === 0;
   };
 
-  add.addEventListener("click", () => file.click());
+  add.addEventListener("click", () => {
+
+  alert("SPINKA FUNGUJE");
+
+  file.click();
+
+});
 
   file.addEventListener("change", () => {
     selected = Array.from(file.files || []).slice(0,3);
@@ -530,7 +537,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem("pendingPushUrl", event.data.url);
   }
 });
-setTimeout(() => showPushPromptSmart(), 3000);
+// setTimeout(() => showPushPromptSmart(), 3000);
 // 🔥 Android resume fix
 document.addEventListener("visibilitychange", () => {
 
@@ -555,14 +562,35 @@ document.addEventListener("visibilitychange", () => {
 // =======================================================
 // NOTIFIKÁCIE – popup len raz
 // =======================================================
-async function showPushPromptSmart() {
+
+  async function showPushPromptSmart() {
+  return;
+
 
   // 👉 ak už má subscription → nič nerob
-  if ("serviceWorker" in navigator) {
+  if (
+  "serviceWorker" in navigator &&
+  "PushManager" in window
+) {
+  try {
+
     const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.getSubscription();
-    if (sub) return;
+
+    if (
+      reg &&
+      reg.pushManager &&
+      typeof reg.pushManager.getSubscription === "function"
+    ) {
+      const sub =
+        await reg.pushManager.getSubscription();
+
+      if (sub) return;
+    }
+
+  } catch(err) {
+    console.log("Push check skipped", err);
   }
+}
 
   const now = Date.now();
   const last = parseInt(localStorage.getItem("pushPromptLast") || "0");
