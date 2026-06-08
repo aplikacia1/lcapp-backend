@@ -53,11 +53,18 @@ router.get(
         });
 
       const browser =
-        await puppeteer.launch({
+  await puppeteer.launch({
 
-          headless: true
+    headless: true,
 
-        });
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ]
+
+  });
 
       const page =
         await browser.newPage();
