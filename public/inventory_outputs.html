@@ -319,16 +319,12 @@ function goBack(){
 
 function generateStartPdf(){
 
-  window.open(
+  window.location.href =
 
     "/api/inventura/pdf/start-state/" +
     inventoryId +
     "/" +
-    warehouse,
-
-    "_blank"
-
-  );
+    warehouse;
 
 }
 
