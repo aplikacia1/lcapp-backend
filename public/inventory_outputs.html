@@ -279,10 +279,11 @@ body{
     <div class="actions">
 
       <button
-        class="action-btn primary"
-      >
-        📥 Stiahnuť XLSX
-      </button>
+  class="action-btn primary"
+  onclick="generateXlsx()"
+>
+  📥 Stiahnuť XLSX
+</button>
 
       <button
         class="action-btn"
@@ -427,6 +428,17 @@ async function sendFinalStateEmail(){
     );
 
   }
+
+}
+
+function generateXlsx(){
+
+  window.location.href =
+
+    "/api/inventura/xlsx/final-state/" +
+    inventoryId +
+    "/" +
+    warehouse;
 
 }
 
