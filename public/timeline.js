@@ -72,16 +72,18 @@ function initComposer() {
   const MAX = 300;
 
   const up = () => {
-    cnt.textContent = `${text.value.length} / ${MAX}`;
-    btn.disabled = !text.value.trim() && selected.length === 0;
-  };
+  cnt.textContent = `${text.value.length} / ${MAX}`;
+  btn.disabled = !text.value.trim() && selected.length === 0;
+
+  if (selected.length > 0) {
+    add.textContent = `📎${selected.length}`;
+  } else {
+    add.textContent = "📎";
+  }
+};
 
   add.addEventListener("click", () => {
-
-
-
   file.click();
-
 });
 
   file.addEventListener("change", () => {
@@ -919,6 +921,49 @@ function openGallery(images, startIndex = 0){
   img.src = images[index];
   img.style = "max-width:95%; max-height:95%; border-radius:12px;";
   overlay.appendChild(img);
+
+  const left = document.createElement("div");
+left.innerHTML = "◀";
+left.style = `
+  position:absolute;
+  left:15px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:40px;
+  color:white;
+  font-weight:bold;
+  pointer-events:none;
+`;
+
+const right = document.createElement("div");
+right.innerHTML = "▶";
+right.style = `
+  position:absolute;
+  right:15px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:40px;
+  color:white;
+  font-weight:bold;
+  pointer-events:none;
+`;
+
+const close = document.createElement("div");
+close.innerHTML = "✕";
+close.style = `
+  position:absolute;
+  top:15px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:34px;
+  color:white;
+  font-weight:bold;
+  pointer-events:none;
+`;
+
+overlay.appendChild(left);
+overlay.appendChild(right);
+overlay.appendChild(close);
 
   overlay.addEventListener("click", (e) => {
     const w = window.innerWidth;

@@ -88,13 +88,7 @@ const productDescription =
 
 const resetBtn =
   document.getElementById("resetBtn");
-
-  const captureBtn =
-  document.getElementById("captureBtn");
-
-const captureCanvas =
-  document.getElementById("captureCanvas");
-
+  
 const video =
   document.getElementById("camera");
 

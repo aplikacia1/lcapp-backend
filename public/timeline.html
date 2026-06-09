@@ -735,7 +735,7 @@
   id="postImage"
   type="file"
   accept="image/*"
-  capture="environment"
+  multiple
   hidden
 />
           </div>
@@ -913,53 +913,70 @@
       document.getElementById('calcBtn')?.addEventListener('click', ()=> go('kalkulacky.html'));
       document.getElementById('messagesBtn')?.addEventListener('click', ()=> go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', ()=> go('index.html'));
-      const allowedInventoryUsers = [
+      (async () => {
 
-  "sabla.marcel@gmail.com",
+  try {
 
-  "info@listovecentrum.sk"
+    const res =
+      await fetch(
+        "/api/inventory/settings"
+      );
 
-];
+    const data =
+      await res.json();
 
-if (
-  allowedInventoryUsers.includes(email)
-) {
+    if (
+      !data.success
+    ) return;
 
-  const inventoryBtn =
-    document.getElementById(
-      'inventoryBtn'
-    );
+    const allowedUsers =
+      data.allowedUsers || [];
 
-  const priceCheckBtn =
-    document.getElementById(
-      'priceCheckBtn'
-    );
+    if (
+      !allowedUsers.includes(email)
+    ) return;
 
-  if (inventoryBtn) {
+    const inventoryBtn =
+      document.getElementById(
+        "inventoryBtn"
+      );
 
-    inventoryBtn.style.display =
-      'flex';
+    const priceCheckBtn =
+      document.getElementById(
+        "priceCheckBtn"
+      );
 
-    inventoryBtn.addEventListener(
-      'click',
-      () => go('inventury.html')
-    );
+    if (inventoryBtn) {
+
+      inventoryBtn.style.display =
+        "flex";
+
+      inventoryBtn.addEventListener(
+        "click",
+        () => go("inventury.html")
+      );
+
+    }
+
+    if (priceCheckBtn) {
+
+      priceCheckBtn.style.display =
+        "flex";
+
+      priceCheckBtn.addEventListener(
+        "click",
+        () => go("check_product.html")
+      );
+
+    }
+
+  } catch (err) {
+
+    console.error(err);
 
   }
 
-  if (priceCheckBtn) {
-
-    priceCheckBtn.style.display =
-      'flex';
-
-    priceCheckBtn.addEventListener(
-      'click',
-      () => go('check_product.html')
-    );
-
-  }
-
-}
+})(); 
 
       // žltý badge pre Správy – načítanie neprečítaných
       const badgeEl = document.getElementById('messagesBadge');

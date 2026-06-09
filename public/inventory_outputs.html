@@ -246,10 +246,11 @@ body{
     <div class="actions">
 
       <button
-        class="action-btn primary"
-      >
-        📄 Vygenerovať PDF
-      </button>
+  class="action-btn primary"
+  onclick="generateFinalPdf()"
+>
+  📄 Vygenerovať PDF
+</button>
 
       <button
         class="action-btn"
@@ -322,6 +323,16 @@ function generateStartPdf(){
   window.location.href =
 
     "/api/inventura/pdf/start-state/" +
+    inventoryId +
+    "/" +
+    warehouse;
+
+}
+function generateFinalPdf(){
+
+  window.location.href =
+
+    "/api/inventura/pdf/final-state/" +
     inventoryId +
     "/" +
     warehouse;
