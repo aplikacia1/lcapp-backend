@@ -10,6 +10,10 @@ const {
   generateInventoryPdfBuffer
 } = require("../utils/pdf/pdfInventory");
 
+const {
+  generateInventoryPdfBuffer: generateInventoryFinalPdfBuffer
+} = require("../utils/pdf/pdfInventoryFinal");
+
 const InventoryRecord =
   require("../models/InventoryRecord");
 
@@ -166,7 +170,7 @@ const records =
   });
 
       const pdfBuffer =
-  await generateInventoryPdfBuffer({
+  await generateInventoryFinalPdfBuffer({
 
     warehouse,
     records,
@@ -383,7 +387,7 @@ router.post(
         });
 
       const pdfBuffer =
-        await generateInventoryPdfBuffer({
+        await generateInventoryFinalPdfBuffer({
 
           warehouse,
 

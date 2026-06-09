@@ -34,13 +34,30 @@ async function generateInventoryPdfBuffer({
     doc.font(fontPath);
 
     // =========================
-    // TITULKA
+    // VÝPOČTY
+    // =========================
+
+    const countedProducts = records.filter(
+      r => r.countedQty !== undefined &&
+           r.countedQty !== null
+    ).length;
+
+    const notCountedProducts =
+      records.length - countedProducts;
+
+    const totalDifference = records.reduce(
+      (sum, item) =>
+        sum + Number(item.difference || 0),
+      0
+    );
+
+    // =========================
+    // TITULNÁ STRANA
     // =========================
 
     doc.fontSize(24);
-
     doc.text(
-      "INVENTÚRNY PODKLAD",
+      "INVENTÚRNY VÝSTUP",
       {
         align: "center"
       }
@@ -69,8 +86,22 @@ async function generateInventoryPdfBuffer({
       `Dátum exportu: ${generatedAt}`
     );
 
+    doc.moveDown();
+
     doc.text(
       `Počet produktov: ${records.length}`
+    );
+
+    doc.text(
+      `Spočítané produkty: ${countedProducts}`
+    );
+
+    doc.text(
+      `Nespočítané produkty: ${notCountedProducts}`
+    );
+
+    doc.text(
+      `Celkový rozdiel: ${totalDifference}`
     );
 
     // =========================
@@ -81,7 +112,7 @@ async function generateInventoryPdfBuffer({
 
     doc.fontSize(16);
     doc.text(
-      "Stav skladu"
+      "Konečný stav inventúry"
     );
 
     doc.moveDown();
@@ -91,9 +122,11 @@ async function generateInventoryPdfBuffer({
     doc.fontSize(9);
 
     doc.text("#", 40, startY);
-    doc.text("Kód", 70, startY);
-    doc.text("Názov", 150, startY);
-    doc.text("Stav", 500, startY);
+    doc.text("Kód", 65, startY);
+    doc.text("Názov", 140, startY);
+    doc.text("Systém", 360, startY);
+    doc.text("Reál", 430, startY);
+    doc.text("Rozdiel", 490, startY);
 
     doc.moveTo(40, startY + 15)
       .lineTo(555, startY + 15)
@@ -109,10 +142,14 @@ async function generateInventoryPdfBuffer({
 
         y = 40;
 
+        doc.fontSize(9);
+
         doc.text("#", 40, y);
-        doc.text("Kód", 70, y);
-        doc.text("Názov", 150, y);
-        doc.text("Stav", 500, y);
+        doc.text("Kód", 65, y);
+        doc.text("Názov", 140, y);
+        doc.text("Systém", 360, y);
+        doc.text("Reál", 430, y);
+        doc.text("Rozdiel", 490, y);
 
         doc.moveTo(40, y + 15)
           .lineTo(555, y + 15)
@@ -132,23 +169,37 @@ async function generateInventoryPdfBuffer({
 
       doc.text(
         item.productCode || "-",
-        70,
+        65,
         y,
         { width: 70 }
       );
 
       doc.text(
         item.productName || "-",
-        150,
+        140,
         y,
-        { width: 330 }
+        { width: 210 }
       );
 
       doc.text(
         String(item.systemStock ?? 0),
-        500,
+        360,
         y,
-        { width: 40 }
+        { width: 60 }
+      );
+
+      doc.text(
+        String(item.countedQty ?? ""),
+        430,
+        y,
+        { width: 50 }
+      );
+
+      doc.text(
+        String(item.difference ?? 0),
+        490,
+        y,
+        { width: 50 }
       );
 
       y += 18;

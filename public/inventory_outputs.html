@@ -253,10 +253,11 @@ body{
 </button>
 
       <button
-        class="action-btn"
-      >
-        ✉ Poslať mailom
-      </button>
+  class="action-btn"
+  onclick="sendFinalStateEmail()"
+>
+  ✉ Poslať mailom
+</button>
 
     </div>
 
@@ -370,6 +371,51 @@ warehouse,
 
     alert(
       "Email bol odoslaný 🙂"
+    );
+
+  }catch(err){
+
+    console.error(err);
+
+    alert(
+      "Chyba servera."
+    );
+
+  }
+
+}
+
+async function sendFinalStateEmail(){
+
+  try{
+
+    const res = await fetch(
+
+      "/api/inventura/pdf/send-final-state-email/" +
+      inventoryId +
+      "/" +
+      warehouse,
+
+      {
+        method: "POST"
+      }
+
+    );
+
+    const data =
+      await res.json();
+
+    if(!data.success){
+
+      alert(
+        "Nepodarilo sa odoslať email."
+      );
+
+      return;
+    }
+
+    alert(
+      "Finálny inventúrny výstup bol odoslaný 🙂"
     );
 
   }catch(err){

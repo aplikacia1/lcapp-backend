@@ -209,6 +209,11 @@ mountRoute(
   "./routes/inventoryPdfRoutes"
 );
 
+mountRoute(
+  "/api/inventura/xlsx",
+  "./routes/inventoryExcelRoutes"
+);
+
 // ✅ PDF routes (test + html->pdf) – obe pod /api/pdf
 mountRoute('/api/pdf',            './routes/pdfTestRoutes');
 mountRoute('/api/pdf',            './routes/pdfHtmlRoutes');
