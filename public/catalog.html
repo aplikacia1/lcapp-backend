@@ -418,7 +418,39 @@ document.addEventListener('DOMContentLoaded', () => {
   burgerBtn?.addEventListener('click', () => {
     document.body.classList.toggle('open-nav');
   });
+if ("serviceWorker" in navigator) {
 
+  navigator.serviceWorker.addEventListener(
+    "message",
+    (event) => {
+
+      if (
+        event.data?.type === "SHOW_OVERLAY"
+      ) {
+
+        const target =
+          event.data.url;
+
+        if (
+          target &&
+          typeof showOverlay === "function"
+        ) {
+
+          console.log(
+            "Overlay:",
+            target
+          );
+
+          showOverlay(target);
+
+        }
+
+      }
+
+    }
+  );
+
+}
 });
 </script>
 </body>

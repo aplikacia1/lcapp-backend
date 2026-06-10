@@ -1144,10 +1144,46 @@
   <!-- Globálne skripty (cookies, config) -->
   <script src="/js/cookies.js"></script>
   <script src="/js/config.js"></script>
+  <script src="/js/popup-manager.js"></script>
 
   <!-- Knižnica profilov ML90 (výšky + farby) -->
   <script src="calculator-profiles.js"></script>
   <!-- Logika kalkulačky -->
   <script src="calculator.js"></script>
+  <script>
+if ("serviceWorker" in navigator) {
+
+  navigator.serviceWorker.addEventListener(
+    "message",
+    (event) => {
+
+      if (
+        event.data?.type === "SHOW_OVERLAY"
+      ) {
+
+        const target =
+          event.data.url;
+
+        if (
+          target &&
+          typeof showOverlay === "function"
+        ) {
+
+          console.log(
+            "Overlay:",
+            target
+          );
+
+          showOverlay(target);
+
+        }
+
+      }
+
+    }
+  );
+
+}
+</script>
 </body>
 </html>

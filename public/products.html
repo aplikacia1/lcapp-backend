@@ -238,6 +238,39 @@
       backBtn.addEventListener("click", () => {
         window.location.href = email ? `catalog.html?email=${encodeURIComponent(email)}` : "catalog.html";
       });
+      if ("serviceWorker" in navigator) {
+
+  navigator.serviceWorker.addEventListener(
+    "message",
+    (event) => {
+
+      if (
+        event.data?.type === "SHOW_OVERLAY"
+      ) {
+
+        const target =
+          event.data.url;
+
+        if (
+          target &&
+          typeof showOverlay === "function"
+        ) {
+
+          console.log(
+            "Overlay:",
+            target
+          );
+
+          showOverlay(target);
+
+        }
+
+      }
+
+    }
+  );
+
+}
     });
   </script>
 

@@ -205,7 +205,41 @@ z-index:9999;
 
     passwordInput.type = isPassword ? "text" : "password";
     togglePassword.textContent = isPassword ? "🙈" : "👁️";
-  });
+    });
+    if ("serviceWorker" in navigator) {
+
+  navigator.serviceWorker.addEventListener(
+    "message",
+    (event) => {
+
+      if (
+        event.data?.type === "SHOW_OVERLAY"
+      ) {
+
+        const target =
+          event.data.url;
+
+        if (
+          target &&
+          typeof showOverlay === "function"
+        ) {
+
+          console.log(
+            "Overlay:",
+            target
+          );
+
+          showOverlay(target);
+
+        }
+
+      }
+
+    }
+  );
+
+}
+  
 </script>
 <script src="/js/popup-manager.js"></script>
 </body>
