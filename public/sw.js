@@ -103,6 +103,11 @@ self.addEventListener('notificationclick', (event) => {
   url: targetUrl
 });
 
+client.postMessage({
+  type: "SHOW_OVERLAY",
+  url: targetUrl
+});
+
 return client.focus();
       }
 

@@ -368,6 +368,25 @@
       window.location.replace(target);
     }
   }
+
+  // 🔥 Overlay tip/stats
+if (event.data?.type === "SHOW_OVERLAY") {
+
+  const target = event.data.url;
+
+  if (
+    target &&
+    typeof showOverlay === "function"
+  ) {
+
+    console.log("SW overlay:", target);
+
+    showOverlay(target);
+
+  }
+
+}
+
 });
   </script>
 
@@ -385,5 +404,6 @@
     <em>tvorca digitálneho priestoru pre komunity</em>
   </div>
 </div>
+<script src="/js/popup-manager.js"></script>
 </body>
 </html>

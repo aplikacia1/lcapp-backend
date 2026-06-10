@@ -89,7 +89,17 @@ if (text) {
   document.getElementById("statsText").innerText = "Dnes sa nič zvláštne nestalo 🙂";
 }
 function closeApp() {
-  window.location.href = "/timeline.html";
+
+  if (
+    window.parent &&
+    window.parent.closeOverlay
+  ) {
+    window.parent.closeOverlay();
+    return;
+  }
+
+  window.location.href =
+    "/timeline.html";
 }
 </script>
 

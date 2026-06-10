@@ -96,8 +96,22 @@ if (textFromPush) {
   document.getElementById("tipText").innerText = random;
 }
 function closeApp() {
-  window.location.href = "/timeline.html";
+
+  if (
+    window.parent &&
+    window.parent.closeOverlay
+  ) {
+
+    window.parent.closeOverlay();
+    return;
+
+  }
+
+  window.location.href =
+    "/timeline.html";
+
 }
+
 </script>
 
 </body>
