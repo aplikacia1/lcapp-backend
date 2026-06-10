@@ -50,20 +50,24 @@ async function checkInventoryAccess(){
 
 checkInventoryAccess();
 
-     let barcodeDetector = null;
-let scanningActive = false;
-let lastScannedCode = "";
+     let lastScannedCode = "";
 let lastScanTime = 0;
 
 async function startCamera() {
 
   try {
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: "environment"
-      }
-    });
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          focusMode: "continuous"
+        }
+
+      });
 
     const video =
       document.getElementById("camera");
@@ -86,83 +90,58 @@ async function startCamera() {
 }
 
 startCamera();
+
 function startBarcodeScanner(video) {
 
-  if (!("BarcodeDetector" in window)) {
+  if (
+    !window.ZXingBrowser ||
+    !ZXingBrowser.BrowserMultiFormatReader
+  ) {
 
     console.warn(
-      "BarcodeDetector nie je podporovaný."
+      "ZXing sa nepodarilo načítať."
     );
 
     return;
   }
 
-  try {
+  const codeReader =
+    new ZXingBrowser.BrowserMultiFormatReader();
 
-    barcodeDetector =
-      new BarcodeDetector({
-        formats: [
-          "ean_13",
-          "ean_8",
-          "code_128",
-          "code_39",
-          "upc_a",
-          "upc_e"
-        ]
-      });
+  codeReader.decodeFromVideoDevice(
 
-  } catch (err) {
+    undefined,
+    video,
 
-    console.error(err);
+    async (result, err) => {
 
-    return;
-  }
+      if (result) {
 
-  scanningActive = true;
+        const code =
+          result.text;
 
-  async function scanLoop() {
-
-    if (!scanningActive) return;
-
-    try {
-
-      if (
-        video.readyState >= 2
-      ) {
-
-        const codes =
-          await barcodeDetector.detect(video);
+        const now =
+          Date.now();
 
         if (
-          codes &&
-          codes.length > 0
+          code &&
+          (
+            code !== lastScannedCode ||
+            now - lastScanTime > 2500
+          )
         ) {
 
-          const code =
-            codes[0].rawValue;
+          lastScannedCode = code;
+          lastScanTime = now;
 
-          const now =
-            Date.now();
+          scanInput.value = code;
 
-          if (
-            code &&
-            (
-              code !== lastScannedCode ||
-              now - lastScanTime > 2500
-            )
-          ) {
+          const product =
+            await findProduct(code);
 
-            lastScannedCode = code;
-            lastScanTime = now;
+          if (product) {
 
-            scanInput.value = code;
-
-            const product =
-              await findProduct(code);
-
-            if (product) {
-              showProduct(product);
-            }
+            showProduct(product);
 
           }
 
@@ -170,19 +149,12 @@ function startBarcodeScanner(video) {
 
       }
 
-    } catch (err) {
-
-      console.error(err);
-
     }
 
-    requestAnimationFrame(scanLoop);
-
-  }
-
-  scanLoop();
+  );
 
 }
+
 let selectedWarehouse = "BA";
 function setWarehouse(warehouse) {
 
