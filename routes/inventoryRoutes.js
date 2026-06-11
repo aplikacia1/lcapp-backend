@@ -97,21 +97,23 @@ router.post("/save", async (req, res) => {
 
     });
 
-    if (existing) {
+   if (existing) {
 
-      existing.productName = productName;
-      existing.systemStock = systemStock;
-      existing.countedQty = countedQty;
-      existing.countedBy = countedBy;
-      existing.countedAt = new Date();
+  return res.json({
 
-      await existing.save();
+    success: true,
 
-      return res.json({
-        success: true,
-        updated: true
-      });
-    }
+    duplicate: true,
+
+    countedBy: existing.countedBy,
+
+    countedQty: existing.countedQty,
+
+    countedAt: existing.countedAt
+
+  });
+
+}
 
     await InventoryRecord.create({
       sessionId,

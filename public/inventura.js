@@ -227,6 +227,23 @@ window.addEventListener("load", () => {
 
     const data = await response.json();
 
+    if (data.duplicate) {
+
+  showMessage(
+
+    "⚠️ Tovar už bol inventarizovaný. Skladník: " +
+    data.countedBy +
+    " | Počet: " +
+    data.countedQty,
+
+    "err"
+
+  );
+
+  return;
+
+}
+
     if (!data.success) {
       return null;
     }
