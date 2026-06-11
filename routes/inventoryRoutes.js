@@ -142,6 +142,70 @@ router.post("/save", async (req, res) => {
 
 });
 
+router.post("/save-duplicate", async (req, res) => {
+
+  try {
+
+    const {
+      sessionId,
+      warehouse,
+      productCode,
+      newQty,
+      countedBy
+    } = req.body;
+
+    const existing =
+      await InventoryRecord.findOne({
+
+        sessionId,
+        warehouse,
+        productCode
+
+      });
+
+    if (!existing) {
+
+      return res.json({
+
+        success: false,
+        message: "Záznam neexistuje"
+
+      });
+
+    }
+
+    existing.countedQty =
+      Number(newQty);
+
+    existing.countedBy =
+      countedBy;
+
+    existing.countedAt =
+      new Date();
+
+    await existing.save();
+
+    res.json({
+
+      success: true,
+      updated: true
+
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+
+      success: false
+
+    });
+
+  }
+
+});
+
 router.get("/all", async (req, res) => {
 
   try {

@@ -198,6 +198,208 @@ window.addEventListener("load", () => {
     const productName = document.getElementById("productName");
     const productCode = document.getElementById("productCode");
     const productStock = document.getElementById("productStock");
+    const duplicateModal =
+  document.getElementById("duplicateModal");
+
+const duplicateIgnoreBtn =
+  document.getElementById("duplicateIgnoreBtn");
+
+  const duplicateAddBtn =
+  document.getElementById("duplicateAddBtn");
+
+const confirmAddModal =
+  document.getElementById("confirmAddModal");
+
+const confirmAddText =
+  document.getElementById("confirmAddText");
+
+  const confirmAddBtn =
+  document.getElementById("confirmAddBtn");
+
+const cancelAddBtn =
+  document.getElementById("cancelAddBtn");
+
+  duplicateIgnoreBtn.addEventListener(
+  "click",
+  () => {
+
+    duplicateModal.style.display =
+      "none";
+
+    scanInput.value = "";
+
+    countInput.value = "";
+
+    currentProduct = null;
+
+    productName.textContent =
+      "Čakám na ďalší produkt…";
+
+    productCode.textContent =
+      "Kód: —";
+
+    productStock.textContent =
+      "Systémový stav: —";
+
+    scanInput.focus();
+
+   }
+);
+  duplicateAddBtn.addEventListener(
+  "click",
+  () => {
+
+    const total =
+      duplicateOriginalQty +
+      duplicateNewQty;
+
+    confirmAddText.innerHTML =
+
+      "<strong>" +
+      currentEmail +
+      "</strong> : " +
+      duplicateOriginalQty +
+      " ks<br><br>" +
+
+      "<strong>Nové počítanie</strong> : " +
+      duplicateNewQty +
+      " ks<br><br>" +
+
+      "────────────<br><br>" +
+
+      "<strong>Spolu : " +
+      total +
+      " ks</strong>";
+
+    duplicateModal.style.display =
+      "none";
+
+    confirmAddModal.style.display =
+      "flex";
+
+  }
+);
+
+cancelAddBtn.addEventListener(
+  "click",
+  () => {
+
+    confirmAddModal.style.display =
+      "none";
+
+    duplicateModal.style.display =
+      "flex";
+
+  }
+);
+
+confirmAddBtn.addEventListener(
+  "click",
+  async () => {
+
+    try {
+
+      const total =
+        duplicateOriginalQty +
+        duplicateNewQty;
+
+      const response =
+        await fetch(
+          "/api/inventura/save-duplicate",
+          {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+
+              sessionId,
+
+              warehouse:
+                selectedWarehouse,
+
+              productCode:
+                currentProduct.code,
+
+              newQty:
+                total,
+
+              countedBy:
+                "Marcel"
+
+            })
+
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!data.success) {
+
+        showMessage(
+          "Nepodarilo sa uložiť súčet.",
+          "err"
+        );
+
+        return;
+      }
+
+      confirmAddModal.style.display =
+        "none";
+
+      duplicateModal.style.display =
+        "none";
+
+      showMessage(
+        "Uložené: " +
+        currentProduct.code +
+        " (" +
+        total +
+        " ks)",
+        "ok"
+      );
+
+      currentProduct = null;
+
+      scanInput.value = "";
+
+      countInput.value = "";
+
+      productName.textContent =
+        "Čakám na ďalší produkt…";
+
+      productCode.textContent =
+        "Kód: —";
+
+      productStock.textContent =
+        "Systémový stav: —";
+
+      setTimeout(() => {
+
+        clearMessage();
+
+        scanInput.focus();
+
+      }, 1200);
+
+    } catch (err) {
+
+      console.error(err);
+
+      showMessage(
+        "Chyba servera.",
+        "err"
+      );
+
+    }
+
+  }
+);
 
     function showMessage(text, type) {
       message.textContent = text;
@@ -283,6 +485,9 @@ window.addEventListener("load", () => {
 
 });
 
+let duplicateOriginalQty = 0;
+let duplicateNewQty = 0;
+
     saveBtn.addEventListener("click", async function() {
 
   if (!currentProduct) {
@@ -337,16 +542,29 @@ window.addEventListener("load", () => {
 
 if (data.duplicate) {
 
-  showMessage(
+  duplicateOriginalQty =
+  Number(data.countedQty || 0);
 
-    "⚠️ Tovar už bol inventarizovaný. Skladník: " +
+duplicateNewQty =
+  Number(countInput.value || 0);
+
+  document.getElementById(
+    "duplicateText"
+  ).innerHTML =
+
+    "<strong>" +
     data.countedBy +
-    " | Počet: " +
-    data.countedQty,
+    "</strong><br><br>" +
 
-    "err"
+    "už napočítal<br>" +
 
-  );
+    "<strong>" +
+    data.countedQty +
+    " ks</strong>";
+
+  document.getElementById(
+    "duplicateModal"
+  ).style.display = "flex";
 
   return;
 

@@ -264,6 +264,122 @@
 
     }
 
+/* ===== DUPLICATE MODAL ===== */
+
+#duplicateModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.55);
+  z-index:9999;
+}
+
+.duplicate-dialog{
+
+  width:100%;
+  max-width:380px;
+
+  margin:0 16px;
+
+  background:
+    radial-gradient(
+      circle at 0 0,
+      #1d4ed8 0,
+      rgba(15,23,42,.96) 52%,
+      #020617 100%
+    );
+
+  color:#e5edff;
+
+  border-radius:18px;
+
+  padding:20px;
+
+  box-shadow:
+    0 20px 50px rgba(3,7,18,.9);
+
+  border:1px solid rgba(129,140,248,.9);
+
+}
+
+.duplicate-title{
+
+  font-size:22px;
+  font-weight:800;
+
+  margin-bottom:14px;
+
+  text-align:center;
+}
+
+.duplicate-text{
+
+  font-size:15px;
+  line-height:1.5;
+
+  color:#dbeafe;
+
+  margin-bottom:18px;
+
+  text-align:center;
+}
+
+.duplicate-actions{
+
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.duplicate-btn{
+
+  height:50px;
+
+  border-radius:999px;
+
+  border:1px solid
+    rgba(148,163,255,.7);
+
+  background:transparent;
+
+  color:#e5edff;
+
+  font-size:15px;
+  font-weight:700;
+
+  cursor:pointer;
+}
+
+.duplicate-btn-primary{
+
+  background:
+    linear-gradient(
+      135deg,
+      #60a5fa,
+      #2563eb
+    );
+
+  border:none;
+
+  color:#f9fafb;
+
+  box-shadow:
+    0 10px 26px
+    rgba(37,99,235,.55);
+}
+
+#confirmAddModal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.55);
+  z-index:10000;
+}
+
   </style>
 </head>
 
@@ -398,6 +514,77 @@ encodeURIComponent(currentEmail)
     </section>
 
   </main>
+<div id="duplicateModal">
+
+  <div class="duplicate-dialog">
+
+    <div class="duplicate-title">
+      ⚠️ Produkt už bol spočítaný
+    </div>
+
+    <div
+      id="duplicateText"
+      class="duplicate-text"
+    >
+    </div>
+
+    <div class="duplicate-actions">
+
+      <button
+        id="duplicateAddBtn"
+        class="duplicate-btn duplicate-btn-primary"
+      >
+        ➕ Pripočítať
+      </button>
+
+      <button
+        id="duplicateIgnoreBtn"
+        class="duplicate-btn"
+      >
+        ❌ Ignorovať
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div id="confirmAddModal">
+
+  <div class="duplicate-dialog">
+
+    <div class="duplicate-title">
+      📋 Potvrdenie súčtu
+    </div>
+
+    <div
+      id="confirmAddText"
+      class="duplicate-text"
+    >
+    </div>
+
+    <div class="duplicate-actions">
+
+      <button
+        id="confirmAddBtn"
+        class="duplicate-btn duplicate-btn-primary"
+      >
+        ✅ Potvrdiť
+      </button>
+
+      <button
+        id="cancelAddBtn"
+        class="duplicate-btn"
+      >
+        ❌ Zrušiť
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
   <script src="https://unpkg.com/@zxing/browser@latest"></script>
   <script src="inventura.js"></script>
