@@ -227,24 +227,7 @@ window.addEventListener("load", () => {
 
     const data = await response.json();
 
-    if (data.duplicate) {
-
-  showMessage(
-
-    "⚠️ Tovar už bol inventarizovaný. Skladník: " +
-    data.countedBy +
-    " | Počet: " +
-    data.countedQty,
-
-    "err"
-
-  );
-
-  return;
-
-}
-
-    if (!data.success) {
+      if (!data.success) {
       return null;
     }
 
@@ -352,45 +335,60 @@ window.addEventListener("load", () => {
 
     const data = await response.json();
 
-    if (!data.success) {
+if (data.duplicate) {
 
-      showMessage("Nepodarilo sa uložiť inventúru.", "err");
+  showMessage(
 
-      return;
-    }
+    "⚠️ Tovar už bol inventarizovaný. Skladník: " +
+    data.countedBy +
+    " | Počet: " +
+    data.countedQty,
 
-    showMessage(
-      "Uložené: " + currentProduct.code,
-      "ok"
-    );
+    "err"
 
-    currentProduct = null;
+  );
 
-    scanInput.value = "";
+  return;
 
-    countInput.value = "";
+}
 
-    productName.textContent = "Čakám na ďalší produkt…";
+if (!data.success) {
 
-    productCode.textContent = "Kód: —";
+  showMessage("Nepodarilo sa uložiť inventúru.", "err");
 
-    productStock.textContent = "Systémový stav: —";
+  return;
+}
 
-    setTimeout(() => {
+showMessage(
+  "Uložené: " + currentProduct.code,
+  "ok"
+);
+currentProduct = null;
 
-      clearMessage();
+scanInput.value = "";
 
-      scanInput.focus();
+countInput.value = "";
 
-    }, 900);
+productName.textContent = "Čakám na ďalší produkt…";
 
-  } catch (err) {
+productCode.textContent = "Kód: —";
 
-    console.error(err);
+productStock.textContent = "Systémový stav: —";
 
-    showMessage("Chyba servera.", "err");
+setTimeout(() => {
 
-  }
+  clearMessage();
+
+  scanInput.focus();
+
+}, 900);
+
+} catch (err) {
+
+  console.error(err);
+
+  showMessage("Chyba servera.", "err");
+
+}
 
 });
-  
