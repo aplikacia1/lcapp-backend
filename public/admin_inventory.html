@@ -316,6 +316,15 @@ async function uploadTransfer(type, warehouse){
 
 async function uploadXlsx(warehouse){
 
+    const uploadButton =
+    document.querySelector(
+      '#uploadModal button'
+    );
+
+  uploadButton.disabled = true;
+  uploadButton.innerText =
+    "⏳ Importujem...";
+
   const fileInput = document.getElementById("xlsxFile");
 
   if(!fileInput.files.length){
@@ -345,6 +354,10 @@ async function uploadXlsx(warehouse){
       Počet položiek: ${data.imported}
     `;
 
+    uploadButton.disabled = false;
+uploadButton.innerText =
+  "Nahrať XLSX";
+
   }catch(err){
 
     console.error(err);
@@ -352,6 +365,11 @@ async function uploadXlsx(warehouse){
     document.getElementById("uploadResult").innerHTML = `
       ❌ Chyba importu
     `;
+
+    uploadButton.disabled = false;
+uploadButton.innerText =
+  "Nahrať XLSX";
+  
   }
 }
 
