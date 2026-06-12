@@ -7,6 +7,41 @@ const currentEmail =
   const sessionId =
   params.get("id") || "";
 
+  let currentUserName =
+  currentEmail;
+
+async function loadCurrentUserName() {
+
+  try {
+
+    const res =
+      await fetch(
+        "/api/users/" +
+        encodeURIComponent(currentEmail)
+      );
+
+    if (!res.ok) return;
+
+    const user =
+      await res.json();
+
+    currentUserName =
+      (user.name || "").trim() ||
+      currentEmail;
+
+  } catch (err) {
+
+    console.error(
+      "Nepodarilo sa načítať meno používateľa:",
+      err
+    );
+
+  }
+
+}
+
+loadCurrentUserName();
+
 async function checkInventoryAccess(){
 
   try{
@@ -329,7 +364,7 @@ confirmAddBtn.addEventListener(
                 total,
 
               countedBy:
-                "Marcel"
+                currentUserName
 
             })
 
@@ -532,7 +567,7 @@ let duplicateNewQty = 0;
 
         countedQty: Number(countInput.value),
 
-        countedBy: "Marcel"
+        countedBy: currentUserName
 
       })
 
