@@ -8,7 +8,7 @@ const {
   nowSK,
   shouldSendMorningJoke,
   shouldSendEveningStats,
-  isSpecialMidnight
+  getSpecialMidnight
 } = require("../utils/timeBrain");
 let lastRun = {
   morning: null,
@@ -266,7 +266,7 @@ async function runEvening() {
 
 // ======= špeciálne polnoci =======
 async function runMidnightSpecial() {
-  const special = isSpecialMidnight();
+  const special = getSpecialMidnight();
   if (!special) return;
 
   if (special === "silvester") {
