@@ -18,56 +18,46 @@ let lastRun = {
 
 // ======= jednoduché vtipy =======
 const JOKES = [
-  "Tip na dnes: Ak to nefunguje, zober väčšie kladivo.",
-  "Tip na dnes: Keď to drží, nechaj to tak.",
-  "Tip na dnes: Dvakrát meraj. Potom aj tak ešte raz.",
-  "Tip na dnes: Keď niečo nesedí, chyba nie je v materiáli… väčšinou.",
-  "Tip na dnes: Ráno nezačínaj prácou. Začni kávou.",
-  "Tip na dnes: Keď to ide hladko, priprav sa na problém.",
-  "Tip na dnes: Najlepšie riešenie je to, ktoré funguje.",
-  "Tip na dnes: Ak si si istý, skontroluj to ešte raz.",
-  "Tip na dnes: Každá chyba je skúsenosť. Niekedy drahá.",
-  "Tip na dnes: Keď nevieš čo ďalej, zastav sa. A premysli.",
-  "Tip na dnes: Náradie si váž. Ono si pamätá.",
-  "Tip na dnes: Čo sa dá spraviť jednoducho, nerob zložito.",
-  "Tip na dnes: Keď to nejde silou, ide to väčšou silou.",
-  "Tip na dnes: Aj malá odchýlka je veľký problém.",
-  "Tip na dnes: Poriadok na stole = pokoj v hlave.",
-  "Tip na dnes: Najprv rozmýšľaj, potom rež.",
-  "Tip na dnes: Keď to vyzerá dobre, ešte to nemusí byť dobre.",
-  "Tip na dnes: Lepšie pomaly a presne ako rýchlo a zle.",
-  "Tip na dnes: Každý problém má riešenie. Len ho treba nájsť.",
-  "Tip na dnes: Keď niečo nesedí, nesedí to.",
-  "Tip na dnes: Najväčšie chyby vznikajú z malých detailov.",
-  "Tip na dnes: Dobrý začiatok je polovica práce.",
-  "Tip na dnes: Keď sa ponáhľaš, spravíš to dvakrát.",
-  "Tip na dnes: Aj rovná stena vie prekvapiť.",
-  "Tip na dnes: Kto sa nepýta, robí podľa seba.",
-  "Tip na dnes: Keď to nepasuje, niečo si prehliadol.",
-  "Tip na dnes: Lepšie opraviť hneď ako neskôr.",
-  "Tip na dnes: Každý materiál má svoju náladu.",
-  "Tip na dnes: Dnes sprav aspoň jednu vec poriadne.",
-  "Tip na dnes: Aj improvizácia má svoje pravidlá.",
-  "Tip na dnes: Vec, ktorú hľadáš 20 minút, býva väčšinou vo vrecku.",
-  "Tip na dnes: Ak dnes nič nepokazíš, asi si nič nerobil.",
-  "Tip na dnes: Každý kábel je krátky presne o 10 centimetrov.",
-  "Tip na dnes: Keď zákazník povie ‚len sa pozerám‘, priprav sa na hodinovú debatu.",
-  "Tip na dnes: Meter sa nikdy nestratí sám.",
-  "Tip na dnes: Najdrahšie býva ‚to nejako spravíme‘.",
-  "Tip na dnes: Každá robota má fázu ‚čo sme to spravili?!‘.",
-  "Tip na dnes: Silikón patrí všade. Hlavne na ruky.",
-  "Tip na dnes: Keď to ide podozrivo dobre, niečo si zabudol.",
-  "Tip na dnes: Niektoré problémy vyrieši spánok. Iné flexa.",
-  "Tip na dnes: Človek vydrží veľa. Hlavne po káve.",
-  "Tip na dnes: Najlepší plán je ten, čo prežije pondelok ráno.",
-  "Tip na dnes: Keď niečo opravíš izolačkou, ešte to nie je profesionálne.",
-  "Tip na dnes: Každý projekt začína optimizmom a končí silikónom.",
-  "Tip na dnes: Aj skúsený majster občas nadáva na vlastnú robotu.",
-  "Tip na dnes: Ak sa dnes všetko kazí, aspoň nie si sám.",
-  "Tip na dnes: Každá stavba má svoje záhady.",
-  "Tip na dnes: Keď sa ti dnes nechce, tvár sa profesionálne.",
-  "Tip na dnes: Všetko je rovné, kým nepriložíš vodováhu.",
-  "Tip na dnes: Najväčší nepriateľ poriadku je veta ‚potom to upracem‘."
+"Pri rezaní veľkoformátovej dlažby vždy podopri celý formát.",
+"Dilatácia nie je chyba. Je to ochrana pred budúcou chybou.",
+"Pred lepením skontroluj rovinnosť podkladu.",
+"Hydroizolácia patrí pod dlažbu, nie až po reklamácii.",
+"Pri balkónoch je správne odvodnenie rovnako dôležité ako samotná dlažba.",
+"Dvakrát skontrolovaná výška profilu je lacnejšia ako prerábka.",
+"DITRA oddeľuje pohyby podkladu od dlažby.",
+"Pri vonkajších plochách mysli na dilatačné škáry už pri návrhu.",
+"Správne pripravený podklad rozhoduje o životnosti celej realizácie.",
+"Nie každý profil je vhodný do exteriéru.",
+"Pri odvodňovacích žľaboch kontroluj spád ešte pred lepením.",
+"Lepidlo nenahrádza nerovný podklad.",
+"Čistý podklad zlepšuje priľnavosť materiálov.",
+"Pri veľkých formátoch používaj buttering-floating metódu.",
+"Voda si vždy nájde cestu. Navrhni jej ju vopred.",
+"Pri terasách je detail okraja rovnako dôležitý ako stred plochy.",
+"Dlažba bez dilatácie môže vyzerať dobre len do prvého problému.",
+"Pred montážou si vždy over hrúbku finálnej skladby.",
+"Správny profil chráni hranu dlažby pred poškodením.",
+"Exteriér odpúšťa menej chýb ako interiér.",
+"Odvodnenie rieš ešte pred výberom dlažby.",
+"Pri schodoch mysli na bezpečnosť aj po daždi.",
+"Lepšie je venovať hodinu príprave ako deň opravám.",
+"Kerdi páska chráni kritické spoje pred prenikaním vody.",
+"Pri balkónoch je každý detail dôležitý.",
+"Pred začatím montáže si priprav všetok potrebný materiál.",
+"Správna penetrácia zvyšuje spoľahlivosť systému.",
+"Technický list často vyrieši problém skôr ako reklamácia.",
+"Pri rezaní používaj vhodný kotúč pre daný materiál.",
+"Dobre navrhnutý detail býva takmer neviditeľný.",
+"Pri pokládke kontroluj rovinu priebežne, nie až na konci.",
+"Kvalitný systém je silný len tak, ako jeho najslabší detail.",
+"Schody musia byť bezpečné za sucha aj za mokra.",
+"Správne odvodnenie predlžuje životnosť celej konštrukcie.",
+"Pri montáži sa riaď odporúčaním výrobcu systému.",
+"Dlažba je viditeľná. Podklad rozhoduje.",
+"Každý milimeter sa pri veľkých plochách násobí.",
+"Správna skladba vrstiev je základ funkčnej realizácie.",
+"Pri exteriéri počítaj s mrazom už počas návrhu.",
+"Kvalitná príprava skracuje čas montáže."
 ];
 
 let lastIndex = -1;
@@ -200,7 +190,7 @@ async function sendPush(email, body) {
   }
 }
 
-// ======= ranný vtip =======
+// ======= ranný tip =======
 async function runMorning() {
   if (!shouldSendMorningJoke()) return;
 
@@ -208,12 +198,12 @@ async function runMorning() {
 
   const joke = randomJoke();
 
-await broadcast(
-  "☀️ Tip na dnes",
-  joke,
-  `/tip.html?text=${encodeURIComponent(joke)}`,
-  "morning"
-);
+  await broadcast(
+    joke,
+    "",
+    `/tip.html?text=${encodeURIComponent(joke)}`,
+    "morning"
+  );
 }
 
 // ======= večerná štatistika =======
