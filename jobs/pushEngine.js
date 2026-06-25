@@ -199,11 +199,11 @@ async function runMorning() {
   const joke = randomJoke();
 
   await broadcast(
-    joke,
-    "",
-    `/tip.html?text=${encodeURIComponent(joke)}`,
-    "morning"
-  );
+  "💡 Tip na dnes",
+  joke,
+  `/tip.html?text=${encodeURIComponent(joke)}`,
+  "morning"
+);
 }
 
 // ======= večerná štatistika =======
