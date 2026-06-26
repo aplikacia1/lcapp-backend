@@ -690,6 +690,13 @@
             <span id="messagesBadge" class="pill-badge"></span>
           </button>
           <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť sa</button>
+          <button
+            class="pill"
+            id="zisBtn">
+
+            🔎 Zákaznícka informačná služba
+
+          </button>
         </div>
       </nav>
     </div>
@@ -914,6 +921,10 @@
       document.getElementById('calcBtn')?.addEventListener('click', ()=> go('kalkulacky.html'));
       document.getElementById('messagesBtn')?.addEventListener('click', ()=> go('messages.html'));
       document.getElementById('logoutBtn')?.addEventListener('click', ()=> go('index.html'));
+      document.getElementById('zisBtn')?.addEventListener(
+  'click',
+  () => go('zis.html')
+);
       (async () => {
 
   try {

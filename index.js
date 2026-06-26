@@ -184,6 +184,7 @@ mountRoute('/api/users',          './routes/userRoutes');
 mountRoute('/api/pin',            './routes/pinRoutes');
 mountRoute('/api/categories',     './routes/categoryRoutes');
 mountRoute('/api/products',       './routes/productRoutes');
+mountRoute('/api/zis',            './routes/zisRoutes');
 mountRoute('/api/orders',         './routes/orderRoutes');
 mountRoute('/api/timeline',       './routes/timelineRoutes');
 mountRoute('/api/ratings',        './routes/ratingRoutes');
@@ -212,6 +213,11 @@ mountRoute(
 mountRoute(
   "/api/inventura/xlsx",
   "./routes/inventoryExcelRoutes"
+);
+
+mountRoute(
+  "/api/inventura/xml",
+  "./routes/inventoryXmlRoutes"
 );
 
 // ✅ PDF routes (test + html->pdf) – obe pod /api/pdf

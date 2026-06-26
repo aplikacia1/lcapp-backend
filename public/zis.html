@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>ZIS – Zákaznícka informačná služba | Lištobook</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(180deg,#071a3d,#0b2b66);
+  color:#ffffff;
+  min-height:100vh;
+  padding-top:96px;
+}
+
+.lb-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:72px;
+  background:#0c1f4b;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  box-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+
+.lb-back{
+  position:absolute;
+  left:15px;
+  color:#fff;
+  text-decoration:none;
+  font-size:28px;
+  font-weight:bold;
+}
+
+.lb-logo{height:42px;}
+
+.header-badge{
+  position:absolute;
+  right:12px;
+  top:10px;
+  display:inline-flex;
+  align-items:center;
+  padding:6px 8px;
+  border-radius:12px;
+  background:radial-gradient(circle at center,rgba(255,255,255,.10) 0%,rgba(255,255,255,.03) 60%,rgba(0,0,0,.25) 100%);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 0 10px rgba(255,255,255,.05);
+  cursor:pointer;
+}
+
+.header-badge img{
+  height:18px;
+  width:auto;
+  display:block;
+}
+
+.marsab-initials{
+  display:none;
+  position:absolute;
+  top:40px;
+  right:0;
+  width:220px;
+  padding:12px;
+  border-radius:14px;
+  background:#0c1f4b;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 8px 20px rgba(0,0,0,.35);
+  font-size:12px;
+  line-height:1.5;
+  z-index:10000;
+}
+
+.zis-page{
+  width:100%;
+  max-width:920px;
+  margin:0 auto;
+  padding:16px 16px 40px;
+}
+
+.zis-header{
+  text-align:center;
+  margin-bottom:24px;
+}
+
+.zis-logo{
+  font-size:42px;
+  margin-bottom:8px;
+}
+
+.zis-header h1{
+  margin:0;
+  font-size:26px;
+  line-height:1.2;
+}
+
+.zis-header p{
+  margin:10px auto 0;
+  max-width:620px;
+  color:#d7e4ff;
+  font-size:15px;
+  line-height:1.5;
+}
+
+.zis-card{
+  background:#0c245f;
+  color:#ffffff;
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.28);
+  margin-bottom:18px;
+}
+
+.zis-card h2{
+  margin:0 0 10px;
+  font-size:20px;
+  color:#ffffff;
+}
+
+.zis-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  margin-top:14px;
+}
+
+.zis-btn{
+  border:none;
+  border-radius:999px;
+  padding:14px 18px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:none;
+  text-align:center;
+  display:block;
+}
+
+.zis-btn.primary{
+  background:#0a1e50;
+  color:#ffffff;
+}
+
+.zis-btn.secondary{
+  background:#edf3ff;
+  color:#0a1e50;
+  border:1px solid #c7d8ff;
+}
+
+.zis-search{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:12px;
+}
+
+.zis-search input{
+  width:100%;
+  padding:14px 16px;
+  border-radius:999px;
+  border:1px solid #c8d2e4;
+  font-size:16px;
+  outline:none;
+}
+
+.zis-note{
+  font-size:14px;
+  line-height:1.5;
+  color:#d7e4ff;
+  margin-top:12px;
+}
+
+.zis-result{
+  display:none;
+  margin-top:18px;
+  border-top:1px solid rgba(255,255,255,.25);
+  padding-top:16px;
+}
+
+.zis-result-item{
+  background:#ffffff;
+  color:#0a1e50;
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:12px;
+  cursor:pointer;
+}
+
+.zis-result-item:hover{
+  opacity:.92;
+}
+
+.zis-product-title{
+  font-size:18px;
+  font-weight:800;
+  color:#0a1e50;
+  margin-bottom:6px;
+}
+
+.zis-product-text{
+  font-size:14px;
+  line-height:1.55;
+  color:#23324d;
+}
+
+.zis-footer{
+  text-align:center;
+  color:#c8d8ff;
+  font-size:13px;
+  margin-top:24px;
+}
+
+@media (min-width:700px){
+  .zis-actions{grid-template-columns:1fr 1fr;}
+  .zis-search{flex-direction:row;}
+  .zis-search input{flex:1;}
+  .zis-search .zis-btn{width:180px;}
+}
+</style>
+</head>
+
+<body>
+
+<header class="lb-header">
+  <a href="timeline.html" class="lb-back" id="backBtn" title="Späť na Timeline">←</a>
+
+  <img src="logo_lc.jpg" alt="Lištobook" class="lb-logo">
+
+  <div class="header-badge" id="marsabSymbol">
+    <img src="img/marsab_logo.png" alt="MarSab">
+
+    <div class="marsab-initials" id="marsabInitials">
+      <strong>MarSab, s. r. o.</strong><br>
+      info@marsab.sk<br><br>
+      <em>tvorca digitálneho priestoru pre komunity</em>
+    </div>
+  </div>
+</header>
+
+<main class="zis-page">
+
+<header class="zis-header">
+  <div class="zis-logo">🔎</div>
+  <h1>ZIS – Zákaznícka informačná služba</h1>
+  <p>
+    Naskenujte čiarový kód alebo vyhľadajte produkt podľa názvu.
+    Lištobook zobrazí technické informácie, hodnotenie, technický list a odkaz na e-shop.
+  </p>
+</header>
+
+<section class="zis-card">
+  <h2>Vyhľadanie produktu</h2>
+
+  <div class="zis-actions">
+    <button class="zis-btn primary" type="button" onclick="startScan()">
+      📷 Skenovať čiarový kód
+    </button>
+
+    <button class="zis-btn secondary" type="button" onclick="showManualSearch()">
+      🔤 Vyhľadať podľa názvu
+    </button>
+  </div>
+
+  <div class="zis-search" id="manualSearchBox" style="display:none;">
+    <input
+      id="zisSearchInput"
+      type="text"
+      placeholder="Napr. JOLLY, BARA, DITRA, KERDI..."
+    />
+    <button class="zis-btn primary" type="button" onclick="realSearch()">
+      Hľadať
+    </button>
+  </div>
+
+  <p class="zis-note" id="zisNote">
+    Vyhľadávanie už číta ZIS karty z MongoDB.
+  </p>
+
+  <div class="zis-result" id="zisResult"></div>
+</section>
+
+<section class="zis-card">
+  <h2>Na čo slúži ZIS?</h2>
+  <p class="zis-note">
+    ZIS pomôže zákazníkovi rýchlo zistiť, čo drží v ruke:
+    technický popis, použitie, kompatibilitu, hodnotenie produktu
+    a odkaz na nákup alebo dopyt.
+  </p>
+</section>
+
+<footer class="zis-footer">
+  Lištobook.sk • Zákaznícka informačná služba
+</footer>
+
+</main>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const email = params.get("email") || "";
+
+// OCHRANA PRIHLÁSENIA — zatiaľ vypnutá.
+// if (!email) {
+//   const next = encodeURIComponent(
+//     window.location.pathname + window.location.search
+//   );
+//   window.location.href = "pin_login.html?next=" + next;
+// }
+
+if (email) {
+  document.getElementById("backBtn").href =
+    "timeline.html?email=" + encodeURIComponent(email);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const badge = document.getElementById("marsabSymbol");
+  const info = document.getElementById("marsabInitials");
+
+  if (badge && info) {
+    badge.addEventListener("click", () => {
+      info.style.display =
+        info.style.display === "block" ? "none" : "block";
+    });
+  }
+
+  const input = document.getElementById("zisSearchInput");
+
+  input.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      realSearch();
+    }
+  });
+});
+
+function showManualSearch() {
+  const box = document.getElementById("manualSearchBox");
+  box.style.display = "flex";
+  document.getElementById("zisSearchInput").focus();
+}
+
+function normalize(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function productName(card) {
+  const product = card.productId || {};
+
+  return (
+    product.name ||
+    product.title ||
+    product.productName ||
+    card.name ||
+    card.title ||
+    "ZIS karta"
+  );
+}
+
+function productImage(card) {
+  const product = card.productId || {};
+
+  return (
+    product.image ||
+    product.imageUrl ||
+    product.photo ||
+    card.image ||
+    card.imageUrl ||
+    ""
+  );
+}
+
+function searchableText(card) {
+  const product = card.productId || {};
+
+  return normalize([
+    card.manufacturer,
+    card.content,
+    card.adminNote,
+    (card.keywords || []).join(" "),
+    (card.categories || []).join(" "),
+    (card.productCodes || []).join(" "),
+    (card.barcodes || []).join(" "),
+    product.name,
+    product.title,
+    product.productName,
+    product.description
+  ].join(" "));
+}
+
+async function realSearch() {
+  const input = document.getElementById("zisSearchInput");
+  const resultBox = document.getElementById("zisResult");
+  const note = document.getElementById("zisNote");
+
+  const value = input.value.trim();
+
+  if (!value) {
+    alert("Zadajte hľadaný výraz.");
+    return;
+  }
+
+  resultBox.style.display = "block";
+  resultBox.innerHTML = "<p class='zis-note'>Hľadám...</p>";
+
+  try {
+    const res = await fetch("/api/zis");
+
+    if (!res.ok) {
+      throw new Error("Nepodarilo sa načítať ZIS karty.");
+    }
+
+    const cards = await res.json();
+    const query = normalize(value);
+
+    const matches = cards.filter(card => {
+      if (card.active === false) return false;
+      return searchableText(card).includes(query);
+    });
+
+    if (matches.length === 0) {
+      resultBox.innerHTML =
+        "<p class='zis-note'>Nenašla sa žiadna ZIS karta.</p>";
+      return;
+    }
+
+    note.textContent =
+      "Nájdené výsledky: " + matches.length;
+
+    if (matches.length === 1) {
+      openDetail(matches[0]._id, value);
+      return;
+    }
+
+    resultBox.innerHTML = "";
+
+    matches.forEach(card => {
+      const item = document.createElement("div");
+      item.className = "zis-result-item";
+
+      const name = productName(card);
+      const manufacturer = card.manufacturer || "";
+      const codes = (card.productCodes || []).join(", ");
+      const img = productImage(card);
+
+      item.innerHTML = `
+        <div class="zis-product-title">
+          ${escapeHtml(name)}
+        </div>
+        <div class="zis-product-text">
+          ${escapeHtml(manufacturer)}
+          ${codes ? "<br>Kód: " + escapeHtml(codes) : ""}
+          ${img ? "<br>Má obrázok produktu" : ""}
+        </div>
+      `;
+
+      item.addEventListener("click", () => {
+        openDetail(card._id, value);
+      });
+
+      resultBox.appendChild(item);
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    resultBox.innerHTML =
+      "<p class='zis-note'>Chyba pri vyhľadávaní.</p>";
+  }
+}
+
+function openDetail(id, searchValue) {
+
+  let url =
+    "zis_detail.html?id=" +
+    encodeURIComponent(id);
+
+  if (searchValue) {
+
+    url +=
+      "&search=" +
+      encodeURIComponent(searchValue);
+
+  }
+
+  if (email) {
+
+    url +=
+      "&email=" +
+      encodeURIComponent(email);
+
+  }
+
+  window.location.href = url;
+
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function startScan() {
+  alert("Skenovanie čiarového kódu pripojíme v ďalšom kroku.");
+}
+</script>
+
+</body>
+</html>

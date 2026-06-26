@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin ZIS</title>
+
+<style>
+
+body{
+  font-family:Arial,sans-serif;
+  background:#0a1e50;
+  color:white;
+  margin:0;
+  padding:20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+}
+
+.card{
+  background:#10275f;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+h1{
+  margin-top:0;
+}
+
+label{
+  display:block;
+  margin-top:15px;
+  margin-bottom:5px;
+  font-weight:bold;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  box-sizing:border-box;
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+button{
+  margin-top:20px;
+  background:#1f6fff;
+  color:white;
+  border:none;
+  padding:12px 20px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+#result{
+  margin-top:15px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,
+td{
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,.2);
+  text-align:left;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+
+    <h1>ZIS Admin</h1>
+
+    <label>Product ID</label>
+    <input id="productId">
+
+    <label>Výrobca</label>
+    <input id="manufacturer" placeholder="BIHUI">
+
+    <label>YouTube URL</label>
+    <input id="youtubeUrl">
+
+    <label>Čiarové kódy (jeden na riadok)</label>
+    <textarea id="barcodes"></textarea>
+
+    <label>Kódy produktov (jeden na riadok)</label>
+    <textarea id="productCodes"></textarea>
+
+    <label>Kategórie (jeden na riadok)</label>
+    <textarea id="categories"></textarea>
+
+    <label>Kľúčové slová (jeden na riadok)</label>
+<textarea id="keywords"></textarea>
+
+<label>Obsah ZIS (HTML)</label>
+
+<textarea
+  id="content"
+  placeholder="<h2>Montáž</h2>
+
+<p>
+Sem píšte technický text...
+</p>
+
+<h2>Výhody</h2>
+
+<ul>
+<li>Prvá výhoda</li>
+<li>Druhá výhoda</li>
+</ul>"
+  style="min-height:350px;font-family:Consolas,monospace;"
+></textarea>
+
+<label>Poznámka admina</label>
+<textarea id="adminNote"></textarea>
+
+    
+
+    <label>
+      <input
+        type="checkbox"
+        id="active"
+        checked
+        style="width:auto;"
+      >
+      Aktívna karta
+    </label>
+
+    <button id="saveBtn">
+      Uložiť kartu
+    </button>
+
+    <div id="result"></div>
+
+  </div>
+
+  <div class="card">
+
+    <h2>Existujúce ZIS karty</h2>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Výrobca</th>
+          <th>Product ID</th>
+          <th>YouTube</th>
+          <th>Akcia</th>
+        </tr>
+      </thead>
+
+      <tbody id="cardsTable">
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+<script src="admin_zis.js"></script>
+
+</body>
+</html>
