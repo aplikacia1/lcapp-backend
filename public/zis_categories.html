@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ZIS oblasti | Lištobook</title>
+
+<style>
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(180deg,#071a3d,#0b2b66);
+  color:#fff;
+  min-height:100vh;
+
+  padding-top:96px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
+}
+
+.lb-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:72px;
+  background:#0c1f4b;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  box-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+
+.lb-back{
+  position:absolute;
+  left:12px;
+  top:10px;
+
+  width:40px;
+  height:40px;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:10px;
+
+  color:#ffffff;
+  text-decoration:none;
+
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.20);
+
+  backdrop-filter:blur(4px);
+}
+
+.lb-back svg{
+  width:22px;
+  height:22px;
+  display:block;
+}
+
+@media (max-width:480px){
+
+  .lb-back{
+    left:8px;
+    top:8px;
+    width:36px;
+    height:36px;
+  }
+
+}
+
+.lb-logo{height:42px;}
+
+.page{
+  max-width:920px;
+  margin:0 auto;
+  padding:18px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:22px;
+}
+
+.header h1{
+  margin:0 0 8px;
+  font-size:26px;
+}
+
+.header p{
+  margin:0;
+  color:#d7e4ff;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+
+.category-card{
+  background:#fff;
+  color:#0a1e50;
+  border-radius:22px;
+  overflow:hidden;
+  cursor:pointer;
+  box-shadow:0 12px 28px rgba(0,0,0,.28);
+}
+
+.category-card img{
+  width:100%;
+  height:210px;
+  object-fit:contain;
+  background:#f3f5fa;
+  display:block;
+}
+
+.category-body{
+  padding:14px;
+}
+
+.category-title{
+  font-size:19px;
+  font-weight:800;
+  margin-bottom:6px;
+}
+
+.category-count{
+  font-size:14px;
+  color:#3f4b66;
+}
+
+.loading,
+.empty{
+  text-align:center;
+  padding:28px;
+  background:#0c245f;
+  border-radius:20px;
+}
+
+@media(min-width:700px){
+  .grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="lb-header">
+  <a href="zis.html" class="lb-back" id="backBtn">
+
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M15 18l-6-6 6-6"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+  </svg>
+
+</a>
+  <img src="logo_lc.jpg" alt="Lištobook" class="lb-logo">
+</header>
+
+<main class="page">
+
+  <div class="header">
+    <h1>Vyberte oblasť</h1>
+    <p id="searchInfo">Načítavam...</p>
+  </div>
+
+  <div id="result" class="grid"></div>
+
+</main>
+
+<script src="zis_categories.js"></script>
+
+</body>
+</html>

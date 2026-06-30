@@ -86,7 +86,34 @@
         transition:transform .25s ease;
         z-index:1002;
       }
-      .nav-track{flex-direction:column;gap:10px;overflow:hidden}
+      .nav-track{
+
+  display:flex;
+  flex-direction:column;
+
+  min-height:100%;
+
+  gap:10px;
+
+}
+.menu-separator{
+
+  margin-top:auto;
+
+  width:100%;
+
+  border:none;
+  border-top:1px solid rgba(255,255,255,.18);
+
+  margin-bottom:12px;
+
+}
+
+.nav-track .pill{
+
+  flex:0 0 auto;
+
+}
       .pill{width:100%!important;height:44px;font-size:1rem;border-radius:14px}
     }
 
@@ -654,26 +681,7 @@
             stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
-      <button
-  type="button"
-  class="notif-btn internal-tool-btn"
-  aria-label="Overenie cien"
-  id="priceCheckBtn"
-  style="display:none; left:108px;"
->
-  💰
-</button>
-
-<button
-  type="button"
-  class="refresh-btn internal-tool-btn"
-  aria-label="Inventúra"
-  id="inventoryBtn"
-  style="display:none; right:116px;"
->
-  📦
-</button>
-
+      
       <img src="logo_lc.jpg" alt="Lištové centrum" class="logo-small">
       <div class="user-chip" id="loggedUser">Prihlásený ako:</div>
 
@@ -682,14 +690,33 @@
           <button class="pill" id="accountBtn">🧑‍💼 Účet</button>
           <button class="pill" id="funBtn">🎲 Voľný čas</button>
           <button class="pill" id="rateBtn">⭐ Hodnotenie tovarov</button>
-          <!-- NOVÉ: kalkulačky -->
-          <button class="pill" id="calcBtn">📐 Kalkulačky</button>
+                    
           <!-- Správy + žltý badge (štart skryté) -->
           <button class="pill" id="messagesBtn" style="display:none;">
             💬 Správy
             <span id="messagesBadge" class="pill-badge"></span>
           </button>
           <button class="pill pill-danger" id="logoutBtn">🚪 Odhlásiť sa</button>
+          <hr class="menu-separator">
+
+<button
+  class="pill"
+  id="inventoryBtn"
+  style="display:none;"
+>
+  📦 Inventúra
+</button>
+
+<button
+  class="pill"
+  id="priceCheckBtn"
+  style="display:none;"
+>
+  💰 Check Product
+</button>
+<button class="pill" id="calcBtn">
+  📐 Kalkulačky
+</button>
           <button
             class="pill"
             id="zisBtn">

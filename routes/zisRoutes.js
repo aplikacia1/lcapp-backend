@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const mongoose = require("mongoose");
 const ZisCard = require("../models/ZisCard");
 
 /*
@@ -20,6 +20,57 @@ router.get("/", async (req, res) => {
       message: "Chyba pri načítaní ZIS kariet"
     });
   }
+});
+
+/*
+ * GET /api/zis/barcode/:code
+ * vyhľadanie podľa čiarového alebo produktového kódu
+ */
+router.get("/barcode/:code", async (req, res) => {
+
+  try {
+
+    const code =
+      String(req.params.code || "").trim();
+
+    const card =
+      await ZisCard.findOne({
+
+        active: true,
+
+        $or: [
+
+          { barcodes: code },
+
+          { productCodes: code }
+
+        ]
+
+      }).populate("productId");
+
+    if (!card) {
+
+      return res.status(404).json({
+        message: "Karta sa nenašla."
+      });
+
+    }
+
+    res.json(card);
+
+  } catch (err) {
+
+    console.error(
+      "GET /api/zis/barcode/:code:",
+      err
+    );
+
+    res.status(500).json({
+      message: "Chyba pri vyhľadávaní."
+    });
+
+  }
+
 });
 
 /*
@@ -158,6 +209,118 @@ router.delete("/:id", async (req, res) => {
     console.error("DELETE /api/zis/:id:", err);
     res.status(500).json({
       message: "Chyba pri mazaní ZIS karty"
+    });
+  }
+});
+
+/*
+ * GET /api/zis/categories/:keyword
+ *
+ * Vráti kategórie,
+ * v ktorých sa nachádzajú ZIS karty
+ * obsahujúce zadané kľúčové slovo.
+ */
+function normalizeZis(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+/*
+ * GET /api/zis/categories/:keyword
+ * vráti kategórie podľa kľúčového slova
+ */
+router.get("/categories/:keyword", async (req, res) => {
+  try {
+    const keyword = normalizeZis(req.params.keyword);
+
+    const cards = await ZisCard.find({ active: true }).lean();
+
+    const categories = {};
+
+    cards.forEach(card => {
+      const keywords = (card.keywords || []).map(k => normalizeZis(k));
+
+      const match = keywords.some(k =>
+        k.includes(keyword) || keyword.includes(k)
+      );
+
+      if (!match) return;
+
+      (card.categories || []).forEach(category => {
+        if (!categories[category]) {
+          categories[category] = {
+            name: category,
+            count: 0,
+            image: ""
+          };
+        }
+
+        categories[category].count++;
+      });
+    });
+
+    const docs = await mongoose.connection.db
+      .collection("documentcategories")
+      .find({})
+      .toArray();
+
+    const imageByName = {};
+
+    docs.forEach(doc => {
+      imageByName[normalizeZis(doc.name)] = doc.image || "";
+    });
+
+    const out = Object.values(categories).map(cat => ({
+      ...cat,
+      image: imageByName[normalizeZis(cat.name)] || ""
+    }));
+
+    res.json(out);
+
+  } catch (err) {
+    console.error("GET /api/zis/categories/:keyword:", err);
+    res.status(500).json({
+      message: "Chyba pri vyhľadávaní kategórií."
+    });
+  }
+});
+
+/*
+ * GET /api/zis/cards/:keyword/:category
+ * vráti ZIS karty podľa kľúčového slova a kategórie
+ */
+router.get("/cards/:keyword/:category", async (req, res) => {
+  try {
+    const keyword = normalizeZis(req.params.keyword);
+    const category = String(req.params.category || "").trim();
+
+    const cards = await ZisCard.find({ active: true })
+      .populate("productId")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const result = cards.filter(card => {
+      const keywords = (card.keywords || [])
+        .map(k => normalizeZis(k));
+
+      const keywordMatch = keywords.some(k =>
+        k.includes(keyword) || keyword.includes(k)
+      );
+
+      const categoryMatch = (card.categories || [])
+        .includes(category);
+
+      return keywordMatch && categoryMatch;
+    });
+
+    res.json(result);
+  } catch (err) {
+    console.error("GET /api/zis/cards/:keyword/:category:", err);
+    res.status(500).json({
+      message: "Chyba pri vyhľadávaní ZIS kariet."
     });
   }
 });

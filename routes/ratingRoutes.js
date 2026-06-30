@@ -101,6 +101,10 @@ router.get('/list/:productId', async (req, res) => {
 /* ───────── GET /api/ratings/summary/:productId ─────────
    Počet a priemer hodnotení (1 desatinné miesto). */
 router.get('/summary/:productId', async (req, res) => {
+  console.log(
+  "SUMMARY PARAM:",
+  req.params.productId
+);
   try {
     const { productId } = req.params;
     const summary = await getSummaryFor(productId);
@@ -123,6 +127,10 @@ router.get('/:id/summary', async (req, res) => {
 });
 
 router.get('/:id/list', async (req, res) => {
+  console.log(
+  "LIST PARAM:",
+  req.params.productId
+);
   try {
     const rows = await Rating.find(
       { productId: req.params.id },

@@ -2,7 +2,10 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+/>
 
 <title>ZIS – Zákaznícka informačná služba | Lištobook</title>
 
@@ -15,7 +18,9 @@ body{
   background:linear-gradient(180deg,#071a3d,#0b2b66);
   color:#ffffff;
   min-height:100vh;
+
   padding-top:96px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
 }
 
 .lb-header{
@@ -34,11 +39,41 @@ body{
 
 .lb-back{
   position:absolute;
-  left:15px;
-  color:#fff;
+  left:12px;
+  top:10px;
+
+  width:40px;
+  height:40px;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:10px;
+
+  color:#ffffff;
   text-decoration:none;
-  font-size:28px;
-  font-weight:bold;
+
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.20);
+
+  backdrop-filter:blur(4px);
+}
+.lb-back svg{
+  width:22px;
+  height:22px;
+  display:block;
+}
+
+@media (max-width:480px){
+
+  .lb-back{
+    left:8px;
+    top:8px;
+    width:36px;
+    height:36px;
+  }
+
 }
 
 .lb-logo{height:42px;}
@@ -226,12 +261,27 @@ body{
   .zis-search .zis-btn{width:180px;}
 }
 </style>
+
+<script src="https://unpkg.com/@zxing/browser@latest"></script>
+
 </head>
 
 <body>
 
 <header class="lb-header">
-  <a href="timeline.html" class="lb-back" id="backBtn" title="Späť na Timeline">←</a>
+  <a href="timeline.html" class="lb-back" id="backBtn" title="Späť na Timeline">
+
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M15 18l-6-6 6-6"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+  </svg>
+
+</a>
 
   <img src="logo_lc.jpg" alt="Lištobook" class="lb-logo">
 
@@ -261,25 +311,105 @@ body{
   <h2>Vyhľadanie produktu</h2>
 
   <div class="zis-actions">
-    <button class="zis-btn primary" type="button" onclick="startScan()">
-      📷 Skenovať čiarový kód
-    </button>
 
-    <button class="zis-btn secondary" type="button" onclick="showManualSearch()">
-      🔤 Vyhľadať podľa názvu
-    </button>
+  <button
+    class="zis-btn secondary"
+    type="button"
+    onclick="showProductSearch()">
+    📦 Kód produktu
+  </button>
+
+  <button
+    class="zis-btn secondary"
+    type="button"
+    onclick="showKeywordSearch()">
+    💡 Čo hľadáte?
+  </button>
+
+  
+</div>
+
+  <div
+  class="zis-search"
+  id="productSearchBox"
+  style="display:none;"
+>
+
+  <input
+    id="productSearchInput"
+    type="text"
+    placeholder="Zadajte kód produktu"
+  >
+
+  <button
+    class="zis-btn primary"
+    type="button"
+    onclick="searchProductCode()"
+  >
+    Vyhľadať
+  </button>
+
+</div>
+
+<div
+  id="scannerBox"
+  style="margin-top:18px;">
+
+  <div
+    style="
+      height:220px;
+      border:2px dashed rgba(255,255,255,.25);
+      border-radius:16px;
+      overflow:hidden;
+      background:#071226;
+    ">
+
+    <video
+      id="camera"
+      autoplay
+      playsinline
+      muted
+      style="
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+      ">
+    </video>
+
   </div>
 
-  <div class="zis-search" id="manualSearchBox" style="display:none;">
-    <input
-      id="zisSearchInput"
-      type="text"
-      placeholder="Napr. JOLLY, BARA, DITRA, KERDI..."
-    />
-    <button class="zis-btn primary" type="button" onclick="realSearch()">
-      Hľadať
-    </button>
-  </div>
+  <p
+    class="zis-note"
+    style="margin-top:10px;">
+
+    📷 Namierte kameru na čiarový kód produktu.
+
+  </p>
+
+</div>
+
+<div
+  class="zis-search"
+  id="keywordSearchBox"
+  style="display:none;"
+>
+
+  <input
+    id="keywordSearchInput"
+    type="text"
+    placeholder="Čo hľadáte? (JOLLY, DITRA, balkón...)"
+  >
+
+  <button
+    class="zis-btn primary"
+    type="button"
+    onclick="searchKeywords()"
+  >
+    Vyhľadať
+  </button>
+
+</div>
 
   <p class="zis-note" id="zisNote">
     Vyhľadávanie už číta ZIS karty z MongoDB.
@@ -307,6 +437,9 @@ body{
 const params = new URLSearchParams(window.location.search);
 const email = params.get("email") || "";
 
+let lastScannedCode = "";
+let lastScanTime = 0;
+
 // OCHRANA PRIHLÁSENIA — zatiaľ vypnutá.
 // if (!email) {
 //   const next = encodeURIComponent(
@@ -328,30 +461,55 @@ document.addEventListener("DOMContentLoaded", () => {
     badge.addEventListener("click", () => {
       info.style.display =
         info.style.display === "block" ? "none" : "block";
+        
     });
   }
-
+/*
   const input = document.getElementById("zisSearchInput");
 
   input.addEventListener("keydown", event => {
     if (event.key === "Enter") {
       realSearch();
     }
+  
   });
-});
+  */
+ const productInput =
+  document.getElementById("productSearchInput");
 
-function showManualSearch() {
-  const box = document.getElementById("manualSearchBox");
-  box.style.display = "flex";
-  document.getElementById("zisSearchInput").focus();
+if (productInput) {
+
+  productInput.addEventListener("input", function () {
+
+    this.value =
+      this.value.toUpperCase();
+
+  });
+
 }
 
-function normalize(value) {
-  return String(value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
+  startCamera();
+  
+});
+
+function showProductSearch() {
+
+  document.getElementById("productSearchBox").style.display = "block";
+
+  document.getElementById("keywordSearchBox").style.display = "none";
+
+  document.getElementById("productSearchInput").focus();
+
+}
+
+function showKeywordSearch() {
+
+  document.getElementById("keywordSearchBox").style.display = "block";
+
+  document.getElementById("productSearchBox").style.display = "none";
+
+  document.getElementById("keywordSearchInput").focus();
+
 }
 
 function productName(card) {
@@ -517,6 +675,194 @@ function escapeHtml(value) {
 function startScan() {
   alert("Skenovanie čiarového kódu pripojíme v ďalšom kroku.");
 }
+
+async function searchProductCode() {
+
+  const code =
+    document
+      .getElementById("productSearchInput")
+      .value
+      .trim();
+
+  if (!code) {
+    return;
+  }
+
+  await searchBarcode(code);
+
+}
+
+function searchKeywords() {
+  const input =
+    document.getElementById("keywordSearchInput");
+
+  const value =
+    input.value.trim();
+
+  if (!value) {
+    alert("Napíšte, čo hľadáte.");
+    return;
+  }
+
+  let url =
+    "zis_categories.html?search=" +
+    encodeURIComponent(value);
+
+  if (email) {
+    url += "&email=" + encodeURIComponent(email);
+  }
+
+  window.location.href = url;
+}
+
+async function startCamera() {
+
+  try {
+
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          focusMode: "continuous"
+        }
+
+      });
+
+    const video =
+      document.getElementById("camera");
+
+    video.srcObject = stream;
+
+    await video.play();
+
+    startBarcodeScanner(video);
+
+  } catch (err) {
+
+    console.error(
+      "Kamera sa nepodarila spustiť:",
+      err
+    );
+
+  }
+
+}
+
+function startBarcodeScanner(video) {
+
+  if (
+    !window.ZXingBrowser ||
+    !ZXingBrowser.BrowserMultiFormatReader
+  ) {
+
+    console.warn(
+      "ZXing sa nepodarilo načítať."
+    );
+
+    return;
+  }
+
+  const codeReader =
+    new ZXingBrowser.BrowserMultiFormatReader();
+
+  codeReader.decodeFromVideoDevice(
+
+    undefined,
+    video,
+
+    (result, err) => {
+
+      if (result) {
+
+        const code =
+          result.text;
+
+          console.log("NAČÍTANÝ KÓD:", code);
+
+        const now =
+          Date.now();
+
+        if (
+          code &&
+          (
+            code !== lastScannedCode ||
+            now - lastScanTime > 2500
+          )
+        ) {
+
+          lastScannedCode = code;
+          lastScanTime = now;
+
+          searchBarcode(code);
+
+        }
+
+      }
+
+    }
+
+  );
+
+}
+
+async function searchBarcode(code) {
+
+  try {
+
+    const res = await fetch(
+      "/api/zis/barcode/" +
+      encodeURIComponent(code)
+    );
+
+    if (!res.ok) {
+
+      alert(
+        "Čiarový kód sa nenašiel.\n\n" +
+        "Skúste zadať kód produktu alebo použite vyhľadávanie podľa názvu."
+      );
+
+      document
+        .getElementById("productSearchBox")
+        .style.display = "block";
+
+      document
+        .getElementById("productSearchInput")
+        .focus();
+
+      return;
+
+    }
+
+    const card =
+      await res.json();
+
+    let url =
+  "zis_detail.html?id=" +
+  encodeURIComponent(card._id) +
+  "&search=" +
+  encodeURIComponent(code);
+
+    if (email) {
+
+      url +=
+        "&email=" +
+        encodeURIComponent(email);
+
+    }
+
+    window.location.href = url;
+
+  } catch (err) {
+
+    console.error(err);
+
+  }
+
+}
+
 </script>
 
 </body>

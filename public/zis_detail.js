@@ -21,6 +21,7 @@ const zisContent = document.getElementById("zisContent");
 const techBtn = document.getElementById("techBtn");
 const videoBtn = document.getElementById("videoBtn");
 const eshopBtn = document.getElementById("eshopBtn");
+const ratingBtn = document.getElementById("ratingBtn");
 const searchBtn = document.getElementById("searchBtn");
 const backBtn = document.getElementById("backBtn");
 
@@ -349,6 +350,27 @@ function renderCard(card) {
   eshopBtn,
   product.shopUrl
 );
+
+if (product._id) {
+
+  let ratingUrl =
+    "/product_detail.html?id=" +
+    encodeURIComponent(product._id);
+
+  if (email) {
+
+    ratingUrl +=
+      "&email=" +
+      encodeURIComponent(email);
+
+  }
+
+  showButton(
+    ratingBtn,
+    ratingUrl
+  );
+
+}
 
   loading.style.display = "none";
   errorBox.style.display = "none";

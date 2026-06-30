@@ -67,20 +67,47 @@ h1{
   left:12px;
   top:10px;
 
-  width:44px;
-  height:44px;
+  width:40px;
+  height:40px;
 
-  display:flex;
+  display:inline-flex;
   align-items:center;
   justify-content:center;
 
-  border:1px solid #ffffff33;
   border-radius:10px;
 
-  color:#e7eefc;
-  cursor:pointer;
+  color:#ffffff;
+  text-decoration:none;
 
-  background: transparent;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.20);
+
+  backdrop-filter:blur(4px);
+}
+
+.back-btn svg{
+  width:22px;
+  height:22px;
+  display:block;
+}
+
+.back-btn svg path{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+@media (max-width:480px){
+
+  .back-btn{
+    left:8px;
+    top:8px;
+    width:36px;
+    height:36px;
+  }
+
 }
 
 </style>

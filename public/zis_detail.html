@@ -2,7 +2,7 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <title>ZIS Detail | Lištobook</title>
 
@@ -15,6 +15,8 @@ body{
   background:linear-gradient(180deg,#071a3d,#0b2b66);
   color:#fff;
   min-height:100vh;
+
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
 }
 
 .mobile-app{
@@ -38,11 +40,42 @@ body{
 
 .lb-back{
   position:absolute;
-  left:15px;
-  color:#fff;
+  left:12px;
+  top:10px;
+
+  width:40px;
+  height:40px;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:10px;
+
+  color:#ffffff;
   text-decoration:none;
-  font-size:30px;
-  font-weight:bold;
+
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.20);
+
+  backdrop-filter:blur(4px);
+}
+
+.lb-back svg{
+  width:22px;
+  height:22px;
+  display:block;
+}
+
+@media (max-width:480px){
+
+  .lb-back{
+    left:8px;
+    top:8px;
+    width:36px;
+    height:36px;
+  }
+
 }
 
 .lb-logo{
@@ -269,7 +302,19 @@ body.desktop-lock .desktop-blocker{
 
 <header class="lb-header">
 
-  <a href="zis.html" class="lb-back" id="backBtn" title="Späť na ZIS">←</a>
+  <a href="zis.html" class="lb-back" id="backBtn" title="Späť na ZIS">
+
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M15 18l-6-6 6-6"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+  </svg>
+
+</a>
 
   <img src="logo_lc.jpg" alt="Lištobook" class="lb-logo">
 
@@ -329,6 +374,15 @@ body.desktop-lock .desktop-blocker{
 
         <a class="zis-btn primary" id="eshopBtn" href="#" target="_blank" rel="noopener">
   🛒 E-shop
+</a>
+
+<a
+  class="zis-btn primary"
+  id="ratingBtn"
+  href="#">
+
+  ⭐ Hodnotiť produkt
+
 </a>
 
 <div

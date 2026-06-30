@@ -76,17 +76,50 @@ h1{
 }
 .lb-back{
   position:absolute;
-  top:20px;
-  left:20px;
-  width:46px;
-  height:46px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.25);
-  display:flex;
+  left:12px;
+  top:10px;
+
+  width:40px;
+  height:40px;
+
+  display:inline-flex;
   align-items:center;
   justify-content:center;
-  cursor:pointer;
-  backdrop-filter: blur(6px);
+
+  border-radius:10px;
+
+  color:#ffffff;
+  text-decoration:none;
+
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.20);
+
+  backdrop-filter:blur(4px);
+}
+
+.lb-back svg{
+  width:22px;
+  height:22px;
+  display:block;
+}
+
+.lb-back svg path{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+@media (max-width:480px){
+
+  .lb-back{
+    left:8px;
+    top:8px;
+    width:36px;
+    height:36px;
+  }
+
 }
 .lb-back svg{
   width:18px;
