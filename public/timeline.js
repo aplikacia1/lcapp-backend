@@ -1007,3 +1007,21 @@ document.getElementById("notifBtn")?.addEventListener("click", () => {
 
   window.location.href = target;
 });
+
+// ===== PC ikonky =====
+
+document.getElementById("inventoryIconBtn")?.addEventListener("click", () => {
+  const email = new URLSearchParams(window.location.search).get("email");
+  if (!email) return;
+
+  window.location.href =
+    `inventury.html?email=${encodeURIComponent(email)}`;
+});
+
+document.getElementById("priceCheckIconBtn")?.addEventListener("click", () => {
+  const email = new URLSearchParams(window.location.search).get("email");
+  if (!email) return;
+
+  window.location.href =
+    `check_product.html?email=${encodeURIComponent(email)}`;
+});
