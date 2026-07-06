@@ -1,7 +1,16 @@
+function getEmailFromURL() {
+  const p = new URLSearchParams(location.search);
+  return p.get("email") || "";
+}
+
+const userEmail = getEmailFromURL();
+
+if (!userEmail)
+  location.href = "index.html";
 const params = new URLSearchParams(window.location.search);
 
 const search = params.get("search") || "";
-const email = params.get("email") || "";
+const email = userEmail;
 
 const result = document.getElementById("result");
 const searchInfo = document.getElementById("searchInfo");

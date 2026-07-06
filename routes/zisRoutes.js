@@ -263,9 +263,12 @@ router.get("/categories/:keyword", async (req, res) => {
     });
 
     const docs = await mongoose.connection.db
-      .collection("documentcategories")
+      .collection("categories")
       .find({})
       .toArray();
+
+      console.log("POČET KATEGÓRIÍ:", docs.length);
+console.log(docs.slice(0,5));
 
     const imageByName = {};
 
@@ -277,7 +280,7 @@ router.get("/categories/:keyword", async (req, res) => {
       ...cat,
       image: imageByName[normalizeZis(cat.name)] || ""
     }));
-
+console.log(JSON.stringify(out, null, 2));
     res.json(out);
 
   } catch (err) {

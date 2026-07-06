@@ -6,6 +6,8 @@
       id: p.get("id") || p.get("pid") || "",
       categoryId: p.get("categoryId") || p.get("cat") || "",
       email: p.get("email") || "",
+      from: p.get("from") || "",
+      zis: p.get("zis") || "",
     };
   }
   function $(s, r = document) { return r.querySelector(s); }
@@ -31,7 +33,13 @@
     );
 
   const API_BASE = (window.API_BASE || "").replace(/\/+$/, "");
-  const { id: productId, categoryId, email } = getParams();
+  const {
+  id: productId,
+  categoryId,
+  email,
+  from,
+  zis
+} = getParams();
   let selectedStars = 5;
 
   // 🔹 uloženie categoryId pre návrat
@@ -42,6 +50,21 @@
   }
 
   function goBack() {
+    if (from === "zis" && zis) {
+
+  let url =
+    "zis_detail.html?id=" +
+    encodeURIComponent(zis);
+
+  if (email) {
+    url +=
+      "&email=" +
+      encodeURIComponent(email);
+  }
+
+  location.href = url;
+  return;
+}
     const cat = categoryId || (function () {
       try { return sessionStorage.getItem("lastCategoryId") || ""; }
       catch (_) { return ""; }

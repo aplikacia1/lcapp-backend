@@ -80,7 +80,7 @@
     @media (max-width:767.98px){
       .app-header .nav-scroller{
         position:fixed;top:0;left:0;height:100vh;width:min(80vw,320px);
-        background:#0c1f4b;padding:88px 16px 16px;
+        background:#0c1f4b;padding:calc(env(safe-area-inset-top) + 100px) 16px 16px;
         box-shadow:24px 0 36px rgba(0,0,0,.35);
         transform:translateX(-100%);
         transition:transform .25s ease;
@@ -197,7 +197,7 @@
     touch-action:pan-y;
 
     border-radius:0;
-    padding:88px 12px 12px;
+    padding:calc(env(safe-area-inset-top) + 100px) 12px 12px;
     transform:translateX(100%);
     box-shadow:-24px 0 36px rgba(0,0,0,.35);
     z-index:1005;

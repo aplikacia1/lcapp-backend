@@ -1,12 +1,47 @@
+function getEmailFromURL() {
+  const p = new URLSearchParams(location.search);
+  return p.get("email") || "";
+}
+
+const userEmail = getEmailFromURL();
+
+if (!userEmail)
+  location.href = "index.html";
+
 const params = new URLSearchParams(window.location.search);
 
-const email = params.get("email") || "";
+const email = userEmail;
 const cardId = params.get("id") || params.get("cardId") || "";
 const barcode = params.get("barcode") || "";
 const search = params.get("search") || "";
 const productCode = params.get("code") || "";
 
 const DEV_EMAIL = "sabla.marcel@gmail.com";
+
+let userData = null;
+
+async function loadUserInfo() {
+
+  try {
+
+    const res = await fetch(
+      `/api/users/${encodeURIComponent(email)}`
+    );
+
+    if (!res.ok)
+      throw 0;
+
+    userData = await res.json();
+
+  } catch {
+
+    alert("Používateľ sa nenašiel. Prihlás sa znova.");
+
+    location.href = "index.html";
+
+  }
+
+}
 
 const loading = document.getElementById("loading");
 const errorBox = document.getElementById("errorBox");
@@ -355,7 +390,10 @@ if (product._id) {
 
   let ratingUrl =
     "/product_detail.html?id=" +
-    encodeURIComponent(product._id);
+    encodeURIComponent(product._id) +
+    "&from=zis" +
+    "&zis=" +
+    encodeURIComponent(card._id);
 
   if (email) {
 
@@ -377,5 +415,12 @@ if (product._id) {
   wrap.style.display = "block";
 }
 
-loadCard();
-loadInventoryInfo();
+document.addEventListener("DOMContentLoaded", async () => {
+
+  await loadUserInfo();
+
+  await loadCard();
+
+  await loadInventoryInfo();
+
+});

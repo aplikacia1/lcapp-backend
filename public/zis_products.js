@@ -1,3 +1,13 @@
+function getEmailFromURL() {
+  const p = new URLSearchParams(location.search);
+  return p.get("email") || "";
+}
+
+const userEmail = getEmailFromURL();
+
+if (!userEmail)
+  location.href = "index.html";
+
 const params = new URLSearchParams(window.location.search);
 
 const search =
@@ -6,8 +16,7 @@ const search =
 const category =
   params.get("category") || "";
 
-const email =
-  params.get("email") || "";
+const email = userEmail;
   loadProducts();
 
 async function loadProducts() {
