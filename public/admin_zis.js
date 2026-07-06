@@ -4,6 +4,8 @@ const cardsTable = document.getElementById("cardsTable");
 
 let editingCardId = null;
 
+let allCards = [];
+
 async function getProductName(productId) {
 
   try {
@@ -33,6 +35,8 @@ async function loadCards() {
 
     const res = await fetch("/api/zis");
     const cards = await res.json();
+
+    allCards = cards;
 
     cardsTable.innerHTML = "";
 
@@ -188,6 +192,33 @@ const res = await fetch(url, {
 });
 
 loadCards();
+
+document
+  .getElementById("searchCards")
+  .addEventListener("input", async function () {
+
+    const text =
+      this.value
+        .toLowerCase()
+        .trim();
+
+    const rows =
+      cardsTable.querySelectorAll("tr");
+
+    rows.forEach(row => {
+
+      const value =
+        row.innerText
+          .toLowerCase();
+
+      row.style.display =
+        value.includes(text)
+          ? ""
+          : "none";
+
+    });
+
+});
 
 async function deleteCard(id) {
 
