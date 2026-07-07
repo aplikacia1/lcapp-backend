@@ -536,7 +536,13 @@
       const email = params.get('email');
       const back = document.getElementById('backToProducts');
       const q = email ? ('?email=' + encodeURIComponent(email)) : '';
-      back.href = 'products.html' + q;
+      back.addEventListener("click", function(e){
+
+    e.preventDefault();
+
+    goBack();
+
+});
 
       if (typeof setupShareButton === 'function') {
         setupShareButton('shareProductBtn');
