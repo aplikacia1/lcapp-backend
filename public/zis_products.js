@@ -17,6 +17,27 @@ const category =
   params.get("category") || "";
 
 const email = userEmail;
+
+const backBtn =
+  document.getElementById("backBtn");
+
+if (backBtn) {
+
+  let backUrl =
+    "zis_categories.html?search=" +
+    encodeURIComponent(search);
+
+  if (email) {
+    backUrl +=
+      "&email=" +
+      encodeURIComponent(email);
+  }
+
+  backBtn.href =
+    backUrl;
+
+}
+
   loadProducts();
 
 async function loadProducts() {
@@ -59,13 +80,32 @@ cards.forEach(card => {
 div.onclick = () => {
 
   let url =
-    "zis_detail.html?id=" + card._id;
+  "zis_detail.html?id=" +
+  encodeURIComponent(card._id);
 
-  if (email) {
-    url +=
-      "&email=" +
-      encodeURIComponent(email);
-  }
+if (search) {
+
+  url +=
+    "&search=" +
+    encodeURIComponent(search);
+
+}
+
+if (category) {
+
+  url +=
+    "&category=" +
+    encodeURIComponent(category);
+
+}
+
+if (email) {
+
+  url +=
+    "&email=" +
+    encodeURIComponent(email);
+
+}
 
   window.location.href = url;
 

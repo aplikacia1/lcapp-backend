@@ -13,8 +13,14 @@ const params = new URLSearchParams(window.location.search);
 const email = userEmail;
 const cardId = params.get("id") || params.get("cardId") || "";
 const barcode = params.get("barcode") || "";
-const search = params.get("search") || "";
-const productCode = params.get("code") || "";
+const search =
+  params.get("search") || "";
+
+const category =
+  params.get("category") || "";
+
+const productCode =
+  params.get("code") || "";
 
 const DEV_EMAIL = "sabla.marcel@gmail.com";
 
@@ -97,10 +103,32 @@ if (marsabSymbol && marsabInitials) {
 }
 
 if (email) {
-  const encodedEmail = encodeURIComponent(email);
 
-  searchBtn.href = "zis.html?email=" + encodedEmail;
-  backBtn.href = "zis.html?email=" + encodedEmail;
+  const encodedEmail =
+    encodeURIComponent(email);
+
+  searchBtn.href =
+    "zis.html?email=" +
+    encodedEmail;
+
+  if (search && category) {
+
+    backBtn.href =
+      "zis_products.html?search=" +
+      encodeURIComponent(search) +
+      "&category=" +
+      encodeURIComponent(category) +
+      "&email=" +
+      encodedEmail;
+
+  } else {
+
+    backBtn.href =
+      "zis.html?email=" +
+      encodedEmail;
+
+  }
+
 }
 
 function showError(message) {
