@@ -260,6 +260,91 @@ body{
   .zis-search input{flex:1;}
   .zis-search .zis-btn{width:180px;}
 }
+/* ====== MODÁL – ZIS ====== */
+
+#barcodePrompt{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.55);
+  z-index:9500;
+}
+
+.barcode-dialog{
+  width:100%;
+  max-width:360px;
+  margin:0 16px;
+  background:
+    radial-gradient(circle at 0 0,#1d4ed8 0,rgba(15,23,42,.96) 52%,#020617 100%);
+  color:#e5edff;
+  border-radius:18px;
+  padding:18px 18px 16px;
+  box-shadow:0 20px 50px rgba(3,7,18,.9);
+  border:1px solid rgba(129,140,248,.9);
+  box-sizing:border-box;
+  position:relative;
+}
+
+.barcode-close{
+  position:absolute;
+  top:8px;
+  right:10px;
+  border:none;
+  background:transparent;
+  color:#9ca3af;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+}
+
+.barcode-close:hover{
+  color:#e5edff;
+}
+
+.barcode-title{
+  margin:4px 0 6px;
+  font-size:1.05rem;
+  font-weight:600;
+}
+
+.barcode-text{
+  margin:0 0 10px;
+  font-size:.9rem;
+  color:#dbeafe;
+}
+
+.barcode-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+
+.barcode-btn{
+  height:38px;
+  padding:0 14px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,255,.7);
+  background:transparent;
+  color:#e5edff;
+  cursor:pointer;
+  font-size:.9rem;
+  font-weight:500;
+}
+
+.barcode-btn-primary{
+  background:linear-gradient(135deg,#60a5fa,#2563eb);
+  border:none;
+  color:#f9fafb;
+  box-shadow:0 10px 26px rgba(37,99,235,.55);
+}
+
+.barcode-btn-primary:hover{
+  filter:brightness(1.05);
+}
 </style>
 
 <script src="https://unpkg.com/@zxing/browser@latest"></script>
@@ -412,7 +497,7 @@ body{
 </div>
 
   <p class="zis-note" id="zisNote">
-    Vyhľadávanie už číta ZIS karty z MongoDB.
+    Čítačka sama zaostrí.
   </p>
 
   <div class="zis-result" id="zisResult"></div>
@@ -487,6 +572,33 @@ if (productInput) {
   });
 
 }
+
+productInput.addEventListener("keydown", function (event) {
+
+  if (event.key === "Enter") {
+
+    event.preventDefault();
+
+    searchProductCode();
+
+  }
+
+});
+
+const keywordInput =
+  document.getElementById("keywordSearchInput");
+
+keywordInput.addEventListener("keydown", function (event) {
+
+  if (event.key === "Enter") {
+
+    event.preventDefault();
+
+    searchKeywords();
+
+  }
+
+});
 
   startCamera();
   
@@ -808,6 +920,34 @@ function startBarcodeScanner(video) {
 
 }
 
+function openBarcodeModal() {
+
+  const modal =
+    document.getElementById("barcodePrompt");
+
+  if (modal)
+    modal.style.display = "flex";
+
+}
+
+function closeBarcodeModal() {
+
+  const modal =
+    document.getElementById("barcodePrompt");
+
+  if (modal)
+    modal.style.display = "none";
+
+  document
+    .getElementById("productSearchBox")
+    .style.display = "block";
+
+  document
+    .getElementById("productSearchInput")
+    .focus();
+
+}
+
 async function searchBarcode(code) {
 
   try {
@@ -819,19 +959,7 @@ async function searchBarcode(code) {
 
     if (!res.ok) {
 
-      alert(
-        "Čiarový kód sa nenašiel.\n\n" +
-        "Skúste zadať kód produktu alebo použite vyhľadávanie podľa názvu."
-      );
-
-      document
-        .getElementById("productSearchBox")
-        .style.display = "block";
-
-      document
-        .getElementById("productSearchInput")
-        .focus();
-
+      openBarcodeModal();
       return;
 
     }
@@ -864,6 +992,55 @@ async function searchBarcode(code) {
 }
 
 </script>
+
+<!-- MODÁL – Čiarový kód sa nenašiel -->
+<div id="barcodePrompt" aria-hidden="true">
+
+  <div
+    class="barcode-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="barcodeTitle">
+
+    <button
+      type="button"
+      class="barcode-close"
+      onclick="closeBarcodeModal()"
+      aria-label="Zavrieť">
+      ×
+    </button>
+
+    <h2
+      id="barcodeTitle"
+      class="barcode-title">
+
+      Čiarový kód sa nenašiel
+
+    </h2>
+
+    <p class="barcode-text">
+
+      Skúste zadať kód produktu alebo použite
+      vyhľadávanie podľa názvu.
+
+    </p>
+
+    <div class="barcode-actions">
+
+      <button
+        type="button"
+        class="barcode-btn barcode-btn-primary"
+        onclick="closeBarcodeModal()">
+
+        Zadať kód produktu
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
 </body>
 </html>
