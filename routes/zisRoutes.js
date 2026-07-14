@@ -103,6 +103,17 @@ router.get("/:id", async (req, res) => {
  */
 router.post("/", async (req, res) => {
   try {
+        const existingCard = await ZisCard.findOne({
+      productId: req.body.productId
+    });
+
+    if (existingCard) {
+      return res.status(409).json({
+        exists: true,
+        id: existingCard._id,
+        message: "Produkt už má ZIS kartu."
+      });
+    }
     const card = await ZisCard.create({
   productId: req.body.productId,
 

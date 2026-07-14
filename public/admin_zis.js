@@ -169,11 +169,34 @@ const res = await fetch(url, {
 
     });
 
-    if (!res.ok) {
+    if (res.status === 409) {
 
-      throw new Error("Nepodarilo sa uložiť");
+  const existing = await res.json();
 
-    }
+  const open = confirm(
+`⚠ Tento produkt už má ZIS kartu.
+
+Chcete ju otvoriť na úpravu?
+
+OK = Otvoriť
+Storno = Zrušiť`
+  );
+
+  if (open) {
+
+    editCard(existing.id);
+
+  }
+
+  return;
+
+}
+
+if (!res.ok) {
+
+  throw new Error("Nepodarilo sa uložiť");
+
+}
 
     result.innerHTML =
       "✅ Karta uložená.";
