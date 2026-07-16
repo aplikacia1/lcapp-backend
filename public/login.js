@@ -51,7 +51,7 @@
   const params = new URLSearchParams(window.location.search);
   const nextRaw = params.get('next');
 
-  const fallback = `zis.html?email=${encodeURIComponent(email)}`;
+  const fallback = `home.html?email=${encodeURIComponent(email)}`;
 
   if (!nextRaw) {
     window.location.replace(fallback);

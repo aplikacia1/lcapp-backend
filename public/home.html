@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<meta name="theme-color"
+      content="#0c1f4b">
+
+<title>Listobook</title>
+
+<link rel="stylesheet"
+      href="style.css">
+
+<style>
+
+body{
+    background:#0c1f4b;
+    font-family:system-ui,sans-serif;
+    margin:0;
+    color:white;
+}
+
+.home-wrap{
+    max-width:460px;
+    margin:auto;
+    padding:18px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.logo{
+    display:block;
+    margin:0 auto 8px;
+    height:90px;
+}
+
+h1{
+    margin:0;
+    text-align:center;
+    font-size:30px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#cfe2ff;
+    margin-top:6px;
+    margin-bottom:20px;
+    font-size:15px;
+}
+
+.tiles{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.tile{
+
+    display:flex;
+    align-items:center;
+    gap:16px;
+
+    background:white;
+    color:#0c1f4b;
+
+    border-radius:16px;
+    padding:16px;
+
+    cursor:pointer;
+
+    border:1px solid #bcd6ff;
+
+    transition:.2s;
+}
+
+.tile:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(0,0,0,.20);
+
+}
+
+.tile:active{
+
+    transform:scale(.98);
+
+}
+
+.icon{
+
+    font-size:36px;
+    width:48px;
+    text-align:center;
+
+}
+
+.text{
+
+    flex:1;
+
+}
+
+.title{
+
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:6px;
+
+}
+
+.desc{
+
+    font-size:14px;
+    line-height:1.35;
+
+}
+
+.fade-in{
+    opacity:0;
+    transform:translateY(20px);
+    animation:fadeInUp .6s ease forwards;
+}
+
+@keyframes fadeInUp{
+
+to{
+
+opacity:1;
+transform:translateY(0);
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="home-wrap fade-in">
+
+<img
+src="logo_lc.jpg"
+class="logo">
+
+<h1>LISTOBOOK</h1>
+
+<div class="subtitle">
+
+Všetko pre obkladačov na jednom mieste.
+
+</div>
+
+<div class="tiles">
+
+<div
+class="tile"
+onclick="go('zis.html')">
+
+<div class="icon">
+🔎
+</div>
+
+<div class="text">
+
+<div class="title">
+
+Zákaznícka informačná služba
+
+</div>
+
+<div class="desc">
+
+Vyhľadajte produkt podľa názvu,
+kódu alebo čiarového kódu.
+Nájdite technické informácie,
+videá a technické listy.
+
+</div>
+
+</div>
+
+</div>
+
+<div
+class="tile"
+onclick="go('timeline.html')">
+
+<div class="icon">
+
+👷
+
+</div>
+
+<div class="text">
+
+<div class="title">
+
+Časová os
+
+</div>
+
+<div class="desc">
+
+Život komunity obkladačov.
+Podeľte sa o svoju prácu,
+získajte rady a sledujte
+novinky.
+
+</div>
+
+</div>
+
+</div>
+
+<div
+class="tile"
+onclick="go('catalog.html')">
+
+<div class="icon">
+
+⭐
+
+</div>
+
+<div class="text">
+
+<div class="title">
+
+Hodnotenie produktov
+
+</div>
+
+<div class="desc">
+
+Objavujte produkty,
+prečítajte si skúsenosti
+ostatných a pomôžte
+svojím hodnotením.
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const email = localStorage.getItem("lb_user_email");
+
+if (!email) {
+    window.location.href = "login.html";
+}
+
+function go(page){
+
+    const separator =
+        page.includes("?") ? "&" : "?";
+
+    window.location.href =
+        page +
+        separator +
+        "email=" +
+        encodeURIComponent(email);
+
+}
+
+</script>
+
+</body>
+</html>

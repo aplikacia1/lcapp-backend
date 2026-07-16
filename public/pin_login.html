@@ -164,7 +164,7 @@ function verifyPin(){
     return;
   }
 
-  const next = params.get("next") || "zis.html";
+  const next = params.get("next") || "home.html";
 
   fetch("/api/pin/verify-pin", {
     method:"POST",
