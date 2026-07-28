@@ -100,8 +100,16 @@ app.use((req, res, next) => {
 // CORS
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-    cb(new Error('Not allowed by CORS'));
+
+    console.log("🌍 CORS Origin:", origin);
+
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      return cb(null, true);
+    }
+
+    console.warn("🚫 CORS BLOCKED:", origin);
+
+    cb(new Error("Not allowed by CORS"));
   },
   credentials: true
 }));
