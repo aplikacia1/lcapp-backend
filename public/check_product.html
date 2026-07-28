@@ -267,11 +267,29 @@ body{
 
     </div>
 
-    <div class="manual-label">
-      Alebo napíš kód produktu
-    </div>
+    
 
-    <input
+<button
+  id="torchButton"
+  class="reset-btn"
+  type="button"
+  style="
+    display:none;
+    height:48px;
+    margin-bottom:14px;
+    background:#13284d;
+  "
+  onclick="toggleTorch()">
+
+  🔦 Zapnúť svetlo
+
+</button>
+
+<div class="manual-label">
+  Alebo napíš kód produktu
+</div>
+
+<input
       id="scanInput"
       class="scan-input"
       placeholder="napr. F110TSI"

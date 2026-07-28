@@ -65,6 +65,9 @@ let scanningActive = false;
 let lastScannedCode = "";
 let lastScanTime = 0;
 
+let cameraTrack = null;
+let torchEnabled = false;
+
 const scanInput =
   document.getElementById("scanInput");
 
@@ -256,13 +259,26 @@ async function startCamera() {
       });
 
     const video =
-      document.getElementById("camera");
+  document.getElementById("camera");
 
-    video.srcObject = stream;
+cameraTrack =
+  stream.getVideoTracks()[0];
 
-    await video.play();
+video.srcObject = stream;
 
-    startBarcodeScanner(video);
+await video.play();
+
+const capabilities =
+  cameraTrack.getCapabilities();
+
+if (capabilities.torch) {
+
+  document.getElementById("torchButton").style.display =
+    "block";
+
+}
+
+startBarcodeScanner(video);
 
   } catch (err) {
 
@@ -369,3 +385,31 @@ resetBtn.addEventListener(
   }
 
 );
+
+async function toggleTorch() {
+
+  if (!cameraTrack)
+    return;
+
+  try {
+
+    torchEnabled = !torchEnabled;
+
+    await cameraTrack.applyConstraints({
+      advanced: [
+        { torch: torchEnabled }
+      ]
+    });
+
+    document.getElementById("torchButton").textContent =
+      torchEnabled
+        ? "💡 Vypnúť svetlo"
+        : "🔦 Zapnúť svetlo";
+
+  } catch (err) {
+
+    console.error("Torch:", err);
+
+  }
+
+}
