@@ -423,13 +423,24 @@ body{
 
   </div>
 
-  <p
-    class="zis-note"
-    style="margin-top:10px;">
+  <button
+  id="torchButton"
+  class="zis-btn secondary"
+  type="button"
+  style="display:none; margin-top:10px;"
+  onclick="toggleTorch()">
 
-    📷 Namierte kameru na čiarový kód produktu.
+  🔦 Zapnúť svetlo
 
-  </p>
+</button>
+
+<p
+  class="zis-note"
+  style="margin-top:10px;">
+
+  📷 Namierte kameru na čiarový kód produktu.
+
+</p>
 
 </div>
 
@@ -522,6 +533,9 @@ const email = params.get("email") || "";
 
 let lastScannedCode = "";
 let lastScanTime = 0;
+
+let cameraTrack = null;
+let torchEnabled = false;
 
 // OCHRANA PRIHLÁSENIA — zatiaľ vypnutá.
 // if (!email) {
@@ -844,9 +858,20 @@ async function startCamera() {
     const video =
       document.getElementById("camera");
 
+    cameraTrack = stream.getVideoTracks()[0];
+
     video.srcObject = stream;
 
     await video.play();
+
+    const capabilities = cameraTrack.getCapabilities();
+
+    if (capabilities.torch) {
+
+  document.getElementById("torchButton").style.display =
+    "block";
+
+}
 
     startBarcodeScanner(video);
 
@@ -984,6 +1009,34 @@ async function searchBarcode(code) {
   } catch (err) {
 
     console.error(err);
+
+  }
+
+}
+
+async function toggleTorch() {
+
+  if (!cameraTrack)
+    return;
+
+  try {
+
+    torchEnabled = !torchEnabled;
+
+    await cameraTrack.applyConstraints({
+      advanced: [
+        { torch: torchEnabled }
+      ]
+    });
+
+    document.getElementById("torchButton").textContent =
+      torchEnabled
+        ? "💡 Vypnúť svetlo"
+        : "🔦 Zapnúť svetlo";
+
+  } catch (err) {
+
+    console.error("Torch:", err);
 
   }
 
