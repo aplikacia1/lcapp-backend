@@ -8,11 +8,75 @@ const esc = (s='') => String(s).replace(/[&<>"']/g, m => (
 
 /* ---------- URL params ---------- */
 const params = new URLSearchParams(location.search);
-const userEmail = params.get('email') || '';
-const toParam   = params.get('to') || '';
 
-if (!userEmail) {
-  location.href = "index.html";
+let userEmail = params.get('email') || '';
+const toParam = params.get('to') || '';
+
+async function ensureMessagesUser() {
+
+  // Email už máme v URL → nič neriešime
+  if (userEmail) {
+    return true;
+  }
+
+  // Email v URL nie je → skúsime trusted device
+  const deviceToken =
+    localStorage.getItem("lb_device_token");
+
+  if (!deviceToken) {
+    location.href = "index.html";
+    return false;
+  }
+
+  try {
+
+    const res = await fetch("/api/device/check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        deviceToken
+      })
+    });
+
+    if (!res.ok) {
+      location.href = "index.html";
+      return false;
+    }
+
+    const data = await res.json();
+
+    if (
+      !data.ok ||
+      !data.trusted ||
+      !data.email
+    ) {
+      location.href = "index.html";
+      return false;
+    }
+
+    // Zariadenie poznáme
+    userEmail = data.email;
+
+    localStorage.setItem(
+      "lb_user_email",
+      userEmail
+    );
+
+    return true;
+
+  } catch (err) {
+
+    console.error(
+      "Trusted device check:",
+      err
+    );
+
+    location.href = "index.html";
+    return false;
+  }
 }
 
 /* ---------- MOBILE VIEW (len dizajn/UX) ---------- */
@@ -584,6 +648,12 @@ async function safeRefresh(){
 
 /* ---------- INIT ---------- */
 document.addEventListener('DOMContentLoaded', async ()=>{
+
+  const userReady = await ensureMessagesUser();
+
+  if (!userReady) {
+    return;
+  }
   wireHeader();
   wireComposerKeys();
 
