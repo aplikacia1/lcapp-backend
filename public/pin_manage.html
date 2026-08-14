@@ -173,6 +173,7 @@ function removePin(){
   fetch("/api/pin/disable-pin",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
+    credentials: "include",
     body: JSON.stringify({ email })
   })
   .then(r => r.json())

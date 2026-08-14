@@ -101,7 +101,7 @@ app.use((req, res, next) => {
 app.use(cors({
   origin: (origin, cb) => {
 
-    console.log("🌍 CORS Origin:", origin);
+    
 
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
       return cb(null, true);
@@ -191,6 +191,7 @@ mountRoute('/api/admin',          './routes/adminDashboardStatsRoutes');
 mountRoute('/api/users',          './routes/userRoutes');
 mountRoute('/api/pin',            './routes/pinRoutes');
 mountRoute('/api/categories',     './routes/categoryRoutes');
+mountRoute('/api/device',         './routes/deviceRoutes');
 mountRoute('/api/products',       './routes/productRoutes');
 mountRoute('/api/zis',            './routes/zisRoutes');
 mountRoute('/api/orders',         './routes/orderRoutes');
@@ -232,6 +233,7 @@ mountRoute(
 mountRoute('/api/pdf',            './routes/pdfTestRoutes');
 mountRoute('/api/pdf',            './routes/pdfHtmlRoutes');
 mountRoute('/api/pdf',            './routes/pdfLowFreeRoutes');
+mountRoute('/api/pdf',            './routes/pdfRoutesNew');
 
 /* --- Štart po DB --- */
 const PORT = process.env.PORT || 5000;

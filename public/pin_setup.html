@@ -231,6 +231,7 @@ function processPin(){
     fetch("/api/pin/set-pin",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
+      credentials: "include",
       body: JSON.stringify({ email, pin })
     })
     .then(r => r.json())

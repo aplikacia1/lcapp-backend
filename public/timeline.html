@@ -974,6 +974,10 @@
     })();
 
     document.addEventListener('DOMContentLoaded', () => {
+
+      // Push cieľ bol úspešne otvorený.
+      localStorage.removeItem("afterLoginRedirect");
+
       // dopočet výšky hlavičky → padding top
       const header = document.querySelector('.app-header');
       const setHdrH = () => {

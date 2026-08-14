@@ -78,6 +78,9 @@ router.post('/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(401).json({ message: 'Nesprávne heslo' });
 
+    req.session.userId = user._id.toString();
+    req.session.userEmail = user.email;
+
     const token = signJwt({ sub: user._id.toString(), email: user.email });
     res.cookie('token', token, jwtCookieOptions());
     return res.json({

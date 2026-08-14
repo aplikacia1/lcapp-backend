@@ -118,7 +118,12 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
 
     const email = new URLSearchParams(window.location.search).get("email");
 
-    const res = await fetch(`/api/pin/has-pin?email=${encodeURIComponent(email)}`);
+    const res = await fetch(
+  `/api/pin/has-pin?email=${encodeURIComponent(email)}`,
+  {
+    credentials: "include"
+  }
+);
     const data = await res.json();
 
     if (data.hasPin) {

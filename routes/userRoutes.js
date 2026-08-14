@@ -40,6 +40,9 @@ router.post('/register', async (req, res) => {
 
     const newUser = await User.create(doc);
 
+    // ===== SESSION PO REGISTRÁCII =====
+    req.session.userId = newUser._id;
+
     try { await sendSignupEmail(newUser.email); } catch (e) { console.error('Signup email (compat) failed:', e?.message || e); }
     return res.status(201).json({ message: 'Registrácia úspešná', userId: newUser._id });
   } catch (err) {

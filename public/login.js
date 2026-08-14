@@ -157,6 +157,50 @@ loginBtn.addEventListener("click", async (e) => {
 
     localStorage.setItem("lb_logged_in", "true");
     localStorage.setItem("lb_user_email", email);
+
+    // ===== TRUSTED DEVICE =====
+try {
+
+  const oldDeviceToken =
+    localStorage.getItem("lb_device_token");
+
+  const deviceRes = await fetch(
+    `${API_BASE}/api/device/register`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        deviceToken: oldDeviceToken || null
+      })
+    }
+  );
+
+  if (deviceRes.ok) {
+
+    const deviceData =
+      await deviceRes.json();
+
+    if (deviceData.ok && deviceData.deviceToken) {
+
+      localStorage.setItem(
+        "lb_device_token",
+        deviceData.deviceToken
+      );
+
+      console.log(
+        "🔐 Trusted device:",
+        deviceData.existing ? "poznám" : "nové"
+      );
+    }
+  }
+
+} catch (e) {
+  console.log("Trusted device registration skip");
+}
+
     try {
   if (window.Android && window.Android.saveEmail) {
     window.Android.saveEmail(email);

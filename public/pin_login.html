@@ -169,6 +169,7 @@ function verifyPin(){
   fetch("/api/pin/verify-pin", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
+    credentials: "include",
     body: JSON.stringify({ email, pin })
   })
   .then(r => {
@@ -188,6 +189,26 @@ function verifyPin(){
     }
 
     tries = 0;
+
+    // ===== TRUSTED DEVICE – PIN OVERENÝ =====
+const deviceToken =
+  localStorage.getItem("lb_device_token");
+
+if (deviceToken) {
+  fetch("/api/device/pin-verified", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include",
+    keepalive: true,
+    body: JSON.stringify({
+      deviceToken
+    })
+  }).catch(() => {
+    console.log("Device PIN reset skip");
+  });
+}
 
     localStorage.setItem("lb_device_auth", JSON.stringify({
       email: email,

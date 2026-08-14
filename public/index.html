@@ -283,15 +283,90 @@
   </div>
 
   <script>
-    // ===== PIN DEVICE CHECK =====
-(function () {
-  const trusted = localStorage.getItem("lb_device_trusted");
-  const hasPin = localStorage.getItem("lb_has_pin");
-  const email = localStorage.getItem("lb_user_email");
+// ===== TRUSTED DEVICE CHECK =====
+(async function () {
 
-  if (trusted === "true" && hasPin === "true" && email) {
-    location.href = "pin_login.html?email=" + encodeURIComponent(email);
+  const deviceToken =
+    localStorage.getItem("lb_device_token");
+
+  // Toto zariadenie ešte nepoznáme.
+  // Zostávame na indexe a používateľ sa prihlási normálne.
+  if (!deviceToken) {
+    return;
   }
+
+  try {
+
+    const res = await fetch("/api/device/check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        deviceToken
+      })
+    });
+
+    if (!res.ok) {
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!data.ok || !data.trusted || !data.email) {
+      return;
+    }
+
+    // Server zariadenie spoznal.
+    localStorage.setItem(
+      "lb_user_email",
+      data.email
+    );
+
+    // Ak nás sem priviedla push správa,
+    // jej cieľ má prednosť pred home.html.
+    const pushTarget =
+      localStorage.getItem("afterLoginRedirect");
+
+    const target =
+      pushTarget || "home.html";
+
+    // Každý 50. vstup -> PIN.
+    if (data.requiresPin) {
+
+      let pinUrl =
+        "pin_login.html?email=" +
+        encodeURIComponent(data.email) +
+        "&next=" +
+        encodeURIComponent(target);
+
+      window.location.replace(pinUrl);
+      return;
+    }
+
+    // Známe zariadenie bez potreby PIN-u.
+
+    const separator =
+      target.includes("?") ? "&" : "?";
+
+    window.location.replace(
+      target +
+      separator +
+      "email=" +
+      encodeURIComponent(data.email)
+    );
+
+  } catch (err) {
+
+    console.log(
+      "Trusted device check skip"
+    );
+
+    // Pri chybe nič násilne nepresmerujeme.
+    // Používateľ zostane na normálnom indexe.
+  }
+
 })();
     // bežné tlačidlá
     document.getElementById('goRegister').addEventListener('click', ()=> location.href = 'register.html');

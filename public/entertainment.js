@@ -5,7 +5,7 @@ const params = new URLSearchParams(location.search);
 const userEmail = params.get('email') || '';
 
 if (!userEmail) {
-  location.href = "login.html";
+  location.href = "index.html";
 }
 
 /** YouTube Channel ID – môžeš nastaviť v /js/config.js ako window.__YT_CHANNEL_ID__ */

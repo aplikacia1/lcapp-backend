@@ -158,6 +158,7 @@
         const res = await fetch('/api/users/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: "include",
           body: JSON.stringify({ email, password })
         });
         const data = await res.json().catch(() => ({}));
@@ -169,6 +170,59 @@
         }
 
         // ✅ ÚSPECH:
+
+        // ===== TRUSTED DEVICE PO REGISTRÁCII =====
+try {
+
+  const deviceRes = await fetch(
+    "/api/device/register",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        deviceToken:
+          localStorage.getItem("lb_device_token") || null
+      })
+    }
+  );
+
+  if (deviceRes.ok) {
+
+    const deviceData =
+      await deviceRes.json();
+
+    if (
+      deviceData.ok &&
+      deviceData.deviceToken
+    ) {
+
+      localStorage.setItem(
+        "lb_device_token",
+        deviceData.deviceToken
+      );
+
+      localStorage.setItem(
+        "lb_user_email",
+        email
+      );
+
+      console.log(
+        "🔐 Trusted device po registrácii:",
+        deviceData.existing ? "poznám" : "nové"
+      );
+    }
+  }
+
+} catch (e) {
+
+  console.log(
+    "Trusted device registration skip"
+  );
+
+}
 
 // 👉 VŽDY ulož email do Androidu
 try {
