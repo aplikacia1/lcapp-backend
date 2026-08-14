@@ -5,8 +5,19 @@ function getEmailFromURL() {
 
 const userEmail = getEmailFromURL();
 
-if (!userEmail)
+if (!userEmail) {
+
+  const next =
+    window.location.pathname +
+    window.location.search;
+
+  localStorage.setItem(
+    "afterLoginRedirect",
+    next
+  );
+
   location.href = "index.html";
+}
 
 const params = new URLSearchParams(window.location.search);
 
@@ -111,7 +122,13 @@ if (email) {
     "zis.html?email=" +
     encodedEmail;
 
-  if (search && category) {
+      if (params.get("from") === "mirror") {
+
+    backBtn.href =
+      "/mirror.html?email=" +
+      encodedEmail;
+
+  } else if (search && category) {
 
     backBtn.href =
       "zis_products.html?search=" +
@@ -128,6 +145,8 @@ if (email) {
       encodedEmail;
 
   }
+
+  
 
 }
 

@@ -249,7 +249,7 @@ async function runEvening() {
   await broadcast(
   "🌙 Dnešná štatistika",
   body,
-  `/stats.html?text=${encodeURIComponent(body)}`,
+  `/mirror.html`,
   "evening"
 );
 }

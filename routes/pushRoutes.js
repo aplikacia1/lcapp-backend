@@ -3,6 +3,10 @@ const express = require('express');
 const router = express.Router();
 const webpush = require('web-push');
 const PushSubscription = require('../models/PushSubscription');
+const User = require('../models/User');
+const Product = require('../models/product');
+const Rating = require('../models/rating');
+const ZisCard = require('../models/ZisCard');
 
 // --- VAPID z ENV alebo (voliteľne) natvrdo bez .env -------------------------
 const ENV_PUB  = process.env.VAPID_PUBLIC_KEY || '';
@@ -102,6 +106,66 @@ router.post('/notify', async (req, res) => {
   } catch (e) {
     console.error('push/notify', e);
     res.status(500).json({ message: 'Notify failed' });
+  }
+});
+
+// --- MIRROR – obsah dnešnej štatistiky --------------------------------------
+router.get('/mirror', async (_req, res) => {
+  try {
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    // dnešné produkty
+    const products = await Product.find({
+      createdAt: { $gte: startOfToday }
+    })
+      .select('_id name image images code')
+      .lean();
+
+    const productIds = products.map(p => p._id);
+
+    // ZIS karty patriace k dnešným produktom
+    const zisCards = productIds.length
+      ? await ZisCard.find({
+          productId: { $in: productIds },
+          active: true
+        })
+          .populate('productId')
+          .lean()
+      : [];
+
+    // dnešné hodnotenia
+    const ratings = await Rating.find({
+      createdAt: { $gte: startOfToday }
+    })
+      .populate('productId')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.json({
+      ok: true,
+
+      counts: {
+        products: products.length,
+        zisCards: zisCards.length,
+        ratings: ratings.length
+      },
+
+      products,
+      zisCards,
+      ratings
+    });
+
+  } catch (err) {
+
+    console.error("MIRROR ERROR:", err);
+
+    return res.status(500).json({
+      ok: false,
+      message: "Mirror sa nepodarilo načítať."
+    });
+
   }
 });
 
