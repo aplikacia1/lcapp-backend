@@ -26,11 +26,24 @@ body{
 .home-wrap{
     max-width:460px;
     margin:auto;
-    padding:18px;
+
+    padding-top:18px;
+    padding-left:18px;
+    padding-right:18px;
+    padding-bottom:calc(18px + env(safe-area-inset-bottom));
+
     min-height:100vh;
+    box-sizing:border-box;
+
     display:flex;
     flex-direction:column;
     justify-content:center;
+}
+
+@media (max-height:750px){
+    .home-wrap{
+        justify-content:flex-start;
+    }
 }
 
 .logo{
