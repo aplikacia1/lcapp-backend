@@ -185,6 +185,27 @@ transform:translateY(0);
     transform:scale(.94);
 }
 
+.power-icon{
+    position:relative;
+    width:18px;
+    height:18px;
+    border:2px solid white;
+    border-radius:50%;
+    box-sizing:border-box;
+}
+
+.power-icon::before{
+    content:"";
+    position:absolute;
+    width:2px;
+    height:10px;
+    background:white;
+    top:-4px;
+    left:50%;
+    transform:translateX(-50%);
+    box-shadow:0 0 0 3px #0c1f4b;
+}
+
 .logout-modal{
     display:none;
     position:fixed;
@@ -227,6 +248,8 @@ transform:translateY(0);
 .logout-modal-icon{
     font-size:30px;
     margin-bottom:8px;
+    display:flex;
+    justify-content:center;
 }
 
 .logout-modal-title{
@@ -283,13 +306,15 @@ transform:translateY(0);
     class="logout-device-btn"
     id="logoutDeviceBtn"
     title="Odhlásiť a zabudnúť">
-    ⏻
+    <span class="power-icon"></span>
 </button>
 <div id="logoutModal" class="logout-modal">
 
     <div class="logout-modal-box">
 
-        <div class="logout-modal-icon">⏻</div>
+        <div class="logout-modal-icon">
+    <span class="power-icon"></span>
+</div>
 
         <div class="logout-modal-title">
             Odhlásiť sa?
