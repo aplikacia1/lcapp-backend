@@ -125,7 +125,8 @@ function shouldSendEveningStats(adminClosed=false){
 function getSpecialMidnight(){
   const now = nowSK();
 
-  if(isSilvester(now)) return "silvester";
+  if(isNewYear(now)) return "silvester";
+
   return null;
 }
 

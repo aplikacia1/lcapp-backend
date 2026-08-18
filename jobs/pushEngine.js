@@ -8,7 +8,8 @@ const {
   nowSK,
   shouldSendMorningJoke,
   shouldSendEveningStats,
-  getSpecialMidnight
+  getSpecialMidnight,
+  getSpecialEvening
 } = require("../utils/timeBrain");
 let lastRun = {
   morning: null,
@@ -254,19 +255,43 @@ async function runEvening() {
 );
 }
 
+// ======= špeciálny Štedrý večer =======
+async function runEveningSpecial() {
+
+  const special = getSpecialEvening();
+
+  if (!special) return;
+
+  if (special === "vianoce") {
+
+    console.log("🎄 sending Christmas special");
+
+    await broadcast(
+  "🎄 Veselé Vianoce",
+  "Lištobook vám želá pokojné sviatky.",
+  "/christmas.html",
+  "christmas"
+);
+
+  }
+
+}
+
 // ======= špeciálne polnoci =======
 async function runMidnightSpecial() {
   const special = getSpecialMidnight();
   if (!special) return;
 
   if (special === "silvester") {
-    await broadcast("🎆 Šťastný nový rok", "Nech sa vám darí!", "/");
-  }
-
-  if (special === "vianoce") {
-    await broadcast("🎄 Veselé Vianoce", "Lištobook vám želá pokojné sviatky.", "/");
-  }
+  await broadcast(
+    "🎆 Šťastný nový rok",
+    "Nech sa vám darí!",
+    "/newyear.html",
+    "newyear"
+  );
 }
+
+  }
 
 // ======= engine loop =======
 function startPushEngine() {
@@ -288,8 +313,17 @@ if (h === 7 && m === 0 && lastRun.morning !== today) {
 
 // 🌙 VEČER
 if (h === 19 && m === 0 && lastRun.evening !== today) {
+
   lastRun.evening = today;
-  await runEvening();
+
+  const specialEvening = getSpecialEvening();
+
+  if (specialEvening) {
+    await runEveningSpecial();
+  } else {
+    await runEvening();
+  }
+
 }
 
 // 🎆 POLNOC

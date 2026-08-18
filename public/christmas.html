@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="sk">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
+
+  <title>Veselé Vianoce</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #1d2347;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .christmas-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .close-button {
+      position: fixed;
+      top: max(14px, env(safe-area-inset-top));
+      right: max(14px, env(safe-area-inset-right));
+
+      width: 44px;
+      height: 44px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+
+      background: rgba(29, 35, 71, 0.65);
+      color: white;
+
+      font-family: Arial, sans-serif;
+      font-size: 25px;
+      line-height: 1;
+
+      text-decoration: none;
+
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body>
+
+  <img
+    class="christmas-image"
+    src="/img/christmas.png"
+    alt="Veselé Vianoce"
+  >
+
+  <a
+    class="close-button"
+    href="/"
+    aria-label="Zavrieť"
+  >×</a>
+
+</body>
+
+</html>

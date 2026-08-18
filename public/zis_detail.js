@@ -442,6 +442,10 @@ if (product._id) {
     "&zis=" +
     encodeURIComponent(card._id);
 
+  if (params.get("from") === "mirror") {
+    ratingUrl += "&returnTo=mirror";
+  }
+
   if (email) {
 
     ratingUrl +=
