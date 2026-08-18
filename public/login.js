@@ -30,7 +30,7 @@
   }
 
   // Voláme relatívne cesty (backend beží na rovnakom pôvode).
-  const API_BASE = 'https://listobook.sk';
+  const API_BASE = window.location.origin;
 
   // ✅ Presmerovanie na next s doplneným email= (ak chýba)
   function redirectToNextWithEmail(email) {
@@ -159,6 +159,7 @@ loginBtn.addEventListener("click", async (e) => {
     localStorage.setItem("lb_user_email", email);
 
     // ===== TRUSTED DEVICE =====
+    console.log("🔥 IDEM REGISTROVAŤ DEVICE");
 try {
 
   const oldDeviceToken =
