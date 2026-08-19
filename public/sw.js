@@ -111,8 +111,12 @@ client.postMessage({
 return client.focus();
       }
 
-  // inak otvor nové okno
-  return clients.openWindow(targetUrl);
+  // inak otvor nové okno cez push oponu
+const loadingUrl =
+  'https://listobook.sk/push-loading.html?to=' +
+  encodeURIComponent(targetUrl);
+
+return clients.openWindow(loadingUrl);
 
 })
 

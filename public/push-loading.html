@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Listobook</title>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: #1d2347;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        img {
+            width: 192px;
+            height: 192px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body>
+
+    <img src="favicon.png" alt="Listobook">
+
+    <script>
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get("to");
+
+    if (target) {
+        localStorage.setItem("afterLoginRedirect", target);
+
+        setTimeout(() => {
+            window.location.replace("/");
+        }, 100);
+    } else {
+        window.location.replace("/");
+    }
+</script>
+
+</body>
+</html>

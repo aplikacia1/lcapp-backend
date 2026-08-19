@@ -4,6 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Listobook – Lištové centrum</title>
+
+  <script>
+  // ===== PUSH OPONA =====
+  if (localStorage.getItem("afterLoginRedirect")) {
+    document.documentElement.classList.add("push-loading");
+  }
+</script>
+
+<style>
+  html.push-loading,
+  html.push-loading body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: #1d2347 !important;
+    overflow: hidden;
+  }
+
+  html.push-loading body > * {
+    display: none !important;
+  }
+
+  html.push-loading body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      #1d2347
+      url("/favicon.png")
+      center center / 192px 192px
+      no-repeat;
+    z-index: 999999;
+    display: block;
+  }
+</style>
+
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0c1f4b">
   <link rel="stylesheet" href="style.css" />
@@ -331,6 +367,10 @@
 
     const target =
       pushTarget || "home.html";
+
+    if (pushTarget) {
+  localStorage.removeItem("afterLoginRedirect");
+}
 
     // Každý 50. vstup -> PIN.
     if (data.requiresPin) {
